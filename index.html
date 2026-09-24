@@ -181,6 +181,34 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .helpInputs{display:none}
 .helpSection{padding:0}
 @media(max-width:480px){.helpRoles{padding:8px}.helpTable{padding:0 10px 2px}.helpTableHead,.helpTableRow{grid-template-columns:minmax(0,1fr) 92px;gap:8px}.helpTableRow{min-height:47px}.helpTableRow:after{display:none}.helpRoleName{font-size:15px}.helpDetailPanel .helpLine{grid-template-columns:minmax(0,1fr) 96px}.helpDetailPanel select{min-width:90px;max-width:96px}.helpDetailPanel .unitInput{width:96px}.helpTierSetting{grid-template-columns:minmax(0,1fr) 96px}.helpTierSelect{width:96px;max-width:96px;height:38px}.helpDetailPanel .timeMini{width:90px}.helpResultRow .helpResultValue{font-size:23px}.helpFormulaBox{padding:6px 10px 9px}.helpFormulaBox .resultFormula{font-size:10px}}
+
+/* 2026-09-25：聯盟幫助手動輸入欄位統一採用「聯盟對決」白底輸入框外觀 */
+.helpDetailPanel .helpInputLine .unitInput input[type="number"]{
+  flex:1;
+  width:100%;
+  min-width:0;
+  height:36px;
+  padding:4px 9px;
+  background:#fff;
+  color:#111;
+  border:1px solid #d7dce0;
+  border-radius:8px;
+  text-align:right;
+  font-weight:800;
+  -webkit-appearance:none;
+  appearance:none;
+}
+.helpDetailPanel .helpInputLine .unitInput input[type="number"]:focus{
+  outline:2px solid rgba(208,164,75,.55);
+  outline-offset:1px;
+}
+.helpDetailPanel .helpInputLine .unitInput em{
+  color:#c5d1d5;
+  font-weight:900;
+}
+@media(max-width:560px){
+  .helpDetailPanel .helpInputLine .unitInput input[type="number"]{height:38px;font-size:16px;border-radius:8px;padding:4px 10px}
+}
 </style>
 <style id="finalHelpOverrides">
 /* 最終版：聯盟幫助／Last Z 手機版排版 */
@@ -277,6 +305,35 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   #helpPage > .helpRoleJump{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
 </style>
+
+<style id="helpManualInputMatchScore">
+/* 聯盟幫助：手動輸入欄位比照「聯盟對決」的白色輸入框 */
+.helpDetailPanel .helpInputLine .unitInput input[type="number"]{
+  height:36px !important;
+  min-width:0 !important;
+  width:100% !important;
+  box-sizing:border-box;
+  padding:4px 8px !important;
+  background:#f3f3f3 !important;
+  color:#111 !important;
+  border:1px solid #cfd4d7 !important;
+  border-radius:8px !important;
+  text-align:right !important;
+  -webkit-appearance:none;
+  appearance:none;
+}
+.helpDetailPanel .helpInputLine .unitInput input[type="number"]::placeholder{color:#777}
+.helpDetailPanel .helpInputLine .unitInput input[type="number"]:focus{
+  outline:2px solid rgba(208,164,75,.45);
+  outline-offset:1px;
+}
+@media(max-width:560px){
+  .helpDetailPanel .helpInputLine .unitInput input[type="number"]{
+    height:36px !important;
+    font-size:16px !important;
+  }
+}
+</style>
 </head><body><main>
 <nav class="topbar"><div class="brand">Last Z</div><div class="mainPageNav" role="tablist" aria-label="主要頁面"><button class="mainPageTab active" data-page="scorePage" role="tab" aria-selected="true">對決積分</button><button class="mainPageTab" data-page="helpPage" role="tab" aria-selected="false">聯盟幫助</button></div><button class="roleBtn" id="roleBtn">👤 <span id="currentRoleName">玩家A</span>⌄</button></nav><div id="scorePage"><section class="card hero"><div class="titleLine"><h1>聯盟對決積分配置計算器</h1><button class="bonusBtn" id="bonusBtn">設定積分加成</button></div>
 <div class="summaryRows"><div class="summaryRow"><span>目標積分</span><select id="target"><option value="20000">20,000</option><option value="80000">80,000</option><option value="300000">300,000</option><option value="550000">550,000</option><option value="840000">840,000</option><option value="1500000">1,500,000</option><option value="2200000">2,200,000</option><option value="3000000">3,000,000</option><option value="6000000" selected>6,000,000</option></select></div><div class="summaryRow"><span>目前積分</span><input id="current" type="number" min="0" inputmode="numeric"></div><div class="summaryRow"><span>預計最終積分</span><b id="final" class="finalValue">0</b></div></div></section>
@@ -300,7 +357,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 </div>
 <details class="soldierBox" open><summary>🪖 士兵訓練／加速計算　⌄</summary>
 <div class="soldierInputs">
-<div><label>設定生產12h時間</label><div class="timeGroup soldierTime"><input id="twelveH" type="number" min="0" max="99" value="11" inputmode="numeric" aria-label="小時"><span>:</span><input id="twelveM" type="number" min="0" max="59" value="45" inputmode="numeric" aria-label="分鐘"><span>:</span><input id="twelveS" type="number" min="0" max="59" inputmode="numeric" aria-label="秒"></div></div>
+<div><label>設定生產12h時間</label><div class="timeGroup soldierTime"><input id="twelveH" type="number" min="0" max="99" value="11" inputmode="numeric" aria-label="小時"><span>:</span><input id="twelveM" type="number" min="0" max="59" value="45" inputmode="numeric" aria-label="分鐘"><span>:</span><input id="twelveS" type="number" min="0" max="59" value="0" inputmode="numeric" aria-label="秒"></div></div>
 <div><label>士兵等級</label><select id="soldierTier"><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option><option value="T7">T7</option><option value="T8">T8</option><option value="T9">T9</option><option value="T10" selected>T10</option></select></div>
 </div>
 <div class="soldierTable"><div class="stHead"><span>兵種</span><span>滿兵數量</span><span>訓練加速</span><span>生產時間</span><span>12h可生產士兵數量</span></div>
