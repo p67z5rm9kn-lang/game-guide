@@ -635,3 +635,47 @@ document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks
 (function init(){helpDB.selectedRoleId=db.active||helpDB.selectedRoleId||db.profiles[0]?.id;saveDB();renderRoles();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}document.getElementById('currentRoleName').textContent=p?.name||'玩家A';})();
 </script></body></html>
 
+<style id="helpSelectMatchManualInput">
+/* 聯盟幫助：所有下拉式選單統一採用與手動輸入欄位相同的白色外觀 */
+.helpRole .helpTierSelect,
+.helpDetailPanel select,
+.helpDetailPanel .helpLine select{
+  background:#f3f3f3 !important;
+  border:1px solid #cfd4d7 !important;
+  color:#111 !important;
+  border-radius:7px !important;
+  box-sizing:border-box !important;
+  font-weight:800 !important;
+  -webkit-appearance:auto;
+  appearance:auto;
+}
+.helpRole .helpTierSelect{
+  height:38px !important;
+  padding:0 8px !important;
+  text-align:right !important;
+  text-align-last:right !important;
+}
+.helpDetailPanel select,
+.helpDetailPanel .helpLine select{
+  height:34px !important;
+  width:112px !important;
+  min-width:112px !important;
+  max-width:112px !important;
+  padding:0 8px !important;
+  text-align:right !important;
+  text-align-last:right !important;
+}
+@media(max-width:480px){
+  .helpRole .helpTierSelect{
+    width:96px !important;
+    min-width:96px !important;
+    max-width:96px !important;
+  }
+  .helpDetailPanel select,
+  .helpDetailPanel .helpLine select{
+    width:112px !important;
+    min-width:112px !important;
+    max-width:112px !important;
+  }
+}
+</style>
