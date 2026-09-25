@@ -224,9 +224,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 #bonusModal .modalBody{padding-top:10px;padding-bottom:10px}
 @media(max-width:560px){
   #bonusModal .settingBlock{padding-top:6px;margin-top:6px}
-  #bonusModal .settingBlock:first-child .settingTitle{grid-template-columns:minmax(0,1fr) 200px}
-#bonusModal .settingBlock:first-child .settingTitle .unitInput{width:200px;min-width:0}
-#bonusModal .settingBlock:first-child .settingTitle #chika{width:165px;min-width:0;flex:0 1 165px}
+  #bonusModal .settingBlock:first-child .settingTitle{grid-template-columns:minmax(0,1fr) 104px}
   #bonusModal details .brow{padding:4px 0}
 }
 </style>
@@ -437,6 +435,40 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   outline-offset:1px;
 }
 /* 設定積分加成：與聯盟對決／聯盟幫助共用同一套輸入框規格 */
+#bonusModal .chikaSettingWrap{
+  width:112px;
+  min-width:112px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  flex:0 0 112px;
+}
+#bonusModal #chika{
+  height:var(--control-height) !important;
+  min-height:var(--control-height) !important;
+  width:100% !important;
+  min-width:0 !important;
+  padding:0 10px !important;
+  background:var(--control-bg) !important;
+  border:1px solid var(--control-border) !important;
+  color:var(--control-text) !important;
+  border-radius:var(--control-radius) !important;
+  font-size:var(--control-font-size) !important;
+  font-weight:var(--control-font-weight) !important;
+  line-height:1.1;
+  box-sizing:border-box;
+  text-align:right !important;
+}
+#bonusModal #chika:focus{
+  outline:2px solid rgba(208,164,75,.55);
+  outline-offset:1px;
+}
+#bonusModal .chikaSettingWrap > span{
+  flex:0 0 auto;
+  color:#c5d1d5;
+  font-size:16px;
+  font-weight:900;
+}
 .modal .brow input[type="number"]{
   height:var(--control-height) !important;
   min-height:var(--control-height) !important;
@@ -542,7 +574,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <div class="stRow"><span>突擊</span><input class="troopCount" type="number" min="0" value="177" inputmode="numeric"><span class="unitInput"><input class="troopSpeed" type="number" min="0" step="0.01" value="529" inputmode="decimal"><span>%</span></span><span class="prodTime">0:0:0</span><span class="twelveQty">0</span></div>
 </div>
 </details></section></div>
-<section id="helpPage" class="helpPage" style="display:none"><div class="helpCard"><div class="helpHead"><div class="helpTitleRow"><div class="helpTitle">聯盟幫助｜快速計算每次治療士兵數量</div><div class="helpInfoWrap"><button type="button" class="helpInfo" id="helpInfoBtn" aria-label="聯盟幫助說明">i</button></div></div><div class="helpInfoPanel" id="helpInfoPanel">士兵等級可直接在角色資料中調整，並與「聯盟對決」星期五／士兵訓練／加速計算的士兵等級保持連動。<br>目前提供 T9 / T10 原始治療時間：T9 為 3:58、T10 為 4:38。<br>其他士兵等級目前沒有原始治療時間資料。</div><div class="helpSub">所有角色共用點手數量、玫瑰花、光碟、殺敵日；其餘數值依角色分別設定。</div></div><div class="globalHelp"><div class="globalLabel">全體角色共用設定｜點手數量</div><div class="stepper"><button type="button" data-step="-5">−5</button><button type="button" data-step="-1">−1</button><input id="helpClicks" type="number" min="0" max="80" step="1" value="5" inputmode="numeric"><button type="button" data-step="1">＋1</button><button type="button" data-step="5">＋5</button></div><div class="globalChecks"><label class="checkPill"><input id="helpRose" type="checkbox" checked>玫瑰花</label><label class="checkPill"><input id="helpDisc" type="checkbox" checked>光碟</label><label class="checkPill"><input id="helpKillDay" type="checkbox" checked>殺敵日</label></div></div></div><div id="helpRoleJump" class="helpRoleJump"></div><div id="helpRoles" class="helpRoles"></div></section></main><div class="modalOverlay" id="bonusModal"><div class="modal"><div class="modalHead"><h2>設定積分加成</h2><button class="closeBtn" data-close="bonusModal">×</button></div><div class="modalBody"><div class="settingBlock" style="border-top:0;padding-top:0;margin-top:0"><div class="settingTitle"><span class="chikaTitle">🌸 千夏 <span class="info" id="chikaInfo" role="button" aria-label="千夏說明">i</span><span class="chikaFlyout" id="chikaFlyout">查看千夏第三技能，填入聯盟對決積分加成。</span></span><div class="unitInput"><input id="chika" type="number" min="0" step="0.01" inputmode="decimal"><span>%</span></div></div></div><div class="settingBlock"><div class="settingTitle"><span class="infoAnchor">⭐ 聯盟表彰 <span class="info" data-info="infoAlliance" role="button" aria-label="聯盟表彰說明">i</span><span class="infoFlyout" id="infoAlliance">聯盟表彰各項加成會依對應的積分項目計算。<br>「所有積分」及各分類加成可以同時套用。<br><br>遊戲內查看方式：<br>打開「科技升級」面板，點擊時間旁的「ⓘ」，查看「聯盟對決屬性」，再將相關數值填入這裡。</span></span><label class="check"><input id="allDone" type="checkbox">全部完成</label></div><details open><summary>聯盟表彰加成項目</summary><div class="brow"><div>所有積分</div><div class="unitInput"><input class="bonus" data-key="all" data-max="300" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>採集資源積分</div><div class="unitInput"><input class="bonus" data-key="gather" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>擊敗野外生物積分</div><div class="unitInput"><input class="bonus" data-key="wild" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗改裝圖紙積分</div><div class="unitInput"><input class="bonus" data-key="blueprint" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗黃金扳手積分</div><div class="unitInput"><input class="bonus" data-key="wrench" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>建築戰力積分</div><div class="unitInput"><input class="bonus" data-key="building" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>科技戰力積分</div><div class="unitInput"><input class="bonus" data-key="tech" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>招募英雄積分</div><div class="unitInput"><input class="bonus" data-key="hero" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗能源核心積分</div><div class="unitInput"><input class="bonus" data-key="energy" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div class="infoAnchor">訓練積分 <span class="info" data-info="infoTraining" role="button" aria-label="訓練積分說明">i</span><span class="infoFlyout" id="infoTraining">訓練積分會提升每生產 1 隻士兵所獲得的士兵積分。<br><br>例如 T10 基礎士兵積分為 250，訓練積分為 100%：<br>250 × (1 + 100%) = 500 分／隻</span></div><div class="unitInput"><input class="bonus" data-key="training" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div></details></div></div></div></div>
+<section id="helpPage" class="helpPage" style="display:none"><div class="helpCard"><div class="helpHead"><div class="helpTitleRow"><div class="helpTitle">聯盟幫助｜快速計算每次治療士兵數量</div><div class="helpInfoWrap"><button type="button" class="helpInfo" id="helpInfoBtn" aria-label="聯盟幫助說明">i</button></div></div><div class="helpInfoPanel" id="helpInfoPanel">士兵等級可直接在角色資料中調整，並與「聯盟對決」星期五／士兵訓練／加速計算的士兵等級保持連動。<br>目前提供 T9 / T10 原始治療時間：T9 為 3:58、T10 為 4:38。<br>其他士兵等級目前沒有原始治療時間資料。</div><div class="helpSub">所有角色共用點手數量、玫瑰花、光碟、殺敵日；其餘數值依角色分別設定。</div></div><div class="globalHelp"><div class="globalLabel">全體角色共用設定｜點手數量</div><div class="stepper"><button type="button" data-step="-5">−5</button><button type="button" data-step="-1">−1</button><input id="helpClicks" type="number" min="0" max="80" step="1" value="5" inputmode="numeric"><button type="button" data-step="1">＋1</button><button type="button" data-step="5">＋5</button></div><div class="globalChecks"><label class="checkPill"><input id="helpRose" type="checkbox" checked>玫瑰花</label><label class="checkPill"><input id="helpDisc" type="checkbox" checked>光碟</label><label class="checkPill"><input id="helpKillDay" type="checkbox" checked>殺敵日</label></div></div></div><div id="helpRoleJump" class="helpRoleJump"></div><div id="helpRoles" class="helpRoles"></div></section></main><div class="modalOverlay" id="bonusModal"><div class="modal"><div class="modalHead"><h2>設定積分加成</h2><button class="closeBtn" data-close="bonusModal">×</button></div><div class="modalBody"><div class="settingBlock" style="border-top:0;padding-top:0;margin-top:0"><div class="settingTitle"><span class="chikaTitle">🌸 千夏 <span class="info" id="chikaInfo" role="button" aria-label="千夏說明">i</span><span class="chikaFlyout" id="chikaFlyout">查看千夏第三技能，填入聯盟對決積分加成。</span></span><div class="unitInput chikaSettingWrap"><input id="chika" class="settingControl" type="number" min="0" step="0.01" inputmode="decimal"><span>%</span></div></div></div><div class="settingBlock"><div class="settingTitle"><span class="infoAnchor">⭐ 聯盟表彰 <span class="info" data-info="infoAlliance" role="button" aria-label="聯盟表彰說明">i</span><span class="infoFlyout" id="infoAlliance">聯盟表彰各項加成會依對應的積分項目計算。<br>「所有積分」及各分類加成可以同時套用。<br><br>遊戲內查看方式：<br>打開「科技升級」面板，點擊時間旁的「ⓘ」，查看「聯盟對決屬性」，再將相關數值填入這裡。</span></span><label class="check"><input id="allDone" type="checkbox">全部完成</label></div><details open><summary>聯盟表彰加成項目</summary><div class="brow"><div>所有積分</div><div class="unitInput"><input class="bonus" data-key="all" data-max="300" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>採集資源積分</div><div class="unitInput"><input class="bonus" data-key="gather" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>擊敗野外生物積分</div><div class="unitInput"><input class="bonus" data-key="wild" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗改裝圖紙積分</div><div class="unitInput"><input class="bonus" data-key="blueprint" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗黃金扳手積分</div><div class="unitInput"><input class="bonus" data-key="wrench" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>建築戰力積分</div><div class="unitInput"><input class="bonus" data-key="building" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>科技戰力積分</div><div class="unitInput"><input class="bonus" data-key="tech" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>招募英雄積分</div><div class="unitInput"><input class="bonus" data-key="hero" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗能源核心積分</div><div class="unitInput"><input class="bonus" data-key="energy" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div class="infoAnchor">訓練積分 <span class="info" data-info="infoTraining" role="button" aria-label="訓練積分說明">i</span><span class="infoFlyout" id="infoTraining">訓練積分會提升每生產 1 隻士兵所獲得的士兵積分。<br><br>例如 T10 基礎士兵積分為 250，訓練積分為 100%：<br>250 × (1 + 100%) = 500 分／隻</span></div><div class="unitInput"><input class="bonus" data-key="training" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div></details></div></div></div></div>
 <div class="modalOverlay" id="roleModal"><div class="modal"><div class="modalHead"><h2>角色</h2><button class="closeBtn" data-close="roleModal">×</button></div><div class="modalBody"><p class="roleHint">切換角色會帶出該角色上次保存的輸入資料。</p><div class="roleList" id="roleList"></div><button class="addRole" id="addRole">＋ 新增角色</button></div></div></div>
 <script>
 const fmt=n=>Math.round(n).toLocaleString('en-US');
