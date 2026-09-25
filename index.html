@@ -209,6 +209,13 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 @media(max-width:560px){
   .helpDetailPanel .helpInputLine .unitInput input[type="number"]{height:38px;font-size:16px;border-radius:8px;padding:4px 10px}
 }
+
+.roleBtn{
+  position:relative;
+  z-index:1000;
+  pointer-events:auto !important;
+  touch-action:manipulation;
+}
 </style>
 <style id="finalHelpOverrides">
 /* 最終版：聯盟幫助／Last Z 手機版排版 */
@@ -601,7 +608,21 @@ function closeModal(id){
 }
 
 document.getElementById('bonusBtn').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openModal('bonusModal');});
-document.getElementById('roleBtn').addEventListener('click',()=>{openModal('roleModal');try{renderRoles();}catch(err){console.error('renderRoles error:',err);}});
+document.addEventListener('click',function(e){
+  const btn=e.target.closest('#roleBtn');
+  if(!btn)return;
+  e.preventDefault();
+  e.stopPropagation();
+  const modal=document.getElementById('roleModal');
+  if(!modal)return;
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  try{
+    if(typeof renderRoles==='function')renderRoles();
+  }catch(err){
+    console.error('renderRoles error:',err);
+  }
+});
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closeModal(b.dataset.close);}));
 document.querySelectorAll('.modalOverlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
 
