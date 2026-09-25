@@ -334,6 +334,146 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   }
 }
 </style>
+
+<style id="sharedControlStyles">
+/* ================================
+   共用設定欄位｜聯盟對決／聯盟幫助
+   所有可操作的數值 input / select 使用同一套視覺規格。
+   未來新增頁籤可直接套用 .settingControl。
+   ================================ */
+:root{
+  --control-bg:#f3f3f3;
+  --control-border:#cfd4d7;
+  --control-text:#111;
+  --control-radius:9px;
+  --control-height:40px;
+  --control-font-size:18px;
+  --control-font-weight:900;
+}
+.settingControl{
+  height:var(--control-height);
+  min-height:var(--control-height);
+  background:var(--control-bg);
+  border:1px solid var(--control-border);
+  color:var(--control-text);
+  border-radius:var(--control-radius);
+  font-size:var(--control-font-size);
+  font-weight:var(--control-font-weight);
+  line-height:1.1;
+  box-sizing:border-box;
+}
+.settingControl:focus{
+  outline:2px solid rgba(208,164,75,.55);
+  outline-offset:1px;
+}
+/* 聯盟對決：一般數值輸入、時間欄位、下拉選單 */
+#scorePage input[type="number"],
+#scorePage select{
+  height:var(--control-height);
+  min-height:var(--control-height);
+  background:var(--control-bg);
+  border:1px solid var(--control-border);
+  color:var(--control-text);
+  border-radius:var(--control-radius);
+  font-size:var(--control-font-size);
+  font-weight:var(--control-font-weight);
+  line-height:1.1;
+  box-sizing:border-box;
+}
+#scorePage input[type="number"]:focus,
+#scorePage select:focus{
+  outline:2px solid rgba(208,164,75,.55);
+  outline-offset:1px;
+}
+/* 保留時間輸入框原本的尺寸／排列，只統一外觀與字級 */
+#scorePage .timeGroup input[type="number"],
+#scorePage .timeInput input[type="number"]{
+  background:var(--control-bg);
+  color:var(--control-text);
+  border:1px solid var(--control-border);
+  border-radius:var(--control-radius);
+  font-size:var(--control-font-size);
+  font-weight:var(--control-font-weight);
+}
+/* 聯盟幫助：玩家資料設定欄位與聯盟對決共用同一套設定元件 */
+#helpPage .helpRole input[type="number"],
+#helpPage .helpRole select,
+#helpPage #helpClicks{
+  background:var(--control-bg) !important;
+  border:1px solid var(--control-border) !important;
+  color:var(--control-text) !important;
+  border-radius:var(--control-radius) !important;
+  font-size:var(--control-font-size) !important;
+  font-weight:var(--control-font-weight) !important;
+  line-height:1.1;
+  box-sizing:border-box;
+}
+#helpPage .helpRole input[type="number"]:focus,
+#helpPage .helpRole select:focus,
+#helpPage #helpClicks:focus{
+  outline:2px solid rgba(208,164,75,.55);
+  outline-offset:1px;
+}
+/* 下拉選單與手動輸入框維持相同高度、圓角與字級 */
+#helpPage .helpTierSelect{
+  height:var(--control-height) !important;
+  min-height:var(--control-height) !important;
+  width:100% !important;
+  max-width:150px !important;
+  padding:0 10px !important;
+  text-align:right !important;
+  text-align-last:right !important;
+}
+#helpPage .helpDetailPanel select{
+  height:var(--control-height) !important;
+  min-height:var(--control-height) !important;
+  width:112px !important;
+  min-width:112px !important;
+  max-width:112px !important;
+  padding:0 10px !important;
+  text-align:right !important;
+  text-align-last:right !important;
+}
+#helpPage .helpDetailPanel .unitInput{
+  width:132px;
+  min-width:132px;
+  justify-self:end;
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+#helpPage .helpDetailPanel .unitInput input[type="number"]{
+  width:100% !important;
+  min-width:0 !important;
+  height:var(--control-height) !important;
+  min-height:var(--control-height) !important;
+  padding:0 10px !important;
+  text-align:right !important;
+}
+#helpPage .helpDetailPanel .unitInput em{
+  flex:0 0 auto;
+  font-style:normal;
+  font-size:16px;
+  font-weight:900;
+  color:#c5d1d5;
+}
+/* 全體共用點手數量也採同一設定框架 */
+#helpPage #helpClicks{
+  height:var(--control-height) !important;
+  min-height:var(--control-height) !important;
+  text-align:center;
+}
+@media(max-width:560px){
+  :root{
+    --control-height:40px;
+    --control-font-size:18px;
+  }
+  #scorePage .summaryRow select,
+  #scorePage .summaryRow input[type="number"]{height:40px;}
+  #helpPage .helpTierSelect{max-width:140px !important;}
+  #helpPage .helpDetailPanel select{width:112px !important;min-width:112px !important;max-width:112px !important;}
+}
+</style>
 </head><body><main>
 <nav class="topbar"><div class="brand">Last Z</div><div class="mainPageNav" role="tablist" aria-label="主要頁面"><button class="mainPageTab active" data-page="scorePage" role="tab" aria-selected="true">對決積分</button><button class="mainPageTab" data-page="helpPage" role="tab" aria-selected="false">聯盟幫助</button></div><button class="roleBtn" id="roleBtn">👤 <span id="currentRoleName">玩家A</span>⌄</button></nav><div id="scorePage"><section class="card hero"><div class="titleLine"><h1>聯盟對決積分配置計算器</h1><button class="bonusBtn" id="bonusBtn">設定積分加成</button></div>
 <div class="summaryRows"><div class="summaryRow"><span>目標積分</span><select id="target"><option value="20000">20,000</option><option value="80000">80,000</option><option value="300000">300,000</option><option value="550000">550,000</option><option value="840000">840,000</option><option value="1500000">1,500,000</option><option value="2200000">2,200,000</option><option value="3000000">3,000,000</option><option value="6000000" selected>6,000,000</option></select></div><div class="summaryRow"><span>目前積分</span><input id="current" type="number" min="0" inputmode="numeric"></div><div class="summaryRow"><span>預計最終積分</span><b id="final" class="finalValue">0</b></div></div></section>
@@ -634,48 +774,3 @@ document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks
 ['helpRose','helpDisc','helpKillDay'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{helpDB[id==='helpRose'?'rose':id==='helpDisc'?'disc':'killDay']=e.target.checked;helpSyncAll();}));
 (function init(){helpDB.selectedRoleId=db.active||helpDB.selectedRoleId||db.profiles[0]?.id;saveDB();renderRoles();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}document.getElementById('currentRoleName').textContent=p?.name||'玩家A';})();
 </script></body></html>
-
-<style id="helpSelectMatchManualInput">
-/* 聯盟幫助：所有下拉式選單統一採用與手動輸入欄位相同的白色外觀 */
-.helpRole .helpTierSelect,
-.helpDetailPanel select,
-.helpDetailPanel .helpLine select{
-  background:#f3f3f3 !important;
-  border:1px solid #cfd4d7 !important;
-  color:#111 !important;
-  border-radius:7px !important;
-  box-sizing:border-box !important;
-  font-weight:800 !important;
-  -webkit-appearance:auto;
-  appearance:auto;
-}
-.helpRole .helpTierSelect{
-  height:38px !important;
-  padding:0 8px !important;
-  text-align:right !important;
-  text-align-last:right !important;
-}
-.helpDetailPanel select,
-.helpDetailPanel .helpLine select{
-  height:34px !important;
-  width:112px !important;
-  min-width:112px !important;
-  max-width:112px !important;
-  padding:0 8px !important;
-  text-align:right !important;
-  text-align-last:right !important;
-}
-@media(max-width:480px){
-  .helpRole .helpTierSelect{
-    width:96px !important;
-    min-width:96px !important;
-    max-width:96px !important;
-  }
-  .helpDetailPanel select,
-  .helpDetailPanel .helpLine select{
-    width:112px !important;
-    min-width:112px !important;
-    max-width:112px !important;
-  }
-}
-</style>
