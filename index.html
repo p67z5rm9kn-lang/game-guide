@@ -942,16 +942,24 @@ function guideCloseModals(){document.querySelectorAll('.modalOverlay.show').forE
 function guideClearFocus(){document.querySelectorAll('.guideTargetPulse').forEach(x=>x.classList.remove('guideTargetPulse'));}
 function guideTarget(selector){
   let el=null;
-  try{el=document.querySelector(selector)}catch(e){}
-  if(!el)return null;
-  if(selector.includes('.dayPanel')){const p=panels.find(x=>x.style.display!=='none');if(p)el=p.querySelector('.body')||p;}
+
+  // 聯盟幫助的角色卡是動態產生，沒有真正的 .helpSelectedRole class。
+  // 必須先找到目前選中的角色卡，再從卡片內尋找目標；不能先 document.querySelector()。
   if(guideState.type==='help' && selector.includes('.helpSelectedRole')){
     const cards=[...document.querySelectorAll('#helpRoles .helpRole')];
     const selected=cards.find(c=>c.dataset.roleId===String(helpDB.selectedRoleId));
     const visible=cards.find(c=>getComputedStyle(c).display!=='none');
     const card=selected||visible||cards[0];
-    if(card){const local=selector.replace('.helpSelectedRole','');el=local?card.querySelector(local):card;}
+    if(card){
+      const local=selector.replace('.helpSelectedRole','');
+      el=local ? card.querySelector(local) : card;
+    }
+    return el;
   }
+
+  try{el=document.querySelector(selector)}catch(e){}
+  if(!el)return null;
+  if(selector.includes('.dayPanel')){const p=panels.find(x=>x.style.display!=='none');if(p)el=p.querySelector('.body')||p;}
   return el;
 }
 function guidePosition(el){
