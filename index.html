@@ -657,8 +657,24 @@ document.addEventListener('click',e=>{
   if(e.target.closest?.('.chikaFlyout'))return;
   document.querySelectorAll('.infoFlyout.show,.chikaFlyout.show').forEach(x=>x.classList.remove('show'));
 });
-const TOUR_STORE='league_duel_intro_version';
+const TOUR_STORE='league_duel_intro';
 const TOUR_VERSION='2';
+function getTourState(){
+  try{
+    const raw=localStorage.getItem(TOUR_STORE);
+    if(!raw)return null;
+    if(raw==='done'||raw==='skipped')return {version:'1',status:raw};
+    const data=JSON.parse(raw);
+    return data&&typeof data==='object'?data:null;
+  }catch(e){return null;}
+}
+function shouldShowTour(){
+  const state=getTourState();
+  return !state || state.version!==TOUR_VERSION;
+}
+function saveTourStatus(status){
+  localStorage.setItem(TOUR_STORE,JSON.stringify({version:TOUR_VERSION,status}));
+}
 const tourSteps=[
  {target:'#roleBtn',title:'第一步：設定角色',text:'先選擇或建立你的角色。角色資料會保存你的計算設定，之後可以直接切換使用。'},
  {target:'#bonusBtn',title:'第二步：設定積分加成',text:'把目前擁有的積分加成設定好，後面的單次積分與計算結果會依照你的設定更新。'},
@@ -692,12 +708,12 @@ function tourRender(){
 }
 function tourEnd(){
  document.getElementById('tourOverlay').classList.remove('show');document.getElementById('tourOverlay').setAttribute('aria-hidden','true');document.getElementById('tourHighlight').hidden=true;document.getElementById('tourCard').hidden=true;
- localStorage.setItem(TOUR_STORE,TOUR_VERSION);
+ saveTourStatus('done');
 }
 function tourStart(){document.getElementById('tourWelcome').classList.remove('show');tourIndex=0;tourRender();}
 document.getElementById('guideBtn').addEventListener('click',tourStart);
 document.getElementById('tourStart').addEventListener('click',tourStart);
-document.getElementById('tourLater').addEventListener('click',()=>{document.getElementById('tourWelcome').classList.remove('show');localStorage.setItem(TOUR_STORE,TOUR_VERSION);});
+document.getElementById('tourLater').addEventListener('click',()=>{document.getElementById('tourWelcome').classList.remove('show');saveTourStatus('skipped');});
 document.getElementById('tourSkip').addEventListener('click',tourEnd);
 document.getElementById('tourNext').addEventListener('click',()=>{if(tourIndex<tourSteps.length-1){tourIndex++;tourRender();}else tourEnd();});
 window.addEventListener('resize',()=>{if(!document.getElementById('tourCard').hidden)tourPosition();});
@@ -948,5 +964,7 @@ document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',
 document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{helpDB.clicks=clampHelpClicks(helpDB.clicks+(+b.dataset.step));helpRender();helpSave();}));
 document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks=clampHelpClicks(e.target.value);e.target.value=helpDB.clicks;helpSyncAll();});
 ['helpRose','helpDisc'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{helpDB[id==='helpRose'?'rose':'disc']=e.target.checked;helpSyncAll();}));
-(function init(){helpDB.selectedRoleId=db.active||helpDB.selectedRoleId||db.profiles[0]?.id;saveDB();renderRoles();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}applyAutoGameDayJump();scheduleHelpKillDayRefresh();document.getElementById('currentRoleName').textContent=p?.name||'玩家A';});if(localStorage.getItem(TOUR_STORE)!==TOUR_VERSION)setTimeout(()=>document.getElementById('tourWelcome').classList.add('show'),350);})();
+function init(){helpDB.selectedRoleId=db.active||helpDB.selectedRoleId||db.profiles[0]?.id;saveDB();renderRoles();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}applyAutoGameDayJump();scheduleHelpKillDayRefresh();document.getElementById('currentRoleName').textContent=p?.name||'玩家A';}
+init();
+if(shouldShowTour())setTimeout(()=>document.getElementById('tourWelcome').classList.add('show'),350);
 </script></body></html>
