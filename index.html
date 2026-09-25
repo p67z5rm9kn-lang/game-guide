@@ -600,6 +600,28 @@ function calc(){
 }
 function show(i){panels.forEach((p,j)=>p.style.display=j===i?'block':'none');tabs.forEach((t,j)=>t.classList.toggle('active',j===i));calc();saveActive();}
 tabs.forEach((t,i)=>t.addEventListener('click',()=>show(i)));
+
+// 星期／日期自動跳轉：以台灣時間、每日 10:00 為遊戲日切換點。
+// 週一 00:00-09:59、週六 10:00 後、週日為假日；假日不強制切換目前正在查看的星期。
+function getAutoGameDayIndex(){
+  const now=new Date();
+  const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Taipei',weekday:'short',hour:'2-digit',hour12:false}).formatToParts(now);
+  const weekday=parts.find(x=>x.type==='weekday')?.value||'';
+  const hour=Number(parts.find(x=>x.type==='hour')?.value||0);
+  const dayMap={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6};
+  const day=dayMap[weekday];
+  if(day===undefined)return null;
+  if(day===0)return hour>=10?0:null;
+  if(day>=1&&day<=5)return hour>=10?day:day-1;
+  return null;
+}
+function applyAutoGameDayJump(){
+  const target=getAutoGameDayIndex();
+  if(target===null)return false;
+  if(target<0||target>=tabs.length)return false;
+  show(target);
+  return true;
+}
 document.addEventListener('input',e=>{if(e.target.matches('input,select')){calc();scheduleSave();}});
 document.addEventListener('change',e=>{if(e.target.matches('input,select')){calc();scheduleSave();}});
 document.getElementById('soldierTier')?.addEventListener('change',e=>{const p=db.profiles.find(x=>x.id===db.active);if(p){setProfileTier(p,e.target.value);}if(document.getElementById('helpPage').style.display!=='none')helpRender();});
@@ -633,7 +655,7 @@ function saveActive(){const p=db.profiles.find(x=>x.id===db.active);if(p){p.stat
 let saveTimer;function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveActive,120);}
 function renderRoles(){const box=document.getElementById('roleList');box.innerHTML='';db.profiles.forEach(p=>{const row=document.createElement('div');row.className='roleRow'+(p.id===db.active?' active':'');const name=document.createElement('div');name.className='roleName';name.textContent=p.name+(p.id===db.active?'（目前）':'');const actions=document.createElement('div');actions.className='roleActions';const choose=document.createElement('button');choose.textContent=p.id===db.active?'✓ 使用中':'切換';choose.addEventListener('click',()=>switchRole(p.id));const edit=document.createElement('button');edit.textContent='編輯';edit.addEventListener('click',()=>renameRole(p.id));const del=document.createElement('button');del.textContent='刪除';del.disabled=db.profiles.length<=1;del.addEventListener('click',()=>deleteRole(p.id));actions.append(choose,edit,del);row.append(name,actions);box.append(row);});document.getElementById('currentRoleName').textContent=db.profiles.find(x=>x.id===db.active)?.name||'玩家A';}
 function resetProfileUI(){document.querySelectorAll('#scorePage input').forEach(x=>{if(x.type==='checkbox')x.checked=x.defaultChecked;else x.value=x.defaultValue;});document.querySelectorAll('#scorePage select').forEach(x=>{const opt=[...x.options].findIndex(o=>o.defaultSelected);x.selectedIndex=opt>=0?opt:0;});applyBonusState(null);}
-function switchRole(id){saveActive();db.active=id;saveDB();const p=db.profiles.find(x=>x.id===id);if(p?.state)applyState(p.state);else{resetProfileUI();calc();saveActive();}document.getElementById('currentRoleName').textContent=p.name;renderRoles();if(document.getElementById('helpPage').style.display!=='none')helpRender();}
+function switchRole(id){saveActive();db.active=id;saveDB();const p=db.profiles.find(x=>x.id===id);if(p?.state)applyState(p.state);else{resetProfileUI();calc();saveActive();}applyAutoGameDayJump();document.getElementById('currentRoleName').textContent=p.name;renderRoles();if(document.getElementById('helpPage').style.display!=='none')helpRender();}
 function renameRole(id){const p=db.profiles.find(x=>x.id===id);if(!p)return;const n=prompt('請輸入角色名稱',p.name);if(n&&n.trim()){p.name=n.trim();saveDB();renderRoles();}}
 function deleteRole(id){if(db.profiles.length<=1)return;const idx=db.profiles.findIndex(x=>x.id===id);if(idx<0)return;if(!confirm('確定刪除「'+db.profiles[idx].name+'」？'))return;const was=id===db.active;db.profiles.splice(idx,1);if(was){db.active=db.profiles[0].id;const p=db.profiles[0];if(p.state)applyState(p.state);}saveDB();renderRoles();document.getElementById('currentRoleName').textContent=db.profiles.find(x=>x.id===db.active).name;calc();if(document.getElementById('helpPage').style.display!=='none')helpRender();}
 document.getElementById('addRole').addEventListener('click',()=>{const n=prompt('請輸入新角色名稱','新角色');if(!n||!n.trim())return;saveActive();const id='p'+Date.now();db.profiles.push({id,name:n.trim(),state:null});db.active=id;saveDB();resetProfileUI();renderRoles();calc();saveActive();});
@@ -840,5 +862,5 @@ document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',
 document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{helpDB.clicks=clampHelpClicks(helpDB.clicks+(+b.dataset.step));helpRender();helpSave();}));
 document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks=clampHelpClicks(e.target.value);e.target.value=helpDB.clicks;helpSyncAll();});
 ['helpRose','helpDisc','helpKillDay'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{helpDB[id==='helpRose'?'rose':id==='helpDisc'?'disc':'killDay']=e.target.checked;helpSyncAll();}));
-(function init(){helpDB.selectedRoleId=db.active||helpDB.selectedRoleId||db.profiles[0]?.id;saveDB();renderRoles();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}document.getElementById('currentRoleName').textContent=p?.name||'玩家A';})();
+(function init(){helpDB.selectedRoleId=db.active||helpDB.selectedRoleId||db.profiles[0]?.id;saveDB();renderRoles();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}applyAutoGameDayJump();document.getElementById('currentRoleName').textContent=p?.name||'玩家A';})();
 </script></body></html>
