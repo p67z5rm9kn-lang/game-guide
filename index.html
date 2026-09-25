@@ -760,7 +760,7 @@ function helpRender(){
          <option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option><option value="T7">T7</option><option value="T8">T8</option><option value="T9">T9</option><option value="T10">T10</option>
        </select>
      </div>
-     <div class="helpDetails helpStaticSection">
+     <div class="helpDetails helpStaticSection helpTreatmentTime">
        <div class="helpTableRow">
          <span class="helpMetric">單手幫助時間</span>
          <span class="helpValue timeTotal">0:00</span>
@@ -775,7 +775,7 @@ function helpRender(){
          
        </div>
      </div>
-     <div class="helpDetails helpStaticSection">
+     <div class="helpDetails helpStaticSection helpTreatmentSpeed">
        <div class="helpTableRow">
          <span class="helpMetric">治療速度提高</span>
          <span class="helpValue speedTotal">0%</span>
@@ -926,12 +926,12 @@ const GUIDE_DATA={
  help:{
    introTitle:'🤝 歡迎使用聯盟幫助計算器',introText:'有傷兵需要治療時，這個工具可以依照你的治療條件，快速計算一次最適合治療多少士兵。',
    steps:[
-    {title:'🪖 選擇士兵等級',text:'先到下方角色卡片的「士兵等級」選擇目前要治療的士兵等級。',target:'.helpRole:first-child .helpTierSetting',scroll:true},
-    {title:'⏱️ 填入單手幫助時間',text:'在角色卡片中設定單手幫助時間相關資訊，包含聯盟科技、專精與避難招募等資料。',target:'.helpRole:first-child .helpDetails:nth-of-type(1)',scroll:true},
-    {title:'⚡ 填入治療速度提高',text:'再填入目前的治療速度提高資訊，系統會把科技、聯盟科技、避難招募與殺敵日效果納入計算。',target:'.helpRole:first-child .helpDetails:nth-of-type(2)',scroll:true},
+    {title:'🪖 選擇士兵等級',text:'先到下方角色卡片的「士兵等級」選擇目前要治療的士兵等級。',target:'.helpSelectedRole .helpTierSetting',scroll:true},
+    {title:'⏱️ 填入單手幫助時間',text:'在角色卡片中設定單手幫助時間相關資訊，包含聯盟科技、專精與避難招募等資料。',target:'.helpSelectedRole .helpTreatmentTime',scroll:true},
+    {title:'⚡ 填入治療速度提高',text:'再填入目前的治療速度提高資訊，系統會把科技、聯盟科技、避難招募與殺敵日效果納入計算。',target:'.helpSelectedRole .helpTreatmentSpeed',scroll:true},
     {title:'✋ 輸入每次使用的手數',text:'輸入你預計每次要使用幾隻手進行治療。',target:'#helpClicks'},
     {title:'🌹💿 確認玫瑰花／光碟效果',text:'確認目前是否有玫瑰花或光碟效果，系統會把勾選的效果一起算入單手幫助時間。',target:'.globalChecks'},
-    {title:'🧮 查看結果',text:'完成設定後，角色卡片的「每次治療個數」就是目前條件下建議一次治療的士兵數量。',target:'.helpRole:first-child .helpResultRow',scroll:true}
+    {title:'🧮 查看結果',text:'完成設定後，角色卡片的「每次治療個數」就是目前條件下建議一次治療的士兵數量。',target:'.helpSelectedRole .helpResultRow',scroll:true}
    ]
  }
 };
@@ -945,7 +945,13 @@ function guideTarget(selector){
   try{el=document.querySelector(selector)}catch(e){}
   if(!el)return null;
   if(selector.includes('.dayPanel')){const p=panels.find(x=>x.style.display!=='none');if(p)el=p.querySelector('.body')||p;}
-  if(guideState.type==='help' && selector.includes('.helpRole:first-child')){const card=document.querySelector('#helpRoles .helpRole');if(card){const local=selector.replace('.helpRole:first-child','');el=local?card.querySelector(local):card;}}
+  if(guideState.type==='help' && selector.includes('.helpSelectedRole')){
+    const cards=[...document.querySelectorAll('#helpRoles .helpRole')];
+    const selected=cards.find(c=>c.dataset.roleId===String(helpDB.selectedRoleId));
+    const visible=cards.find(c=>getComputedStyle(c).display!=='none');
+    const card=selected||visible||cards[0];
+    if(card){const local=selector.replace('.helpSelectedRole','');el=local?card.querySelector(local):card;}
+  }
   return el;
 }
 function guidePosition(el){
