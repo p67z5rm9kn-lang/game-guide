@@ -907,7 +907,7 @@ document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks
 ['helpRose','helpDisc'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{helpDB[id==='helpRose'?'rose':'disc']=e.target.checked;helpSyncAll();}));
 
 
-// ==================== 新手導覽 V1 ====================
+// ==================== 新手導覽 V1｜V10 智慧置中版 ====================
 const GUIDE_VERSION='v1';
 const GUIDE_KEYS={score:'lastz_guide_score_'+GUIDE_VERSION,help:'lastz_guide_help_'+GUIDE_VERSION};
 const GUIDE_DATA={
@@ -974,6 +974,31 @@ function guidePosition(el){
   if(top+ch>window.innerHeight-14)top=Math.max(14,r.top-ch-16);
   card.style.width=cw+'px';card.style.left=left+'px';card.style.top=top+'px';card.style.transform='none';
 }
+function guideSmartScroll(el){
+  if(!el)return 0;
+
+  // 讓導覽目標盡可能落在手機可視區域中央。
+  // 與單純 scrollIntoView({block:'center'}) 不同：會避開 sticky 頂部導覽列，
+  // 並在頁面上下邊界時自動限制滾動範圍，避免目標被捲得過頭。
+  const r=el.getBoundingClientRect();
+  const topbar=document.querySelector('.topbar');
+  const topSafe=Math.max(12,(topbar?.getBoundingClientRect().height||0)+10);
+  const bottomSafe=18;
+  const safeCenter=(topSafe+(window.innerHeight-bottomSafe))/2;
+  const targetCenter=r.top+r.height/2;
+  const delta=targetCenter-safeCenter;
+
+  const maxScroll=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+  const current=window.scrollY||window.pageYOffset||0;
+  const targetScroll=Math.max(0,Math.min(maxScroll,current+delta));
+  const distance=Math.abs(targetScroll-current);
+
+  if(distance<2)return 0;
+
+  window.scrollTo({top:targetScroll,behavior:'smooth'});
+  // 依實際滾動距離估算動畫完成時間，讓高亮框在捲動完成後再定位。
+  return Math.max(320,Math.min(700,220+distance*0.45));
+}
 function guideScrollAndShow(){
   guideClearFocus();
   const data=GUIDE_DATA[guideState.type];
@@ -982,14 +1007,15 @@ function guideScrollAndShow(){
   if(step.open)openModal(step.open);
   setTimeout(()=>{
     const el=guideTarget(step.target);
-    if(step.scroll && el)el.scrollIntoView({behavior:'smooth',block:'center'});
+    const scrollWait=step.scroll&&el?guideSmartScroll(el):0;
     setTimeout(()=>{
       const fresh=guideTarget(step.target);
       const focusEl=fresh||document.body;
       guidePosition(focusEl);
-    },step.scroll?260:40);
+    },scrollWait||40);
   },30);
 }
+
 function guideRender(){
   const data=GUIDE_DATA[guideState.type],overlay=document.getElementById('guideOverlay');
   overlay.classList.add('show');overlay.setAttribute('aria-hidden','false');
