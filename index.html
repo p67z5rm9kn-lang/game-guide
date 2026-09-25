@@ -1,9 +1,10 @@
 <!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>聯盟對決積分配置計算器</title><style>
 *{box-sizing:border-box}html{background:#07131b}body{margin:0;overflow-x:hidden;background:#07131b;color:#eef3f5;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC",sans-serif}button,input,select{font:inherit}main{max-width:820px;margin:auto;padding:0 14px 44px}.topbar{position:sticky;top:0;z-index:80;margin:0 -14px 12px;padding:10px 14px;background:#091621ee;border-bottom:1px solid #294553;backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px}.brand{font-size:17px;font-weight:900;letter-spacing:.3px;flex:0 0 auto}.navBtn,.roleBtn{border:1px solid #3a5360;background:#122833;color:#eaf1f4;border-radius:10px;padding:9px 12px;font-weight:800;white-space:nowrap}.roleBtn{display:flex;align-items:center;gap:7px}.card{background:#0d202b;border:1px solid #294553;border-radius:16px;margin:10px 0;overflow:hidden}.hero{padding:13px 14px;border-color:#735725;background:linear-gradient(145deg,#11232d,#09151d)}.titleLine{display:flex;align-items:center;justify-content:space-between;gap:10px}.titleLine h1{font-size:21px;margin:0;font-weight:900}.bonusBtn{border:1px solid #d0a44b;background:#6f5523;color:#fff4d0;border-radius:9px;padding:8px 10px;font-weight:900;white-space:nowrap}.summaryRows{display:flex;flex-direction:column;gap:2px;margin-top:8px}.summaryRow{display:grid;grid-template-columns:1fr minmax(145px,34%);gap:10px;align-items:center;padding:2px 0;min-height:34px}.summaryRow>span{font-size:13px;color:#b7c5ca}.summaryRow select,.summaryRow input{height:32px;text-align:right}.finalValue{text-align:right;font-size:19px;font-weight:900;color:#f2d47e;min-height:24px}.dayTabs{display:flex;gap:6px;overflow-x:auto;margin:10px 0}.dayTab{flex:1;min-width:70px;padding:9px 7px;border:1px solid #304b59;border-radius:9px;background:#102732;color:#dce7eb;font-weight:900}.dayTab.active{background:#6f5523;border-color:#d0a44b}.dayHeader{padding:10px 12px;background:#102732;display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:17px}.dayHeader button{border:1px solid #3a5360;background:#172f3a;color:#fff;border-radius:8px;padding:7px 9px;font-weight:800}.body{padding:8px 12px 10px}.tablehead,.row{display:grid;grid-template-columns:minmax(0,1fr) 138px 78px 84px;gap:6px;align-items:center}.tablehead{color:#9fb0b8;font-size:11px;padding:0 0 4px}.row{padding:7px 0;border-bottom:1px solid #203640}.name{line-height:1.25;font-size:14px}.qty{width:82px;justify-self:end;text-align:right}.single,.need{text-align:right;color:#d7e4e8;font-weight:800;font-size:12px}.need{color:#ffbc63}.timeGroup,.timeInput{display:grid;grid-template-columns:minmax(0,1fr) 8px minmax(0,1fr) 8px minmax(0,1fr);gap:2px;align-items:center;justify-self:end}.timeGroup input,.timeInput input{width:100%;height:36px;min-width:0;padding:4px 5px;text-align:center}.dailyTime,.timeInput{grid-template-columns:38px 8px 38px 8px 38px;width:130px}.soldierTime{grid-template-columns:78px 8px 78px 8px 78px;width:250px}.timeGroup span{text-align:center;color:#a9b9c1;font-weight:800}.unitInput{display:flex;align-items:center;gap:4px}.unitInput input{flex:1}.unitInput>span{font-weight:900;color:#c5d1d5}.resource input,.specialResource input,.soldierTable input{text-align:right}select{text-align:right}details{border-top:1px solid #203640}summary{padding:10px 0;font-weight:900;cursor:pointer;list-style:none}summary::-webkit-details-marker{display:none}.bonusSettings{border-top:0;margin-top:8px}.bonusSettings>summary{padding:0;display:none}.modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:200;display:none;align-items:center;justify-content:center;padding:12px 10px;overflow:hidden}.modalOverlay.show{display:flex}.modal{width:min(650px,calc(100vw - 20px));max-width:650px;max-height:calc(100dvh - 24px);overflow-y:auto;overflow-x:hidden;background:#0d202b;border:1px solid #5a6570;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.55)}.modalHead{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#102732;border-bottom:1px solid #294553}.modalHead h2{font-size:18px;margin:0}.modalOverlay#roleModal{}.modalOverlay#bonusModal{}.closeBtn{width:34px;height:34px;border-radius:50%;padding:0}.modalBody{padding:12px 16px}.settingBlock{border-top:1px solid #294553;padding-top:10px;margin-top:10px}.settingTitle{font-weight:900;font-size:16px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center}.chikaTitle{display:inline-flex;align-items:center;gap:6px;position:relative}.info{display:inline-flex;width:18px;height:18px;border:1px solid #9fb0b8;border-radius:50%;align-items:center;justify-content:center;font-size:12px;color:#dce7eb;cursor:pointer;font-style:normal}.chikaFlyout{position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);width:260px;z-index:220;padding:11px 12px;border:1px solid #735725;border-radius:10px;background:#0b1c25;color:#e8eef1;box-shadow:0 10px 24px rgba(0,0,0,.4);font-size:12px;font-weight:500;line-height:1.55;display:none}.chikaFlyout.show{display:block}.infoFlyout{position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);width:280px;z-index:220;padding:11px 12px;border:1px solid #735725;border-radius:10px;background:#0b1c25;color:#e8eef1;box-shadow:0 10px 24px rgba(0,0,0,.4);font-size:12px;font-weight:500;line-height:1.55;display:none;white-space:normal}.infoFlyout.show{display:block}.infoAnchor{display:inline-flex;align-items:center;gap:6px;position:relative}.check{display:flex;gap:7px;align-items:center;color:#fff;font-size:14px;margin:0}.check input{width:19px;height:19px;accent-color:#d6aa4c}.brow{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #203640;font-size:13px}.brow input{text-align:right}.brow>div:first-child{min-width:0;line-height:1.35}.brow .unitInput{min-width:0;width:112px}.brow .unitInput input{min-width:0;width:100%;}.soldierBox{margin:8px 0 0;border:1px solid #294553;border-radius:10px;padding:0 10px}.soldierInputs{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 0 8px}.soldierInputs label{display:block;color:#a9b9c1;font-size:12px;margin-bottom:5px}.soldierInputs select{width:100%;max-width:150px;height:38px;text-align:left}.soldierTable{overflow-x:auto}.stHead,.stRow{display:grid;grid-template-columns:minmax(55px,1fr) 82px 100px 82px 88px;gap:6px;align-items:center}.stHead{font-size:10px;color:#9fb0b8;padding:6px 0}.stRow{padding:7px 0;border-top:1px solid #203640;font-size:12px}.stRow input{height:36px;padding:5px;width:100%;min-width:0}.stRow .troopCount{width:82px}.stRow .troopSpeed{width:82px}.stRow .unitInput{width:100%}.prodTime,.twelveQty{text-align:center;font-size:11px}.roleList{padding:4px 0}.roleRow{display:flex;align-items:center;gap:10px;padding:13px 4px;border-bottom:1px solid #203640}.roleRow.active{background:#123b4a}.roleName{flex:1;font-size:17px;font-weight:800}.roleActions{display:flex;gap:6px}.roleActions button{padding:7px 9px}.addRole{width:100%;margin-top:10px;padding:11px}.roleHint{font-size:12px;color:#9fb0b8;margin:0 0 8px}.hidden{display:none!important}
+#infoTraining{left:0;top:auto;bottom:calc(100% + 8px);transform:none;}
 @media(max-width:560px){main{padding:0 10px 36px}.topbar{margin:0 -10px 10px;padding:9px 10px}.brand{font-size:15px;flex:0 0 auto}.mainPageNav{flex:1;justify-content:center}.mainPageTab{padding:7px 8px;font-size:11px}.roleBtn{font-size:14px;max-width:112px}.titleLine h1{font-size:18px}.bonusBtn{font-size:12px;padding:7px 8px}.summaryRow{grid-template-columns:1fr 150px;min-height:31px}.summaryRow select,.summaryRow input{height:30px}.tablehead,.row{grid-template-columns:minmax(0,1fr) 116px 68px 76px;gap:5px}.dailyTime{grid-template-columns:34px 8px 34px 8px 34px;width:118px}.qty{width:76px}.name{font-size:13px}.single,.need{font-size:11px}.soldierInputs{grid-template-columns:1fr}.soldierTime{grid-template-columns:72px 8px 72px 8px 72px;width:232px;max-width:none}.stHead,.stRow{grid-template-columns:minmax(45px,1fr) 74px 88px 72px 78px;gap:4px}.stRow .troopCount{width:74px}.stRow .troopSpeed{width:74px}.chikaFlyout,.infoFlyout{left:0;top:calc(100% + 8px);transform:none;width:min(280px,calc(100vw - 42px))}.modalOverlay{padding:12px 10px}.modalOverlay#roleModal{}.modalOverlay#bonusModal{}.modal{max-height:calc(100dvh - 24px)}.modalBody{padding:10px 12px}.brow{grid-template-columns:minmax(0,1fr) 104px;gap:6px}.brow .unitInput{width:104px}.brow .unitInput input{min-width:0}.soldierInputs{grid-template-columns:1fr}.soldierInputs select{max-width:140px}.timeInput{grid-template-columns:38px 8px 38px 8px 38px;width:130px}.modalOverlay#bonusModal .modal{overflow:hidden}.modalOverlay#bonusModal .modalBody{overflow:visible}.modalOverlay#bonusModal details .brow{grid-template-columns:minmax(0,1fr) 104px}}
 
 .mainPageNav{display:flex;align-items:center;gap:4px;flex:0 0 auto;min-width:0}.roleBtn{margin-left:auto}.mainPageTab{border:1px solid #304a57;background:#102732;color:#aebfc6;border-radius:9px;padding:8px 9px;font-weight:900;font-size:12px;white-space:nowrap;min-height:38px;cursor:pointer}.mainPageTab.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12)}
- .helpPage{padding-bottom:20px}.helpCard{background:linear-gradient(180deg,#102833,#0b1b23);border:1px solid #2c4652;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.2);overflow:hidden;margin-bottom:12px}.helpHead{padding:14px 14px 10px;border-bottom:1px solid #29424d}.helpTitleRow{display:flex;align-items:center;gap:8px}.helpTitle{font-size:18px;font-weight:950;color:#fff1cf}.helpSub{font-size:11px;color:#91a6af;margin-top:4px;line-height:1.5}.helpInfo{width:34px;height:34px;min-width:34px;border-radius:50%;border:1px solid #7d8e96;background:#17252c;color:#e7eef1;font-weight:950;cursor:pointer;font-size:17px;display:inline-flex;align-items:center;justify-content:center}.helpInfoWrap{position:relative}.helpInfoPanel{display:none;margin-top:9px;padding:10px 12px;border:1px solid #735725;border-radius:10px;background:#0b1c25;color:#dce7ea;font-size:11px;line-height:1.6}.helpInfoPanel.show{display:block}.globalHelp{padding:12px 14px}.globalLabel{font-size:12px;color:#a9bac1;font-weight:800;margin-bottom:7px}.stepper{display:grid;grid-template-columns:42px 42px minmax(54px,1fr) 42px 42px;gap:6px;align-items:center}.stepper button{height:40px;border:1px solid #50636b;background:#172f3a;color:#fff;border-radius:9px;font-weight:950;font-size:15px}.stepper input{width:100%;height:40px;border:1px solid #8f6a32;background:#091820;color:#fff;text-align:center;border-radius:9px;font-weight:950;font-size:16px}.globalChecks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.checkPill{display:flex;align-items:center;justify-content:center;gap:5px;min-height:38px;border:1px solid #304953;border-radius:9px;background:#0d2029;color:#d9e5e9;font-size:12px;font-weight:800}.checkPill input{width:18px;height:18px;accent-color:#c99543}.helpRoles{display:grid;grid-template-columns:1fr;gap:10px;padding:10px}.helpRole{border:1px solid #29434e;border-radius:12px;background:#0a1a22;overflow:hidden}.helpRoleHead{padding:12px;border-bottom:1px solid #263f49;display:flex;justify-content:space-between;align-items:center;gap:8px}.helpRoleName{font-weight:950;color:#fff;font-size:16px}.helpRoleTitle{display:flex;align-items:center;gap:8px;min-width:0}.helpTierBadge{font-size:11px;color:#e0b86c;border:1px solid #6f542d;border-radius:999px;padding:3px 7px;background:#211b11;white-space:nowrap}.helpTierSetting{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #263f49}.helpTierSelect{width:100%;max-width:150px;height:38px;background:#07151c;border:1px solid #3a555f;color:#eef3f5;border-radius:7px;padding:0 7px;text-align:left;text-align-last:left;font-weight:800}.helpTierSetting .helpMetric{font-size:14px;color:#dce6e9;font-weight:850}.helpTable{padding:0 12px}.helpTableRow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:11px 0;list-style:none;border-bottom:1px solid #263f49;min-height:48px}.helpTableRow::-webkit-details-marker{display:none}.helpMetric{font-size:14px;color:#dce6e9;font-weight:850}.helpValue{font-size:16px;font-weight:950;color:#fff1cf;text-align:right}.helpDetails>.helpTableRow .helpValue{color:#fff}.helpDetailPanel{padding:2px 0 9px;border-bottom:1px solid #263f49}.helpLine{display:grid;grid-template-columns:minmax(0,1fr) 132px;gap:8px;align-items:center;padding:7px 0;font-size:12px;color:#aebec4}.helpLine b{color:#dce7ea;font-weight:800;text-align:right}.helpLine.total{display:none}.helpDetailPanel select{width:112px;min-width:112px;height:34px;background:#07151c;border:1px solid #3a555f;color:#eef3f5;border-radius:7px;padding:0 7px;text-align:right;text-align-last:right}.helpLine .timePair{width:112px;justify-self:end;display:grid;grid-template-columns:48px 8px 48px;align-items:center;gap:4px}.helpLine .timePair input{width:100%;height:34px;background:#07151c;border:1px solid #3a555f;color:#eef3f5;border-radius:7px;text-align:center;padding:0 4px}.helpLine .timePair i{font-style:normal;text-align:center;color:#9fb0b8}.helpLine .unitInput{width:112px;justify-self:end;display:flex;align-items:center;gap:4px}.helpLine .unitInput input{width:88px;height:34px;background:#07151c;border:1px solid #3a555f;color:#eef3f5;border-radius:7px;text-align:right;padding:0 7px}.helpLine .unitInput em{font-style:normal;font-weight:800;color:#b8c7cc}.helpResultRow{cursor:default;background:linear-gradient(90deg,#102832,#0e222b);margin:0 -12px;padding:11px 12px;border-bottom:0}.helpResultRow .helpMetric{font-size:14px}.helpResultValue{font-size:16px;line-height:1.2;font-weight:950;color:#f2c66e;text-align:right}.helpMuted{font-size:11px;color:#81969f;margin-top:3px}.helpNote{padding:10px 14px;font-size:11px;color:#8298a1;line-height:1.5;border-top:1px solid #263e48}
+ .helpPage{padding-bottom:20px}.helpCard{background:linear-gradient(180deg,#102833,#0b1b23);border:1px solid #2c4652;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.2);overflow:hidden;margin-bottom:12px}.helpHead{padding:14px 14px 10px;border-bottom:1px solid #29424d}.helpTitleRow{display:flex;align-items:center;gap:8px}.helpTitle{font-size:18px;font-weight:950;color:#fff1cf}.helpSub{font-size:11px;color:#91a6af;margin-top:4px;line-height:1.5}.helpInfo{width:34px;height:34px;min-width:34px;border-radius:50%;border:1px solid #7d8e96;background:#17252c;color:#e7eef1;font-weight:950;cursor:pointer;font-size:17px;display:inline-flex;align-items:center;justify-content:center}.helpInfoWrap{position:relative}.helpInfoPanel{display:none;margin-top:9px;padding:10px 12px;border:1px solid #735725;border-radius:10px;background:#0b1c25;color:#dce7ea;font-size:11px;line-height:1.6}.helpInfoPanel.show{display:block}.globalHelp{padding:12px 14px}.globalLabel{font-size:12px;color:#a9bac1;font-weight:800;margin-bottom:7px}.stepper{display:grid;grid-template-columns:42px 42px minmax(54px,1fr) 42px 42px;gap:6px;align-items:center}.stepper button{height:40px;border:1px solid #50636b;background:#172f3a;color:#fff;border-radius:9px;font-weight:950;font-size:15px}.stepper input{width:100%;height:40px;border:1px solid #8f6a32;background:#091820;color:#fff;text-align:center;border-radius:9px;font-weight:950;font-size:16px}.globalChecks{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.checkPill{display:flex;align-items:center;justify-content:center;gap:5px;min-height:38px;border:1px solid #304953;border-radius:9px;background:#0d2029;color:#d9e5e9;font-size:12px;font-weight:800}.checkPill input{width:18px;height:18px;accent-color:#c99543}.helpRoles{display:grid;grid-template-columns:1fr;gap:10px;padding:10px}.helpRole{border:1px solid #29434e;border-radius:12px;background:#0a1a22;overflow:hidden}.helpRoleHead{padding:12px;border-bottom:1px solid #263f49;display:flex;justify-content:space-between;align-items:center;gap:8px}.helpRoleName{font-weight:950;color:#fff;font-size:16px}.helpRoleTitle{display:flex;align-items:center;gap:8px;min-width:0}.helpTierBadge{font-size:11px;color:#e0b86c;border:1px solid #6f542d;border-radius:999px;padding:3px 7px;background:#211b11;white-space:nowrap}.helpTierSetting{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #263f49}.helpTierSelect{width:100%;max-width:150px;height:38px;background:#07151c;border:1px solid #3a555f;color:#eef3f5;border-radius:7px;padding:0 7px;text-align:left;text-align-last:left;font-weight:800}.helpTierSetting .helpMetric{font-size:14px;color:#dce6e9;font-weight:850}.helpTable{padding:0 12px}.helpTableRow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:11px 0;list-style:none;border-bottom:1px solid #263f49;min-height:48px}.helpTableRow::-webkit-details-marker{display:none}.helpMetric{font-size:14px;color:#dce6e9;font-weight:850}.helpValue{font-size:16px;font-weight:950;color:#fff1cf;text-align:right}.helpDetails>.helpTableRow .helpValue{color:#fff}.helpDetailPanel{padding:2px 0 9px;border-bottom:1px solid #263f49}.helpLine{display:grid;grid-template-columns:minmax(0,1fr) 132px;gap:8px;align-items:center;padding:7px 0;font-size:12px;color:#aebec4}.helpLine b{color:#dce7ea;font-weight:800;text-align:right}.helpLine.total{display:none}.helpDetailPanel select{width:112px;min-width:112px;height:34px;background:#07151c;border:1px solid #3a555f;color:#eef3f5;border-radius:7px;padding:0 7px;text-align:right;text-align-last:right}.helpLine .timePair{width:112px;justify-self:end;display:grid;grid-template-columns:48px 8px 48px;align-items:center;gap:4px}.helpLine .timePair input{width:100%;height:34px;background:#07151c;border:1px solid #3a555f;color:#eef3f5;border-radius:7px;text-align:center;padding:0 4px}.helpLine .timePair i{font-style:normal;text-align:center;color:#9fb0b8}.helpLine .unitInput{width:112px;justify-self:end;display:flex;align-items:center;gap:4px}.helpLine .unitInput input{width:88px;height:34px;background:#07151c;border:1px solid #3a555f;color:#eef3f5;border-radius:7px;text-align:right;padding:0 7px}.helpLine .unitInput em{font-style:normal;font-weight:800;color:#b8c7cc}.helpResultRow{cursor:default;background:linear-gradient(90deg,#102832,#0e222b);margin:0 -12px;padding:11px 12px;border-bottom:0}.helpResultRow .helpMetric{font-size:14px}.helpResultValue{font-size:16px;line-height:1.2;font-weight:950;color:#f2c66e;text-align:right}.helpMuted{font-size:11px;color:#81969f;margin-top:3px}.helpNote{padding:10px 14px;font-size:11px;color:#8298a1;line-height:1.5;border-top:1px solid #263e48}
 @media(min-width:700px){.helpRoleJump{grid-template-columns:repeat(4,minmax(0,1fr))}.helpRoles{grid-template-columns:1fr}.helpRole{width:100%}.helpTable{display:grid;grid-template-columns:1fr 1fr;column-gap:24px}.helpDetails{min-width:0}.helpResultRow{grid-column:1/-1}.helpPage{padding-bottom:30px}}
 
 @media(max-width:480px){.helpRoleJump{grid-template-columns:repeat(2,minmax(0,1fr))}.mainPageNav{gap:3px}.mainPageTab{padding:7px 8px;font-size:11px;min-height:36px}.globalChecks{grid-template-columns:1fr 1fr}.globalChecks .checkPill:last-child{grid-column:1/-1}.helpInputs{grid-template-columns:1fr}.stepper{grid-template-columns:38px 38px minmax(50px,1fr) 38px 38px}}
@@ -210,11 +211,22 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   .helpDetailPanel .helpInputLine .unitInput input[type="number"]{height:38px;font-size:16px;border-radius:8px;padding:4px 10px}
 }
 
-.roleBtn{
-  position:relative;
-  z-index:1000;
-  pointer-events:auto !important;
-  touch-action:manipulation;
+/* v14 積分加成排版修正：項目固定展開、列距壓縮，不改輸入框尺寸 */
+#bonusModal .settingBlock{padding-top:8px;margin-top:8px}
+#bonusModal .settingBlock:first-child{padding-top:0;margin-top:0}
+#bonusModal .settingTitle{margin-bottom:5px}
+#bonusModal .settingBlock:first-child .settingTitle{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:8px;align-items:center}
+#bonusModal .settingBlock:first-child .settingTitle .chikaTitle{min-width:0}
+#bonusModal .settingBlock:first-child>.brow{display:none}
+#bonusModal .settingBlock:nth-child(2)>.settingTitle{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+#bonusModal details{border-top:0}
+#bonusModal details>summary{display:none}
+#bonusModal details .brow{padding:5px 0;min-height:0}
+#bonusModal .modalBody{padding-top:10px;padding-bottom:10px}
+@media(max-width:560px){
+  #bonusModal .settingBlock{padding-top:6px;margin-top:6px}
+  #bonusModal .settingBlock:first-child .settingTitle{grid-template-columns:minmax(0,1fr) 104px}
+  #bonusModal details .brow{padding:4px 0}
 }
 </style>
 <style id="finalHelpOverrides">
@@ -342,35 +354,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 </style>
 
-<style id="bonusModalCompactStyles">
-/* 設定積分加成：維持一項一列，但壓縮列距，並一次顯示全部項目 */
-#bonusModal{overflow:hidden;padding:10px;}
-#bonusModal .bonusModalBox{
-  width:min(650px,calc(100vw - 20px));
-  max-width:650px;
-  max-height:none;
-  overflow:visible;
-}
-#bonusModal .bonusModalBody{padding:8px 14px 10px;}
-#bonusModal .bonusSection{border-top:1px solid #294553;padding-top:6px;margin-top:6px;}
-#bonusModal .bonusSection.chikaSection{border-top:0;padding-top:0;margin-top:0;}
-#bonusModal .bonusRowHeader{display:grid;grid-template-columns:minmax(0,1fr) 132px;gap:8px;align-items:center;min-height:40px;}
-#bonusModal .bonusRowHeader>.unitInput{width:132px;min-width:132px;justify-self:end;}
-#bonusModal .bonusRowHeader>.unitInput input{height:var(--control-height);min-height:var(--control-height);width:100%;box-sizing:border-box;padding:0 10px;background:var(--control-bg);border:1px solid var(--control-border);color:var(--control-text);border-radius:var(--control-radius);font-size:var(--control-font-size);font-weight:var(--control-font-weight);text-align:right;}
-#bonusModal .bonusRows .brow{padding:3px 0;min-height:40px;}
-#bonusModal .bonusRows .brow .unitInput{width:112px;}
-#bonusModal .bonusRows .brow>div:first-child{font-size:13px;}
-#bonusModal .settingTitle{margin-bottom:0;}
-#bonusModal .check{font-size:14px;}
-#bonusModal .bonusModalBody>.bonusSection:last-child{padding-bottom:0;}
-@media(max-width:560px){
-  #bonusModal .bonusModalBody{padding:6px 12px 8px;}
-  #bonusModal .bonusRowHeader{grid-template-columns:minmax(0,1fr) 126px;gap:6px;}
-  #bonusModal .bonusRowHeader>.unitInput{width:126px;min-width:126px;}
-  #bonusModal .bonusRows .brow{padding:2px 0;min-height:40px;}
-  #bonusModal .bonusRows .brow>div:first-child{font-size:13px;}
-}
-</style>
 <style id="sharedControlStyles">
 /* ================================
    共用設定欄位｜聯盟對決／聯盟幫助
@@ -453,6 +436,40 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   outline-offset:1px;
 }
 /* 設定積分加成：與聯盟對決／聯盟幫助共用同一套輸入框規格 */
+#bonusModal .chikaSettingWrap{
+  width:112px;
+  min-width:112px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  flex:0 0 112px;
+}
+#bonusModal #chika{
+  height:var(--control-height) !important;
+  min-height:var(--control-height) !important;
+  width:100% !important;
+  min-width:0 !important;
+  padding:0 10px !important;
+  background:var(--control-bg) !important;
+  border:1px solid var(--control-border) !important;
+  color:var(--control-text) !important;
+  border-radius:var(--control-radius) !important;
+  font-size:var(--control-font-size) !important;
+  font-weight:var(--control-font-weight) !important;
+  line-height:1.1;
+  box-sizing:border-box;
+  text-align:right !important;
+}
+#bonusModal #chika:focus{
+  outline:2px solid rgba(208,164,75,.55);
+  outline-offset:1px;
+}
+#bonusModal .chikaSettingWrap > span{
+  flex:0 0 auto;
+  color:#c5d1d5;
+  font-size:16px;
+  font-weight:900;
+}
 .modal .brow input[type="number"]{
   height:var(--control-height) !important;
   min-height:var(--control-height) !important;
@@ -526,37 +543,8 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   #helpPage .helpDetailPanel select{width:112px !important;min-width:112px !important;max-width:112px !important;}
 }
 </style>
-<script>window.__openRoleModal=function(e){if(e){e.preventDefault();e.stopPropagation();}var m=document.getElementById("roleModal");if(!m)return false;document.querySelectorAll(".modalOverlay.show").forEach(function(o){if(o!==m){o.classList.remove("show");o.setAttribute("aria-hidden","true");}});m.classList.add("show");m.setAttribute("aria-hidden","false");var box=document.getElementById("roleList");if(box&&window.renderRoles){try{window.renderRoles();}catch(_){}}return false;};</script>
-<style id="helpTourStyle">
-.helpTourBtn{height:34px;min-width:96px;padding:0 10px;border:1px solid #b98532;border-radius:9px;background:#3e3018;color:#fff1cf;font-size:12px;font-weight:950;cursor:pointer;white-space:nowrap}
-.helpTourBtn:active{transform:translateY(1px)}
-.helpTourOverlay{position:fixed;inset:0;z-index:3000;display:none;pointer-events:none}
-.helpTourOverlay.show{display:block}
-.helpTourShade{position:absolute;inset:0;background:rgba(0,0,0,.48);pointer-events:none}
-.helpTourSpot{position:fixed;z-index:3001;border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.58),0 0 0 2px #e3b85d,0 0 24px rgba(227,184,93,.35);pointer-events:none;transition:all .18s ease}
-.helpTourCard{position:fixed;z-index:3002;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(430px,calc(100vw - 24px));padding:14px 14px 12px;background:linear-gradient(180deg,#102833,#091920);border:1px solid #8a682f;border-radius:14px;box-shadow:0 18px 45px rgba(0,0,0,.6);pointer-events:auto}
-.helpTourKicker{font-size:11px;color:#d5a84f;font-weight:950;margin-bottom:4px}
-.helpTourTitle{font-size:17px;color:#fff1cf;font-weight:950;margin-bottom:6px}
-.helpTourText{font-size:12px;color:#d2dee2;line-height:1.65}
-.helpTourTip{margin-top:7px;padding:7px 9px;border-radius:8px;background:#0b1c24;border:1px solid #294650;color:#9fb4bc;font-size:11px;line-height:1.55}
-.helpTourActions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px}
-.helpTourSkip{border:0;background:transparent;color:#8299a2;font-size:11px;padding:7px 3px;cursor:pointer}
-.helpTourNext{border:1px solid #d0a44b;background:#6f5523;color:#fff4d0;border-radius:9px;padding:8px 14px;font-weight:950;cursor:pointer}
-.helpTourProgress{font-size:10px;color:#7f969f;margin-left:auto}
-.helpTourWelcome{position:fixed;inset:0;z-index:2999;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.62)}
-.helpTourWelcome.show{display:flex}
-.helpTourWelcomeCard{width:min(430px,calc(100vw - 24px));background:linear-gradient(180deg,#102833,#091920);border:1px solid #8a682f;border-radius:16px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.65)}
-.helpTourWelcomeTitle{font-size:20px;font-weight:950;color:#fff1cf;margin-bottom:8px}
-.helpTourWelcomeText{font-size:12px;color:#d2dee2;line-height:1.65}
-.helpTourList{margin:12px 0 0;padding-left:22px;color:#cbd9dd;font-size:12px;line-height:1.8}
-.helpTourList b{color:#f0c66d}
-.helpTourWelcomeActions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
-.helpTourStart{border:1px solid #d0a44b;background:#6f5523;color:#fff4d0;border-radius:9px;padding:9px 15px;font-weight:950;cursor:pointer}
-.helpTourLater{border:1px solid #405862;background:#142832;color:#c7d4d8;border-radius:9px;padding:9px 13px;font-weight:800;cursor:pointer}
-@media(max-width:480px){.helpTourBtn{min-width:88px;padding:0 8px}.helpTourCard{bottom:max(12px,env(safe-area-inset-bottom));padding:12px}.helpTourTitle{font-size:16px}.helpTourText{font-size:12px}}
-</style>
 </head><body><main>
-<nav class="topbar"><div class="brand">Last Z</div><div class="mainPageNav" role="tablist" aria-label="主要頁面"><button class="mainPageTab active" data-page="scorePage" role="tab" aria-selected="true">對決積分</button><button class="mainPageTab" data-page="helpPage" role="tab" aria-selected="false">聯盟幫助</button></div><button type="button" class="roleBtn" id="roleBtn" onclick="window.__openRoleModal && window.__openRoleModal(event); return false;">👤 <span id="currentRoleName">玩家A</span>⌄</button></nav><div id="scorePage"><section class="card hero"><div class="titleLine"><h1>聯盟對決積分配置計算器</h1><button type="button" class="bonusBtn" id="bonusBtn">設定積分加成</button></div>
+<nav class="topbar"><div class="brand">Last Z</div><div class="mainPageNav" role="tablist" aria-label="主要頁面"><button class="mainPageTab active" data-page="scorePage" role="tab" aria-selected="true">對決積分</button><button class="mainPageTab" data-page="helpPage" role="tab" aria-selected="false">聯盟幫助</button></div><button class="roleBtn" id="roleBtn">👤 <span id="currentRoleName">玩家A</span>⌄</button></nav><div id="scorePage"><section class="card hero"><div class="titleLine"><h1>聯盟對決積分配置計算器</h1><button class="bonusBtn" id="bonusBtn">設定積分加成</button></div>
 <div class="summaryRows"><div class="summaryRow"><span>目標積分</span><select id="target"><option value="20000">20,000</option><option value="80000">80,000</option><option value="300000">300,000</option><option value="550000">550,000</option><option value="840000">840,000</option><option value="1500000">1,500,000</option><option value="2200000">2,200,000</option><option value="3000000">3,000,000</option><option value="6000000" selected>6,000,000</option></select></div><div class="summaryRow"><span>目前積分</span><input id="current" type="number" min="0" inputmode="numeric"></div><div class="summaryRow"><span>預計最終積分</span><b id="final" class="finalValue">0</b></div></div></section>
 <div class="dayTabs"><button class="dayTab active" data-index="0">星期一</button><button class="dayTab" data-index="1">星期二</button><button class="dayTab" data-index="2">星期三</button><button class="dayTab" data-index="3">星期四</button><button class="dayTab" data-index="4">星期五</button></div>
 <section class="dayPanel card" data-day="星期一" style="display:block"><div class="dayHeader"><span>星期一</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource" data-score="20" data-cat="blueprint"><div class="name">改裝圖紙</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="5000" data-cat="wrench"><div class="name">扳手</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="5000" data-cat="none"><div class="name">雷達</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><details><summary>外裝模組（組件）　⌄</summary><div class="row resource" data-score="500" data-cat="none"><div class="name">1級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1500" data-cat="none"><div class="name">2級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="4500" data-cat="none"><div class="name">3級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="13500" data-cat="none"><div class="name">4級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="40500" data-cat="none"><div class="name">5級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="121500" data-cat="none"><div class="name">6級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="364500" data-cat="none"><div class="name">7級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></details><details><summary>戰術插片（晶片）　⌄</summary><div class="row resource" data-score="3000" data-cat="none"><div class="name">綠色戰術插片（晶片）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="12500" data-cat="none"><div class="name">藍色戰術插片（晶片）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="50000" data-cat="none"><div class="name">紫色戰術插片（晶片）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="240000" data-cat="none"><div class="name">橙色戰術插片（晶片）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></details><details><summary>瘦瘦　⌄</summary><div class="row resource" data-score="500" data-cat="wild"><div class="name">瘦瘦1-10</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="600" data-cat="wild"><div class="name">瘦瘦11-20</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="700" data-cat="wild"><div class="name">瘦瘦21-30</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="800" data-cat="wild"><div class="name">瘦瘦31-40</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1000" data-cat="wild"><div class="name">瘦瘦41-50</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1200" data-cat="wild"><div class="name">瘦瘦51-60</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></details><details><summary>胖胖　⌄</summary><div class="row resource" data-score="1000" data-cat="wild"><div class="name">胖胖1-10</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1200" data-cat="wild"><div class="name">胖胖11-20</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1400" data-cat="wild"><div class="name">胖胖21-30</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1600" data-cat="wild"><div class="name">胖胖31-40</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="2000" data-cat="wild"><div class="name">胖胖41-50</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="2400" data-cat="wild"><div class="name">胖胖51-60</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></details><div class="row resource" data-score="30" data-cat="none"><div class="name infoAnchor">鑽石禮包 <span class="info" data-info="infoDiamond" role="button" aria-label="鑽石禮包說明">i</span><span class="infoFlyout" id="infoDiamond">購買含鑽石的禮包，每獲得 1 顆鑽石可獲得 30 積分。<br><br>此積分不受千夏及聯盟表彰的積分加成影響。</span></div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="3" data-cat="gather"><div class="name">採集1000Z幣</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1" data-cat="gather"><div class="name">採集1000木頭/電/食物</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期二" style="display:none"><div class="dayHeader"><span>星期二</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource accelResource" data-score="40" data-cat="accel"><div class="name infoAnchor">建造加速 <span class="info" data-info="infoBuildAccel" role="button" aria-label="建造加速說明">i</span><span class="infoFlyout" id="infoBuildAccel">加速時間請輸入「天 : 時 : 分」。<br><br>例如：0 : 2 : 0 = 使用 2 小時加速。<br><br>系統會依使用的加速時間及目前設定的積分加成計算加速積分。</span></div><span class="timeInput"><input class="d" type="number" min="0" inputmode="numeric"><span>:</span><input class="h" type="number" min="0" max="23" inputmode="numeric"><span>:</span><input class="m" type="number" min="0" max="59" inputmode="numeric"></span><div class="single">40</div><div class="need">0:0:0</div></div><div class="row resource" data-score="0.1" data-cat="building"><div class="name infoAnchor">建築戰力 <span class="info" data-info="infoBuilding" role="button" aria-label="建築戰力說明">i</span><span class="infoFlyout" id="infoBuilding">填入升級前後增加的建築戰力。<br><br>例如：建築等級 1 戰力為 100，升級至等級 2 戰力為 300，則增加建築戰力為：300 − 100 = 200。</span></div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="60000" data-cat="none"><div class="name">橙色懸賞任務</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="4000" data-cat="none"><div class="name">鍛造石</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="100000" data-cat="none"><div class="name">脈衝模組</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="40000" data-cat="none"><div class="name">橙色避難</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="10000" data-cat="none"><div class="name">紫色避難</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="2000" data-cat="none"><div class="name">藍色避難</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="30" data-cat="none"><div class="name">鑽石禮包</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期三" style="display:none"><div class="dayHeader"><span>星期三</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource accelResource" data-score="30" data-cat="accel"><div class="name">科技加速</div><span class="timeInput"><input class="d" type="number" min="0" inputmode="numeric"><span>:</span><input class="h" type="number" min="0" max="23" inputmode="numeric"><span>:</span><input class="m" type="number" min="0" max="59" inputmode="numeric"></span><div class="single">30</div><div class="need">0:0:0</div></div><div class="row resource" data-score="0.1" data-cat="tech"><div class="name infoAnchor">科技戰力 <span class="info" data-info="infoTech" role="button" aria-label="科技戰力說明">i</span><span class="infoFlyout" id="infoTech">填入升級前後增加的科技戰力。<br><br>例如：科技等級 1 戰力為 100，升級至等級 2 戰力為 300，則增加科技戰力為：300 − 100 = 200。</span></div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="40" data-cat="none"><div class="name">警徽</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="75000" data-cat="none"><div class="name">貨車</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="30" data-cat="none"><div class="name">鑽石禮包</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期四" style="display:none"><div class="dayHeader"><span>星期四</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource" data-score="5000" data-cat="none"><div class="name">橙碎</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1750" data-cat="none"><div class="name">紫碎</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="500" data-cat="none"><div class="name">藍碎</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="5000" data-cat="none"><div class="name">專屬裝備碎片</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="500" data-cat="hero"><div class="name">高級招募</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="400" data-cat="energy"><div class="name">能源核心</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="300000" data-cat="none"><div class="name">消耗橙裝晉升</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="0.3" data-cat="none"><div class="name infoAnchor">強化合金 <span class="info" data-info="infoAlloy" role="button" aria-label="強化合金說明">i</span><span class="infoFlyout" id="infoAlloy">每次計算以 10 個的倍數強化合金計分。<br><br>例如使用 10、20、30 個都有積分；若使用 15 個，則 10 個計分、剩餘 5 個不計分。</span></div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="10" data-cat="none"><div class="name">橙書</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="10000" data-cat="none"><div class="name">覺醒徽章</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="10000" data-cat="none"><div class="name">突破水晶</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="30" data-cat="none"><div class="name">鑽石禮包</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期五" style="display:none">
@@ -587,34 +575,8 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <div class="stRow"><span>突擊</span><input class="troopCount" type="number" min="0" value="177" inputmode="numeric"><span class="unitInput"><input class="troopSpeed" type="number" min="0" step="0.01" value="529" inputmode="decimal"><span>%</span></span><span class="prodTime">0:0:0</span><span class="twelveQty">0</span></div>
 </div>
 </details></section></div>
-<section id="helpPage" class="helpPage" style="display:none"><div class="helpCard"><div class="helpHead"><div class="helpTitleRow"><div class="helpTitle">聯盟幫助｜快速計算每次治療士兵數量</div><div class="helpInfoWrap"><button type="button" class="helpInfo" id="helpInfoBtn" aria-label="聯盟幫助說明">i</button></div><button type="button" class="helpTourBtn" id="helpTourBtn">🧭 新手導覽</button></div><div class="helpInfoPanel" id="helpInfoPanel">士兵等級可直接在角色資料中調整，並與「聯盟對決」星期五／士兵訓練／加速計算的士兵等級保持連動。<br>目前提供 T9 / T10 原始治療時間：T9 為 3:58、T10 為 4:38。<br>其他士兵等級目前沒有原始治療時間資料。</div><div class="helpSub">所有角色共用點手數量、玫瑰花、光碟、殺敵日；其餘數值依角色分別設定。</div></div><div class="globalHelp"><div class="globalLabel">全體角色共用設定｜點手數量</div><div class="stepper"><button type="button" data-step="-5">−5</button><button type="button" data-step="-1">−1</button><input id="helpClicks" type="number" min="0" max="80" step="1" value="5" inputmode="numeric"><button type="button" data-step="1">＋1</button><button type="button" data-step="5">＋5</button></div><div class="globalChecks"><label class="checkPill"><input id="helpRose" type="checkbox" checked>玫瑰花</label><label class="checkPill"><input id="helpDisc" type="checkbox" checked>光碟</label><label class="checkPill"><input id="helpKillDay" type="checkbox" checked>殺敵日</label></div></div></div><div id="helpRoleJump" class="helpRoleJump"></div><div id="helpRoles" class="helpRoles"></div></section>
-<div class="helpTourWelcome" id="helpTourWelcome" role="dialog" aria-modal="true" aria-labelledby="helpTourWelcomeTitle">
-  <div class="helpTourWelcomeCard">
-    <div class="helpTourWelcomeTitle" id="helpTourWelcomeTitle">🪖 歡迎使用聯盟幫助</div>
-    <div class="helpTourWelcomeText">第一次使用？先花不到 1 分鐘了解設定順序，就能快速算出「每次治療個數」。</div>
-    <ol class="helpTourList">
-      <li><b>設定點手數量</b>　確認一次要使用幾次幫助</li>
-      <li><b>確認共用加成</b>　玫瑰花、光碟、殺敵日</li>
-      <li><b>選擇角色</b>　切換要計算的角色</li>
-      <li><b>確認士兵等級</b>　例如 T9、T10</li>
-      <li><b>填寫幫助資料</b>　包含避難招募秒數與治療速度</li>
-      <li><b>查看結果</b>　最下方就是每次可治療數量</li>
-    </ol>
-    <div class="helpTourWelcomeActions"><button type="button" class="helpTourLater" id="helpTourLater">先看看</button><button type="button" class="helpTourStart" id="helpTourStart">開始導覽 →</button></div>
-  </div>
-</div>
-<div class="helpTourOverlay" id="helpTourOverlay" aria-hidden="true">
-  <div class="helpTourShade"></div>
-  <div class="helpTourSpot" id="helpTourSpot"></div>
-  <div class="helpTourCard" id="helpTourCard" role="dialog" aria-live="polite">
-    <div class="helpTourKicker" id="helpTourKicker">第 1 步／6</div>
-    <div class="helpTourTitle" id="helpTourTitle"></div>
-    <div class="helpTourText" id="helpTourText"></div>
-    <div class="helpTourTip" id="helpTourTip"></div>
-    <div class="helpTourActions"><button type="button" class="helpTourSkip" id="helpTourSkip">先跳過</button><span class="helpTourProgress" id="helpTourProgress">1 / 6</span><button type="button" class="helpTourNext" id="helpTourNext">下一步 →</button></div>
-  </div>
-</div></main><div class="modalOverlay" id="bonusModal" aria-hidden="true"><div class="modal bonusModalBox"><div class="modalHead"><h2>設定積分加成</h2><button class="closeBtn" data-close="bonusModal">×</button></div><div class="modalBody bonusModalBody"><div class="bonusSection chikaSection"><div class="bonusRowHeader"><span class="chikaTitle">🌸 千夏 <span class="info" id="chikaInfo" role="button" aria-label="千夏說明">i</span><span class="chikaFlyout" id="chikaFlyout">查看千夏第三技能，填入聯盟對決積分加成。</span></span><div class="unitInput bonusValue"><input id="chika" type="number" min="0" step="0.01" inputmode="decimal"><span>%</span></div></div></div><div class="bonusSection"><div class="bonusRowHeader"><span class="infoAnchor">⭐ 聯盟表彰 <span class="info" data-info="infoAlliance" role="button" aria-label="聯盟表彰說明">i</span><span class="infoFlyout" id="infoAlliance">聯盟表彰各項加成會依對應的積分項目計算。<br>「所有積分」及各分類加成可以同時套用。<br><br>遊戲內查看方式：<br>打開「科技升級」面板，點擊時間旁的「ⓘ」，查看「聯盟對決屬性」，再將相關數值填入這裡。</span></span><label class="check"><input id="allDone" type="checkbox">全部完成</label></div><div class="bonusRows"><div class="brow"><div>所有積分</div><div class="unitInput"><input class="bonus" data-key="all" data-max="300" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>採集資源積分</div><div class="unitInput"><input class="bonus" data-key="gather" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>擊敗野外生物積分</div><div class="unitInput"><input class="bonus" data-key="wild" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗改裝圖紙積分</div><div class="unitInput"><input class="bonus" data-key="blueprint" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗黃金扳手積分</div><div class="unitInput"><input class="bonus" data-key="wrench" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>建築戰力積分</div><div class="unitInput"><input class="bonus" data-key="building" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>科技戰力積分</div><div class="unitInput"><input class="bonus" data-key="tech" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>招募英雄積分</div><div class="unitInput"><input class="bonus" data-key="hero" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗能源核心積分</div><div class="unitInput"><input class="bonus" data-key="energy" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div class="infoAnchor">訓練積分 <span class="info" data-info="infoTraining" role="button" aria-label="訓練積分說明">i</span><span class="infoFlyout" id="infoTraining">訓練積分會提升每生產 1 隻士兵所獲得的士兵積分。<br><br>例如 T10 基礎士兵積分為 250，訓練積分為 100%：<br>250 × (1 + 100%) = 500 分／隻</span></div><div class="unitInput"><input class="bonus" data-key="training" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div></div></div></div></div>
-<div class="modalOverlay" id="roleModal" aria-hidden="true"><div class="modal"><div class="modalHead"><h2>角色</h2><button class="closeBtn" data-close="roleModal">×</button></div><div class="modalBody"><p class="roleHint">切換角色會帶出該角色上次保存的輸入資料。</p><div class="roleList" id="roleList"></div><button class="addRole" id="addRole">＋ 新增角色</button></div></div></div>
+<section id="helpPage" class="helpPage" style="display:none"><div class="helpCard"><div class="helpHead"><div class="helpTitleRow"><div class="helpTitle">聯盟幫助｜快速計算每次治療士兵數量</div><div class="helpInfoWrap"><button type="button" class="helpInfo" id="helpInfoBtn" aria-label="聯盟幫助說明">i</button></div></div><div class="helpInfoPanel" id="helpInfoPanel">士兵等級可直接在角色資料中調整，並與「聯盟對決」星期五／士兵訓練／加速計算的士兵等級保持連動。<br>目前提供 T9 / T10 原始治療時間：T9 為 3:58、T10 為 4:38。<br>其他士兵等級目前沒有原始治療時間資料。</div><div class="helpSub">所有角色共用點手數量、玫瑰花、光碟；殺敵日依台灣時間自動判斷，其餘數值依角色分別設定。</div></div><div class="globalHelp"><div class="globalLabel">全體角色共用設定｜點手數量</div><div class="stepper"><button type="button" data-step="-5">−5</button><button type="button" data-step="-1">−1</button><input id="helpClicks" type="number" min="0" max="80" step="1" value="5" inputmode="numeric"><button type="button" data-step="1">＋1</button><button type="button" data-step="5">＋5</button></div><div class="globalChecks"><label class="checkPill"><input id="helpRose" type="checkbox" checked>玫瑰花</label><label class="checkPill"><input id="helpDisc" type="checkbox" checked>光碟</label></div></div></div><div id="helpRoleJump" class="helpRoleJump"></div><div id="helpRoles" class="helpRoles"></div></section></main><div class="modalOverlay" id="bonusModal"><div class="modal"><div class="modalHead"><h2>設定積分加成</h2><button class="closeBtn" data-close="bonusModal">×</button></div><div class="modalBody"><div class="settingBlock" style="border-top:0;padding-top:0;margin-top:0"><div class="settingTitle"><span class="chikaTitle">🌸 千夏 <span class="info" id="chikaInfo" role="button" aria-label="千夏說明">i</span><span class="chikaFlyout" id="chikaFlyout">查看千夏第三技能，填入聯盟對決積分加成。</span></span><div class="unitInput chikaSettingWrap"><input id="chika" class="settingControl" type="number" min="0" step="0.01" inputmode="decimal"><span>%</span></div></div></div><div class="settingBlock"><div class="settingTitle"><span class="infoAnchor">⭐ 聯盟表彰 <span class="info" data-info="infoAlliance" role="button" aria-label="聯盟表彰說明">i</span><span class="infoFlyout" id="infoAlliance">聯盟表彰各項加成會依對應的積分項目計算。<br>「所有積分」及各分類加成可以同時套用。<br><br>遊戲內查看方式：<br>打開「科技升級」面板，點擊時間旁的「ⓘ」，查看「聯盟對決屬性」，再將相關數值填入這裡。</span></span><label class="check"><input id="allDone" type="checkbox">全部完成</label></div><details open><summary>聯盟表彰加成項目</summary><div class="brow"><div>所有積分</div><div class="unitInput"><input class="bonus" data-key="all" data-max="300" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>採集資源積分</div><div class="unitInput"><input class="bonus" data-key="gather" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>擊敗野外生物積分</div><div class="unitInput"><input class="bonus" data-key="wild" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗改裝圖紙積分</div><div class="unitInput"><input class="bonus" data-key="blueprint" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗黃金扳手積分</div><div class="unitInput"><input class="bonus" data-key="wrench" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>建築戰力積分</div><div class="unitInput"><input class="bonus" data-key="building" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>科技戰力積分</div><div class="unitInput"><input class="bonus" data-key="tech" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>招募英雄積分</div><div class="unitInput"><input class="bonus" data-key="hero" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗能源核心積分</div><div class="unitInput"><input class="bonus" data-key="energy" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div class="infoAnchor">訓練積分 <span class="info" data-info="infoTraining" role="button" aria-label="訓練積分說明">i</span><span class="infoFlyout" id="infoTraining">訓練積分會提升每生產 1 隻士兵所獲得的士兵積分。<br><br>例如 T10 基礎士兵積分為 250，訓練積分為 100%：<br>250 × (1 + 100%) = 500 分／隻</span></div><div class="unitInput"><input class="bonus" data-key="training" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div></details></div></div></div></div>
+<div class="modalOverlay" id="roleModal"><div class="modal"><div class="modalHead"><h2>角色</h2><button class="closeBtn" data-close="roleModal">×</button></div><div class="modalBody"><p class="roleHint">切換角色會帶出該角色上次保存的輸入資料。</p><div class="roleList" id="roleList"></div><button class="addRole" id="addRole">＋ 新增角色</button></div></div></div>
 <script>
 const fmt=n=>Math.round(n).toLocaleString('en-US');
 const panels=[...document.querySelectorAll('.dayPanel')],tabs=[...document.querySelectorAll('.dayTab')];
@@ -639,36 +601,53 @@ function calc(){
 }
 function show(i){panels.forEach((p,j)=>p.style.display=j===i?'block':'none');tabs.forEach((t,j)=>t.classList.toggle('active',j===i));calc();saveActive();}
 tabs.forEach((t,i)=>t.addEventListener('click',()=>show(i)));
+
+// 星期／日期自動跳轉：以台灣時間、每日 10:00 為遊戲日切換點。
+// 週一 00:00-09:59、週六 10:00 後、週日為假日；假日不強制切換目前正在查看的星期。
+function getAutoGameDayIndex(){
+  const now=new Date();
+  const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Taipei',weekday:'short',hour:'2-digit',hour12:false}).formatToParts(now);
+  const weekday=parts.find(x=>x.type==='weekday')?.value||'';
+  const hour=Number(parts.find(x=>x.type==='hour')?.value||0);
+  const dayMap={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6};
+  const day=dayMap[weekday];
+  if(day===undefined)return null;
+  if(day===0)return hour>=10?0:null;
+  if(day>=1&&day<=5)return hour>=10?day:day-1;
+  return null;
+}
+function applyAutoGameDayJump(){
+  const target=getAutoGameDayIndex();
+  if(target===null)return false;
+  if(target<0||target>=tabs.length)return false;
+  show(target);
+  return true;
+}
 document.addEventListener('input',e=>{if(e.target.matches('input,select')){calc();scheduleSave();}});
 document.addEventListener('change',e=>{if(e.target.matches('input,select')){calc();scheduleSave();}});
 document.getElementById('soldierTier')?.addEventListener('change',e=>{const p=db.profiles.find(x=>x.id===db.active);if(p){setProfileTier(p,e.target.value);}if(document.getElementById('helpPage').style.display!=='none')helpRender();});
 document.getElementById('allDone').addEventListener('change',e=>{document.querySelectorAll('.bonus').forEach(x=>x.value=e.target.checked?x.dataset.max:'');calc();saveActive();});
 document.querySelectorAll('#bonusModal #chika,#bonusModal .bonus').forEach(x=>x.addEventListener('input',()=>{calc();saveActive();}));
 document.querySelectorAll('.clearDay').forEach(btn=>btn.addEventListener('click',()=>{const p=btn.closest('.dayPanel');p.querySelectorAll('.qty').forEach(x=>x.value='');p.querySelectorAll('.d,.h,.m').forEach(x=>x.value='');calc();scheduleSave();}));
-function openModal(id){
-  // 同一時間只允許一個飛出視窗開啟，避免角色與設定積分加成互相疊在一起。
-  document.querySelectorAll('.modalOverlay.show').forEach(o=>{
-    if(o.id!==id){o.classList.remove('show');o.setAttribute('aria-hidden','true');}
-  });
-  const modal=document.getElementById(id);
-  if(!modal)return;
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden','false');
-}
-function closeModal(id){
-  const modal=document.getElementById(id);
-  if(!modal)return;
-  modal.classList.remove('show');
-  modal.setAttribute('aria-hidden','true');
-}
-
-document.getElementById('bonusBtn').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openModal('bonusModal');});
-document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closeModal(b.dataset.close);}));
-document.querySelectorAll('.modalOverlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
-
+function openModal(id){document.querySelectorAll('.modalOverlay.show').forEach(o=>{if(o.id!==id)o.classList.remove('show');});document.getElementById(id).classList.add('show');}function closeModal(id){document.getElementById(id).classList.remove('show');}
+document.getElementById('bonusBtn').addEventListener('click',()=>openModal('bonusModal'));document.getElementById('roleBtn').addEventListener('click',()=>{renderRoles();openModal('roleModal');});document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));document.querySelectorAll('.modalOverlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
 document.getElementById('chikaInfo').addEventListener('click',e=>{e.stopPropagation();document.getElementById('chikaFlyout').classList.toggle('show');});
-document.querySelectorAll('.info[data-info]').forEach(info=>info.addEventListener('click',e=>{e.stopPropagation();const id=info.dataset.info;document.querySelectorAll('.infoFlyout.show').forEach(x=>{if(x.id!==id)x.classList.remove('show')});document.getElementById(id)?.classList.toggle('show');}));
-document.addEventListener('click',()=>{document.querySelectorAll('.infoFlyout.show,.chikaFlyout.show').forEach(x=>x.classList.remove('show'));});
+document.addEventListener('click',e=>{
+  const info=e.target.closest?.('.info[data-info]');
+  if(info){
+    e.stopPropagation();
+    const anchor=info.closest('.infoAnchor');
+    const flyout=anchor?.querySelector('.infoFlyout') || document.getElementById(info.dataset.info);
+    if(!flyout)return;
+    document.querySelectorAll('.infoFlyout.show').forEach(x=>{if(x!==flyout)x.classList.remove('show')});
+    document.querySelectorAll('.chikaFlyout.show').forEach(x=>x.classList.remove('show'));
+    flyout.classList.toggle('show');
+    return;
+  }
+  if(e.target.closest?.('#chikaInfo'))return;
+  if(e.target.closest?.('.chikaFlyout'))return;
+  document.querySelectorAll('.infoFlyout.show,.chikaFlyout.show').forEach(x=>x.classList.remove('show'));
+});
 const STORE='league_duel_profiles_v12';
 let db=JSON.parse(localStorage.getItem(STORE)||'null')||{active:'p1',profiles:[{id:'p1',name:'玩家A',state:null},{id:'p2',name:'玩家B',state:null}]};
 if(!Array.isArray(db.profiles))db.profiles=[];
@@ -689,15 +668,9 @@ function applyState(st){if(!st)return;st=normalizeBlankManualState(st);const cs=
 function saveDB(){localStorage.setItem(STORE,JSON.stringify(db));}
 function saveActive(){const p=db.profiles.find(x=>x.id===db.active);if(p){p.state=captureState();saveDB();}}
 let saveTimer;function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveActive,120);}
-window.renderRoles=function renderRoles(){const box=document.getElementById('roleList');box.innerHTML='';db.profiles.forEach(p=>{const row=document.createElement('div');row.className='roleRow'+(p.id===db.active?' active':'');const name=document.createElement('div');name.className='roleName';name.textContent=p.name+(p.id===db.active?'（目前）':'');const actions=document.createElement('div');actions.className='roleActions';const choose=document.createElement('button');choose.textContent=p.id===db.active?'✓ 使用中':'切換';choose.addEventListener('click',()=>switchRole(p.id));const edit=document.createElement('button');edit.textContent='編輯';edit.addEventListener('click',()=>renameRole(p.id));const del=document.createElement('button');del.textContent='刪除';del.disabled=db.profiles.length<=1;del.addEventListener('click',()=>deleteRole(p.id));actions.append(choose,edit,del);row.append(name,actions);box.append(row);});document.getElementById('currentRoleName').textContent=db.profiles.find(x=>x.id===db.active)?.name||'玩家A';}
-document.getElementById('roleBtn').addEventListener('click',function(e){
-  e.preventDefault();
-  e.stopPropagation();
-  renderRoles();
-  openModal('roleModal');
-});
+function renderRoles(){const box=document.getElementById('roleList');box.innerHTML='';db.profiles.forEach(p=>{const row=document.createElement('div');row.className='roleRow'+(p.id===db.active?' active':'');const name=document.createElement('div');name.className='roleName';name.textContent=p.name+(p.id===db.active?'（目前）':'');const actions=document.createElement('div');actions.className='roleActions';const choose=document.createElement('button');choose.textContent=p.id===db.active?'✓ 使用中':'切換';choose.addEventListener('click',()=>switchRole(p.id));const edit=document.createElement('button');edit.textContent='編輯';edit.addEventListener('click',()=>renameRole(p.id));const del=document.createElement('button');del.textContent='刪除';del.disabled=db.profiles.length<=1;del.addEventListener('click',()=>deleteRole(p.id));actions.append(choose,edit,del);row.append(name,actions);box.append(row);});document.getElementById('currentRoleName').textContent=db.profiles.find(x=>x.id===db.active)?.name||'玩家A';}
 function resetProfileUI(){document.querySelectorAll('#scorePage input').forEach(x=>{if(x.type==='checkbox')x.checked=x.defaultChecked;else x.value=x.defaultValue;});document.querySelectorAll('#scorePage select').forEach(x=>{const opt=[...x.options].findIndex(o=>o.defaultSelected);x.selectedIndex=opt>=0?opt:0;});applyBonusState(null);}
-function switchRole(id){saveActive();db.active=id;saveDB();const p=db.profiles.find(x=>x.id===id);if(p?.state)applyState(p.state);else{resetProfileUI();calc();saveActive();}document.getElementById('currentRoleName').textContent=p.name;renderRoles();if(document.getElementById('helpPage').style.display!=='none')helpRender();}
+function switchRole(id){saveActive();db.active=id;saveDB();const p=db.profiles.find(x=>x.id===id);if(p?.state)applyState(p.state);else{resetProfileUI();calc();saveActive();}applyAutoGameDayJump();document.getElementById('currentRoleName').textContent=p.name;renderRoles();if(document.getElementById('helpPage').style.display!=='none')helpRender();}
 function renameRole(id){const p=db.profiles.find(x=>x.id===id);if(!p)return;const n=prompt('請輸入角色名稱',p.name);if(n&&n.trim()){p.name=n.trim();saveDB();renderRoles();}}
 function deleteRole(id){if(db.profiles.length<=1)return;const idx=db.profiles.findIndex(x=>x.id===id);if(idx<0)return;if(!confirm('確定刪除「'+db.profiles[idx].name+'」？'))return;const was=id===db.active;db.profiles.splice(idx,1);if(was){db.active=db.profiles[0].id;const p=db.profiles[0];if(p.state)applyState(p.state);}saveDB();renderRoles();document.getElementById('currentRoleName').textContent=db.profiles.find(x=>x.id===db.active).name;calc();if(document.getElementById('helpPage').style.display!=='none')helpRender();}
 document.getElementById('addRole').addEventListener('click',()=>{const n=prompt('請輸入新角色名稱','新角色');if(!n||!n.trim())return;saveActive();const id='p'+Date.now();db.profiles.push({id,name:n.trim(),state:null});db.active=id;saveDB();resetProfileUI();renderRoles();calc();saveActive();});
@@ -757,8 +730,7 @@ function helpRender(){
  document.getElementById('helpClicks').value=helpDB.clicks;
  document.getElementById('helpRose').checked=!!helpDB.rose;
  document.getElementById('helpDisc').checked=!!helpDB.disc;
- document.getElementById('helpKillDay').checked=!!helpDB.killDay;
-
+ 
  const box=document.getElementById('helpRoles');
  box.innerHTML='';
  db.profiles.forEach(p=>{
@@ -786,7 +758,7 @@ function helpRender(){
          <div class="helpLine"><span>基本</span><b>2:00</b></div>
          <div class="helpLine"><span>聯盟科技</span><span><select data-key="alliance"><option>0:00</option><option>0:30</option><option>1:00</option><option>1:30</option><option>2:00</option><option>2:30</option></select></span></div>
          <div class="helpLine"><span>專精</span><span class="unitInput"><select data-key="mastery"><option value="0">0</option><option value="30">30</option><option value="60">60</option><option value="90">90</option><option value="120">120</option><option value="150">150</option></select><em>秒</em></span></div>
-         <div class="helpLine helpInputLine"><span class="infoAnchor">避難招募 <span class="info" data-info="infoHelpRecruit" role="button" aria-label="避難招募說明">i</span><span class="infoFlyout" id="infoHelpRecruit">請至聯盟中心，點擊「派遣」，確認當前秒數。</span></span><span class="unitInput"><input data-key="recruitSeconds" type="number" min="0" step="1" inputmode="numeric" aria-label="避難招募秒數"><em>秒</em></span></div>
+         <div class="helpLine helpInputLine"><span class="infoAnchor">避難招募 <span class="info" data-info="infoHelpRecruit" role="button" aria-label="避難招募說明">i</span><span class="infoFlyout" id="infoHelpRecruit">請至聯盟中心，點擊「派遣」，將幫助時間（秒）填入此欄。</span></span><span class="unitInput"><input data-key="recruitSeconds" type="number" min="0" step="1" inputmode="numeric" aria-label="避難招募秒數"><em>秒</em></span></div>
          <div class="helpLine"><span>玫瑰花</span><b class="roseValue">0:00</b></div>
          <div class="helpLine"><span>光碟</span><b class="discValue">0:00</b></div>
          
@@ -852,6 +824,14 @@ function setProfileTier(p,tier){
  p.state.day=typeof p.state.day==='number'?p.state.day:4;
  saveDB();
 }
+function isKillDayTW(){
+ const now=new Date();
+ const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Taipei',weekday:'short',hour:'2-digit',hour12:false}).formatToParts(now);
+ const weekday=parts.find(x=>x.type==='weekday')?.value||'';
+ const hour=Number(parts.find(x=>x.type==='hour')?.value||0);
+ return (weekday==='Sat' && hour>=10) || (weekday==='Sun' && hour<10);
+}
+
 function helpUpdateCard(card,id){
  const p=db.profiles.find(x=>x.id===id);
  if(!p)return;
@@ -875,13 +855,14 @@ function helpUpdateCard(card,id){
 
  const masterySeconds=String(d.mastery).includes(':')?parseMS(d.mastery):Math.max(0,Number(d.mastery)||0);
  const total=120+parseMS(d.alliance)+masterySeconds+recruitSeconds+(helpDB.rose?120:0)+(helpDB.disc?120:0);
- const speed=d.tech+d.allianceSpeed+d.recruitSpeed+(helpDB.killDay?200:0);
+ const killDayActive=isKillDayTW();
+ const speed=d.tech+d.allianceSpeed+d.recruitSpeed+(killDayActive?200:0);
 
  card.querySelector('.timeTotal').textContent=secToMS(total);
  card.querySelector('.roseValue').textContent=helpDB.rose?'2:00':'0:00';
  card.querySelector('.discValue').textContent=helpDB.disc?'2:00':'0:00';
  card.querySelector('.speedTotal').textContent=speed+'%';
- card.querySelector('.killValue').textContent=helpDB.killDay?'200%':'0%';
+ card.querySelector('.killValue').textContent=killDayActive?'200%':'0%';
 
  const tier=selectedTier;
  const rawSec=({T9:238,T10:278})[tier] ?? null;
@@ -898,128 +879,20 @@ function helpUpdateCard(card,id){
  helpUpdateJumpValue(id,result);
 }
 function helpSyncAll(){document.querySelectorAll('.helpRole').forEach(c=>helpUpdateCard(c,c.dataset.roleId));helpSave();}
-function switchPage(id){document.getElementById('scorePage').style.display=id==='scorePage'?'block':'none';document.getElementById('helpPage').style.display=id==='helpPage'?'block':'none';document.querySelectorAll('.mainPageTab').forEach(b=>{const active=b.dataset.page===id;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');});if(id==='helpPage'){helpRender();if(shouldShowHelpTour()&&!document.getElementById('helpTourOverlay').classList.contains('show'))setTimeout(helpTourOpenWelcome,220);}}
-document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
+let helpKillDayTimer=null;
+function scheduleHelpKillDayRefresh(){
+ clearInterval(helpKillDayTimer);
+ helpKillDayTimer=setInterval(()=>{
+   const page=document.getElementById('helpPage');
+   if(page && page.style.display!=='none') helpSyncAll();
+ },30000);
+}
 
-/* 聯盟幫助：首次導覽／版本控制／可重新開啟 */
-const HELP_TOUR_STORE='league_help_intro';
-const HELP_TOUR_VERSION='1';
-const helpTourSteps=[
- {target:'#helpClicks',title:'第一步：設定點手數量',text:'先設定一次治療要使用幾次聯盟幫助。可以直接輸入數字，也可以用 −5、−1、＋1、＋5 快速調整。',tip:'這個數值會套用到目前的計算結果。'},
- {target:'#helpRose',title:'第二步：確認共用加成',text:'確認目前是否使用玫瑰花、光碟與殺敵日。這些設定屬於共用條件，會套用到所有角色。',tip:'如果今天沒有該加成，就取消勾選。'},
- {target:'#helpRoleJump',title:'第三步：選擇要計算的角色',text:'如果你有多個角色，可以在這裡切換。切換後會顯示該角色自己的士兵與治療設定。',tip:'每個角色的資料可以分開保存，不需要每次重新輸入。'},
- {target:'.helpRole .helpTierSelect',title:'第四步：確認士兵等級',text:'確認目前要計算的士兵等級，例如 T9 或 T10。士兵等級會影響後面的治療時間計算。',tip:'士兵等級也會與「聯盟對決」星期五／士兵訓練／加速計算的設定連動。'},
- {target:'.helpRole .helpInputLine',title:'第五步：填寫幫助資料',text:'這裡是主要輸入區。除了基本、聯盟科技與專精外，還可以填寫「避難招募」秒數，以及治療速度相關的科技、聯盟科技與避難招募加成。',tip:'「避難招募」秒數請至聯盟中心，點擊「派遣」，確認當前秒數後填入。'},
- {target:'.helpRole .helpResultRow',title:'第六步：查看最終結果',text:'完成設定後，這裡會顯示「每次治療個數」，就是目前條件下每一次可以治療的士兵數量。',tip:'修改上面的設定後，結果會自動更新。'}
-];
-let helpTourIndex=0;
-function getHelpTourState(){
- try{const raw=localStorage.getItem(HELP_TOUR_STORE);if(!raw)return null;const data=JSON.parse(raw);return data&&typeof data==='object'?data:null;}catch(e){return null;}
-}
-function shouldShowHelpTour(){const state=getHelpTourState();return !state||state.version!==HELP_TOUR_VERSION;}
-function saveHelpTourStatus(status){localStorage.setItem(HELP_TOUR_STORE,JSON.stringify({version:HELP_TOUR_VERSION,status}));}
-function helpTourTarget(){return document.querySelector(helpTourSteps[helpTourIndex]?.target);}
-function positionHelpTour(){
- const target=helpTourTarget(),spot=document.getElementById('helpTourSpot');
- if(!target||!spot)return;
- const r=target.getBoundingClientRect(),pad=5;
- spot.style.left=Math.max(4,r.left-pad)+'px';spot.style.top=Math.max(4,r.top-pad)+'px';spot.style.width=Math.min(window.innerWidth-8,r.width+pad*2)+'px';spot.style.height=Math.min(window.innerHeight-8,r.height+pad*2)+'px';
-}
-function renderHelpTourStep(){
- const step=helpTourSteps[helpTourIndex],target=helpTourTarget();
- if(!step||!target)return;
- target.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'});
- document.getElementById('helpTourKicker').textContent=`第 ${helpTourIndex+1} 步／${helpTourSteps.length}`;
- document.getElementById('helpTourProgress').textContent=`${helpTourIndex+1} / ${helpTourSteps.length}`;
- document.getElementById('helpTourTitle').textContent=step.title;
- document.getElementById('helpTourText').textContent=step.text;
- document.getElementById('helpTourTip').textContent=step.tip;
- document.getElementById('helpTourNext').textContent=helpTourIndex===helpTourSteps.length-1?'完成導覽 ✓':'下一步 →';
- setTimeout(positionHelpTour,80);setTimeout(positionHelpTour,260);
-}
-function helpTourStart(){
- switchPage('helpPage');
- document.getElementById('helpTourWelcome').classList.remove('show');
- document.getElementById('helpTourOverlay').classList.add('show');
- document.getElementById('helpTourOverlay').setAttribute('aria-hidden','false');
- helpTourIndex=0;
- helpRender();
- setTimeout(renderHelpTourStep,80);
-}
-function helpTourEnd(status='done'){
- document.getElementById('helpTourOverlay').classList.remove('show');
- document.getElementById('helpTourOverlay').setAttribute('aria-hidden','true');
- document.getElementById('helpTourWelcome').classList.remove('show');
- saveHelpTourStatus(status);
-}
-function helpTourOpenWelcome(){document.getElementById('helpTourWelcome').classList.add('show');}
-
-document.getElementById('helpTourBtn')?.addEventListener('click',()=>helpTourStart());
-document.getElementById('helpTourStart')?.addEventListener('click',()=>helpTourStart());
-document.getElementById('helpTourLater')?.addEventListener('click',()=>helpTourEnd('skipped'));
-document.getElementById('helpTourSkip')?.addEventListener('click',()=>helpTourEnd('skipped'));
-document.getElementById('helpTourNext')?.addEventListener('click',()=>{if(helpTourIndex>=helpTourSteps.length-1){helpTourEnd('done');return;}helpTourIndex++;renderHelpTourStep();});
-window.addEventListener('resize',positionHelpTour);
-window.addEventListener('scroll',positionHelpTour,{passive:true});
-document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
+function switchPage(id){document.getElementById('scorePage').style.display=id==='scorePage'?'block':'none';document.getElementById('helpPage').style.display=id==='helpPage'?'block':'none';document.querySelectorAll('.mainPageTab').forEach(b=>{const active=b.dataset.page===id;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');});if(id==='helpPage')helpRender();}
+document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
 
 document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{helpDB.clicks=clampHelpClicks(helpDB.clicks+(+b.dataset.step));helpRender();helpSave();}));
 document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks=clampHelpClicks(e.target.value);e.target.value=helpDB.clicks;helpSyncAll();});
-['helpRose','helpDisc','helpKillDay'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{helpDB[id==='helpRose'?'rose':id==='helpDisc'?'disc':'killDay']=e.target.checked;helpSyncAll();}));
-(function init(){helpDB.selectedRoleId=db.active||helpDB.selectedRoleId||db.profiles[0]?.id;saveDB();renderRoles();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}document.getElementById('currentRoleName').textContent=p?.name||'玩家A';})();
-</script>
-<style id="roleButtonRootFix">
-/* 角色按鈕根治：頂部三區固定分欄，避免導航區或其他元素覆蓋觸控區 */
-.topbar{
-  display:grid!important;
-  grid-template-columns:auto minmax(0,1fr) auto!important;
-  align-items:center!important;
-  gap:10px!important;
-  position:sticky!important;
-  z-index:1000!important;
-}
-.topbar .brand{min-width:0!important;flex:0 0 auto!important}
-.topbar .mainPageNav{
-  min-width:0!important;
-  width:100%!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:4px!important;
-  overflow:hidden!important;
-}
-.topbar .mainPageTab{
-  flex:0 1 auto!important;
-  min-width:0!important;
-  position:relative!important;
-  z-index:1001!important;
-}
-.topbar .roleBtn{
-  grid-column:3!important;
-  grid-row:1!important;
-  position:relative!important;
-  z-index:1002!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  flex:0 0 auto!important;
-  min-width:78px!important;
-  max-width:none!important;
-  margin:0!important;
-  pointer-events:auto!important;
-  touch-action:manipulation!important;
-  cursor:pointer!important;
-  -webkit-tap-highlight-color:transparent!important;
-}
-@media(max-width:560px){
-  .topbar{grid-template-columns:auto minmax(0,1fr) auto!important;gap:7px!important}
-  .topbar .mainPageNav{justify-content:center!important;gap:3px!important}
-  .topbar .mainPageTab{padding:7px 7px!important;font-size:11px!important;min-height:36px!important}
-  .topbar .roleBtn{min-width:76px!important;padding:8px 9px!important;font-size:14px!important}
-}
-@media(max-width:390px){
-  .topbar .roleBtn{min-width:72px!important;padding-left:7px!important;padding-right:7px!important}
-  .topbar .mainPageTab{padding-left:6px!important;padding-right:6px!important}
-}
-</style>
-</body></html>
+['helpRose','helpDisc'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{helpDB[id==='helpRose'?'rose':'disc']=e.target.checked;helpSyncAll();}));
+(function init(){helpDB.selectedRoleId=db.active||helpDB.selectedRoleId||db.profiles[0]?.id;saveDB();renderRoles();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}applyAutoGameDayJump();scheduleHelpKillDayRefresh();document.getElementById('currentRoleName').textContent=p?.name||'玩家A';})();
+</script></body></html>
