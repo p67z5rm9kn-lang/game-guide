@@ -347,7 +347,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   --control-text:#111;
   --control-radius:9px;
   --control-height:40px;
-  --control-font-size:18px;
+  --control-font-size:16px;
   --control-font-weight:900;
 }
 .settingControl{
@@ -398,7 +398,8 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 /* 聯盟幫助：玩家資料設定欄位與聯盟對決共用同一套設定元件 */
 #helpPage .helpRole input[type="number"],
 #helpPage .helpRole select,
-#helpPage #helpClicks{
+#helpPage #helpClicks,
+.modal .brow input[type="number"]{
   background:var(--control-bg) !important;
   border:1px solid var(--control-border) !important;
   color:var(--control-text) !important;
@@ -410,10 +411,25 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 #helpPage .helpRole input[type="number"]:focus,
 #helpPage .helpRole select:focus,
-#helpPage #helpClicks:focus{
+#helpPage #helpClicks:focus,
+.modal .brow input[type="number"]:focus{
   outline:2px solid rgba(208,164,75,.55);
   outline-offset:1px;
 }
+/* 設定積分加成：與聯盟對決／聯盟幫助共用同一套輸入框規格 */
+.modal .brow input[type="number"]{
+  height:var(--control-height) !important;
+  min-height:var(--control-height) !important;
+  width:100% !important;
+  min-width:0 !important;
+  padding:0 10px !important;
+  text-align:right !important;
+  font-size:var(--control-font-size) !important;
+  font-weight:var(--control-font-weight) !important;
+  line-height:1.1;
+  box-sizing:border-box;
+}
+
 /* 下拉選單與手動輸入框維持相同高度、圓角與字級 */
 #helpPage .helpTierSelect{
   height:var(--control-height) !important;
