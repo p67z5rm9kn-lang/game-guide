@@ -608,21 +608,6 @@ function closeModal(id){
 }
 
 document.getElementById('bonusBtn').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openModal('bonusModal');});
-document.addEventListener('click',function(e){
-  const btn=e.target.closest('#roleBtn');
-  if(!btn)return;
-  e.preventDefault();
-  e.stopPropagation();
-  const modal=document.getElementById('roleModal');
-  if(!modal)return;
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden','false');
-  try{
-    if(typeof renderRoles==='function')renderRoles();
-  }catch(err){
-    console.error('renderRoles error:',err);
-  }
-});
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closeModal(b.dataset.close);}));
 document.querySelectorAll('.modalOverlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
 
@@ -650,6 +635,12 @@ function saveDB(){localStorage.setItem(STORE,JSON.stringify(db));}
 function saveActive(){const p=db.profiles.find(x=>x.id===db.active);if(p){p.state=captureState();saveDB();}}
 let saveTimer;function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveActive,120);}
 function renderRoles(){const box=document.getElementById('roleList');box.innerHTML='';db.profiles.forEach(p=>{const row=document.createElement('div');row.className='roleRow'+(p.id===db.active?' active':'');const name=document.createElement('div');name.className='roleName';name.textContent=p.name+(p.id===db.active?'（目前）':'');const actions=document.createElement('div');actions.className='roleActions';const choose=document.createElement('button');choose.textContent=p.id===db.active?'✓ 使用中':'切換';choose.addEventListener('click',()=>switchRole(p.id));const edit=document.createElement('button');edit.textContent='編輯';edit.addEventListener('click',()=>renameRole(p.id));const del=document.createElement('button');del.textContent='刪除';del.disabled=db.profiles.length<=1;del.addEventListener('click',()=>deleteRole(p.id));actions.append(choose,edit,del);row.append(name,actions);box.append(row);});document.getElementById('currentRoleName').textContent=db.profiles.find(x=>x.id===db.active)?.name||'玩家A';}
+document.getElementById('roleBtn').addEventListener('click',function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  renderRoles();
+  openModal('roleModal');
+});
 function resetProfileUI(){document.querySelectorAll('#scorePage input').forEach(x=>{if(x.type==='checkbox')x.checked=x.defaultChecked;else x.value=x.defaultValue;});document.querySelectorAll('#scorePage select').forEach(x=>{const opt=[...x.options].findIndex(o=>o.defaultSelected);x.selectedIndex=opt>=0?opt:0;});applyBonusState(null);}
 function switchRole(id){saveActive();db.active=id;saveDB();const p=db.profiles.find(x=>x.id===id);if(p?.state)applyState(p.state);else{resetProfileUI();calc();saveActive();}document.getElementById('currentRoleName').textContent=p.name;renderRoles();if(document.getElementById('helpPage').style.display!=='none')helpRender();}
 function renameRole(id){const p=db.profiles.find(x=>x.id===id);if(!p)return;const n=prompt('請輸入角色名稱',p.name);if(n&&n.trim()){p.name=n.trim();saveDB();renderRoles();}}
@@ -859,4 +850,59 @@ document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',(
 document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks=clampHelpClicks(e.target.value);e.target.value=helpDB.clicks;helpSyncAll();});
 ['helpRose','helpDisc','helpKillDay'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{helpDB[id==='helpRose'?'rose':id==='helpDisc'?'disc':'killDay']=e.target.checked;helpSyncAll();}));
 (function init(){helpDB.selectedRoleId=db.active||helpDB.selectedRoleId||db.profiles[0]?.id;saveDB();renderRoles();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}document.getElementById('currentRoleName').textContent=p?.name||'玩家A';})();
-</script></body></html>
+</script>
+<style id="roleButtonRootFix">
+/* 角色按鈕根治：頂部三區固定分欄，避免導航區或其他元素覆蓋觸控區 */
+.topbar{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:10px!important;
+  position:sticky!important;
+  z-index:1000!important;
+}
+.topbar .brand{min-width:0!important;flex:0 0 auto!important}
+.topbar .mainPageNav{
+  min-width:0!important;
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:4px!important;
+  overflow:hidden!important;
+}
+.topbar .mainPageTab{
+  flex:0 1 auto!important;
+  min-width:0!important;
+  position:relative!important;
+  z-index:1001!important;
+}
+.topbar .roleBtn{
+  grid-column:3!important;
+  grid-row:1!important;
+  position:relative!important;
+  z-index:1002!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 auto!important;
+  min-width:78px!important;
+  max-width:none!important;
+  margin:0!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  cursor:pointer!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+@media(max-width:560px){
+  .topbar{grid-template-columns:auto minmax(0,1fr) auto!important;gap:7px!important}
+  .topbar .mainPageNav{justify-content:center!important;gap:3px!important}
+  .topbar .mainPageTab{padding:7px 7px!important;font-size:11px!important;min-height:36px!important}
+  .topbar .roleBtn{min-width:76px!important;padding:8px 9px!important;font-size:14px!important}
+}
+@media(max-width:390px){
+  .topbar .roleBtn{min-width:72px!important;padding-left:7px!important;padding-right:7px!important}
+  .topbar .mainPageTab{padding-left:6px!important;padding-right:6px!important}
+}
+</style>
+</body></html>
