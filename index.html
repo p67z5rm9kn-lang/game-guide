@@ -601,7 +601,7 @@ function closeModal(id){
 }
 
 document.getElementById('bonusBtn').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openModal('bonusModal');});
-document.getElementById('roleBtn').addEventListener('click',()=>{renderRoles();openModal('roleModal');});
+document.getElementById('roleBtn').addEventListener('click',()=>{openModal('roleModal');try{renderRoles();}catch(err){console.error('renderRoles error:',err);}});
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closeModal(b.dataset.close);}));
 document.querySelectorAll('.modalOverlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
 
