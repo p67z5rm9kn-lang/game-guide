@@ -907,7 +907,7 @@ document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks
 ['helpRose','helpDisc'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{helpDB[id==='helpRose'?'rose':'disc']=e.target.checked;helpSyncAll();}));
 
 
-// ==================== 新手導覽 V1｜V10 智慧置中版 ====================
+// ==================== 新手導覽 V1｜V11 聯盟幫助＋聯盟對決智慧置中版 ====================
 const GUIDE_VERSION='v1';
 const GUIDE_KEYS={score:'lastz_guide_score_'+GUIDE_VERSION,help:'lastz_guide_help_'+GUIDE_VERSION};
 const GUIDE_DATA={
@@ -916,11 +916,11 @@ const GUIDE_DATA={
    steps:[
     {title:'👤 角色設定',text:'先選擇或建立你要使用的角色。角色會保存自己的計算資料，之後再次使用時可以直接載入。',target:'#roleBtn',open:'roleModal'},
     {title:'⭐ 積分加成',text:'設定你目前擁有的積分相關加成，後面的積分計算會依照這些設定進行。',target:'#bonusBtn',open:'bonusModal'},
-    {title:'🎯 設定目標',text:'設定這次希望達成的目標積分，系統會以這個數值計算還需要完成多少。',target:'#target'},
-    {title:'📊 目前進度',text:'輸入你目前已經取得的積分，系統會計算距離目標還差多少。',target:'#current'},
-    {title:'📅 選擇星期',text:'選擇目前要計算的聯盟對決星期。不同星期的積分項目不同。',target:'.dayTabs'},
+    {title:'🎯 設定目標',text:'設定這次希望達成的目標積分，系統會以這個數值計算還需要完成多少。',target:'#target',scroll:true},
+    {title:'📊 目前進度',text:'輸入你目前已經取得的積分，系統會計算距離目標還差多少。',target:'#current',scroll:true},
+    {title:'📅 選擇星期',text:'選擇目前要計算的聯盟對決星期。不同星期的積分項目不同。',target:'.dayTabs',scroll:true},
     {title:'📦 預估投入資源',text:'在這裡填入你預計投入的資源、次數或時間，系統會換算成預估可取得的積分。',target:'.dayPanel[style*="display: block"] .body'},
-    {title:'✅ 查看結果',text:'最後查看預計最終積分，以及各項目還需要投入多少，就可以依照結果安排今天的進度。',target:'#final'}
+    {title:'✅ 查看結果',text:'最後查看預計最終積分，以及各項目還需要投入多少，就可以依照結果安排今天的進度。',target:'#final',scroll:true}
    ]
  },
  help:{
@@ -929,8 +929,8 @@ const GUIDE_DATA={
     {title:'🪖 選擇士兵等級',text:'先到下方角色卡片的「士兵等級」選擇目前要治療的士兵等級。',target:'.helpSelectedRole .helpTierSetting',scroll:true},
     {title:'⏱️ 填入單手幫助時間',text:'在角色卡片中設定單手幫助時間相關資訊，包含聯盟科技、專精與避難招募等資料。',target:'.helpSelectedRole .helpTreatmentTime',scroll:true},
     {title:'⚡ 填入治療速度提高',text:'再填入目前的治療速度提高資訊，系統會把科技、聯盟科技、避難招募與殺敵日效果納入計算。',target:'.helpSelectedRole .helpTreatmentSpeed',scroll:true},
-    {title:'✋ 輸入每次使用的手數',text:'輸入你預計每次要使用幾隻手進行治療。',target:'#helpClicks'},
-    {title:'🌹💿 確認玫瑰花／光碟效果',text:'確認目前是否有玫瑰花或光碟效果，系統會把勾選的效果一起算入單手幫助時間。',target:'.globalChecks'},
+    {title:'✋ 輸入每次使用的手數',text:'輸入你預計每次要使用幾隻手進行治療。',target:'#helpClicks',scroll:true},
+    {title:'🌹💿 確認玫瑰花／光碟效果',text:'確認目前是否有玫瑰花或光碟效果，系統會把勾選的效果一起算入單手幫助時間。',target:'.globalChecks',scroll:true},
     {title:'🧮 查看結果',text:'完成設定後，角色卡片的「每次治療個數」就是目前條件下建議一次治療的士兵數量。',target:'.helpSelectedRole .helpResultRow',scroll:true}
    ]
  }
