@@ -10,6 +10,12 @@ h1{font-size:25px;margin:0 0 8px}.desc{color:#aaa;line-height:1.55;margin-bottom
 .card{background:#1d1d1d;border:1px solid #333;border-radius:14px;padding:15px;margin:12px 0}
 h2{font-size:19px;margin:0 0 12px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.pair:last-child{margin-bottom:0}
+.status-row{display:flex;align-items:end;gap:10px}.status-row>div{flex:1}
+.switch{display:flex;align-items:center;gap:8px;min-height:42px}.switch input{width:46px;height:26px;margin:0;accent-color:#1683ff}.switch span{font-size:14px;color:#bbb}
+.segment{display:flex;gap:8px}.segment button{flex:1;background:#292929;border:1px solid #444;color:#bbb;padding:10px 8px;font-size:15px}.segment button.active{background:#1683ff;color:#fff;border-color:#1683ff}
+.fixed-target{height:42px;display:flex;align-items:center;padding:0 12px;background:#292929;border:1px solid #444;border-radius:9px;box-sizing:border-box;font-size:16px}
+.hidden{display:none!important}
 label{display:block;color:#bbb;font-size:14px;margin-bottom:5px}
 input,select{width:100%;box-sizing:border-box;background:#292929;color:#fff;border:1px solid #444;border-radius:9px;padding:10px;font-size:16px}
 button{font-size:17px;font-weight:700;padding:12px 18px;border:0;border-radius:11px;background:#1683ff;color:#fff}
@@ -19,56 +25,43 @@ button.planning{position:relative;transform:scale(.97);filter:brightness(.88);bo
 button.plan-done{background:#168f55;box-shadow:0 0 0 3px rgba(32,216,121,.14)}
 button.planning::before{content:"";display:inline-block;width:13px;height:13px;margin-right:8px;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;vertical-align:-2px;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.row{display:flex;gap:9px;flex-wrap:wrap}.switch-row{display:flex;align-items:center;gap:10px;min-height:44px}
-.switch-row label:first-child{margin:0;flex:1}
-.switch{position:relative;display:inline-block;width:48px;height:26px;flex:0 0 auto}
-.switch input{opacity:0;width:0;height:0}
-.slider{position:absolute;inset:0;cursor:pointer;background:#555;border:1px solid #777;border-radius:26px;transition:.18s}
-.slider:before{content:"";position:absolute;width:20px;height:20px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.18s}
-.switch input:checked + .slider{background:#b8893b;border-color:#d8b66a}
-.switch input:checked + .slider:before{transform:translateX(22px)}
-.switch-text{min-width:48px;color:#ccc;font-size:14px}
-.result{font-size:17px;line-height:1.65}
+.row{display:flex;gap:9px;flex-wrap:wrap}.result{font-size:17px;line-height:1.65}
 .good{color:#20d879}.warn{color:#ffc44d}.bad{color:#ff5964}
 .big{font-size:23px;font-weight:800}.muted{color:#aaa}
 ul{margin:8px 0;padding-left:22px}
-@media(max-width:520px){.grid{grid-template-columns:1fr}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.pair{grid-template-columns:1fr 1fr}.status-row{gap:8px}.segment{gap:6px}}
 </style>
 </head>
 <body>
 <h1>雷達規劃器</h1>
-<div class="desc">Production UI 試作 v1｜本版先試作「勞拉今日狀態」改為與每日任務相同的開關切換；核心計算邏輯不變。</div>
+<div class="desc">Production v5｜以目前玩家狀態計算理想準備狀態、預計可達與操作順序。規劃只產生建議，不會直接修改玩家狀態。</div>
 
 <div class="card">
 <h2>① 目前狀態</h2>
-<div class="grid">
-<div><label>庫存 MAX</label><input id="maxInventory" type="number" min="1" value="30"></div>
+<div class="pair">
 <div><label>庫存</label><input id="inventory" type="number" min="0" value="22"></div>
+<div><label>庫存上限</label><input id="maxInventory" type="number" min="1" value="30"></div>
+</div>
+<div class="pair">
+<div><label>場上已完成</label><input id="completed" type="number" min="0" value="8"></div>
 <div><label>場上雷達總數</label><input id="field" type="number" min="0" value="11"></div>
-<div><label>其中已完成</label><input id="completed" type="number" min="0" value="8"></div>
+</div>
+<div class="pair">
 <div><label>勞拉星級</label><select id="lauraStar"><option value="0">0 星</option><option value="1">1 星</option><option value="2">2 星</option><option value="3">3 星</option><option value="4" selected>4 星</option><option value="5">5 星</option></select></div>
-<div class="switch-row">
-<label>勞拉今日狀態</label>
-<label class="switch">
-  <input id="lauraUsed" type="checkbox">
-  <span class="slider"></span>
-</label>
-<span id="lauraUsedText" class="switch-text">未使用</span>
+<div><label>勞拉今日狀態</label><div class="switch"><input id="lauraUsed" type="checkbox"><span id="lauraUsedText">未使用</span></div></div>
 </div>
-<div><label>勞拉寶藏</label><input id="treasure" type="number" min="0" max="10" value="0"></div>
-<div><label>時間顯示</label><select id="timeMode"><option value="local">當地時間</option><option value="doom">末日時間（UTC−2）</option></select></div>
-</div>
+<div id="treasureRow"><label>勞拉寶藏</label><input id="treasure" type="number" min="0" max="10" value="0"></div>
 </div>
 
 <div class="card">
 <h2>② 每日任務</h2>
-<div class="grid">
-<div><label>勇士戰令</label><select id="warActive"><option value="false">未啟用</option><option value="true">啟用</option></select></div>
-<div><label>勇士戰令目標</label><input id="warTarget" type="number" min="0" value="20"></div>
-<div><label>勇士戰令目前進度</label><input id="warCurrent" type="number" min="0" value="0"></div>
-<div><label>黎明曙光</label><select id="dawnActive"><option value="false">未啟用</option><option value="true">啟用</option></select></div>
-<div><label>黎明曙光目標</label><input id="dawnTarget" type="number" min="0" value="20"></div>
-<div><label>黎明曙光目前進度</label><input id="dawnCurrent" type="number" min="0" value="0"></div>
+<div class="pair">
+<div><label>勇士戰令</label><div class="switch"><input id="warActive" type="checkbox"><span id="warActiveText">未啟用</span></div></div>
+<div><label>目前進度 / 目標</label><div class="status-row"><input id="warCurrent" type="number" min="0" value="0" placeholder="—"><div class="fixed-target">/ 10</div></div></div>
+</div>
+<div class="pair">
+<div><label>黎明曙光</label><div class="switch"><input id="dawnActive" type="checkbox"><span id="dawnActiveText">未啟用</span></div></div>
+<div><label>目前進度 / 目標</label><div class="status-row"><input id="dawnCurrent" type="number" min="0" value="0" placeholder="—"><div class="fixed-target">/ 20</div></div></div>
 </div>
 </div>
 
@@ -76,8 +69,10 @@ ul{margin:8px 0;padding-left:22px}
 <h2>③ 規劃時間</h2>
 <div class="grid">
 <div><label>計算基準時間</label><input id="baseTime" type="datetime-local"></div>
-<div><label>規劃日期判斷</label><div id="timeInfo" class="muted">尚未規劃</div></div>
+<div><label>時間顯示</label><div class="segment"><button type="button" id="timeLocal" data-mode="local">當地時間</button><button type="button" id="timeDoom" data-mode="doom">末日時間</button></div></div>
 </div>
+<input id="timeMode" type="hidden" value="local">
+<div id="timeInfo" class="muted" style="margin-top:10px">尚未規劃</div>
 <div class="row" style="margin-top:12px">
 <button id="now">使用現在時間</button>
 <button id="plan">開始規劃</button>
@@ -96,11 +91,11 @@ function makeState(){
  return {
   field:+$("field").value, completed:+$("completed").value,
   inventory:+$("inventory").value, maxInventory:+$("maxInventory").value,
-  lauraStar:+$("lauraStar").value, lauraUsed:$("lauraUsed").value==="true",
+  lauraStar:+$("lauraStar").value, lauraUsed:$("lauraUsed").checked,
   treasure:Math.min(10,Math.max(0,+$("treasure").value)),
   tasks:{
-   warriors:{active:$("warActive").value==="true",target:+$("warTarget").value,current:+$("warCurrent").value},
-   dawn:{active:$("dawnActive").value==="true",target:+$("dawnTarget").value,current:+$("dawnCurrent").value}
+   warriors:{active:$("warActive").checked,target:10,current:+$("warCurrent").value},
+   dawn:{active:$("dawnActive").checked,target:20,current:+$("dawnCurrent").value}
   }
  };
 }
@@ -159,7 +154,7 @@ function laura(s){
 }
 function validate(s){
  const e=[];
- if(s.maxInventory<=0)e.push("庫存 MAX 必須大於 0");
+ if(s.maxInventory<=0)e.push("庫存上限必須大於 0");
  if(s.inventory<0)e.push("庫存不可小於 0");
  if(s.field<0)e.push("場上雷達總數不可小於 0");
  if(s.completed<0)e.push("已完成數不可小於 0");
@@ -194,7 +189,7 @@ function setNow(){
  const d=new Date(), pad=n=>String(n).padStart(2,"0");
  $("baseTime").value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-const planInputs=["maxInventory","inventory","field","completed","lauraStar","treasure","timeMode","warActive","warTarget","warCurrent","dawnActive","dawnTarget","dawnCurrent","baseTime"];
+const planInputs=["maxInventory","inventory","field","completed","lauraStar","lauraUsed","treasure","timeMode","warActive","warCurrent","dawnActive","dawnCurrent","baseTime"];
 function markPlanDirty(){
   const btn=$("plan");
   if(btn.classList.contains("planning")) return;
@@ -206,8 +201,30 @@ for(const id of planInputs){
   el.addEventListener("input",markPlanDirty);
   el.addEventListener("change",markPlanDirty);
 }
+function syncLauraUI(){
+  const is5=$("lauraStar").value==="5";
+  $("treasureRow").classList.toggle("hidden",!is5);
+  $("treasure").disabled=!is5;
+  $("lauraUsedText").textContent=$("lauraUsed").checked?"已使用":"未使用";
+}
+function syncTaskUI(id,textId,currentId){
+  const active=$(id).checked;
+  $(textId).textContent=active?"已啟用":"未啟用";
+  $(currentId).disabled=!active;
+  if(active && $(currentId).value==="")$(currentId).value="0";
+}
+function syncTimeUI(){
+  const mode=$("timeMode").value;
+  $("timeLocal").classList.toggle("active",mode==="local");
+  $("timeDoom").classList.toggle("active",mode==="doom");
+}
+$("lauraStar").addEventListener("change",()=>{syncLauraUI();markPlanDirty();});
+$("lauraUsed").addEventListener("change",()=>{syncLauraUI();markPlanDirty();});
+$("warActive").addEventListener("change",()=>{syncTaskUI("warActive","warActiveText","warCurrent");markPlanDirty();});
+$("dawnActive").addEventListener("change",()=>{syncTaskUI("dawnActive","dawnActiveText","dawnCurrent");markPlanDirty();});
+for(const b of [$("timeLocal"),$("timeDoom")]) b.onclick=()=>{$("timeMode").value=b.dataset.mode;syncTimeUI();markPlanDirty();};
 $("now").onclick=()=>{setNow();markPlanDirty();};
-$("timeMode").onchange=()=>{$("timeInfo").textContent="顯示："+($("timeMode").value==="doom"?"末日時間（UTC−2）":"當地時間");markPlanDirty();};
+$("timeMode").onchange=()=>{syncTimeUI();$("timeInfo").textContent="顯示："+($("timeMode").value==="doom"?"末日時間（UTC−2）":"當地時間");markPlanDirty();};
 $("plan").onclick=()=>{
  const planBtn=$("plan");
  planBtn.disabled=true;
@@ -232,7 +249,7 @@ $("plan").onclick=()=>{
  if(mode==="衝分日"){
   const lauraAmount={0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar];
   const estimate=s.field+s.inventory+24+lauraAmount;
-  html+=`<div class="card" style="margin-top:14px"><div class="big">🏆 本次衝分日預計可收割：${estimate} 個</div><div class="muted">基準：目前場上＋目前庫存＋本次衝分日系統 +24＋Laura ${lauraAmount}<br>不預設盟友瞬間幫助；自動補回不視為新增資源。</div></div>`;
+  html+=`<div class="card" style="margin-top:14px"><div class="big">🏆 本次衝分日預計可收割：${estimate} 個</div><div class="muted">基準：目前場上＋目前庫存＋本次衝分日系統 +24＋勞拉 ${lauraAmount}<br>不預設盟友瞬間幫助；自動補回不視為新增資源。</div></div>`;
   html+=`<div class="result"><b>衝分日操作方向</b><ul><li>完成可完成的未完成雷達</li><li>收割已完成雷達</li><li>不需要為下一個衝分日保留資源</li></ul></div>`;
  }else{
   html+=`<div class="result"><b>操作順序建議</b><ol>`;
@@ -243,7 +260,7 @@ $("plan").onclick=()=>{
   // it adds +3 field and sends the rest to inventory.
   if(!planState.lauraUsed && planState.lauraStar>=0 && planState.field<11){
     planState=laura(planState);
-    html+=`<li><b>使用 Laura</b>：${({0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar])} 個。使用後預計場上 ${planState.field}、庫存 ${planState.inventory}。</li>`;
+    html+=`<li><b>使用勞拉</b>：${({0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar])} 個。使用後預計場上 ${planState.field}、庫存 ${planState.inventory}。</li>`;
     step++;
   }
 
@@ -278,12 +295,7 @@ $("plan").onclick=()=>{
  planBtn.classList.add("plan-done");
  planBtn.textContent="✓ 已完成規劃";
 };
-function syncLauraUsedText(){
-  $("lauraUsedText").textContent = $("lauraUsed").checked ? "已使用" : "未使用";
-}
-$("lauraUsed").onchange=syncLauraUsedText;
-syncLauraUsedText();
-setNow();$("timeMode").onchange();
+setNow();syncLauraUI();syncTaskUI("warActive","warActiveText","warCurrent");syncTaskUI("dawnActive","dawnActiveText","dawnCurrent");syncTimeUI();$("timeMode").onchange();
 </script>
 </body>
 </html>
