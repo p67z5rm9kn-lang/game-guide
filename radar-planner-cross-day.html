@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>雷達跨日規劃器｜Core Test v2 Fixed</title>
+<style>
+body{margin:0;background:#111;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:16px}
+h1{font-size:23px;margin:0 0 6px}.desc{color:#aaa;line-height:1.55;margin-bottom:14px}.card{background:#1d1d1d;border:1px solid #333;border-radius:14px;padding:14px;margin:12px 0}
+button{font-size:16px;font-weight:700;padding:11px 16px;border:0;border-radius:10px;background:#1683ff;color:#fff;margin:4px}.row{display:flex;gap:8px;flex-wrap:wrap}
+.pass{color:#20d879}.fail{color:#ff5964}.warn{color:#ffc44d}.muted{color:#aaa}.test{border-top:1px solid #333;padding:10px 0}.test:first-child{border-top:0}.name{font-weight:700}.detail{font-size:13px;color:#aaa;margin-top:4px;white-space:pre-wrap}
+.summary{font-size:20px;font-weight:800;margin-top:8px}.small{font-size:13px;color:#aaa}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+</style>
+</head>
+<body>
+<h1>雷達跨日規劃器｜Core Test v1</h1>
+<div class="desc">只測「跨日 2–3 天完整規劃」核心，不修改 Production UI。重點：下一個衝分點、未來每日任務 10/20、系統 +8、每日重置、勞拉、收割/自動補回，以及最終衝分前狀態。</div>
+<div class="card">
+ <div class="row"><button id="runAll">全部執行</button><button id="clear" class="secondary">清除</button></div>
+ <div id="summary" class="summary">尚未執行</div>
+ <div class="small">基準：不預設盟友瞬間幫助；不預測未完成雷達提前消失。未來每個完整遊戲日固定視為兩個每日任務都啟用，目標 10 / 20，因此每日最低完成 20 個雷達。</div>
+</div>
+<div id="results" class="card"></div>
+<script>
+const $=id=>document.getElementById(id);
+const DAY=86400000, HOUR=3600000;
+function clone(x){return JSON.parse(JSON.stringify(x));}
+function iso(s){return new Date(s).getTime();}
+function pad(n){return String(n).padStart(2,'0');}
+function taiwanParts(ms){
+ const d=new Date(ms+8*HOUR);
+ return {y:d.getUTCFullYear(),m:d.getUTCMonth()+1,d:d.getUTCDate(),h:d.getUTCHours(),mi:d.getUTCMinutes()};
+}
+function gameDayKey(ms){
+ // Taiwan 10:00 is game-day rollover. Equivalent to UTC date after +8h-10h = UTC-2.
+ const d=new Date(ms-2*HOUR);
+ return d.toISOString().slice(0,10);
+}
+function weekday(ms){return new Date(ms+8*HOUR).getUTCDay();}
+function fmt(ms){const p=taiwanParts(ms);const w=['日','一','二','三','四','五','六'][weekday(ms)];return `${p.y}/${pad(p.m)}/${pad(p.d)}（${w}） ${pad(p.h)}:${pad(p.mi)}`;}
+function nextScoring(ms){
+ const p=taiwanParts(ms), wd=weekday(ms);
+ // Monday/Friday before 10:00 -> same-day 10:00.
+ if((wd===1||wd===5)&&p.h<10)return ms + ((10-p.h)*HOUR-p.mi*60000);
+ for(let i=0;i<8;i++){
+  const x=ms+i*DAY; const xwd=weekday(x), xp=taiwanParts(x);
+  if((xwd===1||xwd===5) && (i>0 || p.h>=10)){
+   return x - (xp.h*HOUR+xp.mi*60000) + 10*HOUR;
+  }
+ }
+ throw new Error('找不到下一個衝分點');
+}
+function mode(ms){const p=taiwanParts(ms),wd=weekday(ms);if((wd===1||wd===5)&&p.h>=10)return '衝分日';if((wd===1||wd===5)&&p.h<10)return '衝分日前準備';return '準備期';}
+function newState(o={}){
+ const s=Object.assign({field:11,completed:8,inventory:22,maxInventory:30,lauraStar:4,lauraUsed:false,treasure:0,tasks:{warriors:{active:true,target:10,current:0},dawn:{active:true,target:20,current:0}}},o);
+ s.unfinished=s.field-s.completed;return s;
+}
+function normalize(s){s=clone(s);s.unfinished=s.field-s.completed;return s;}
+function system8(s){s=clone(s);const fieldAdd=Math.min(8,Math.max(0,8-s.field));s.field+=fieldAdd;const rem=8-fieldAdd;s.inventory+=Math.min(rem,Math.max(0,s.maxInventory-s.inventory));s.unfinished=s.field-s.completed;return s;}
+function laura(s){s=clone(s);if(s.lauraUsed)return s;const amount={0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar];if(s.field<8){const add=Math.min(8-s.field,amount);s.field+=add;s.inventory+=amount-add;}else{s.field+=3;s.inventory+=amount-3;}s.lauraUsed=true;s.unfinished=s.field-s.completed;return s;}
+function complete(s,n=1){s=clone(s);let k=0;for(;k<n&&s.unfinished>0;k++){s.unfinished--;s.completed++;for(const key of ['warriors','dawn']){const t=s.tasks[key];if(t&&t.active)t.current=Math.min(t.target,t.current+1);}}return s;}
+function harvest(s,n=1){s=clone(s);let k=0;for(;k<n&&s.completed>0;k++){s.completed--;s.field--;if(s.lauraStar===5&&s.treasure<10)s.treasure++;if(s.field<8&&s.inventory>0){const add=Math.min(8-s.field,s.inventory);s.field+=add;s.inventory-=add;}}s.unfinished=s.field-s.completed;return s;}
+function resetDay(s){s=clone(s);s.lauraUsed=false;s.treasure=0;s.tasks.warriors={active:true,target:10,current:0};s.tasks.dawn={active:true,target:20,current:0};return s;}
+function taskRemaining(s){return Math.max(0,20-Math.min(s.tasks.warriors.current,10),20-Math.min(s.tasks.dawn.current,20));}
+function totalTaskProgress(s){return Math.min(s.tasks.warriors.current,10)>=10&&Math.min(s.tasks.dawn.current,20)>=20;}
+function eventTimes(start,end){
+ const out=[];
+ // System free radar: Taiwan 10:00, 18:00, 02:00. Include events strictly after start and <= end.
+ const first=new Date(start-2*HOUR); // UTC-2 clock
+ const base=Date.UTC(first.getUTCFullYear(),first.getUTCMonth(),first.getUTCDate(),0,0,0);
+ for(let i=-1;i<8;i++)for(const h of [0,8,16]){const t=base+i*DAY+h*HOUR;if(t>start&&t<=end)out.push({t,kind:'system8'});}
+ out.sort((a,b)=>a.t-b.t);return out;
+}
+function dayEnd(ms){
+ const p=taiwanParts(ms);
+ return Date.UTC(p.y,p.m-1,p.d,2,0,0); // Taiwan next 10:00 absolute (UTC 02:00)
+}
+function planCrossDay(start,state){
+ start=iso(start);let score=nextScoring(start);let s=normalize(state);const actions=[];const daily=[];let cursor=start;
+ // We intentionally plan to the scoring point, but the scoring point itself is not a future task day.
+ const days=[];let k=0;while(gameDayKey(cursor)!==gameDayKey(score)&&k<8){days.push(gameDayKey(cursor));const p=taiwanParts(cursor);const rollover=Date.UTC(p.y,p.m-1,p.d,2,0,0)-8*HOUR;if(cursor<rollover)days.push(gameDayKey(cursor-1));cursor=Math.min(score,rollover+DAY);k++;}
+ // Simpler and safer: walk event timeline plus day resets. Start with current day requirement; every later full game day gets 20.
+ let currentDay=gameDayKey(start), nextReset=dayEnd(start);
+ let eventList=eventTimes(start,score);
+ let idx=0, last=start;
+ function ensureDaily20(){
+   let guard=0;
+   while(!totalTaskProgress(s)&&guard++<30){
+     if(s.unfinished>0){const need=Math.max(0,20-Math.max(s.tasks.warriors.current,s.tasks.dawn.current));const before=s.unfinished;s=complete(s,Math.min(need,s.unfinished));actions.push({t:last,kind:'complete',n:before-s.unfinished,day:currentDay});continue;}
+     // No unfinished: harvest completed to trigger auto-refill. Harvest enough to drop field below 8, then auto-refill.
+     if(s.completed>0){const n=Math.min(s.completed,Math.max(1,s.field-7));const before=s;const oldInv=s.inventory;s=harvest(s,n);actions.push({t:last,kind:'harvest',n,day:currentDay,inventoryUsed:oldInv-s.inventory});continue;}
+     // No completed and no unfinished means no field. Use inventory to refill only via harvest is impossible; system/Laura must provide field resources.
+     break;
+   }
+   return totalTaskProgress(s);
+ }
+ // Current day: respect current progress; planner assumes current-day actual task state.
+ ensureDaily20();
+ // Process known future events. At each future game-day rollover reset tasks/Laura/treasure, then target 20.
+ while(idx<eventList.length){
+   const e=eventList[idx++];
+   // apply any rollover(s) before event
+   while(nextReset<=e.t && nextReset<score){
+     s=resetDay(s);currentDay=gameDayKey(nextReset);actions.push({t:nextReset,kind:'reset',day:currentDay});last=nextReset;
+     // Use Laura once per future day when it can support task throughput.
+     s=laura(s);actions.push({t:nextReset,kind:'laura',day:currentDay});
+     ensureDaily20();
+     nextReset+=DAY;
+   }
+   if(e.t>=score)break;
+   last=e.t;
+   if(e.kind==='system8'){s=system8(s);actions.push({t:e.t,kind:'system8',day:currentDay});ensureDaily20();}
+ }
+ // Final rollover at score: no future task requirement. Treat this as scoring prep checkpoint.
+ // If current/future task requirement is not met, mark infeasible.
+ const taskOK=totalTaskProgress(s);
+ // For scoring prep, convert completed stock into target field 11 while keeping inventory as high as possible.
+ // Do not invent resources; harvest only when it is necessary to restore field <=11.
+ let guard=0;
+ while(s.field>11 && s.completed>0 && guard++<50){const n=Math.min(s.completed,s.field-11);s=harvest(s,n);actions.push({t:score,kind:'harvest-final',n,day:currentDay});}
+ return {start,score,state:s,actions,daily,taskOK};
+}
+
+// A compact reference simulator used by tests. It validates the core planner contract rather than UI rendering.
+function actionKinds(plan){return plan.actions.map(x=>x.kind);}
+function countKind(plan,k){return plan.actions.filter(x=>x.kind===k).length;}
+function countActionN(plan,k){return plan.actions.filter(x=>x.kind===k).reduce((a,x)=>a+(x.n||0),0);}
+function expectedScoreLabel(ms){return fmt(ms);}
+
+const tests=[];
+function test(name,fn){tests.push({name,fn});}
+function assert(cond,msg){if(!cond)throw new Error(msg);}
+function eq(a,b,msg){if(a!==b)throw new Error(`${msg}｜實際 ${a} ≠ 預期 ${b}`);}
+
+// 1–5：衝分點判斷
+const baseSat='2026-09-26T14:00+08:00';
+test('01｜星期六應規劃到下週一 10:00',()=>{const p=planCrossDay(baseSat,newState());eq(fmt(p.score),'2026/09/28（一） 10:00','下一個衝分點');eq(mode(iso(baseSat)),'準備期','規劃模式');});
+test('02｜星期日仍規劃到下週一 10:00',()=>{const p=planCrossDay('2026-09-27T09:00+08:00',newState());eq(fmt(p.score),'2026/09/28（一） 10:00','下一個衝分點');});
+test('03｜星期二應規劃到本週五 10:00',()=>{const p=planCrossDay('2026-09-29T14:00+08:00',newState());eq(fmt(p.score),'2026/10/02（五） 10:00','下一個衝分點');});
+test('04｜星期四仍規劃到隔日星期五 10:00',()=>{const p=planCrossDay('2026-10-01T23:00+08:00',newState());eq(fmt(p.score),'2026/10/02（五） 10:00','下一個衝分點');});
+test('05｜星期一 09:00 應準備同日 10:00',()=>{const p=planCrossDay('2026-09-28T09:00+08:00',newState());eq(fmt(p.score),'2026/09/28（一） 10:00','下一個衝分點');});
+
+// 6–10：未來每日任務硬約束
+function futurePlan(){return planCrossDay('2026-09-26T10:01+08:00',newState({tasks:{warriors:{active:true,target:10,current:0},dawn:{active:true,target:20,current:0}}}));}
+test('06｜未來每日任務固定視為啟用',()=>{const p=futurePlan();assert(p.taskOK,'規劃應滿足未來每日雙任務');});
+test('07｜勇士戰令目標固定 10',()=>{const s=newState();eq(s.tasks.warriors.target,10,'勇士戰令目標');});
+test('08｜黎明曙光目標固定 20',()=>{const s=newState();eq(s.tasks.dawn.target,20,'黎明曙光目標');});
+test('09｜一個完成事件同時增加兩個任務',()=>{let s=newState({tasks:{warriors:{active:true,target:10,current:0},dawn:{active:true,target:20,current:0}}});s=complete(s,1);eq(s.tasks.warriors.current,1,'勇士戰令進度');eq(s.tasks.dawn.current,1,'黎明曙光進度');});
+test('10｜未來一天等價至少 20 次完成',()=>{let s=newState({field:20,completed:0,tasks:{warriors:{active:true,target:10,current:0},dawn:{active:true,target:20,current:0}}});s=complete(s,20);assert(totalTaskProgress(s),'20 次完成後兩個任務都應達標');});
+
+// 11–15：每日重置 / 勞拉 / 寶藏 / 系統事件
+function simpleState(){return newState({field:8,completed:0,inventory:10,lauraStar:5,lauraUsed:true,treasure:7,tasks:{warriors:{active:true,target:10,current:10},dawn:{active:true,target:20,current:20}}});}
+test('11｜10:00 新一天任務重置為 0/10、0/20',()=>{const s=resetDay(simpleState());eq(s.tasks.warriors.current,0,'勇士戰令');eq(s.tasks.dawn.current,0,'黎明曙光');eq(s.tasks.warriors.target,10,'勇士戰令目標');eq(s.tasks.dawn.target,20,'黎明曙光目標');});
+test('12｜10:00 勞拉使用狀態重置為未使用',()=>{const s=resetDay(simpleState());assert(!s.lauraUsed,'勞拉應可在新的一天再次使用');});
+test('13｜10:00 勞拉寶箱重置為 0',()=>{const s=resetDay(simpleState());eq(s.treasure,0,'勞拉寶箱');});
+test('14｜規劃序列包含跨日重置',()=>{const p=futurePlan();assert(countKind(p,'reset')>=1,'跨 10:00 必須有 reset 事件');});
+test('15｜規劃序列包含已知系統 +8 事件',()=>{const p=futurePlan();assert(countKind(p,'system8')>=1,'2–3 天規劃必須模擬系統 +8');});
+
+// 16–20：完成 / 收割 / 自動補回 / 長區間
+function richState(){return newState({field:11,completed:8,inventory:22,maxInventory:30,lauraStar:4,lauraUsed:false,tasks:{warriors:{active:true,target:10,current:0},dawn:{active:true,target:20,current:0}}});}
+test('16｜跨日規劃不能只有「等待下一次 +8」',()=>{const p=planCrossDay(baseSat,richState());assert(countKind(p,'reset')>=1,'需要跨日 reset');assert(countKind(p,'system8')>=2,'需要模擬多次系統 +8');assert(countKind(p,'complete')>=1,'需要完成操作');});
+test('17｜規劃序列必須區分完成與收割',()=>{const p=planCrossDay(baseSat,richState());assert(countKind(p,'complete')>=1,'缺少 complete');assert(countKind(p,'harvest')>=1,'缺少 harvest');});
+test('18｜勞拉是每日可用來源，跨日後可再次安排',()=>{const p=planCrossDay(baseSat,richState());assert(countKind(p,'laura')>=1,'至少應安排一次勞拉');});
+test('19｜不預設盟友瞬間幫助',()=>{const p=planCrossDay(baseSat,richState());assert(!actionKinds(p).includes('allyHelp'),'基準規劃不應出現盟友瞬間幫助');});
+test('20｜規劃結果包含完整行動序列，而非單一下一事件',()=>{const p=planCrossDay(baseSat,richState());assert(p.actions.length>=8,'完整跨日規劃應包含多個時間節點與操作');});
+
+// 21–24：狀態守恆與衝分前準備
+function invariant(s){return s.field>=0&&s.completed>=0&&s.completed<=s.field&&s.inventory>=0;}
+test('21｜模擬過程不應產生非法雷達狀態',()=>{const p=planCrossDay(baseSat,richState());assert(invariant(p.state),'最終 field/completed/inventory 非法');});
+test('22｜5 星寶箱不應超過 10',()=>{let s=newState({lauraStar:5,treasure:10,field:8,completed:8,inventory:10});s=harvest(s,5);eq(s.treasure,10,'寶箱上限');});
+test('23｜收割觸發場上低於 8 時的自動補回',()=>{let s=newState({field:8,completed:8,inventory:5});s=harvest(s,1);eq(s.field,8,'自動補回後場上應回到 8');eq(s.inventory,4,'自動補回應消耗 1 庫存');});
+test('24｜跨日規劃終點是衝分點，而不是下一個 +8',()=>{const p=planCrossDay('2026-09-29T14:00+08:00',richState());eq(fmt(p.score),'2026/10/02（五） 10:00','終點');assert(p.score-iso('2026-09-29T14:00+08:00')>48*HOUR,'應跨越超過 2 天，不能只規劃 8 小時');});
+
+function runOne(i){const t=tests[i];const box=document.createElement('div');box.className='test';try{t.fn();box.innerHTML=`<div class="name pass">✅ ${t.name}</div>`;return {ok:true,box};}catch(e){box.innerHTML=`<div class="name fail">❌ ${t.name}</div><div class="detail">${String(e.message||e)}</div>`;return {ok:false,box};}}
+function runAll(){const frag=document.createDocumentFragment();let pass=0;for(let i=0;i<tests.length;i++){const r=runOne(i);if(r.ok)pass++;frag.appendChild(r.box);}$("results").innerHTML='';$("results").appendChild(frag);$("summary").innerHTML=pass===tests.length?`<span class="pass">全部通過：${pass}/${tests.length}</span>`:`<span class="fail">${pass}/${tests.length} 通過，${tests.length-pass} 失敗</span>`;}
+$("runAll").onclick=runAll;
+$("clear").onclick=()=>{$("results").innerHTML='';$("summary").textContent='尚未執行';};
+</script>
+</body>
+</html>
