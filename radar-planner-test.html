@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>雷達規劃器測試 - 衝分日判定</title>
+
+<style>
+
+body {
+    margin: 0;
+    padding: 20px;
+
+    background: #111827;
+    color: #f9fafb;
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Noto Sans TC",
+        "PingFang TC",
+        sans-serif;
+
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+h1 {
+    font-size: 23px;
+}
+
+.subtitle {
+    color: #cbd5e1;
+    margin-bottom: 20px;
+}
+
+.test {
+    background: #1f2937;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 18px;
+}
+
+.test-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.state {
+    background: #111827;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 14px;
+}
+
+button {
+    width: 100%;
+    margin-top: 12px;
+
+    padding: 14px;
+
+    border: 0;
+    border-radius: 12px;
+
+    background: #d98224;
+    color: white;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.result {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #111827;
+}
+
+.pass {
+    color: #4ade80;
+    font-weight: 700;
+}
+
+.fail {
+    color: #f87171;
+    font-weight: 700;
+}
+
+.summary {
+    background: #111827;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 24px;
+    margin-bottom: 30px;
+}
+
+.highlight {
+    color: #fbbf24;
+    font-weight: 700;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="container">
+
+<h1>雷達規劃器測試</h1>
+
+<div class="subtitle">
+第一階段：下一個衝分日判定
+</div>
+
+<div id="tests"></div>
+
+<div class="summary" id="summary">
+    尚未執行測試
+</div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   基本設定
+   =========================================================
+
+   JavaScript Date 的月份是 0～11。
+
+   這裡所有測試輸入都是：
+   「台灣時間」
+
+   台灣時間：
+   UTC+8
+
+   遊戲時間：
+   台灣時間 - 10 小時
+   ========================================================= */
+
+
+/* =========================================================
+   建立台灣時間
+   ========================================================= */
+
+function taiwanDate(
+    year,
+    month,
+    day,
+    hour,
+    minute = 0
+) {
+
+    /*
+       使用 UTC 儲存，
+       避免手機所在地區影響測試。
+
+       台灣 UTC+8
+    */
+
+    return new Date(
+        Date.UTC(
+            year,
+            month - 1,
+            day,
+            hour - 8,
+            minute,
+            0
+        )
+    );
+}
+
+
+/* =========================================================
+   星期
+   ========================================================= */
+
+const weekdayNames = [
+    "日",
+    "一",
+    "二",
+    "三",
+    "四",
+    "五",
+    "六"
+];
+
+
+/* =========================================================
+   格式化台灣時間
+   ========================================================= */
+
+function formatTaiwanTime(date) {
+
+    const utc =
+        date.getTime();
+
+    const taiwan =
+        new Date(
+            utc + 8 * 60 * 60 * 1000
+        );
+
+    const year =
+        taiwan.getUTCFullYear();
+
+    const month =
+        String(
+            taiwan.getUTCMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            taiwan.getUTCDate()
+        ).padStart(2, "0");
+
+    const hour =
+        String(
+            taiwan.getUTCHours()
+        ).padStart(2, "0");
+
+    const minute =
+        String(
+            taiwan.getUTCMinutes()
+        ).padStart(2, "0");
+
+    const weekday =
+        weekdayNames[
+            taiwan.getUTCDay()
+        ];
+
+    return `${year}/${month}/${day}（${weekday}）${hour}:${minute}`;
+}
+
+
+/* =========================================================
+   台灣時間 → 遊戲時間
+   ========================================================= */
+
+function toGameTime(taiwanDateValue) {
+
+    /*
+       遊戲時間 = 台灣時間 - 10 小時
+    */
+
+    return new Date(
+        taiwanDateValue.getTime()
+        -
+        10 * 60 * 60 * 1000
+    );
+}
+
+
+/* =========================================================
+   格式化遊戲時間
+   ========================================================= */
+
+function formatGameTime(date) {
+
+    const year =
+        date.getUTCFullYear();
+
+    const month =
+        String(
+            date.getUTCMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            date.getUTCDate()
+        ).padStart(2, "0");
+
+    const hour =
+        String(
+            date.getUTCHours()
+        ).padStart(2, "0");
+
+    const minute =
+        String(
+            date.getUTCMinutes()
+        ).padStart(2, "0");
+
+    const weekday =
+        weekdayNames[
+            date.getUTCDay()
+        ];
+
+    return `${year}/${month}/${day}（${weekday}）${hour}:${minute}`;
+}
+
+
+/* =========================================================
+   取得「下一個衝分日」
+   =========================================================
+
+   規則：
+
+   Monday / Friday：
+
+   < 10:00
+   → 今天 10:00 是衝分日
+
+   >= 10:00
+   → 今天就是衝分日
+
+   Tuesday / Wednesday / Thursday
+   → 下一個 Friday 10:00
+
+   Saturday / Sunday
+   → 下一個 Monday 10:00
+
+
+   注意：
+
+   這裡的判定完全以「台灣時間」為基準。
+   ========================================================= */
+
+function getScoringDayInfo(taiwanDateValue) {
+
+    const date =
+        new Date(
+            taiwanDateValue.getTime()
+        );
+
+
+    /*
+       取得台灣日期與時間
+    */
+
+    const taiwan =
+        new Date(
+            date.getTime()
+            +
+            8 * 60 * 60 * 1000
+        );
+
+
+    const weekday =
+        taiwan.getUTCDay();
+
+    const hour =
+        taiwan.getUTCHours();
+
+    const minute =
+        taiwan.getUTCMinutes();
+
+
+    /*
+       是否已經過今天 10:00
+    */
+
+    const after10 =
+        hour > 10 ||
+        (
+            hour === 10 &&
+            minute >= 0
+        );
+
+
+    let target;
+
+
+    /*
+       Monday
+    */
+
+    if (weekday === 1) {
+
+        target =
+            new Date(
+                Date.UTC(
+                    taiwan.getUTCFullYear(),
+                    taiwan.getUTCMonth(),
+                    taiwan.getUTCDate(),
+                    2,
+                    0,
+                    0
+                )
+            );
+
+        /*
+           上面的 UTC 02:00
+           對應台灣 10:00
+        */
+
+        if (after10) {
+
+            /*
+               今天已經是衝分日，
+               仍然把「今天」視為目前衝分日。
+            */
+
+            return {
+                mode: "scoring",
+                target
+            };
+        }
+
+
+        return {
+            mode: "prepare",
+            target
+        };
+    }
+
+
+    /*
+       Friday
+    */
+
+    if (weekday === 5) {
+
+        target =
+            new Date(
+                Date.UTC(
+                    taiwan.getUTCFullYear(),
+                    taiwan.getUTCMonth(),
+                    taiwan.getUTCDate(),
+                    2,
+                    0,
+                    0
+                )
+            );
+
+
+        if (after10) {
+
+            return {
+                mode: "scoring",
+                target
+            };
+        }
+
+
+        return {
+            mode: "prepare",
+            target
+        };
+    }
+
+
+    /*
+       Tuesday～Thursday
+       → 下一個 Friday
+    */
+
+    if (
+        weekday === 2 ||
+        weekday === 3 ||
+        weekday === 4
+    ) {
+
+        const daysUntilFriday =
+            5 - weekday;
+
+
+        target =
+            new Date(
+                Date.UTC(
+                    taiwan.getUTCFullYear(),
+                    taiwan.getUTCMonth(),
+                    taiwan.getUTCDate()
+                    +
+                    daysUntilFriday,
+                    2,
+                    0,
+                    0
+                )
+            );
+
+
+        return {
+            mode: "prepare",
+            target
+        };
+    }
+
+
+    /*
+       Saturday / Sunday
+       → 下一個 Monday
+    */
+
+    if (
+        weekday === 6 ||
+        weekday === 0
+    ) {
+
+        let daysUntilMonday;
+
+
+        if (weekday === 6) {
+
+            daysUntilMonday = 2;
+
+        } else {
+
+            daysUntilMonday = 1;
+        }
+
+
+        target =
+            new Date(
+                Date.UTC(
+                    taiwan.getUTCFullYear(),
+                    taiwan.getUTCMonth(),
+                    taiwan.getUTCDate()
+                    +
+                    daysUntilMonday,
+                    2,
+                    0,
+                    0
+                )
+            );
+
+
+        return {
+            mode: "prepare",
+            target
+        };
+    }
+}
+
+
+/* =========================================================
+   測試資料
+   ========================================================= */
+
+const tests = [];
+
+
+function addTest(
+    title,
+    input,
+    expected
+) {
+
+    tests.push({
+        title,
+        input,
+        expected
+    });
+
+}
+
+
+/* =========================================================
+   51A
+   週一 09:00
+   → 今天 10:00
+   ========================================================= */
+
+addTest(
+
+    "測試 A：週一 09:00 → 今天 10:00 衝分",
+
+    taiwanDate(
+        2026,
+        9,
+        28,
+        9,
+        0
+    ),
+
+    {
+        mode: "prepare",
+
+        targetTaiwan:
+            "2026/09/28（1）10:00"
+    }
+);
+
+
+/* =========================================================
+   51B
+   週一 15:00
+   → 今天是衝分日
+   ========================================================= */
+
+addTest(
+
+    "測試 B：週一 15:00 → 今天是衝分日",
+
+    taiwanDate(
+        2026,
+        9,
+        28,
+        15,
+        0
+    ),
+
+    {
+        mode: "scoring",
+
+        targetTaiwan:
+            "2026/09/28（一）10:00"
+    }
+);
+
+
+/* =========================================================
+   51C
+   週二
+   → 下一個週五
+   ========================================================= */
+
+addTest(
+
+    "測試 C：週二 → 下一個週五 10:00",
+
+    taiwanDate(
+        2026,
+        9,
+        29,
+        12,
+        0
+    ),
+
+    {
+        mode: "prepare",
+
+        targetTaiwan:
+            "2026/10/02（五）10:00"
+    }
+);
+
+
+/* =========================================================
+   51D
+   週四
+   → 明天週五
+   ========================================================= */
+
+addTest(
+
+    "測試 D：週四 → 下一個週五 10:00",
+
+    taiwanDate(
+        2026,
+        10,
+        1,
+        20,
+        0
+    ),
+
+    {
+        mode: "prepare",
+
+        targetTaiwan:
+            "2026/10/02（五）10:00"
+    }
+);
+
+
+/* =========================================================
+   51E
+   週五 09:00
+   → 今天 10:00
+   ========================================================= */
+
+addTest(
+
+    "測試 E：週五 09:00 → 今天 10:00 衝分",
+
+    taiwanDate(
+        2026,
+        10,
+        2,
+        9,
+        0
+    ),
+
+    {
+        mode: "prepare",
+
+        targetTaiwan:
+            "2026/10/02（五）10:00"
+    }
+);
+
+
+/* =========================================================
+   51F
+   週五 15:00
+   → 今天是衝分日
+   ========================================================= */
+
+addTest(
+
+    "測試 F：週五 15:00 → 今天是衝分日",
+
+    taiwanDate(
+        2026,
+        10,
+        2,
+        15,
+        0
+    ),
+
+    {
+        mode: "scoring",
+
+        targetTaiwan:
+            "2026/10/02（五）10:00"
+    }
+);
+
+
+/* =========================================================
+   51G
+   週六
+   → 下一個週一
+   ========================================================= */
+
+addTest(
+
+    "測試 G：週六 → 下一個週一 10:00",
+
+    taiwanDate(
+        2026,
+        10,
+        3,
+        15,
+        0
+    ),
+
+    {
+        mode: "prepare",
+
+        targetTaiwan:
+            "2026/10/05（一）10:00"
+    }
+);
+
+
+/* =========================================================
+   顯示測試
+   ========================================================= */
+
+let executed = 0;
+let passed = 0;
+let failed = 0;
+
+
+function runTest(index) {
+
+    const test =
+        tests[index];
+
+
+    const result =
+        getScoringDayInfo(
+            test.input
+        );
+
+
+    const actualTarget =
+        formatTaiwanTime(
+            result.target
+        );
+
+
+    const success =
+        result.mode ===
+            test.expected.mode
+        &&
+        actualTarget ===
+            test.expected.targetTaiwan;
+
+
+    executed++;
+
+
+    if (success) {
+
+        passed++;
+
+    } else {
+
+        failed++;
+    }
+
+
+    const resultBox =
+        document.getElementById(
+            `result-${index}`
+        );
+
+
+    const gameTarget =
+        formatGameTime(
+            toGameTime(
+                result.target
+            )
+        );
+
+
+    if (success) {
+
+        resultBox.innerHTML = `
+
+            <strong>測試結果</strong>
+
+            <br><br>
+
+            規劃模式：
+            ${
+                result.mode === "scoring"
+                ? "🏆 今天是衝分日"
+                : "📦 準備衝分日"
+            }
+
+            <br>
+
+            衝分時間：
+            ${actualTarget}
+
+            <br>
+
+            遊戲時間：
+            ${gameTarget}
+
+            <br><br>
+
+            <span class="pass">
+                ✅ 測試通過
+            </span>
+
+        `;
+
+    } else {
+
+        resultBox.innerHTML = `
+
+            <strong>測試結果</strong>
+
+            <br><br>
+
+            <span class="fail">
+                ❌ 測試失敗
+            </span>
+
+            <br><br>
+
+            實際模式：
+            ${
+                result.mode === "scoring"
+                ? "衝分日"
+                : "準備日"
+            }
+
+            <br>
+
+            實際衝分時間：
+            ${actualTarget}
+
+            <br>
+
+            實際遊戲時間：
+            ${gameTarget}
+
+            <br><br>
+
+            預期模式：
+            ${
+                test.expected.mode === "scoring"
+                ? "衝分日"
+                : "準備日"
+            }
+
+            <br>
+
+            預期衝分時間：
+            ${test.expected.targetTaiwan}
+
+        `;
+    }
+
+
+    updateSummary();
+}
+
+
+/* =========================================================
+   建立畫面
+   ========================================================= */
+
+function renderTests() {
+
+    const container =
+        document.getElementById(
+            "tests"
+        );
+
+
+    tests.forEach(
+        (test, index) => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "test";
+
+
+            div.innerHTML = `
+
+                <div class="test-title">
+
+                    ${test.title}
+
+                </div>
+
+
+                <div class="state">
+
+                    <strong>
+                        計算基準時間
+                    </strong>
+
+                    <br>
+
+                    台灣時間：
+                    ${formatTaiwanTime(test.input)}
+
+                    <br>
+
+                    遊戲時間：
+                    ${
+                        formatGameTime(
+                            toGameTime(
+                                test.input
+                            )
+                        )
+                    }
+
+                </div>
+
+
+                <button
+                    onclick="runTest(${index})"
+                >
+                    執行測試
+                </button>
+
+
+                <div
+                    class="result"
+                    id="result-${index}"
+                >
+
+                    尚未執行
+
+                </div>
+
+            `;
+
+
+            container.appendChild(div);
+        }
+    );
+}
+
+
+/* =========================================================
+   更新摘要
+   ========================================================= */
+
+function updateSummary() {
+
+    document.getElementById(
+        "summary"
+    ).innerHTML = `
+
+        <strong>
+            測試進度
+        </strong>
+
+        <br><br>
+
+        已執行：
+        ${executed} / ${tests.length}
+
+        <br>
+
+        <span class="pass">
+            ✅ 通過：
+            ${passed}
+        </span>
+
+        <br>
+
+        <span class="fail">
+            ❌ 失敗：
+            ${failed}
+        </span>
+
+    `;
+}
+
+
+/* =========================================================
+   初始化
+   ========================================================= */
+
+renderTests();
+
+</script>
+
+</body>
+</html>
