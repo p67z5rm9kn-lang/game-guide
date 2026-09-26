@@ -1,716 +1,698 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雷達規則引擎測試</title>
 
-  <title>雷達規則引擎測試</title>
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC",
+                 "PingFang TC", sans-serif;
+    background: #111827;
+    color: #f9fafb;
+    padding: 20px;
+    line-height: 1.6;
+}
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+.card {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #1f2937;
+    border-radius: 16px;
+}
 
-    body {
-      margin: 0;
-      padding: 20px;
+h1 {
+    font-size: 22px;
+    margin-top: 0;
+}
 
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Noto Sans TC",
-        "Noto Sans Traditional Chinese",
-        sans-serif;
+.test {
+    background: #111827;
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: 16px;
+}
 
-      background: #111827;
-      color: #f9fafb;
-      line-height: 1.6;
-    }
+.test h2 {
+    font-size: 16px;
+    margin-top: 0;
+}
 
-    .card {
-      max-width: 500px;
-      margin: 0 auto 20px;
-      padding: 20px;
+.state {
+    margin: 10px 0;
+}
 
-      background: #1f2937;
-      border-radius: 16px;
-    }
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 12px;
+    border: 0;
+    border-radius: 12px;
+    background: #d9821b;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
 
-    h1 {
-      margin-top: 0;
-      font-size: 26px;
-    }
+.result {
+    margin-top: 12px;
+    padding: 14px;
+    background: #111827;
+    border-radius: 12px;
+}
 
-    .test-card {
-      margin-top: 24px;
-    }
+.pass {
+    color: #22c55e;
+    font-weight: bold;
+}
 
-    .test-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 20px;
-    }
+.fail {
+    color: #ef4444;
+    font-weight: bold;
+}
 
-    .state {
-      background: #111827;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 18px;
-    }
-
-    .state-title {
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .state-row {
-      font-size: 17px;
-      margin: 4px 0;
-    }
-
-    button {
-      width: 100%;
-      padding: 16px;
-
-      border: 0;
-      border-radius: 14px;
-
-      background: #d98228;
-      color: white;
-
-      font-size: 18px;
-      font-weight: 700;
-
-      cursor: pointer;
-    }
-
-    button:active {
-      transform: scale(0.98);
-    }
-
-    .result {
-      margin-top: 18px;
-      padding: 18px;
-
-      background: #111827;
-      border-radius: 12px;
-
-      display: none;
-    }
-
-    .result.show {
-      display: block;
-    }
-
-    .result-title {
-      font-size: 19px;
-      font-weight: 700;
-      margin-bottom: 18px;
-    }
-
-    .result-row {
-      font-size: 18px;
-      margin: 6px 0;
-    }
-
-    .pass {
-      margin-top: 18px;
-      color: #86efac;
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .fail {
-      margin-top: 18px;
-      color: #fca5a5;
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .summary {
-      margin-top: 24px;
-      padding: 18px;
-
-      background: #111827;
-      border-radius: 12px;
-
-      font-size: 17px;
-    }
-  </style>
+.summary {
+    margin-top: 20px;
+    padding: 14px;
+    background: #111827;
+    border-radius: 12px;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="card">
+<div class="card">
 
-    <h1>雷達規則引擎測試</h1>
+<h1>雷達規則引擎測試</h1>
 
-    <div id="testArea"></div>
+<div id="tests"></div>
 
-    <div class="summary" id="summary">
-      尚未執行測試
-    </div>
+<div class="summary" id="summary">
+尚未執行測試
+</div>
 
-  </div>
+</div>
+
+<script>
+
+/* =========================================================
+   雷達規則引擎 v1.0
+   第 11～20 測試
+   ========================================================= */
 
 
-  <script>
+/* ---------------------------------------------------------
+   建立狀態
+--------------------------------------------------------- */
 
-    /* =========================================================
-       雷達規則引擎 v1.0
-       ========================================================= */
+function createState({
+    field = 0,
+    completed = 0,
+    inventory = 0,
+    maxInventory = 30,
+    lauraStar = 0,
+    lauraUsed = false
+} = {}) {
+
+    return {
+        field,
+        completed,
+        inventory,
+        maxInventory,
+        lauraStar,
+        lauraUsed
+    };
+}
 
 
-    /**
-     * 建立雷達狀態
-     */
-    function createState(field, inventory, inventoryMax) {
+/* ---------------------------------------------------------
+   Laura 雷達數量
+--------------------------------------------------------- */
 
-      return {
-        field: field,
-        inventory: inventory,
-        inventoryMax: inventoryMax
-      };
+function getLauraRadar(star) {
 
+    const radarMap = {
+        0: 5,
+        1: 10,
+        2: 10,
+        3: 10,
+        4: 20,
+        5: 20
+    };
+
+    return radarMap[star] ?? 0;
+}
+
+
+/* ---------------------------------------------------------
+   將新雷達加入場上
+--------------------------------------------------------- */
+
+function addNewRadar(state, amount) {
+
+    if (amount <= 0) return;
+
+    /*
+       新雷達進場規則：
+
+       場上 < 8：
+       先補到 8
+       剩餘才進庫存
+
+       場上 >= 8：
+       新雷達直接：
+       場上 +3
+       剩餘進庫存
+    */
+
+    if (state.field < 8) {
+
+        const need = 8 - state.field;
+        const toField = Math.min(amount, need);
+
+        state.field += toField;
+        amount -= toField;
+
+    } else {
+
+        const toField = Math.min(amount, 3);
+
+        state.field += toField;
+        amount -= toField;
     }
 
+    /*
+       Laura 產生的雷達不受 MAX 限制。
+       因此這裡直接加入庫存。
+    */
 
-    /**
-     * 系統免費雷達 +8
-     *
-     * 規則：
-     *
-     * 1. 系統一次產生 8 個雷達
-     *
-     * 2. 如果場上少於 8：
-     *    優先補場上到 8
-     *
-     * 3. 剩餘雷達才進入庫存
-     *
-     * 4. 進入庫存時不能超過庫存上限 MAX
-     *
-     * 5. 如果場上已經 >= 8：
-     *    8 個全部嘗試進入庫存
-     *
-     * 6. 庫存已滿時，不增加庫存
-     */
-    function applySystemRadar(state) {
-
-      const result = {
-        ...state
-      };
-
-      let generated = 8;
+    state.inventory += amount;
+}
 
 
-      // ---------------------------------------------------------
-      // 第一階段：優先補場上到 8
-      // ---------------------------------------------------------
+/* ---------------------------------------------------------
+   使用 Laura
+--------------------------------------------------------- */
 
-      if (result.field < 8) {
+function useLaura(state) {
 
-        const need = 8 - result.field;
-
-        const toField =
-          Math.min(
-            generated,
-            need
-          );
-
-        result.field += toField;
-
-        generated -= toField;
-      }
-
-
-      // ---------------------------------------------------------
-      // 第二階段：剩餘雷達進入庫存
-      // ---------------------------------------------------------
-
-      if (generated > 0) {
-
-        const inventorySpace =
-          Math.max(
-            0,
-            result.inventoryMax - result.inventory
-          );
-
-        const toInventory =
-          Math.min(
-            generated,
-            inventorySpace
-          );
-
-        result.inventory += toInventory;
-      }
-
-
-      return result;
+    if (state.lauraUsed) {
+        return {
+            success: false,
+            reason: "Laura 今日已使用"
+        };
     }
 
+    const amount = getLauraRadar(state.lauraStar);
 
-    /**
-     * 比較狀態
-     */
-    function statesEqual(actual, expected) {
+    addNewRadar(state, amount);
 
-      return (
-        actual.field === expected.field &&
-        actual.inventory === expected.inventory
-      );
+    state.lauraUsed = true;
 
+    return {
+        success: true,
+        amount
+    };
+}
+
+
+/* ---------------------------------------------------------
+   收割一個已完成雷達
+--------------------------------------------------------- */
+
+function harvestRadar(state) {
+
+    if (state.completed <= 0) {
+        return {
+            success: false,
+            reason: "沒有已完成雷達"
+        };
     }
 
+    state.completed--;
+    state.field--;
 
-    /* =========================================================
-       第 1～10 個測試
-       ========================================================= */
+    /*
+       場上低於 8 時，
+       庫存立即自動補回。
+    */
 
-    const tests = [
+    if (state.field < 8 && state.inventory > 0) {
 
-      /* -------------------------------------------------------
-         第 1 個
-         ------------------------------------------------------- */
+        const need = 8 - state.field;
+        const refill = Math.min(need, state.inventory);
 
-      {
-        id: 1,
+        state.field += refill;
+        state.inventory -= refill;
+    }
 
-        title: "第一個測試：系統 +8 雷達",
+    return {
+        success: true
+    };
+}
 
-        initial: createState(
-          6,
-          20,
-          30
-        ),
 
-        expected: {
-          field: 8,
-          inventory: 26
+/* ---------------------------------------------------------
+   測試工具
+--------------------------------------------------------- */
+
+const tests = [];
+
+function addTest(title, initialState, action, expected) {
+
+    tests.push({
+        title,
+        initialState,
+        action,
+        expected
+    });
+}
+
+
+/* =========================================================
+   第 11～20 測試
+   ========================================================= */
+
+
+/* 11
+   0 星 Laura
+   場上 7
+   庫存 0
+
+   +5：
+   場上先補到 8
+   剩餘 4 進庫存
+*/
+addTest(
+    "第十一個測試：Laura 0星｜場上不足8",
+    createState({
+        field: 7,
+        inventory: 0,
+        lauraStar: 0
+    }),
+    state => useLaura(state),
+    {
+        field: 8,
+        inventory: 4
+    }
+);
+
+
+/* 12
+   0 星 Laura
+   場上 8
+
+   +5：
+   場上 +3 → 11
+   剩餘 2 進庫存
+*/
+addTest(
+    "第十二個測試：Laura 0星｜場上8",
+    createState({
+        field: 8,
+        inventory: 0,
+        lauraStar: 0
+    }),
+    state => useLaura(state),
+    {
+        field: 11,
+        inventory: 2
+    }
+);
+
+
+/* 13
+   4 星 Laura
+   +20
+   場上8
+
+   場上 +3 → 11
+   庫存 +17
+*/
+addTest(
+    "第十三個測試：Laura 4星｜+20",
+    createState({
+        field: 8,
+        inventory: 0,
+        lauraStar: 4
+    }),
+    state => useLaura(state),
+    {
+        field: 11,
+        inventory: 17
+    }
+);
+
+
+/* 14
+   4 星 Laura
+   場上6
+
+   +20：
+   場上先補2到8
+   剩餘18進庫存
+*/
+addTest(
+    "第十四個測試：Laura 4星｜場上6",
+    createState({
+        field: 6,
+        inventory: 0,
+        lauraStar: 4
+    }),
+    state => useLaura(state),
+    {
+        field: 8,
+        inventory: 18
+    }
+);
+
+
+/* 15
+   Laura 不受 MAX 限制
+
+   場上8
+   庫存25
+   MAX30
+   +20
+
+   場上11
+   庫存42
+*/
+addTest(
+    "第十五個測試：Laura 可以突破庫存 MAX",
+    createState({
+        field: 8,
+        inventory: 25,
+        maxInventory: 30,
+        lauraStar: 4
+    }),
+    state => useLaura(state),
+    {
+        field: 11,
+        inventory: 42
+    }
+);
+
+
+/* 16
+   Laura 每日只能使用一次
+*/
+addTest(
+    "第十六個測試：Laura 同一天不能使用第二次",
+    createState({
+        field: 8,
+        inventory: 0,
+        lauraStar: 4,
+        lauraUsed: true
+    }),
+    state => useLaura(state),
+    {
+        field: 8,
+        inventory: 0
+    }
+);
+
+
+/* 17
+   1 星 Laura
+   +10
+   場上8
+
+   場上11
+   庫存7
+*/
+addTest(
+    "第十七個測試：Laura 1星｜+10",
+    createState({
+        field: 8,
+        inventory: 0,
+        lauraStar: 1
+    }),
+    state => useLaura(state),
+    {
+        field: 11,
+        inventory: 7
+    }
+);
+
+
+/* 18
+   5 星 Laura
+   +20
+   場上8
+
+   場上11
+   庫存17
+
+   寶箱目前還沒有加入本批測試。
+*/
+addTest(
+    "第十八個測試：Laura 5星｜+20",
+    createState({
+        field: 8,
+        inventory: 0,
+        lauraStar: 5
+    }),
+    state => useLaura(state),
+    {
+        field: 11,
+        inventory: 17
+    }
+);
+
+
+/* 19
+   收割一個完成雷達
+
+   場上8
+   已完成1
+   庫存5
+
+   收割後：
+   場上7
+   自動補1
+   → 場上8
+   庫存4
+*/
+addTest(
+    "第十九個測試：收割後自動從庫存補回8",
+    createState({
+        field: 8,
+        completed: 1,
+        inventory: 5
+    }),
+    state => harvestRadar(state),
+    {
+        field: 8,
+        inventory: 4,
+        completed: 0
+    }
+);
+
+
+/* 20
+   收割一個完成雷達
+
+   場上11
+   已完成1
+   庫存0
+
+   收割後：
+   場上10
+   沒有庫存，所以不補
+*/
+addTest(
+    "第二十個測試：場上11收割後變10",
+    createState({
+        field: 11,
+        completed: 1,
+        inventory: 0
+    }),
+    state => harvestRadar(state),
+    {
+        field: 10,
+        inventory: 0,
+        completed: 0
+    }
+);
+
+
+/* =========================================================
+   執行測試
+   ========================================================= */
+
+function runTest(test) {
+
+    const state = JSON.parse(JSON.stringify(test.initialState));
+
+    let actionResult = null;
+
+    try {
+        actionResult = test.action(state);
+    } catch (error) {
+
+        return {
+            pass: false,
+            state,
+            error: error.message
+        };
+    }
+
+    let pass = true;
+
+    for (const key in test.expected) {
+
+        if (state[key] !== test.expected[key]) {
+            pass = false;
         }
-      },
+    }
 
+    return {
+        pass,
+        state,
+        actionResult
+    };
+}
 
-      /* -------------------------------------------------------
-         第 2 個
-         ------------------------------------------------------- */
 
-      {
-        id: 2,
+/* ---------------------------------------------------------
+   顯示測試
+--------------------------------------------------------- */
 
-        title: "第二個測試：系統 +8｜庫存接近 MAX",
+function renderTests() {
 
-        initial: createState(
-          8,
-          29,
-          30
-        ),
+    const container = document.getElementById("tests");
 
-        expected: {
-          field: 8,
-          inventory: 30
-        }
-      },
+    container.innerHTML = "";
 
+    let passed = 0;
+    let failed = 0;
 
-      /* -------------------------------------------------------
-         第 3 個
-         ------------------------------------------------------- */
+    tests.forEach((test, index) => {
 
-      {
-        id: 3,
+        const box = document.createElement("div");
+        box.className = "test";
 
-        title: "第三個測試：系統 +8｜庫存已滿",
+        box.innerHTML = `
+            <h2>${test.title}</h2>
 
-        initial: createState(
-          8,
-          30,
-          30
-        ),
+            <div class="state">
+                <strong>初始狀態：</strong><br>
+                場上：${test.initialState.field}<br>
+                已完成：${test.initialState.completed}<br>
+                庫存：${test.initialState.inventory}<br>
+                庫存上限：${test.initialState.maxInventory}
+            </div>
 
-        expected: {
-          field: 8,
-          inventory: 30
-        }
-      },
+            <button onclick="executeSingleTest(${index})">
+                執行測試
+            </button>
 
+            <div class="result" id="result-${index}">
+                尚未執行測試
+            </div>
+        `;
 
-      /* -------------------------------------------------------
-         第 4 個
-         ------------------------------------------------------- */
-
-      {
-        id: 4,
-
-        title: "第四個測試：場上 0｜庫存 0",
-
-        initial: createState(
-          0,
-          0,
-          30
-        ),
-
-        expected: {
-          field: 8,
-          inventory: 0
-        }
-      },
-
-
-      /* -------------------------------------------------------
-         第 5 個
-         ------------------------------------------------------- */
-
-      {
-        id: 5,
-
-        title: "第五個測試：場上 7｜系統 +8 優先補到 8",
-
-        initial: createState(
-          7,
-          20,
-          30
-        ),
-
-        expected: {
-          field: 8,
-          inventory: 27
-        }
-      },
-
-
-      /* -------------------------------------------------------
-         第 6 個
-         ------------------------------------------------------- */
-
-      {
-        id: 6,
-
-        title: "第六個測試：場上超過 8｜+8 全進庫存",
-
-        initial: createState(
-          11,
-          20,
-          30
-        ),
-
-        expected: {
-          field: 11,
-          inventory: 28
-        }
-      },
-
-
-      /* -------------------------------------------------------
-         第 7 個
-         ------------------------------------------------------- */
-
-      {
-        id: 7,
-
-        title: "第七個測試：場上 8｜庫存 5",
-
-        initial: createState(
-          8,
-          5,
-          30
-        ),
-
-        expected: {
-          field: 8,
-          inventory: 13
-        }
-      },
-
-
-      /* -------------------------------------------------------
-         第 8 個
-         ------------------------------------------------------- */
-
-      {
-        id: 8,
-
-        title: "第八個測試：場上 8｜庫存 25",
-
-        initial: createState(
-          8,
-          25,
-          30
-        ),
-
-        expected: {
-          field: 8,
-          inventory: 30
-        }
-      },
-
-
-      /* -------------------------------------------------------
-         第 9 個
-         ------------------------------------------------------- */
-
-      {
-        id: 9,
-
-        title: "第九個測試：MAX 很小｜只能進 1 個庫存",
-
-        initial: createState(
-          8,
-          0,
-          1
-        ),
-
-        expected: {
-          field: 8,
-          inventory: 1
-        }
-      },
-
-
-      /* -------------------------------------------------------
-         第 10 個
-         ------------------------------------------------------- */
-
-      {
-        id: 10,
-
-        title: "第十個測試：場上不足 8｜優先補場",
-
-        initial: createState(
-          0,
-          29,
-          30
-        ),
-
-        expected: {
-          field: 8,
-          inventory: 29
-        }
-      }
-
-    ];
-
-
-    /* =========================================================
-       建立測試畫面
-       ========================================================= */
-
-    const testArea =
-      document.getElementById("testArea");
-
-    const summary =
-      document.getElementById("summary");
-
-
-    let testResults = [];
-
-
-    tests.forEach(test => {
-
-      const card =
-        document.createElement("div");
-
-      card.className = "test-card";
-
-
-      card.innerHTML = `
-
-        <div class="test-title">
-          ${test.title}
-        </div>
-
-
-        <div class="state">
-
-          <div class="state-title">
-            初始狀態：
-          </div>
-
-          <div class="state-row">
-            場上：${test.initial.field}
-          </div>
-
-          <div class="state-row">
-            庫存：${test.initial.inventory}
-          </div>
-
-          <div class="state-row">
-            庫存上限：${test.initial.inventoryMax}
-          </div>
-
-        </div>
-
-
-        <button onclick="runTest(${test.id})">
-          執行測試
-        </button>
-
-
-        <div
-          class="result"
-          id="result-${test.id}"
-        ></div>
-
-      `;
-
-
-      testArea.appendChild(card);
-
+        container.appendChild(box);
     });
 
+    window.updateSummary = function() {
 
-    /* =========================================================
-       執行單一測試
-       ========================================================= */
+        const results = tests.map((_, index) => {
 
-    function runTest(testId) {
+            const el = document.getElementById(`result-${index}`);
 
-      const test =
-        tests.find(
-          item => item.id === testId
-        );
+            return el && el.dataset.pass === "true";
 
+        });
 
-      if (!test) {
-        return;
-      }
+        const executed = results.filter(x => x !== undefined).length;
 
+        /*
+           重新統計畫面上的結果
+        */
 
-      const actual =
-        applySystemRadar(
-          {
-            ...test.initial
-          }
-        );
+        let p = 0;
+        let f = 0;
 
+        tests.forEach((_, index) => {
 
-      const passed =
-        statesEqual(
-          actual,
-          test.expected
-        );
+            const el = document.getElementById(`result-${index}`);
 
+            if (!el || !el.dataset.executed) return;
 
-      testResults =
-        testResults.filter(
-          item => item.id !== testId
-        );
+            if (el.dataset.pass === "true") {
+                p++;
+            } else {
+                f++;
+            }
+        });
 
-
-      testResults.push({
-        id: testId,
-        passed: passed
-      });
+        document.getElementById("summary").innerHTML = `
+            <strong>目前測試進度</strong><br><br>
+            已執行：${p + f} 個<br>
+            <span class="pass">✅ 通過：${p} 個</span><br>
+            <span class="fail">❌ 失敗：${f} 個</span>
+        `;
+    };
+}
 
 
-      const result =
-        document.getElementById(
-          `result-${testId}`
-        );
+/* ---------------------------------------------------------
+   單項測試
+--------------------------------------------------------- */
 
+function executeSingleTest(index) {
 
-      result.classList.add("show");
+    const test = tests[index];
+    const result = runTest(test);
 
+    const el = document.getElementById(`result-${index}`);
 
-      result.innerHTML = `
+    el.dataset.executed = "true";
+    el.dataset.pass = result.pass ? "true" : "false";
 
-        <div class="result-title">
-          測試結果
-        </div>
+    if (result.pass) {
 
+        el.innerHTML = `
+            <strong>測試結果</strong><br><br>
 
-        <div class="result-row">
-          場上：${actual.field}
-        </div>
+            場上：${result.state.field}<br>
+            已完成：${result.state.completed}<br>
+            庫存：${result.state.inventory}<br>
 
+            <br>
+            <span class="pass">✅ 測試通過</span>
+        `;
 
-        <div class="result-row">
-          庫存：${actual.inventory}
-        </div>
+    } else {
 
+        el.innerHTML = `
+            <strong>測試結果</strong><br><br>
 
-        ${
-          passed
+            場上：${result.state.field}<br>
+            已完成：${result.state.completed}<br>
+            庫存：${result.state.inventory}<br>
 
-          ? `
-            <div class="pass">
-              ✅ 測試通過
-            </div>
-          `
-
-          : `
-            <div class="fail">
-              ❌ 測試失敗
-            </div>
-
-            <div class="result-row">
-              預期：
-              場上 ${test.expected.field}
-              ／
-              庫存 ${test.expected.inventory}
-            </div>
-          `
-        }
-
-      `;
-
-
-      updateSummary();
-
+            <br>
+            <span class="fail">❌ 測試失敗</span>
+        `;
     }
 
-
-    /* =========================================================
-       更新測試進度
-       ========================================================= */
-
-    function updateSummary() {
-
-      if (testResults.length === 0) {
-
-        summary.innerHTML =
-          "尚未執行測試";
-
-        return;
-      }
+    updateSummary();
+}
 
 
-      const passedCount =
-        testResults.filter(
-          item => item.passed
-        ).length;
+/* ---------------------------------------------------------
+   初始化
+--------------------------------------------------------- */
 
+renderTests();
 
-      const failedCount =
-        testResults.filter(
-          item => !item.passed
-        ).length;
-
-
-      const total =
-        testResults.length;
-
-
-      summary.innerHTML = `
-
-        <strong>目前測試進度</strong>
-
-        <br><br>
-
-        已執行：${total} 個
-
-        <br>
-
-        ✅ 通過：${passedCount} 個
-
-        <br>
-
-        ❌ 失敗：${failedCount} 個
-
-      `;
-
-    }
-
-  </script>
+</script>
 
 </body>
 </html>
