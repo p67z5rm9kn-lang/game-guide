@@ -100,7 +100,7 @@ button {
 
 /* =========================================================
    雷達規則引擎 v1.0
-   第 11～20 測試
+   第 21～30 測試
    ========================================================= */
 
 
@@ -113,8 +113,15 @@ function createState({
     completed = 0,
     inventory = 0,
     maxInventory = 30,
-    lauraStar = 0,
-    lauraUsed = false
+
+    warriorPassEnabled = false,
+    warriorTarget = 0,
+    warriorProgress = 0,
+
+    dawnEnabled = false,
+    dawnTarget = 0,
+    dawnProgress = 0
+
 } = {}) {
 
     return {
@@ -122,99 +129,118 @@ function createState({
         completed,
         inventory,
         maxInventory,
-        lauraStar,
-        lauraUsed
+
+        warriorPassEnabled,
+        warriorTarget,
+        warriorProgress,
+
+        dawnEnabled,
+        dawnTarget,
+        dawnProgress
     };
 }
 
 
 /* ---------------------------------------------------------
-   Laura 雷達數量
+   任務進度增加
 --------------------------------------------------------- */
 
-function getLauraRadar(star) {
-
-    const radarMap = {
-        0: 5,
-        1: 10,
-        2: 10,
-        3: 10,
-        4: 20,
-        5: 20
-    };
-
-    return radarMap[star] ?? 0;
-}
-
-
-/* ---------------------------------------------------------
-   將新雷達加入場上
---------------------------------------------------------- */
-
-function addNewRadar(state, amount) {
-
-    if (amount <= 0) return;
+function addCompletionProgress(state) {
 
     /*
-       新雷達進場規則：
+       一次「完成事件」：
 
-       場上 < 8：
-       先補到 8
-       剩餘才進庫存
+       未完成 → 已完成
 
-       場上 >= 8：
-       新雷達直接：
-       場上 +3
-       剩餘進庫存
+       同時：
+       勇士戰令 +1（如果啟用）
+       黎明曙光 +1（如果啟用）
+
+       兩個任務彼此獨立。
     */
 
-    if (state.field < 8) {
+    if (state.warriorPassEnabled) {
 
-        const need = 8 - state.field;
-        const toField = Math.min(amount, need);
-
-        state.field += toField;
-        amount -= toField;
-
-    } else {
-
-        const toField = Math.min(amount, 3);
-
-        state.field += toField;
-        amount -= toField;
+        state.warriorProgress = Math.min(
+            state.warriorProgress + 1,
+            state.warriorTarget
+        );
     }
 
-    /*
-       Laura 產生的雷達不受 MAX 限制。
-       因此這裡直接加入庫存。
-    */
+    if (state.dawnEnabled) {
 
-    state.inventory += amount;
+        state.dawnProgress = Math.min(
+            state.dawnProgress + 1,
+            state.dawnTarget
+        );
+    }
 }
 
 
 /* ---------------------------------------------------------
-   使用 Laura
+   玩家完成一個未完成雷達
 --------------------------------------------------------- */
 
-function useLaura(state) {
+function completeRadar(state) {
 
-    if (state.lauraUsed) {
+    if (state.field - state.completed <= 0) {
+
         return {
             success: false,
-            reason: "Laura 今日已使用"
+            reason: "沒有未完成雷達"
         };
     }
 
-    const amount = getLauraRadar(state.lauraStar);
+    /*
+       未完成 -1
+       已完成 +1
 
-    addNewRadar(state, amount);
+       場上總數不變。
+       庫存不變。
+       不觸發自動補回。
+    */
 
-    state.lauraUsed = true;
+    state.completed++;
+
+    addCompletionProgress(state);
 
     return {
-        success: true,
-        amount
+        success: true
+    };
+}
+
+
+/* ---------------------------------------------------------
+   盟友瞬間幫助
+--------------------------------------------------------- */
+
+function allyInstantHelp(state) {
+
+    if (state.field - state.completed <= 0) {
+
+        return {
+            success: false,
+            reason: "沒有未完成雷達"
+        };
+    }
+
+    /*
+       盟友瞬間幫助與玩家完成
+       在規則引擎中視為相同的「完成事件」。
+
+       未完成 -1
+       已完成 +1
+       場上總數不變
+       庫存不變
+       任務進度 +1
+    */
+
+    state.completed++;
+
+    addCompletionProgress(state);
+
+    return {
+        success: true
     };
 }
 
@@ -226,6 +252,7 @@ function useLaura(state) {
 function harvestRadar(state) {
 
     if (state.completed <= 0) {
+
         return {
             success: false,
             reason: "沒有已完成雷達"
@@ -237,17 +264,27 @@ function harvestRadar(state) {
 
     /*
        場上低於 8 時，
-       庫存立即自動補回。
+       才從庫存自動補回。
     */
 
     if (state.field < 8 && state.inventory > 0) {
 
         const need = 8 - state.field;
-        const refill = Math.min(need, state.inventory);
+
+        const refill = Math.min(
+            need,
+            state.inventory
+        );
 
         state.field += refill;
         state.inventory -= refill;
     }
+
+    /*
+       重要：
+       收割不增加勇士戰令
+       收割不增加黎明曙光
+    */
 
     return {
         success: true
@@ -255,11 +292,12 @@ function harvestRadar(state) {
 }
 
 
-/* ---------------------------------------------------------
-   測試工具
---------------------------------------------------------- */
+/* =========================================================
+   測試資料
+   ========================================================= */
 
 const tests = [];
+
 
 function addTest(title, initialState, action, expected) {
 
@@ -273,249 +311,320 @@ function addTest(title, initialState, action, expected) {
 
 
 /* =========================================================
-   第 11～20 測試
+   第 21～30 測試
    ========================================================= */
 
 
-/* 11
-   0 星 Laura
-   場上 7
-   庫存 0
+/* ---------------------------------------------------------
+   21
+   玩家完成一個未完成雷達
 
-   +5：
-   場上先補到 8
-   剩餘 4 進庫存
-*/
-addTest(
-    "第十一個測試：Laura 0星｜場上不足8",
-    createState({
-        field: 7,
-        inventory: 0,
-        lauraStar: 0
-    }),
-    state => useLaura(state),
-    {
-        field: 8,
-        inventory: 4
-    }
-);
-
-
-/* 12
-   0 星 Laura
-   場上 8
-
-   +5：
-   場上 +3 → 11
-   剩餘 2 進庫存
-*/
-addTest(
-    "第十二個測試：Laura 0星｜場上8",
-    createState({
-        field: 8,
-        inventory: 0,
-        lauraStar: 0
-    }),
-    state => useLaura(state),
-    {
-        field: 11,
-        inventory: 2
-    }
-);
-
-
-/* 13
-   4 星 Laura
-   +20
-   場上8
-
-   場上 +3 → 11
-   庫存 +17
-*/
-addTest(
-    "第十三個測試：Laura 4星｜+20",
-    createState({
-        field: 8,
-        inventory: 0,
-        lauraStar: 4
-    }),
-    state => useLaura(state),
-    {
-        field: 11,
-        inventory: 17
-    }
-);
-
-
-/* 14
-   4 星 Laura
-   場上6
-
-   +20：
-   場上先補2到8
-   剩餘18進庫存
-*/
-addTest(
-    "第十四個測試：Laura 4星｜場上6",
-    createState({
-        field: 6,
-        inventory: 0,
-        lauraStar: 4
-    }),
-    state => useLaura(state),
-    {
-        field: 8,
-        inventory: 18
-    }
-);
-
-
-/* 15
-   Laura 不受 MAX 限制
-
-   場上8
-   庫存25
-   MAX30
-   +20
-
-   場上11
-   庫存42
-*/
-addTest(
-    "第十五個測試：Laura 可以突破庫存 MAX",
-    createState({
-        field: 8,
-        inventory: 25,
-        maxInventory: 30,
-        lauraStar: 4
-    }),
-    state => useLaura(state),
-    {
-        field: 11,
-        inventory: 42
-    }
-);
-
-
-/* 16
-   Laura 每日只能使用一次
-*/
-addTest(
-    "第十六個測試：Laura 同一天不能使用第二次",
-    createState({
-        field: 8,
-        inventory: 0,
-        lauraStar: 4,
-        lauraUsed: true
-    }),
-    state => useLaura(state),
-    {
-        field: 8,
-        inventory: 0
-    }
-);
-
-
-/* 17
-   1 星 Laura
-   +10
-   場上8
-
-   場上11
-   庫存7
-*/
-addTest(
-    "第十七個測試：Laura 1星｜+10",
-    createState({
-        field: 8,
-        inventory: 0,
-        lauraStar: 1
-    }),
-    state => useLaura(state),
-    {
-        field: 11,
-        inventory: 7
-    }
-);
-
-
-/* 18
-   5 星 Laura
-   +20
-   場上8
-
-   場上11
-   庫存17
-
-   寶箱目前還沒有加入本批測試。
-*/
-addTest(
-    "第十八個測試：Laura 5星｜+20",
-    createState({
-        field: 8,
-        inventory: 0,
-        lauraStar: 5
-    }),
-    state => useLaura(state),
-    {
-        field: 11,
-        inventory: 17
-    }
-);
-
-
-/* 19
-   收割一個完成雷達
-
-   場上8
-   已完成1
-   庫存5
-
-   收割後：
-   場上7
-   自動補1
-   → 場上8
-   庫存4
-*/
-addTest(
-    "第十九個測試：收割後自動從庫存補回8",
-    createState({
-        field: 8,
-        completed: 1,
-        inventory: 5
-    }),
-    state => harvestRadar(state),
-    {
-        field: 8,
-        inventory: 4,
-        completed: 0
-    }
-);
-
-
-/* 20
-   收割一個完成雷達
-
-   場上11
-   已完成1
-   庫存0
-
-   收割後：
    場上10
-   沒有庫存，所以不補
-*/
+   已完成2
+   → 未完成8
+
+   完成後：
+   場上10
+   已完成3
+--------------------------------------------------------- */
+
 addTest(
-    "第二十個測試：場上11收割後變10",
+    "第二十一個測試：玩家完成一個未完成雷達",
+
     createState({
-        field: 11,
-        completed: 1,
-        inventory: 0
+        field: 10,
+        completed: 2
     }),
-    state => harvestRadar(state),
+
+    state => completeRadar(state),
+
     {
         field: 10,
-        inventory: 0,
-        completed: 0
+        completed: 3
+    }
+);
+
+
+/* ---------------------------------------------------------
+   22
+   完成雷達不改變場上總數，也不改變庫存
+--------------------------------------------------------- */
+
+addTest(
+    "第二十二個測試：完成雷達不改變場上總數與庫存",
+
+    createState({
+        field: 8,
+        completed: 0,
+        inventory: 15
+    }),
+
+    state => completeRadar(state),
+
+    {
+        field: 8,
+        completed: 1,
+        inventory: 15
+    }
+);
+
+
+/* ---------------------------------------------------------
+   23
+   勇士戰令啟用
+
+   17/20
+   完成一次
+   → 18/20
+--------------------------------------------------------- */
+
+addTest(
+    "第二十三個測試：完成雷達增加勇士戰令",
+
+    createState({
+        field: 8,
+        completed: 0,
+
+        warriorPassEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 17
+    }),
+
+    state => completeRadar(state),
+
+    {
+        completed: 1,
+        warriorProgress: 18
+    }
+);
+
+
+/* ---------------------------------------------------------
+   24
+   黎明曙光啟用
+
+   5/10
+   完成一次
+   → 6/10
+--------------------------------------------------------- */
+
+addTest(
+    "第二十四個測試：完成雷達增加黎明曙光",
+
+    createState({
+        field: 8,
+        completed: 0,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 5
+    }),
+
+    state => completeRadar(state),
+
+    {
+        completed: 1,
+        dawnProgress: 6
+    }
+);
+
+
+/* ---------------------------------------------------------
+   25
+   兩個任務同時啟用
+
+   一次完成事件
+   → 勇士戰令 +1
+   → 黎明曙光 +1
+--------------------------------------------------------- */
+
+addTest(
+    "第二十五個測試：一次完成同時增加兩個任務",
+
+    createState({
+        field: 8,
+        completed: 0,
+
+        warriorPassEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 10,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 5
+    }),
+
+    state => completeRadar(state),
+
+    {
+        completed: 1,
+        warriorProgress: 11,
+        dawnProgress: 6
+    }
+);
+
+
+/* ---------------------------------------------------------
+   26
+   勇士戰令已經 20/20
+
+   再完成雷達：
+   顯示仍然 20/20
+--------------------------------------------------------- */
+
+addTest(
+    "第二十六個測試：勇士戰令達標後進度封頂",
+
+    createState({
+        field: 8,
+        completed: 0,
+
+        warriorPassEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 20
+    }),
+
+    state => completeRadar(state),
+
+    {
+        completed: 1,
+        warriorProgress: 20
+    }
+);
+
+
+/* ---------------------------------------------------------
+   27
+   黎明曙光已經 10/10
+
+   再完成雷達：
+   仍然 10/10
+--------------------------------------------------------- */
+
+addTest(
+    "第二十七個測試：黎明曙光達標後進度封頂",
+
+    createState({
+        field: 8,
+        completed: 0,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 10
+    }),
+
+    state => completeRadar(state),
+
+    {
+        completed: 1,
+        dawnProgress: 10
+    }
+);
+
+
+/* ---------------------------------------------------------
+   28
+   盟友瞬間幫助
+
+   未完成 → 已完成
+
+   任務也 +1
+--------------------------------------------------------- */
+
+addTest(
+    "第二十八個測試：盟友瞬間幫助視為完成事件",
+
+    createState({
+        field: 11,
+        completed: 2,
+
+        warriorPassEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 17,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 5
+    }),
+
+    state => allyInstantHelp(state),
+
+    {
+        field: 11,
+        completed: 3,
+        warriorProgress: 18,
+        dawnProgress: 6
+    }
+);
+
+
+/* ---------------------------------------------------------
+   29
+   收割不增加任務進度
+
+   勇士戰令 17/20
+   黎明曙光 5/10
+
+   收割已完成雷達
+   → 任務都不變
+--------------------------------------------------------- */
+
+addTest(
+    "第二十九個測試：收割不增加勇士戰令與黎明曙光",
+
+    createState({
+        field: 8,
+        completed: 1,
+        inventory: 5,
+
+        warriorPassEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 17,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 5
+    }),
+
+    state => harvestRadar(state),
+
+    {
+        field: 8,
+        completed: 0,
+        inventory: 4,
+        warriorProgress: 17,
+        dawnProgress: 5
+    }
+);
+
+
+/* ---------------------------------------------------------
+   30
+   完成事件不會觸發自動補回
+
+   場上8
+   庫存20
+
+   完成一個未完成雷達：
+   場上仍然8
+   庫存仍然20
+--------------------------------------------------------- */
+
+addTest(
+    "第三十個測試：完成雷達不觸發庫存自動補回",
+
+    createState({
+        field: 8,
+        completed: 0,
+        inventory: 20
+    }),
+
+    state => completeRadar(state),
+
+    {
+        field: 8,
+        completed: 1,
+        inventory: 20
     }
 );
 
@@ -526,12 +635,16 @@ addTest(
 
 function runTest(test) {
 
-    const state = JSON.parse(JSON.stringify(test.initialState));
+    const state = JSON.parse(
+        JSON.stringify(test.initialState)
+    );
 
     let actionResult = null;
 
     try {
+
         actionResult = test.action(state);
+
     } catch (error) {
 
         return {
@@ -558,9 +671,9 @@ function runTest(test) {
 }
 
 
-/* ---------------------------------------------------------
-   顯示測試
---------------------------------------------------------- */
+/* =========================================================
+   顯示
+   ========================================================= */
 
 function renderTests() {
 
@@ -568,12 +681,10 @@ function renderTests() {
 
     container.innerHTML = "";
 
-    let passed = 0;
-    let failed = 0;
-
     tests.forEach((test, index) => {
 
         const box = document.createElement("div");
+
         box.className = "test";
 
         box.innerHTML = `
@@ -581,79 +692,69 @@ function renderTests() {
 
             <div class="state">
                 <strong>初始狀態：</strong><br>
+
                 場上：${test.initialState.field}<br>
+
                 已完成：${test.initialState.completed}<br>
+
                 庫存：${test.initialState.inventory}<br>
-                庫存上限：${test.initialState.maxInventory}
+
+                勇士戰令：
+                ${
+                    test.initialState.warriorPassEnabled
+                    ? test.initialState.warriorProgress
+                      + "/"
+                      + test.initialState.warriorTarget
+                    : "未啟用"
+                }<br>
+
+                黎明曙光：
+                ${
+                    test.initialState.dawnEnabled
+                    ? test.initialState.dawnProgress
+                      + "/"
+                      + test.initialState.dawnTarget
+                    : "未啟用"
+                }
             </div>
 
             <button onclick="executeSingleTest(${index})">
                 執行測試
             </button>
 
-            <div class="result" id="result-${index}">
+            <div
+                class="result"
+                id="result-${index}"
+            >
                 尚未執行測試
             </div>
         `;
 
         container.appendChild(box);
     });
-
-    window.updateSummary = function() {
-
-        const results = tests.map((_, index) => {
-
-            const el = document.getElementById(`result-${index}`);
-
-            return el && el.dataset.pass === "true";
-
-        });
-
-        const executed = results.filter(x => x !== undefined).length;
-
-        /*
-           重新統計畫面上的結果
-        */
-
-        let p = 0;
-        let f = 0;
-
-        tests.forEach((_, index) => {
-
-            const el = document.getElementById(`result-${index}`);
-
-            if (!el || !el.dataset.executed) return;
-
-            if (el.dataset.pass === "true") {
-                p++;
-            } else {
-                f++;
-            }
-        });
-
-        document.getElementById("summary").innerHTML = `
-            <strong>目前測試進度</strong><br><br>
-            已執行：${p + f} 個<br>
-            <span class="pass">✅ 通過：${p} 個</span><br>
-            <span class="fail">❌ 失敗：${f} 個</span>
-        `;
-    };
 }
 
 
-/* ---------------------------------------------------------
-   單項測試
---------------------------------------------------------- */
+/* =========================================================
+   執行單項
+   ========================================================= */
 
 function executeSingleTest(index) {
 
     const test = tests[index];
+
     const result = runTest(test);
 
-    const el = document.getElementById(`result-${index}`);
+    const el =
+        document.getElementById(
+            `result-${index}`
+        );
 
     el.dataset.executed = "true";
-    el.dataset.pass = result.pass ? "true" : "false";
+
+    el.dataset.pass =
+        result.pass ? "true" : "false";
+
 
     if (result.pass) {
 
@@ -661,11 +762,34 @@ function executeSingleTest(index) {
             <strong>測試結果</strong><br><br>
 
             場上：${result.state.field}<br>
+
             已完成：${result.state.completed}<br>
+
             庫存：${result.state.inventory}<br>
 
-            <br>
-            <span class="pass">✅ 測試通過</span>
+            勇士戰令：
+            ${
+                result.state.warriorPassEnabled
+                ? result.state.warriorProgress
+                  + "/"
+                  + result.state.warriorTarget
+                : "未啟用"
+            }<br>
+
+            黎明曙光：
+            ${
+                result.state.dawnEnabled
+                ? result.state.dawnProgress
+                  + "/"
+                  + result.state.dawnTarget
+                : "未啟用"
+            }
+
+            <br><br>
+
+            <span class="pass">
+                ✅ 測試通過
+            </span>
         `;
 
     } else {
@@ -674,11 +798,16 @@ function executeSingleTest(index) {
             <strong>測試結果</strong><br><br>
 
             場上：${result.state.field}<br>
+
             已完成：${result.state.completed}<br>
+
             庫存：${result.state.inventory}<br>
 
             <br>
-            <span class="fail">❌ 測試失敗</span>
+
+            <span class="fail">
+                ❌ 測試失敗
+            </span>
         `;
     }
 
@@ -686,9 +815,56 @@ function executeSingleTest(index) {
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================================
+   更新總進度
+   ========================================================= */
+
+function updateSummary() {
+
+    let executed = 0;
+    let passed = 0;
+    let failed = 0;
+
+    tests.forEach((_, index) => {
+
+        const el =
+            document.getElementById(
+                `result-${index}`
+            );
+
+        if (!el.dataset.executed) {
+            return;
+        }
+
+        executed++;
+
+        if (el.dataset.pass === "true") {
+            passed++;
+        } else {
+            failed++;
+        }
+    });
+
+
+    document.getElementById("summary").innerHTML = `
+        <strong>目前測試進度</strong><br><br>
+
+        已執行：${executed} 個<br>
+
+        <span class="pass">
+            ✅ 通過：${passed} 個
+        </span><br>
+
+        <span class="fail">
+            ❌ 失敗：${failed} 個
+        </span>
+    `;
+}
+
+
+/* =========================================================
    初始化
---------------------------------------------------------- */
+   ========================================================= */
 
 renderTests();
 
