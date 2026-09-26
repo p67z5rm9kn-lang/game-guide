@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>規劃器決策測試 v1</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#111;color:#eee;padding:16px;line-height:1.5}
+button{font-size:18px;padding:12px 18px;border:0;border-radius:10px;margin:8px 0;font-weight:700}
+#summary{font-size:20px;margin:12px 0}.test{padding:10px 0;border-bottom:1px solid #333}
+.pass{color:#7ee787}.fail{color:#ff7b72}pre{background:#1b1b1b;padding:10px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<h1>規劃器決策測試 v1</h1>
+<p>這一批開始測「規劃器應該做什麼」，不是 UI。</p>
+<button onclick="runAll()">全部執行</button>
+<div id="summary">尚未執行</div>
+<div id="results"></div>
+<script>
+function d(s){return new Date(s);}
+function nextScoring(t){
+  const w=t.getDay(), x=new Date(t), ten=new Date(t); ten.setHours(10,0,0,0);
+  if((w===1||w===5)&&t.getTime()>=ten.getTime()) return {date:ten,scoring:true};
+  let add={0:1,1:4,2:3,3:2,4:1,5:3,6:2}[w];
+  x.setDate(x.getDate()+add); x.setHours(10,0,0,0);
+  return {date:x,scoring:false};
+}
+function decide(i){
+  const n=nextScoring(i.time);
+  const ideal={inventory:Math.max(0,i.max-8),field:11};
+  return n.scoring
+    ? {mode:"SCORING",target:n.date,strategy:"CLEAR_AND_HARVEST",lauraRequired:false,ideal}
+    : {mode:"PREPARE",target:n.date,strategy:"PREPARE_TARGET",lauraRequired:!i.lauraUsedToday,ideal};
+}
+function sameTime(a,s){return a.getTime()===d(s+"+08:00").getTime();}
+const tests=[
+["1 週六準備週一","2026-09-26T16:00:00+08:00",30,false,"PREPARE","2026-09-28T10:00:00","PREPARE_TARGET"],
+["2 週日準備週一","2026-09-27T09:00:00+08:00",30,true,"PREPARE","2026-09-28T10:00:00","PREPARE_TARGET"],
+["3 週一09:00仍是衝分前準備","2026-09-28T09:00:00+08:00",30,false,"PREPARE","2026-09-28T10:00:00","PREPARE_TARGET"],
+["4 週一10:00進入衝分","2026-09-28T10:00:00+08:00",30,false,"SCORING","2026-09-28T10:00:00","CLEAR_AND_HARVEST"],
+["5 週一15:00仍是衝分","2026-09-28T15:00:00+08:00",30,true,"SCORING","2026-09-28T10:00:00","CLEAR_AND_HARVEST"],
+["6 週一23:00仍是衝分","2026-09-28T23:00:00+08:00",30,false,"SCORING","2026-09-28T10:00:00","CLEAR_AND_HARVEST"],
+["7 週二準備週五","2026-09-29T12:00:00+08:00",25,false,"PREPARE","2026-10-02T10:00:00","PREPARE_TARGET"],
+["8 週三準備週五","2026-09-30T20:00:00+08:00",40,false,"PREPARE","2026-10-02T10:00:00","PREPARE_TARGET"],
+["9 週四準備週五","2026-10-01T08:00:00+08:00",30,false,"PREPARE","2026-10-02T10:00:00","PREPARE_TARGET"],
+["10 週五09:59衝分前","2026-10-02T09:59:00+08:00",30,false,"PREPARE","2026-10-02T10:00:00","PREPARE_TARGET"],
+["11 週五10:00進入衝分","2026-10-02T10:00:00+08:00",30,false,"SCORING","2026-10-02T10:00:00","CLEAR_AND_HARVEST"],
+["12 週五21:00仍是衝分","2026-10-02T21:00:00+08:00",20,true,"SCORING","2026-10-02T10:00:00","CLEAR_AND_HARVEST"],
+["13 週六準備下一個週一","2026-10-03T10:01:00+08:00",50,false,"PREPARE","2026-10-05T10:00:00","PREPARE_TARGET"],
+["14 MAX=1理想庫存=0","2026-09-29T12:00:00+08:00",1,false,"PREPARE","2026-10-02T10:00:00","PREPARE_TARGET"],
+["15 Laura未使用→可規劃","2026-09-29T12:00:00+08:00",30,false,"PREPARE","2026-10-02T10:00:00","PREPARE_TARGET"],
+["16 Laura已使用→不再要求","2026-09-29T12:00:00+08:00",30,true,"PREPARE","2026-10-02T10:00:00","PREPARE_TARGET"],
+["17 MAX=30理想22/11","2026-09-30T12:00:00+08:00",30,false,"PREPARE","2026-10-02T10:00:00","PREPARE_TARGET"],
+["18 MAX=40理想32/11","2026-09-30T12:00:00+08:00",40,false,"PREPARE","2026-10-02T10:00:00","PREPARE_TARGET"],
+["19 週日跨週找週一","2026-10-04T23:00:00+08:00",30,false,"PREPARE","2026-10-05T10:00:00","PREPARE_TARGET"],
+["20 過去設定時間仍依設定時間規劃","2026-09-29T12:00:00+08:00",30,false,"PREPARE","2026-10-02T10:00:00","PREPARE_TARGET"]
+];
+function runAll(){
+ let pass=0, out="";
+ tests.forEach((t,i)=>{
+  const [name,time,max,used,mode,target,strategy]=t, r=decide({time:d(time),max,lauraUsedToday:used});
+  const ok=r.mode===mode&&sameTime(r.target,target)&&r.strategy===strategy;
+  if(ok)pass++;
+  const extra=(i===13&&r.ideal.inventory!==0)||(i===16&&r.ideal.inventory!==22)||(i===17&&r.ideal.inventory!==32)||(i===14&&r.lauraRequired!==true)||(i===15&&r.lauraRequired!==false);
+  const final=ok&&!extra;
+  if(!final) pass-=ok?1:0;
+  out+=`<div class="test ${final?"pass":"fail"}">${final?"✅":"❌"} ${name}${final?"":"<pre>"+JSON.stringify({expected:{mode,target,strategy},actual:{mode:r.mode,target:r.target.toISOString(),strategy:r.strategy,ideal:r.ideal,lauraRequired:r.lauraRequired},index:i+1},null,2)+"</pre>"}</div>`;
+ });
+ document.getElementById("summary").innerHTML="<b>"+pass+"/"+tests.length+" 通過</b>";
+ document.getElementById("results").innerHTML=out;
+}
+</script>
+</body>
+</html>
