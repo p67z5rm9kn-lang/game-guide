@@ -3,145 +3,145 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>planner-sequence-test-v1</title>
+<title>planner-decision-test-v2</title>
 <style>
-  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;padding:20px;line-height:1.6;background:#111;color:#eee}
-  button{font-size:18px;padding:12px 18px;border-radius:10px;border:0;margin:8px 0}
-  #summary{font-size:20px;font-weight:700;margin:12px 0}
-  #results{white-space:pre-wrap;font-family:ui-monospace,monospace;background:#1d1d1d;padding:14px;border-radius:10px}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;padding:20px;line-height:1.6;background:#111;color:#eee}
+button{font-size:18px;padding:12px 18px;border-radius:10px;border:0;margin:8px 0}
+#summary{font-size:20px;font-weight:700;margin:12px 0}
+#results{white-space:pre-wrap;font-family:ui-monospace,monospace;background:#1d1d1d;padding:14px;border-radius:10px}
 </style>
 </head>
 <body>
-<h2>planner-sequence-test-v1</h2>
+<h2>planner-decision-test-v2</h2>
 <button onclick="runAllTests()">▶ 全部執行</button>
 <div id="summary">尚未執行</div>
 <div id="results"></div>
 
 <script>
 function assertEqual(name, actual, expected) {
-  const a = JSON.stringify(actual);
-  const e = JSON.stringify(expected);
-  return a === e ? `✅ ${name}` : `❌ ${name}\n   實際：${a}\n   預期：${e}`;
+  const a=JSON.stringify(actual), e=JSON.stringify(expected);
+  return a===e ? `✅ ${name}` : `❌ ${name}\n   實際：${a}\n   預期：${e}`;
 }
-function clone(x){return JSON.parse(JSON.stringify(x));}
+function pad(n){return String(n).padStart(2,"0");}
 
-function complete(state,count=1,tasks=null){
-  const s=clone(state);
-  for(let i=0;i<count;i++){
-    if(s.unfinished<=0)break;
-    s.unfinished--; s.completed++;
-    if(tasks){
-      for(const key of ["warrior","dawn"]){
-        if(tasks[key]?.active){
-          tasks[key].current=Math.min(tasks[key].target,tasks[key].current+1);
-        }
-      }
-    }
+/*
+  所有輸入都是「絕對時間 ISO」。
+  末日時間 = UTC-2。
+  規劃目標以末日日期的星期與 00:00 為準。
+*/
+function doomParts(iso){
+  const d=new Date(iso);
+  const utcMs=d.getTime()+2*60*60*1000;
+  const x=new Date(utcMs);
+  return {
+    year:x.getUTCFullYear(),
+    month:x.getUTCMonth()+1,
+    day:x.getUTCDate(),
+    hour:x.getUTCHours(),
+    minute:x.getUTCMinutes(),
+    second:x.getUTCSeconds(),
+    weekday:x.getUTCDay()
+  };
+}
+
+function doomDateKey(p){
+  return `${p.year}-${pad(p.month)}-${pad(p.day)}`;
+}
+
+function targetInfo(iso){
+  const p=doomParts(iso);
+  const scoring=p.weekday===1 || p.weekday===5;
+  const beforeRollover=p.hour===0 && p.minute===0 && p.second===0;
+
+  // 末日00:00對應遊戲日10:00。
+  // 星期一/五當天：
+  // - 00:00以前不存在「當天準備」；到00:00起視為衝分日。
+  // 其他時間也視為該日衝分日。
+  if(scoring){
+    return {
+      mode:"scoring",
+      scoringDay:doomDateKey(p),
+      reason:"今天是星期一/五衝分日"
+    };
   }
-  return s;
+
+  // 非星期一/五：找下一個星期一或星期五的末日00:00。
+  let daysToFriday=(5-p.weekday+7)%7;
+  let daysToMonday=(1-p.weekday+7)%7;
+  const candidates=[daysToFriday,daysToMonday].filter(x=>x>0);
+  const addDays=Math.min(...candidates);
+  const base=new Date(Date.UTC(p.year,p.month-1,p.day)+addDays*86400000);
+  const target=`${base.getUTCFullYear()}-${pad(base.getUTCMonth()+1)}-${pad(base.getUTCDate())}`;
+  return {
+    mode:"prepare",
+    scoringDay:target,
+    reason:"今天不是星期一/五，準備下一個衝分日"
+  };
 }
 
-function harvest(state,count=1,fiveStar=false){
-  const s=clone(state); s.treasure ??= 0;
-  for(let i=0;i<count;i++){
-    if(s.completed<=0)break;
-    s.completed--; s.field--;
-    if(fiveStar)s.treasure=Math.min(10,s.treasure+1);
-    if(s.field<8 && s.inventory>0){
-      const move=Math.min(8-s.field,s.inventory);
-      s.field+=move; s.inventory-=move;
-    }
-  }
-  return s;
-}
-
-function systemFree(state,amount=8){
-  const s=clone(state);
-  const fieldNeed=Math.max(0,8-s.field);
-  const toField=Math.min(amount,fieldNeed);
-  s.field+=toField;
-  const toInventory=amount-toField;
-  if(toInventory>0){
-    const room=Math.max(0,s.maxInventory-s.inventory);
-    s.inventory+=Math.min(toInventory,room);
-  }
-  return s;
-}
-
-function useLaura(state,star){
-  const s=clone(state);
-  if(s.lauraUsed)return s;
-  const amount=[5,10,10,10,20,20][star];
-  if(s.field<8){
-    const toField=Math.min(amount,8-s.field);
-    s.field+=toField; s.inventory+=amount-toField;
-  }else{
-    s.field+=3; s.inventory+=amount-3;
-  }
-  s.lauraUsed=true;
-  return s;
-}
-
-function rollover(state){
-  const s=clone(state);
-  s.lauraUsed=false;
-  s.treasure=0;
-  return systemFree(s,8);
-}
-
-function scoreCompletion(state,tasks,count=1){
-  const s=complete(state,count,tasks);
-  return {state:s,tasks:clone(tasks)};
-}
-
-function idealPrep(maxInventory){
+function idealState(maxInventory){
   return {field:11,inventory:maxInventory-8};
+}
+
+function estimatedHarvest(field,inventory,star){
+  const laura=[5,10,10,10,20,20][star];
+  return field+inventory+24+laura;
+}
+
+function scoringDayAdvice(){
+  return "今天是衝分日，建議今天完成並收割全部可用雷達，不需要為下一個衝分日保留。";
+}
+
+function prepAdvice(){
+  return "準備下一個衝分日：目標在衝分日前維持場上11、庫存MAX−8。";
+}
+
+function normalizeTask(task){
+  if(!task || !task.active) return {active:false};
+  return {
+    active:true,
+    target:Math.max(0,task.target),
+    current:Math.max(0,Math.min(task.current,task.target))
+  };
 }
 
 const tests=[];
 
-tests.push(()=>{let s={field:11,unfinished:3,completed:8,inventory:10,treasure:0};s=complete(s,3);s=harvest(s,3);return assertEqual("1. 完成3→收割3的完整序列",s,{field:8,unfinished:0,completed:8,inventory:10,treasure:0});});
+// 1-8：衝分日/準備日目標判定
+tests.push(()=>assertEqual("1. 末日星期一10:00 → 衝分日",targetInfo("2026-09-21T10:00:00+08:00").mode,"scoring"));
+tests.push(()=>assertEqual("2. 末日星期五10:00 → 衝分日",targetInfo("2026-09-25T10:00:00+08:00").mode,"scoring"));
+tests.push(()=>assertEqual("3. 星期二 → 準備星期五",targetInfo("2026-09-22T10:00:00+08:00").scoringDay,"2026-09-25"));
+tests.push(()=>assertEqual("4. 星期三 → 準備星期五",targetInfo("2026-09-23T18:00:00+08:00").scoringDay,"2026-09-25"));
+tests.push(()=>assertEqual("5. 星期四 → 準備星期五",targetInfo("2026-09-24T23:00:00+08:00").scoringDay,"2026-09-25"));
+tests.push(()=>assertEqual("6. 星期六 → 準備星期一",targetInfo("2026-09-26T12:00:00+08:00").scoringDay,"2026-09-28"));
+tests.push(()=>assertEqual("7. 星期日 → 準備星期一",targetInfo("2026-09-27T12:00:00+08:00").scoringDay,"2026-09-28"));
+tests.push(()=>assertEqual("8. 星期一衝分日不改選下一個星期五",targetInfo("2026-09-28T18:00:00+08:00").scoringDay,"2026-09-28"));
 
-tests.push(()=>{let s={field:11,unfinished:0,completed:11,inventory:0};s=harvest(s,3);return assertEqual("2. 場上11收割3、庫存0",s,{field:8,unfinished:0,completed:8,inventory:0,treasure:0});});
+// 9-12：絕對時間/末日時間
+tests.push(()=>assertEqual("9. 台灣10:00 = 末日00:00",doomParts("2026-09-21T10:00:00+08:00").hour,0));
+tests.push(()=>assertEqual("10. 台灣18:00 = 末日08:00",doomParts("2026-09-21T18:00:00+08:00").hour,8));
+tests.push(()=>assertEqual("11. 台灣02:00 = 末日16:00",doomParts("2026-09-22T02:00:00+08:00").hour,16));
+tests.push(()=>assertEqual("12. 時區切換不改變絕對瞬間",new Date("2026-09-21T10:00:00+08:00").getTime(),new Date("2026-09-21T02:00:00Z").getTime()));
 
-tests.push(()=>{let s={field:11,unfinished:0,completed:11,inventory:5};s=harvest(s,3);return assertEqual("3. 場上11收割3、庫存5自動補充",s,{field:8,unfinished:0,completed:8,inventory:5,treasure:0});});
+// 13-15：理想準備狀態
+tests.push(()=>assertEqual("13. MAX30 → 場上11/庫存22",idealState(30),{field:11,inventory:22}));
+tests.push(()=>assertEqual("14. MAX20 → 場上11/庫存12",idealState(20),{field:11,inventory:12}));
+tests.push(()=>assertEqual("15. MAX8 → 場上11/庫存0",idealState(8),{field:11,inventory:0}));
 
-tests.push(()=>{let s={field:7,unfinished:2,completed:5,inventory:4};s=complete(s,1);return assertEqual("4. 完成事件不觸發自動補充",s,{field:7,unfinished:1,completed:6,inventory:4});});
+// 16-18：衝分日預計收割
+tests.push(()=>assertEqual("16. 場上11+庫存10+系統24+Laura5=50",estimatedHarvest(11,10,0),50));
+tests.push(()=>assertEqual("17. 場上11+庫存10+系統24+Laura10=55",estimatedHarvest(11,10,1),55));
+tests.push(()=>assertEqual("18. 場上11+庫存10+系統24+Laura20=65",estimatedHarvest(11,10,5),65));
 
-tests.push(()=>{let s={field:7,unfinished:0,completed:7,inventory:4};s=harvest(s,1);return assertEqual("5. 收割後才觸發自動補充",s,{field:8,unfinished:0,completed:6,inventory:2,treasure:0});});
-
-tests.push(()=>{let s={field:11,unfinished:0,completed:11,inventory:0,treasure:9};s=harvest(s,3,true);return assertEqual("6. 5星Laura寶箱9/10收割3→10/10",s,{field:8,unfinished:0,completed:8,inventory:0,treasure:10});});
-
-tests.push(()=>{let s={field:8,unfinished:0,completed:8,inventory:0,treasure:0,lauraUsed:false};s=harvest(s,2,true);s=useLaura(s,5);return assertEqual("7. 寶箱進度不阻止當日Laura使用",s,{field:8,unfinished:0,completed:6,inventory:18,treasure:2,lauraUsed:true});});
-
-tests.push(()=>{let s={field:8,unfinished:0,completed:8,inventory:0,lauraUsed:false};s=useLaura(s,4);const afterFirst=clone(s);s=useLaura(s,4);return assertEqual("8. Laura同日第二次使用無效",s,afterFirst);});
-
-tests.push(()=>{let s={field:8,unfinished:0,completed:8,inventory:0,lauraUsed:true,treasure:7,maxInventory:30};s=rollover(s);s=useLaura(s,0);return assertEqual("9. 10:00後Laura重置可使用",s,{field:11,unfinished:0,completed:8,inventory:10,lauraUsed:true,treasure:0,maxInventory:30});});
-
-tests.push(()=>{const s={field:6,unfinished:2,completed:4,inventory:10,maxInventory:30};return assertEqual("10. 系統+8先補場上",systemFree(s),{field:8,unfinished:2,completed:4,inventory:16,maxInventory:30});});
-
-tests.push(()=>{const s={field:11,unfinished:3,completed:8,inventory:27,maxInventory:30};return assertEqual("11. 系統+8進庫存且受MAX限制",systemFree(s),{field:11,unfinished:3,completed:8,inventory:30,maxInventory:30});});
-
-tests.push(()=>{const s={field:8,unfinished:0,completed:8,inventory:29,maxInventory:30,lauraUsed:false};return assertEqual("12. Laura可突破MAX",useLaura(s,4),{field:11,unfinished:0,completed:8,inventory:46,maxInventory:30,lauraUsed:true});});
-
-tests.push(()=>{const s={field:11,unfinished:2,completed:9,inventory:0};const tasks={warrior:{active:true,target:20,current:17},dawn:{active:true,target:10,current:9}};const r=scoreCompletion(s,tasks,1);return assertEqual("13. 一次完成同時推進兩個每日任務",r.tasks,{warrior:{active:true,target:20,current:18},dawn:{active:true,target:10,current:10}});});
-
-tests.push(()=>{const s={field:11,unfinished:3,completed:8,inventory:0};const tasks={warrior:{active:true,target:20,current:20},dawn:{active:true,target:10,current:9}};const r=scoreCompletion(s,tasks,2);return assertEqual("14. 每日任務各自封頂不互相影響",r.tasks,{warrior:{active:true,target:20,current:20},dawn:{active:true,target:10,current:10}});});
-
-tests.push(()=>assertEqual("15. MAX30理想準備狀態",idealPrep(30),{field:11,inventory:22}));
-
-tests.push(()=>assertEqual("16. MAX20理想準備狀態",idealPrep(20),{field:11,inventory:12}));
-
-tests.push(()=>{const s={field:11,unfinished:0,completed:11,inventory:22,maxInventory:30};return assertEqual("17. MAX30理想狀態→10:00庫存MAX",systemFree(s),{field:11,unfinished:0,completed:11,inventory:30,maxInventory:30});});
-
-tests.push(()=>assertEqual("18. 跨日前預計可收割",11+10,21));
-
-tests.push(()=>{let s={field:11,unfinished:0,completed:11,inventory:10,maxInventory:30};s=systemFree(s,8);s=systemFree(s,8);s=systemFree(s,8);return assertEqual("19. 衝分日三次系統+8共24",s.inventory,30);});
-
-tests.push(()=>assertEqual("20. 預計收割基準不加入盟友瞬間幫助",11+10+24+20,65));
+// 19-20：任務獨立與操作建議模式
+tests.push(()=>assertEqual("19. 已達標任務進度封頂",normalizeTask({active:true,target:10,current:15}),{active:true,target:10,current:10}));
+tests.push(()=>assertEqual("20. 準備日/衝分日建議文字模式不同",[prepAdvice(),scoringDayAdvice()],[
+  "準備下一個衝分日：目標在衝分日前維持場上11、庫存MAX−8。",
+  "今天是衝分日，建議今天完成並收割全部可用雷達，不需要為下一個衝分日保留。"
+]));
 
 function runAllTests(){
-  const results=tests.map(fn=>{try{return fn();}catch(e){return `❌ 測試執行錯誤：${e.message}`;}});
+  const results=tests.map(fn=>{try{return fn()}catch(e){return `❌ 測試執行錯誤：${e.message}`;}});
   const passed=results.filter(x=>x.startsWith("✅")).length;
   const failed=results.length-passed;
   document.getElementById("summary").textContent=`通過：${passed}/${results.length}　失敗：${failed}`;
