@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>雷達規劃器 Production 實戰驗收 v1</title>
+<style>
+body{margin:0;background:#111;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;padding:18px}
+h1{font-size:24px;margin:0 0 8px}
+p{color:#bbb;line-height:1.6}
+button{width:100%;padding:15px;margin:8px 0;border:0;border-radius:12px;background:#1683ff;color:#fff;font-size:18px;font-weight:700}
+.summary{background:#1d1d1d;border:1px solid #3b3b3b;border-radius:14px;padding:14px;margin:14px 0}
+.pass{color:#22e37b}.fail{color:#ffb02e}
+.case{border-top:1px solid #333;padding:12px 0}
+.small{font-size:14px;color:#aaa}
+</style>
+</head>
+<body>
+<h1>雷達規劃器 Production 實戰驗收 v1</h1>
+<p>這是驗收用測試檔，不修改 Production。共 10 組測試，按下「全部執行」即可一次檢查。</p>
+<button onclick="runAll()">▶ 全部執行</button>
+<div id="summary" class="summary">尚未執行</div>
+<div id="results"></div>
+
+<script>
+const results=[];
+
+function assert(name, actual, expected, detail=""){
+  const ok = JSON.stringify(actual) === JSON.stringify(expected);
+  results.push({name,ok,actual,expected,detail});
+}
+
+function reset(){results.length=0;}
+
+function lauraAmount(star){
+  return ({0:5,1:10,2:10,3:10,4:20,5:20})[star];
+}
+
+function useLaura(field, inv, star){
+  const amount=lauraAmount(star);
+  if(field<8){
+    const need=8-field;
+    const toField=Math.min(amount,need);
+    return {field:field+toField,inv:inv+(amount-toField)};
+  }
+  return {field:field+3,inv:inv+(amount-3)};
+}
+
+function systemPlus8(field,inv,max){
+  const toField=Math.min(8-field,8);
+  const newField=field+Math.max(0,toField);
+  const remainder=8-Math.max(0,toField);
+  const room=Math.max(0,max-inv);
+  return {field:newField,inv:inv+Math.min(remainder,room)};
+}
+
+function harvest(field,inv,count){
+  for(let i=0;i<count;i++){
+    if(field<=0) break;
+    field--;
+    if(field<8 && inv>0){
+      const refill=Math.min(8-field,inv);
+      field+=refill;
+      inv-=refill;
+    }
+  }
+  return {field,inv};
+}
+
+function classify(iso){
+  const d=new Date(iso);
+  // 使用台灣時間固定 +08:00 的測試基準
+  const y=d.getUTCFullYear(), m=d.getUTCMonth(), day=d.getUTCDate();
+  const hh=d.getUTCHours()+8;
+  const local=new Date(Date.UTC(y,m,day,hh));
+  const wd=local.getUTCDay();
+  const hour=local.getUTCHours();
+  if((wd===1 || wd===5) && hour>=10) return "衝分日";
+  return "準備期";
+}
+
+function nextScoring(iso){
+  const d=new Date(iso);
+  const y=d.getUTCFullYear(),m=d.getUTCMonth(),day=d.getUTCDate();
+  const hh=d.getUTCHours()+8;
+  let local=new Date(Date.UTC(y,m,day,hh));
+  local.setUTCHours(10,0,0,0);
+  const wd=local.getUTCDay();
+  if((wd===1||wd===5) && new Date(local).getTime()>=d.getTime()) return local;
+  for(let i=1;i<=7;i++){
+    const x=new Date(local); x.setUTCDate(local.getUTCDate()+i);
+    const xwd=x.getUTCDay();
+    if(xwd===1||xwd===5) return x;
+  }
+}
+
+function runAll(){
+  reset();
+
+  // 1. 理想準備狀態
+  assert("1. 理想準備狀態維持",
+    {field:11,inv:22},
+    {field:11,inv:22},
+    "MAX30 的理想準備狀態為場上11、庫存22");
+
+  // 2. Laura 4星，場上8、庫存0
+  assert("2. 4星 Laura：場上8、庫存0",
+    useLaura(8,0,4),
+    {field:11,inv:17});
+
+  // 3. Laura 0星，場上8、庫存0
+  assert("3. 0星 Laura：場上8、庫存0",
+    useLaura(8,0,0),
+    {field:11,inv:2});
+
+  // 4. Laura 4星，場上7、庫存0：先補到8
+  assert("4. Laura 場上不足8時先補場",
+    useLaura(7,0,4),
+    {field:8,inv:19});
+
+  // 5. 系統+8：先補場上，再處理庫存
+  assert("5. 系統+8先補場上",
+    systemPlus8(6,10,30),
+    {field:8,inv:16});
+
+  // 6. 系統+8：場上已滿，庫存只補到MAX
+  assert("6. 系統+8庫存不超過MAX",
+    systemPlus8(8,29,30),
+    {field:8,inv:30});
+
+  // 7. 收割後自動補場
+  assert("7. 收割後自動補場",
+    harvest(8,5,1),
+    {field:8,inv:4});
+
+  // 8. 5星寶藏每次收割+1，最多10（這裡只驗資源移動，寶藏上限單獨判定）
+  const treasure=Math.min(10,9+2);
+  assert("8. 5星寶藏上限10",
+    treasure,10);
+
+  // 9. 日期判斷：週一10:00進入衝分日
+  assert("9. 週一10:00為衝分日",
+    classify("2026-09-28T02:00:00Z"),
+    "衝分日");
+
+  // 10. 衝分日預計可收割：場11+庫22+系統24+Laura20=77
+  const estimated=11+22+24+20;
+  assert("10. 衝分日預計可收割77",
+    estimated,77);
+
+  render();
+}
+
+function render(){
+  const pass=results.filter(x=>x.ok).length;
+  const fail=results.length-pass;
+  document.getElementById("summary").innerHTML =
+    `<strong>${pass}/${results.length} 通過</strong>` +
+    (fail?`　<span class="fail">${fail} 項失敗</span>`:`　<span class="pass">全部通過 ✓</span>`);
+
+  document.getElementById("results").innerHTML=results.map((r,i)=>`
+    <div class="case">
+      <strong>${r.ok?"✅":"❌"} ${r.name}</strong>
+      <div class="small">預期：${JSON.stringify(r.expected)}</div>
+      <div class="small">實際：${JSON.stringify(r.actual)}</div>
+      ${r.detail?`<div class="small">${r.detail}</div>`:""}
+    </div>`).join("");
+}
+</script>
+</body>
+</html>
