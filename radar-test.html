@@ -3,49 +3,138 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>雷達規則引擎測試</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang TC",
-        "Noto Sans TC", sans-serif;
+      margin: 0;
+      padding: 20px;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Noto Sans TC",
+        "Noto Sans Traditional Chinese",
+        sans-serif;
+
       background: #111827;
       color: #f9fafb;
-      padding: 20px;
       line-height: 1.6;
     }
 
     .card {
       max-width: 500px;
-      margin: 0 auto;
+      margin: 0 auto 20px;
       padding: 20px;
+
       background: #1f2937;
       border-radius: 16px;
     }
 
     h1 {
-      font-size: 22px;
       margin-top: 0;
+      font-size: 26px;
+    }
+
+    h2 {
+      font-size: 21px;
+      margin: 0 0 18px;
+    }
+
+    .test-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .state {
+      background: #111827;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .state-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .state-row {
+      font-size: 17px;
+      margin: 4px 0;
     }
 
     button {
       width: 100%;
-      padding: 14px;
-      margin-top: 15px;
+      padding: 16px;
+
       border: 0;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      background: #d97706;
+      border-radius: 14px;
+
+      background: #d98228;
       color: white;
+
+      font-size: 18px;
+      font-weight: 700;
+
+      cursor: pointer;
     }
 
-    #result {
-      margin-top: 20px;
-      padding: 15px;
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .result {
+      margin-top: 18px;
+      padding: 18px;
+
       background: #111827;
-      border-radius: 10px;
-      white-space: pre-line;
+      border-radius: 12px;
+
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result-title {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .result-row {
+      font-size: 18px;
+      margin: 6px 0;
+    }
+
+    .pass {
+      margin-top: 18px;
+      color: #86efac;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .fail {
+      margin-top: 18px;
+      color: #fca5a5;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .summary {
+      margin-top: 20px;
+      padding: 16px;
+
+      background: #111827;
+      border-radius: 12px;
+
+      font-size: 17px;
     }
   </style>
 </head>
@@ -53,75 +142,388 @@
 <body>
 
   <div class="card">
+
     <h1>雷達規則引擎測試</h1>
 
-    <p>第二個測試：系統 +8｜庫存接近 MAX</p>
+    <div id="testArea"></div>
 
-    <p>
-      初始狀態：<br>
-      場上：8<br>
-      庫存：29<br>
-      庫存上限：30
-    </p>
-
-    <button onclick="runTest()">
-      執行測試
-    </button>
-
-    <div id="result">
+    <div class="summary" id="summary">
       尚未執行測試
     </div>
+
   </div>
 
+
   <script>
-    function applySystemRadar(state) {
-      const radarGenerated = 8;
 
-      const fieldSpace = Math.max(0, 8 - state.fieldTotal);
+    /* =========================================================
+       雷達規則引擎 v1.0
+       ========================================================= */
 
-      const toField = Math.min(
-        radarGenerated,
-        fieldSpace
-      );
 
-      const toInventory = radarGenerated - toField;
+    /**
+     * 建立雷達狀態
+     */
+    function createState(field, inventory, inventoryMax) {
 
-      state.fieldTotal += toField;
-
-      const inventorySpace = Math.max(
-        0,
-        state.inventoryMax - state.inventory
-      );
-
-      state.inventory += Math.min(
-        toInventory,
-        inventorySpace
-      );
-
-      return state;
-    }
-
-    function runTest() {
-      const state = {
-        fieldTotal: 8,
-        inventory: 29,
-        inventoryMax: 30
+      return {
+        field: field,
+        inventory: inventory,
+        inventoryMax: inventoryMax
       };
 
-      applySystemRadar(state);
+    }
+
+
+    /**
+     * 系統免費雷達 +8
+     *
+     * 規則：
+     * 1. 系統產生 8 個雷達
+     * 2. 優先補場上至 8
+     * 3. 剩餘數量才進入庫存
+     * 4. 進入庫存時不能超過 MAX
+     */
+    function applySystemRadar(state) {
+
+      const result = {
+        ...state
+      };
+
+      let generated = 8;
+
+
+      // 第一階段：補場上到 8
+      if (result.field < 8) {
+
+        const need = 8 - result.field;
+
+        const toField = Math.min(generated, need);
+
+        result.field += toField;
+
+        generated -= toField;
+      }
+
+
+      // 第二階段：剩餘進庫存
+      if (generated > 0) {
+
+        const inventorySpace =
+          Math.max(
+            0,
+            result.inventoryMax - result.inventory
+          );
+
+        const toInventory =
+          Math.min(
+            generated,
+            inventorySpace
+          );
+
+        result.inventory += toInventory;
+      }
+
+
+      return result;
+    }
+
+
+    /**
+     * 比較兩個狀態
+     */
+    function statesEqual(actual, expected) {
+
+      return (
+        actual.field === expected.field &&
+        actual.inventory === expected.inventory
+      );
+
+    }
+
+
+    /* =========================================================
+       測試資料
+       ========================================================= */
+
+    const tests = [
+
+      {
+        id: 1,
+
+        title: "第一個測試：系統 +8 雷達",
+
+        initial: createState(
+          6,
+          20,
+          30
+        ),
+
+        expected: {
+          field: 8,
+          inventory: 26
+        }
+      },
+
+
+      {
+        id: 2,
+
+        title: "第二個測試：系統 +8｜庫存接近 MAX",
+
+        initial: createState(
+          8,
+          29,
+          30
+        ),
+
+        expected: {
+          field: 8,
+          inventory: 30
+        }
+      },
+
+
+      {
+        id: 3,
+
+        title: "第三個測試：系統 +8｜庫存已滿",
+
+        initial: createState(
+          8,
+          30,
+          30
+        ),
+
+        expected: {
+          field: 8,
+          inventory: 30
+        }
+      }
+
+    ];
+
+
+    /* =========================================================
+       建立測試畫面
+       ========================================================= */
+
+    const testArea =
+      document.getElementById("testArea");
+
+    const summary =
+      document.getElementById("summary");
+
+
+    let testResults = [];
+
+
+    tests.forEach(test => {
+
+      const card =
+        document.createElement("div");
+
+      card.className = "card";
+
+
+      card.innerHTML = `
+
+        <div class="test-title">
+          ${test.title}
+        </div>
+
+
+        <div class="state">
+
+          <div class="state-title">
+            初始狀態：
+          </div>
+
+          <div class="state-row">
+            場上：${test.initial.field}
+          </div>
+
+          <div class="state-row">
+            庫存：${test.initial.inventory}
+          </div>
+
+          <div class="state-row">
+            庫存上限：${test.initial.inventoryMax}
+          </div>
+
+        </div>
+
+
+        <button onclick="runTest(${test.id})">
+          執行測試
+        </button>
+
+
+        <div
+          class="result"
+          id="result-${test.id}"
+        >
+        </div>
+
+      `;
+
+
+      testArea.appendChild(card);
+
+    });
+
+
+    /* =========================================================
+       執行單一測試
+       ========================================================= */
+
+    function runTest(testId) {
+
+      const test =
+        tests.find(
+          item => item.id === testId
+        );
+
+
+      if (!test) {
+        return;
+      }
+
+
+      // 使用新的狀態，避免修改原始測試資料
+      const actual =
+        applySystemRadar(
+          {
+            ...test.initial
+          }
+        );
+
 
       const passed =
-        state.fieldTotal === 8 &&
-        state.inventory === 30;
+        statesEqual(
+          actual,
+          test.expected
+        );
 
-      document.getElementById("result").textContent =
-        "測試結果\n\n" +
-        "場上：" + state.fieldTotal + "\n" +
-        "庫存：" + state.inventory + "\n\n" +
-        (passed
-          ? "✅ 測試通過"
-          : "❌ 測試失敗");
+
+      testResults =
+        testResults.filter(
+          item => item.id !== testId
+        );
+
+
+      testResults.push({
+        id: testId,
+        passed: passed
+      });
+
+
+      const result =
+        document.getElementById(
+          `result-${testId}`
+        );
+
+
+      result.classList.add("show");
+
+
+      result.innerHTML = `
+
+        <div class="result-title">
+          測試結果
+        </div>
+
+
+        <div class="result-row">
+          場上：${actual.field}
+        </div>
+
+
+        <div class="result-row">
+          庫存：${actual.inventory}
+        </div>
+
+
+        ${
+          passed
+
+          ? `
+            <div class="pass">
+              ✅ 測試通過
+            </div>
+          `
+
+          : `
+            <div class="fail">
+              ❌ 測試失敗
+            </div>
+
+            <div class="result-row">
+              預期：場上 ${test.expected.field}
+              ／ 庫存 ${test.expected.inventory}
+            </div>
+          `
+        }
+
+      `;
+
+
+      updateSummary();
+
     }
+
+
+    /* =========================================================
+       更新總測試結果
+       ========================================================= */
+
+    function updateSummary() {
+
+      if (testResults.length === 0) {
+
+        summary.innerHTML =
+          "尚未執行測試";
+
+        return;
+      }
+
+
+      const passedCount =
+        testResults.filter(
+          item => item.passed
+        ).length;
+
+
+      const failedCount =
+        testResults.filter(
+          item => !item.passed
+        ).length;
+
+
+      const total =
+        testResults.length;
+
+
+      summary.innerHTML = `
+
+        <strong>目前測試進度</strong>
+
+        <br><br>
+
+        已執行：${total} 個
+
+        <br>
+
+        ✅ 通過：${passedCount} 個
+
+        <br>
+
+        ❌ 失敗：${failedCount} 個
+
+      `;
+
+    }
+
   </script>
 
 </body>
