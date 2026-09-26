@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>雷達規則引擎測試 41-50</title>
+<title>雷達規則引擎測試 51-60</title>
 
 <style>
 
@@ -105,14 +105,6 @@ button {
     margin-bottom: 30px;
 }
 
-.valid {
-    color: #4ade80;
-}
-
-.invalid {
-    color: #f87171;
-}
-
 </style>
 </head>
 
@@ -121,10 +113,10 @@ button {
 
 <div class="container">
 
-<h1>雷達規則引擎測試 41～50</h1>
+<h1>雷達規則引擎測試 51～60</h1>
 
 <div class="subtitle">
-本批測試：輸入驗證、邊界值、資料正規化
+最後一批核心交互規則：完成、任務、收割
 </div>
 
 <div id="tests"></div>
@@ -140,160 +132,10 @@ button {
 
 
 /* =========================================================
-   輸入驗證
+   建立狀態
    ========================================================= */
 
-function validateInput(data) {
-
-    const errors = [];
-
-
-    /* -----------------------------------------------------
-       庫存
-       ----------------------------------------------------- */
-
-    if (data.inventory < 0) {
-        errors.push("庫存不能小於 0");
-    }
-
-
-    /* -----------------------------------------------------
-       庫存 MAX
-       ----------------------------------------------------- */
-
-    if (data.maxInventory <= 0) {
-        errors.push("庫存上限 MAX 必須大於 0");
-    }
-
-
-    /* -----------------------------------------------------
-       場上
-       ----------------------------------------------------- */
-
-    if (data.field < 0) {
-        errors.push("場上雷達總數不能小於 0");
-    }
-
-
-    /* -----------------------------------------------------
-       已完成
-       ----------------------------------------------------- */
-
-    if (data.completed < 0) {
-        errors.push("已完成雷達不能小於 0");
-    }
-
-
-    if (data.completed > data.field) {
-        errors.push("已完成雷達不能大於場上雷達總數");
-    }
-
-
-    /* -----------------------------------------------------
-       寶箱
-       ----------------------------------------------------- */
-
-    if (data.treasure < 0) {
-        errors.push("寶箱進度不能小於 0");
-    }
-
-
-    /* -----------------------------------------------------
-       勇士戰令
-       ----------------------------------------------------- */
-
-    if (data.warriorEnabled) {
-
-        if (data.warriorTarget < 0) {
-            errors.push("勇士戰令目標不能小於 0");
-        }
-
-        if (data.warriorProgress < 0) {
-            errors.push("勇士戰令目前進度不能小於 0");
-        }
-    }
-
-
-    /* -----------------------------------------------------
-       黎明曙光
-       ----------------------------------------------------- */
-
-    if (data.dawnEnabled) {
-
-        if (data.dawnTarget < 0) {
-            errors.push("黎明曙光目標不能小於 0");
-        }
-
-        if (data.dawnProgress < 0) {
-            errors.push("黎明曙光目前進度不能小於 0");
-        }
-    }
-
-
-    return {
-        valid: errors.length === 0,
-        errors
-    };
-}
-
-
-/* =========================================================
-   資料正規化
-   ========================================================= */
-
-function normalizeInput(data) {
-
-    const result =
-        JSON.parse(
-            JSON.stringify(data)
-        );
-
-
-    /* -----------------------------------------------------
-       寶箱 > 10
-       → 10
-       ----------------------------------------------------- */
-
-    if (result.treasure > 10) {
-        result.treasure = 10;
-    }
-
-
-    /* -----------------------------------------------------
-       任務進度超過目標
-       → 視為已完成
-       → 顯示封頂於目標
-       ----------------------------------------------------- */
-
-    if (
-        result.warriorEnabled &&
-        result.warriorProgress >= result.warriorTarget
-    ) {
-
-        result.warriorProgress =
-            result.warriorTarget;
-    }
-
-
-    if (
-        result.dawnEnabled &&
-        result.dawnProgress >= result.dawnTarget
-    ) {
-
-        result.dawnProgress =
-            result.dawnTarget;
-    }
-
-
-    return result;
-}
-
-
-/* =========================================================
-   建立測試資料
-   ========================================================= */
-
-function createData(options = {}) {
+function createState(options = {}) {
 
     return {
 
@@ -309,6 +151,9 @@ function createData(options = {}) {
         maxInventory:
             options.maxInventory ?? 30,
 
+
+        lauraStar:
+            options.lauraStar ?? 5,
 
         treasure:
             options.treasure ?? 0,
@@ -337,6 +182,126 @@ function createData(options = {}) {
 
 
 /* =========================================================
+   完成一個未完成雷達
+   ========================================================= */
+
+function completeRadar(state) {
+
+    const unfinished =
+        state.field - state.completed;
+
+
+    if (unfinished <= 0) {
+        return false;
+    }
+
+
+    /*
+       未完成 → 已完成
+
+       場上總數不變
+       已完成 +1
+    */
+
+    state.completed++;
+
+
+    /*
+       勇士戰令
+    */
+
+    if (state.warriorEnabled) {
+
+        state.warriorProgress =
+            Math.min(
+                state.warriorTarget,
+                state.warriorProgress + 1
+            );
+    }
+
+
+    /*
+       黎明曙光
+    */
+
+    if (state.dawnEnabled) {
+
+        state.dawnProgress =
+            Math.min(
+                state.dawnTarget,
+                state.dawnProgress + 1
+            );
+    }
+
+
+    /*
+       寶箱不增加
+    */
+
+    return true;
+}
+
+
+/* =========================================================
+   收割一個已完成雷達
+   ========================================================= */
+
+function harvestRadar(state) {
+
+    if (state.completed <= 0) {
+        return false;
+    }
+
+
+    state.completed--;
+    state.field--;
+
+
+    /*
+       5 星 Laura：
+       收割 → 寶箱 +1
+       每日最多 10
+    */
+
+    if (state.lauraStar === 5) {
+
+        state.treasure =
+            Math.min(
+                10,
+                state.treasure + 1
+            );
+    }
+
+
+    /*
+       場上 < 8：
+       從庫存自動補場
+    */
+
+    if (
+        state.field < 8 &&
+        state.inventory > 0
+    ) {
+
+        const need =
+            8 - state.field;
+
+        const refill =
+            Math.min(
+                need,
+                state.inventory
+            );
+
+        state.field += refill;
+        state.inventory -= refill;
+    }
+
+
+    return true;
+}
+
+
+/* =========================================================
    測試工具
    ========================================================= */
 
@@ -346,279 +311,442 @@ const tests = [];
 function addTest(
     title,
     initial,
-    expected
+    expected,
+    action
 ) {
 
     tests.push({
         title,
         initial,
-        expected
+        expected,
+        action
     });
 
 }
 
 
 /* =========================================================
-   41
-   場上 0 / 已完成 0
-   應該是有效資料
+   51
+   完成一個雷達：
+   場上不變
+   已完成 +1
    ========================================================= */
 
 addTest(
 
-    "第四十一個測試：場上0、已完成0為有效資料",
+    "第五十一個測試：完成雷達不改變場上總數",
 
-    createData({
-        field: 0,
+    createState({
+
+        field: 8,
         completed: 0,
         inventory: 0,
-        maxInventory: 30
+
+        warriorEnabled: false,
+        dawnEnabled: false
     }),
 
     {
-        valid: true
+        field: 8,
+        completed: 1
+    },
+
+    state => {
+
+        completeRadar(state);
+
+        return state;
     }
 );
 
 
 /* =========================================================
-   42
-   場上有雷達
-   已完成 0
-   → 有效
+   52
+   勇士戰令啟用：
+   完成 1 個
+   → 任務 +1
    ========================================================= */
 
 addTest(
 
-    "第四十二個測試：場上有雷達、已完成0為有效資料",
+    "第五十二個測試：完成雷達增加勇士戰令進度",
 
-    createData({
-        field: 8,
-        completed: 0,
-        inventory: 0,
-        maxInventory: 30
-    }),
-
-    {
-        valid: true
-    }
-);
-
-
-/* =========================================================
-   43
-   任務目標 = 0
-   → 有效
-   ========================================================= */
-
-addTest(
-
-    "第四十三個測試：每日任務目標0為有效資料",
-
-    createData({
+    createState({
 
         field: 8,
         completed: 0,
-        inventory: 0,
-        maxInventory: 30,
-
-        warriorEnabled: true,
-        warriorTarget: 0,
-        warriorProgress: 0
-    }),
-
-    {
-        valid: true
-    }
-);
-
-
-/* =========================================================
-   44
-   勇士戰令：
-   目前進度 25/20
-   → 正規化成 20/20
-   ========================================================= */
-
-addTest(
-
-    "第四十四個測試：任務進度超過目標時封頂",
-
-    createData({
-
-        field: 8,
-        completed: 0,
-        inventory: 0,
-        maxInventory: 30,
 
         warriorEnabled: true,
         warriorTarget: 20,
-        warriorProgress: 25
+        warriorProgress: 5,
+
+        dawnEnabled: false
+    }),
+
+    {
+        warriorProgress: 6
+    },
+
+    state => {
+
+        completeRadar(state);
+
+        return state;
+    }
+);
+
+
+/* =========================================================
+   53
+   黎明曙光啟用：
+   完成 1 個
+   → 任務 +1
+   ========================================================= */
+
+addTest(
+
+    "第五十三個測試：完成雷達增加黎明曙光進度",
+
+    createState({
+
+        field: 8,
+        completed: 0,
+
+        warriorEnabled: false,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 4
+    }),
+
+    {
+        dawnProgress: 5
+    },
+
+    state => {
+
+        completeRadar(state);
+
+        return state;
+    }
+);
+
+
+/* =========================================================
+   54
+   兩個任務同時啟用：
+
+   完成一個雷達
+   → 勇士 +1
+   → 黎明 +1
+   ========================================================= */
+
+addTest(
+
+    "第五十四個測試：一次完成同時增加兩個任務",
+
+    createState({
+
+        field: 8,
+        completed: 0,
+
+        warriorEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 7,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 3
+    }),
+
+    {
+        warriorProgress: 8,
+        dawnProgress: 4
+    },
+
+    state => {
+
+        completeRadar(state);
+
+        return state;
+    }
+);
+
+
+/* =========================================================
+   55
+   勇士戰令已經 20/20：
+
+   再完成雷達
+   → 不變成 21
+   → 維持 20
+   ========================================================= */
+
+addTest(
+
+    "第五十五個測試：勇士戰令達標後進度封頂",
+
+    createState({
+
+        field: 8,
+        completed: 0,
+
+        warriorEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 20,
+
+        dawnEnabled: false
     }),
 
     {
         warriorProgress: 20
+    },
+
+    state => {
+
+        completeRadar(state);
+
+        return state;
     }
 );
 
 
 /* =========================================================
-   45
-   寶箱：
-   15/10
-   → 10/10
+   56
+   黎明曙光已經 10/10：
+
+   再完成雷達
+   → 維持 10
    ========================================================= */
 
 addTest(
 
-    "第四十五個測試：寶箱超過10時封頂",
+    "第五十六個測試：黎明曙光達標後進度封頂",
 
-    createData({
+    createState({
 
         field: 8,
         completed: 0,
-        inventory: 0,
-        maxInventory: 30,
-
-        treasure: 15
-    }),
-
-    {
-        treasure: 10
-    }
-);
-
-
-/* =========================================================
-   46
-   寶箱 -1
-   → 無效
-   ========================================================= */
-
-addTest(
-
-    "第四十六個測試：寶箱負數為無效資料",
-
-    createData({
-
-        field: 8,
-        completed: 0,
-        inventory: 0,
-        maxInventory: 30,
-
-        treasure: -1
-    }),
-
-    {
-        valid: false
-    }
-);
-
-
-/* =========================================================
-   47
-   MAX = 0
-   → 無效
-   ========================================================= */
-
-addTest(
-
-    "第四十七個測試：庫存MAX等於0為無效資料",
-
-    createData({
-
-        field: 8,
-        completed: 0,
-        inventory: 0,
-        maxInventory: 0
-    }),
-
-    {
-        valid: false
-    }
-);
-
-
-/* =========================================================
-   48
-   場上 = -1
-   → 無效
-   ========================================================= */
-
-addTest(
-
-    "第四十八個測試：場上雷達負數為無效資料",
-
-    createData({
-
-        field: -1,
-        completed: 0,
-        inventory: 0,
-        maxInventory: 30
-    }),
-
-    {
-        valid: false
-    }
-);
-
-
-/* =========================================================
-   49
-   已完成 > 場上
-   → 無效
-   ========================================================= */
-
-addTest(
-
-    "第四十九個測試：已完成不能大於場上總數",
-
-    createData({
-
-        field: 5,
-        completed: 6,
-        inventory: 0,
-        maxInventory: 30
-    }),
-
-    {
-        valid: false
-    }
-);
-
-
-/* =========================================================
-   50
-   任務未啟用
-   即使裡面的目標/進度數值異常
-   也不應阻擋
-
-   注意：
-   這裡測的是「未啟用任務不參與驗證」
-   ========================================================= */
-
-addTest(
-
-    "第五十個測試：未啟用的每日任務不阻擋",
-
-    createData({
-
-        field: 8,
-        completed: 0,
-        inventory: 0,
-        maxInventory: 30,
 
         warriorEnabled: false,
-        warriorTarget: -5,
-        warriorProgress: -10,
 
-        dawnEnabled: false,
-        dawnTarget: -3,
-        dawnProgress: -7
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 10
     }),
 
     {
-        valid: true
+        dawnProgress: 10
+    },
+
+    state => {
+
+        completeRadar(state);
+
+        return state;
+    }
+);
+
+
+/* =========================================================
+   57
+   已完成雷達不能再次完成
+
+   場上 8
+   已完成 8
+   → 沒有未完成雷達
+
+   執行完成
+   → 已完成仍為 8
+   ========================================================= */
+
+addTest(
+
+    "第五十七個測試：已完成雷達不能再次完成",
+
+    createState({
+
+        field: 8,
+        completed: 8,
+
+        warriorEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 5,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 4
+    }),
+
+    {
+        completed: 8,
+        warriorProgress: 5,
+        dawnProgress: 4
+    },
+
+    state => {
+
+        completeRadar(state);
+
+        return state;
+    }
+);
+
+
+/* =========================================================
+   58
+   收割不增加勇士戰令
+
+   3 個已完成
+   勇士 7/20
+
+   收割 1
+   → 勇士仍 7
+   ========================================================= */
+
+addTest(
+
+    "第五十八個測試：收割不增加勇士戰令",
+
+    createState({
+
+        field: 8,
+        completed: 3,
+        inventory: 0,
+
+        warriorEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 7,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 4
+    }),
+
+    {
+        field: 7,
+        completed: 2,
+        warriorProgress: 7,
+        dawnProgress: 4
+    },
+
+    state => {
+
+        harvestRadar(state);
+
+        return state;
+    }
+);
+
+
+/* =========================================================
+   59
+   收割不增加黎明曙光
+
+   3 個已完成
+   黎明 6/10
+
+   收割 1
+   → 黎明仍 6
+   ========================================================= */
+
+addTest(
+
+    "第五十九個測試：收割不增加黎明曙光",
+
+    createState({
+
+        field: 8,
+        completed: 3,
+        inventory: 0,
+
+        warriorEnabled: false,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 6
+    }),
+
+    {
+        field: 7,
+        completed: 2,
+        dawnProgress: 6
+    },
+
+    state => {
+
+        harvestRadar(state);
+
+        return state;
+    }
+);
+
+
+/* =========================================================
+   60
+   完成與收割是兩個不同事件
+
+   初始：
+   場上 8
+   已完成 0
+   勇士 5/20
+   黎明 3/10
+   寶箱 0/10
+
+   第一步：完成 1
+   → 已完成 1
+   → 勇士 6
+   → 黎明 4
+   → 寶箱 0
+
+   第二步：收割 1
+   → 已完成 0
+   → 勇士仍 6
+   → 黎明仍 4
+   → 5星 Laura 寶箱 1
+   ========================================================= */
+
+addTest(
+
+    "第六十個測試：完成與收割的完整事件分離",
+
+    createState({
+
+        field: 8,
+        completed: 0,
+        inventory: 0,
+
+        lauraStar: 5,
+        treasure: 0,
+
+        warriorEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 5,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 3
+    }),
+
+    {
+        field: 8,
+        completed: 0,
+
+        warriorProgress: 6,
+        dawnProgress: 4,
+
+        treasure: 1
+    },
+
+    state => {
+
+        /* 完成 */
+        completeRadar(state);
+
+        /* 收割 */
+        harvestRadar(state);
+
+        return state;
     }
 );
 
@@ -633,35 +761,52 @@ let failed = 0;
 
 
 /* =========================================================
-   測試執行
+   比對
+   ========================================================= */
+
+function checkExpected(
+    actual,
+    expected
+) {
+
+    for (const key in expected) {
+
+        if (
+            actual[key] !==
+            expected[key]
+        ) {
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+/* =========================================================
+   執行單一測試
    ========================================================= */
 
 function runTest(index) {
 
     const test = tests[index];
 
-    let resultData;
+
+    const state =
+        JSON.parse(
+            JSON.stringify(
+                test.initial
+            )
+        );
+
+
     let error = null;
+
 
     try {
 
-        const validation =
-            validateInput(test.initial);
-
-        const normalized =
-            normalizeInput(test.initial);
-
-
-        resultData = {
-
-            valid:
-                validation.valid,
-
-            errors:
-                validation.errors,
-
-            normalized
-        };
+        test.action(state);
 
     } catch (e) {
 
@@ -669,47 +814,23 @@ function runTest(index) {
     }
 
 
-    let success = false;
-
-
-    if (!error) {
-
-        if (
-            test.expected.valid !== undefined
-        ) {
-
-            success =
-                resultData.valid ===
-                test.expected.valid;
-
-        } else {
-
-            success = true;
-
-            for (
-                const key in test.expected
-            ) {
-
-                if (
-                    resultData.normalized[key]
-                    !==
-                    test.expected[key]
-                ) {
-
-                    success = false;
-                    break;
-                }
-            }
-        }
-    }
+    const success =
+        !error &&
+        checkExpected(
+            state,
+            test.expected
+        );
 
 
     executed++;
 
 
     if (success) {
+
         passed++;
+
     } else {
+
         failed++;
     }
 
@@ -728,59 +849,35 @@ function runTest(index) {
 
             <br><br>
 
-            ${
-                resultData.valid
-                ? "資料有效"
-                : "資料無效"
-            }
+            場上：
+            ${state.field}
 
-            <br><br>
+            <br>
 
-            ${
-                test.expected.valid !== undefined
-                ? `
-                    預期：
-                    ${
-                        test.expected.valid
-                        ? "有效"
-                        : "無效"
-                    }
-                `
-                : `
-                    正規化後：
+            已完成：
+            ${state.completed}
 
-                    <br>
+            <br>
 
-                    寶箱：
-                    ${resultData.normalized.treasure}/10
+            勇士戰令：
+            ${state.warriorProgress}/${state.warriorTarget}
 
-                    <br>
+            <br>
 
-                    勇士戰令：
-                    ${
-                        resultData.normalized.warriorProgress
-                    } /
-                    ${
-                        resultData.normalized.warriorTarget
-                    }
+            黎明曙光：
+            ${state.dawnProgress}/${state.dawnTarget}
 
-                    <br>
+            <br>
 
-                    黎明曙光：
-                    ${
-                        resultData.normalized.dawnProgress
-                    } /
-                    ${
-                        resultData.normalized.dawnTarget
-                    }
-                `
-            }
+            寶箱：
+            ${state.treasure}/10
 
             <br><br>
 
             <span class="pass">
                 ✅ 測試通過
             </span>
+
         `;
 
     } else {
@@ -813,21 +910,31 @@ function runTest(index) {
 
                     <br>
 
-                    ${
-                        resultData.valid
-                        ? "資料有效"
-                        : "資料無效"
-                    }
+                    場上：
+                    ${state.field}
 
-                    <br><br>
+                    <br>
 
-                    ${
-                        resultData.errors.length
-                        ? resultData.errors.join("<br>")
-                        : ""
-                    }
+                    已完成：
+                    ${state.completed}
+
+                    <br>
+
+                    勇士：
+                    ${state.warriorProgress}/${state.warriorTarget}
+
+                    <br>
+
+                    黎明：
+                    ${state.dawnProgress}/${state.dawnTarget}
+
+                    <br>
+
+                    寶箱：
+                    ${state.treasure}/10
                 `
             }
+
         `;
     }
 
@@ -837,22 +944,28 @@ function runTest(index) {
 
 
 /* =========================================================
-   建立畫面
+   建立測試畫面
    ========================================================= */
 
 function renderTests() {
 
     const container =
-        document.getElementById("tests");
+        document.getElementById(
+            "tests"
+        );
 
 
     tests.forEach(
         (test, index) => {
 
             const div =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            div.className = "test";
+
+            div.className =
+                "test";
 
 
             div.innerHTML = `
@@ -866,7 +979,9 @@ function renderTests() {
 
                 <div class="state">
 
-                    <strong>測試資料</strong>
+                    <strong>
+                        初始狀態
+                    </strong>
 
                     <br>
 
@@ -885,8 +1000,23 @@ function renderTests() {
 
                     <br>
 
-                    MAX：
-                    ${test.initial.maxInventory}
+                    勇士戰令：
+                    ${
+                        test.initial.warriorProgress
+                    } /
+                    ${
+                        test.initial.warriorTarget
+                    }
+
+                    <br>
+
+                    黎明曙光：
+                    ${
+                        test.initial.dawnProgress
+                    } /
+                    ${
+                        test.initial.dawnTarget
+                    }
 
                     <br>
 
@@ -911,6 +1041,7 @@ function renderTests() {
                     尚未執行
 
                 </div>
+
             `;
 
 
