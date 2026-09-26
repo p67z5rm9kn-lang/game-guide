@@ -1,28 +1,39 @@
-# planner-sequence-test-v1.txt
-# 規劃器「跨時間／實際操作序列」測試
-# 用法：整份貼到測試頁執行，按「全部執行」
-# 目的：不只測單一函式，而是確認多個操作串起來後，狀態仍符合已確認規則。
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>planner-sequence-test-v1</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;padding:20px;line-height:1.6;background:#111;color:#eee}
+  button{font-size:18px;padding:12px 18px;border-radius:10px;border:0;margin:8px 0}
+  #summary{font-size:20px;font-weight:700;margin:12px 0}
+  #results{white-space:pre-wrap;font-family:ui-monospace,monospace;background:#1d1d1d;padding:14px;border-radius:10px}
+</style>
+</head>
+<body>
+<h2>planner-sequence-test-v1</h2>
+<button onclick="runAllTests()">▶ 全部執行</button>
+<div id="summary">尚未執行</div>
+<div id="results"></div>
 
+<script>
 function assertEqual(name, actual, expected) {
   const a = JSON.stringify(actual);
   const e = JSON.stringify(expected);
   return a === e ? `✅ ${name}` : `❌ ${name}\n   實際：${a}\n   預期：${e}`;
 }
+function clone(x){return JSON.parse(JSON.stringify(x));}
 
-function clone(x) {
-  return JSON.parse(JSON.stringify(x));
-}
-
-function complete(state, count = 1, tasks = null) {
-  const s = clone(state);
-  for (let i = 0; i < count; i++) {
-    if (s.unfinished <= 0) break;
-    s.unfinished--;
-    s.completed++;
-    if (tasks) {
-      for (const key of ["warrior", "dawn"]) {
-        if (tasks[key]?.active) {
-          tasks[key].current = Math.min(tasks[key].target, tasks[key].current + 1);
+function complete(state,count=1,tasks=null){
+  const s=clone(state);
+  for(let i=0;i<count;i++){
+    if(s.unfinished<=0)break;
+    s.unfinished--; s.completed++;
+    if(tasks){
+      for(const key of ["warrior","dawn"]){
+        if(tasks[key]?.active){
+          tasks[key].current=Math.min(tasks[key].target,tasks[key].current+1);
         }
       }
     }
@@ -30,275 +41,112 @@ function complete(state, count = 1, tasks = null) {
   return s;
 }
 
-function harvest(state, count = 1, fiveStar = false) {
-  const s = clone(state);
-  s.treasure ??= 0;
-
-  for (let i = 0; i < count; i++) {
-    if (s.completed <= 0) break;
-
-    s.completed--;
-    s.field--;
-
-    if (fiveStar) {
-      s.treasure = Math.min(10, s.treasure + 1);
-    }
-
-    if (s.field < 8 && s.inventory > 0) {
-      const need = 8 - s.field;
-      const move = Math.min(need, s.inventory);
-      s.field += move;
-      s.inventory -= move;
+function harvest(state,count=1,fiveStar=false){
+  const s=clone(state); s.treasure ??= 0;
+  for(let i=0;i<count;i++){
+    if(s.completed<=0)break;
+    s.completed--; s.field--;
+    if(fiveStar)s.treasure=Math.min(10,s.treasure+1);
+    if(s.field<8 && s.inventory>0){
+      const move=Math.min(8-s.field,s.inventory);
+      s.field+=move; s.inventory-=move;
     }
   }
-
   return s;
 }
 
-function systemFree(state, amount = 8) {
-  const s = clone(state);
-
-  const fieldNeed = Math.max(0, 8 - s.field);
-  const toField = Math.min(amount, fieldNeed);
-  s.field += toField;
-
-  const toInventory = amount - toField;
-  if (toInventory > 0) {
-    const room = Math.max(0, s.maxInventory - s.inventory);
-    s.inventory += Math.min(toInventory, room);
+function systemFree(state,amount=8){
+  const s=clone(state);
+  const fieldNeed=Math.max(0,8-s.field);
+  const toField=Math.min(amount,fieldNeed);
+  s.field+=toField;
+  const toInventory=amount-toField;
+  if(toInventory>0){
+    const room=Math.max(0,s.maxInventory-s.inventory);
+    s.inventory+=Math.min(toInventory,room);
   }
-
   return s;
 }
 
-function useLaura(state, star) {
-  const s = clone(state);
-  if (s.lauraUsed) return s;
-
-  const amount = [5, 10, 10, 10, 20, 20][star];
-  if (s.field < 8) {
-    const need = 8 - s.field;
-    const toField = Math.min(amount, need);
-    s.field += toField;
-    s.inventory += amount - toField;
-  } else {
-    s.field += 3;
-    s.inventory += amount - 3;
+function useLaura(state,star){
+  const s=clone(state);
+  if(s.lauraUsed)return s;
+  const amount=[5,10,10,10,20,20][star];
+  if(s.field<8){
+    const toField=Math.min(amount,8-s.field);
+    s.field+=toField; s.inventory+=amount-toField;
+  }else{
+    s.field+=3; s.inventory+=amount-3;
   }
-
-  s.lauraUsed = true;
+  s.lauraUsed=true;
   return s;
 }
 
-function rollover(state) {
-  // 本測試採用已確認的模型假設：
-  // 先處理未完成雷達到期，再發放系統 +8。
-  // 但規劃器基準模型本身不預測現有未完成雷達會到期。
-  const s = clone(state);
-  s.lauraUsed = false;
-  s.treasure = 0;
-  return systemFree(s, 8);
+function rollover(state){
+  const s=clone(state);
+  s.lauraUsed=false;
+  s.treasure=0;
+  return systemFree(s,8);
 }
 
-function scoreCompletion(state, tasks, count = 1) {
-  return complete(state, count, tasks);
+function scoreCompletion(state,tasks,count=1){
+  const s=complete(state,count,tasks);
+  return {state:s,tasks:clone(tasks)};
 }
 
-function idealPrep(maxInventory) {
-  return {
-    field: 11,
-    inventory: maxInventory - 8
-  };
+function idealPrep(maxInventory){
+  return {field:11,inventory:maxInventory-8};
 }
 
-const tests = [];
+const tests=[];
 
-// 1. 完成 3 個後再收割 3 個，場上總數應回到原本 -3
-tests.push(() => {
-  let s = { field: 11, unfinished: 3, completed: 8, inventory: 10 };
-  s = complete(s, 3);
-  s = harvest(s, 3);
-  return assertEqual("1. 完成3→收割3的完整序列", s,
-    { field: 8, unfinished: 0, completed: 8, inventory: 10 });
-});
+tests.push(()=>{let s={field:11,unfinished:3,completed:8,inventory:10};s=complete(s,3);s=harvest(s,3);return assertEqual("1. 完成3→收割3的完整序列",s,{field:8,unfinished:0,completed:8,inventory:10});});
 
-// 2. 場上 11、庫存 0，收割 3 個後不會自動補到 11
-tests.push(() => {
-  let s = { field: 11, unfinished: 0, completed: 11, inventory: 0 };
-  s = harvest(s, 3);
-  return assertEqual("2. 場上11收割3、庫存0", s,
-    { field: 8, unfinished: 0, completed: 8, inventory: 0, treasure: 0 });
-});
+tests.push(()=>{let s={field:11,unfinished:0,completed:11,inventory:0};s=harvest(s,3);return assertEqual("2. 場上11收割3、庫存0",s,{field:8,unfinished:0,completed:8,inventory:0,treasure:0});});
 
-// 3. 場上 11、庫存 5，收割 3 個後會自動補回 8
-tests.push(() => {
-  let s = { field: 11, unfinished: 0, completed: 11, inventory: 5 };
-  s = harvest(s, 3);
-  return assertEqual("3. 場上11收割3、庫存5自動補充", s,
-    { field: 8, unfinished: 0, completed: 8, inventory: 5, treasure: 0 });
-});
+tests.push(()=>{let s={field:11,unfinished:0,completed:11,inventory:5};s=harvest(s,3);return assertEqual("3. 場上11收割3、庫存5自動補充",s,{field:8,unfinished:0,completed:8,inventory:5,treasure:0});});
 
-// 4. 先完成再收割，不會因完成事件觸發補充
-tests.push(() => {
-  let s = { field: 7, unfinished: 2, completed: 5, inventory: 4 };
-  s = complete(s, 1);
-  return assertEqual("4. 完成事件不觸發自動補充", s,
-    { field: 7, unfinished: 1, completed: 6, inventory: 4 });
-});
+tests.push(()=>{let s={field:7,unfinished:2,completed:5,inventory:4};s=complete(s,1);return assertEqual("4. 完成事件不觸發自動補充",s,{field:7,unfinished:1,completed:6,inventory:4});});
 
-// 5. 收割才會觸發自動補充
-tests.push(() => {
-  let s = { field: 7, unfinished: 0, completed: 7, inventory: 4 };
-  s = harvest(s, 1);
-  return assertEqual("5. 收割後才觸發自動補充", s,
-    { field: 8, unfinished: 0, completed: 6, inventory: 3, treasure: 0 });
-});
+tests.push(()=>{let s={field:7,unfinished:0,completed:7,inventory:4};s=harvest(s,1);return assertEqual("5. 收割後才觸發自動補充",s,{field:8,unfinished:0,completed:6,inventory:3,treasure:0});});
 
-// 6. 5星 Laura + 收割，寶箱每天最多10
-tests.push(() => {
-  let s = { field: 11, unfinished: 0, completed: 11, inventory: 0, treasure: 9 };
-  s = harvest(s, 3, true);
-  return assertEqual("6. 5星Laura寶箱9/10收割3→10/10", s,
-    { field: 8, unfinished: 0, completed: 8, inventory: 0, treasure: 10 });
-});
+tests.push(()=>{let s={field:11,unfinished:0,completed:11,inventory:0,treasure:9};s=harvest(s,3,true);return assertEqual("6. 5星Laura寶箱9/10收割3→10/10",s,{field:8,unfinished:0,completed:8,inventory:0,treasure:10});});
 
-// 7. 5星 Laura 寶箱與 Laura 使用次數彼此獨立
-tests.push(() => {
-  let s = { field: 8, unfinished: 0, completed: 8, inventory: 0, treasure: 0, lauraUsed: false };
-  s = harvest(s, 2, true);
-  s = useLaura(s, 5);
-  return assertEqual("7. 寶箱進度不阻止當日Laura使用", s,
-    { field: 9, unfinished: 0, completed: 6, inventory: 37, treasure: 2, lauraUsed: true });
-});
+tests.push(()=>{let s={field:8,unfinished:0,completed:8,inventory:0,treasure:0,lauraUsed:false};s=harvest(s,2,true);s=useLaura(s,5);return assertEqual("7. 寶箱進度不阻止當日Laura使用",s,{field:11,unfinished:0,completed:6,inventory:17,treasure:2,lauraUsed:true});});
 
-// 8. Laura 當天只能使用一次
-tests.push(() => {
-  let s = { field: 8, unfinished: 0, completed: 8, inventory: 0, lauraUsed: false };
-  s = useLaura(s, 4);
-  const afterFirst = clone(s);
-  s = useLaura(s, 4);
-  return assertEqual("8. Laura同日第二次使用無效", s, afterFirst);
-});
+tests.push(()=>{let s={field:8,unfinished:0,completed:8,inventory:0,lauraUsed:false};s=useLaura(s,4);const afterFirst=clone(s);s=useLaura(s,4);return assertEqual("8. Laura同日第二次使用無效",s,afterFirst);});
 
-// 9. 10:00 rollover 後 Laura 重置可再次使用
-tests.push(() => {
-  let s = { field: 8, unfinished: 0, completed: 8, inventory: 0, lauraUsed: true, treasure: 7, maxInventory: 30 };
-  s = rollover(s);
-  s = useLaura(s, 0);
-  return assertEqual("9. 10:00後Laura重置可使用", s,
-    { field: 11, unfinished: 0, completed: 8, inventory: 5, lauraUsed: true, treasure: 0, maxInventory: 30 });
-});
+tests.push(()=>{let s={field:8,unfinished:0,completed:8,inventory:0,lauraUsed:true,treasure:7,maxInventory:30};s=rollover(s);s=useLaura(s,0);return assertEqual("9. 10:00後Laura重置可使用",s,{field:11,unfinished:0,completed:8,inventory:10,lauraUsed:true,treasure:0,maxInventory:30});});
 
-// 10. 系統+8在場上<8時，先補場上
-tests.push(() => {
-  const s = { field: 6, unfinished: 2, completed: 4, inventory: 10, maxInventory: 30 };
-  return assertEqual("10. 系統+8先補場上", systemFree(s),
-    { field: 8, unfinished: 2, completed: 4, inventory: 8, maxInventory: 30 });
-});
+tests.push(()=>{const s={field:6,unfinished:2,completed:4,inventory:10,maxInventory:30};return assertEqual("10. 系統+8先補場上",systemFree(s),{field:8,unfinished:2,completed:4,inventory:8,maxInventory:30});});
 
-// 11. 系統+8在場上≥8時，全部進庫存但受MAX限制
-tests.push(() => {
-  const s = { field: 11, unfinished: 3, completed: 8, inventory: 27, maxInventory: 30 };
-  return assertEqual("11. 系統+8進庫存且受MAX限制", systemFree(s),
-    { field: 11, unfinished: 3, completed: 8, inventory: 30, maxInventory: 30 });
-});
+tests.push(()=>{const s={field:11,unfinished:3,completed:8,inventory:27,maxInventory:30};return assertEqual("11. 系統+8進庫存且受MAX限制",systemFree(s),{field:11,unfinished:3,completed:8,inventory:30,maxInventory:30});});
 
-// 12. Laura 不受 MAX 限制
-tests.push(() => {
-  const s = { field: 8, unfinished: 0, completed: 8, inventory: 29, maxInventory: 30, lauraUsed: false };
-  return assertEqual("12. Laura可突破MAX", useLaura(s, 4),
-    { field: 11, unfinished: 0, completed: 8, inventory: 46, maxInventory: 30, lauraUsed: true });
-});
+tests.push(()=>{const s={field:8,unfinished:0,completed:8,inventory:29,maxInventory:30,lauraUsed:false};return assertEqual("12. Laura可突破MAX",useLaura(s,4),{field:11,unfinished:0,completed:8,inventory:46,maxInventory:30,lauraUsed:true});});
 
-// 13. 兩個每日任務同時啟用，一次完成同時+1
-tests.push(() => {
-  const s = { field: 11, unfinished: 2, completed: 9, inventory: 0 };
-  const tasks = {
-    warrior: { active: true, target: 20, current: 17 },
-    dawn: { active: true, target: 10, current: 9 }
-  };
-  const r = scoreCompletion(s, tasks, 1);
-  return assertEqual("13. 一次完成同時推進兩個每日任務", r.tasks ?? null, null);
-});
+tests.push(()=>{const s={field:11,unfinished:2,completed:9,inventory:0};const tasks={warrior:{active:true,target:20,current:17},dawn:{active:true,target:10,current:9}};const r=scoreCompletion(s,tasks,1);return assertEqual("13. 一次完成同時推進兩個每日任務",r.tasks,{warrior:{active:true,target:20,current:18},dawn:{active:true,target:10,current:10}});});
 
-// 14. 任務進度各自獨立且封頂
-tests.push(() => {
-  const s = { field: 11, unfinished: 3, completed: 8, inventory: 0 };
-  const tasks = {
-    warrior: { active: true, target: 20, current: 20 },
-    dawn: { active: true, target: 10, current: 9 }
-  };
-  const rTasks = clone(tasks);
-  for (let i = 0; i < 2; i++) {
-    if (rTasks.warrior.active) rTasks.warrior.current = Math.min(rTasks.warrior.target, rTasks.warrior.current + 1);
-    if (rTasks.dawn.active) rTasks.dawn.current = Math.min(rTasks.dawn.target, rTasks.dawn.current + 1);
-  }
-  return assertEqual("14. 每日任務各自封頂不互相影響", rTasks, {
-    warrior: { active: true, target: 20, current: 20 },
-    dawn: { active: true, target: 10, current: 10 }
-  });
-});
+tests.push(()=>{const s={field:11,unfinished:3,completed:8,inventory:0};const tasks={warrior:{active:true,target:20,current:20},dawn:{active:true,target:10,current:9}};const r=scoreCompletion(s,tasks,2);return assertEqual("14. 每日任務各自封頂不互相影響",r.tasks,{warrior:{active:true,target:20,current:20},dawn:{active:true,target:10,current:10}});});
 
-// 15. 理想準備狀態 MAX=30 → 09:59:59 應為場上11、庫存22
-tests.push(() => {
-  return assertEqual("15. MAX30理想準備狀態", idealPrep(30), { field: 11, inventory: 22 });
-});
+tests.push(()=>assertEqual("15. MAX30理想準備狀態",idealPrep(30),{field:11,inventory:22}));
 
-// 16. 理想準備狀態 MAX=20 → 09:59:59 應為場上11、庫存12
-tests.push(() => {
-  return assertEqual("16. MAX20理想準備狀態", idealPrep(20), { field: 11, inventory: 12 });
-});
+tests.push(()=>assertEqual("16. MAX20理想準備狀態",idealPrep(20),{field:11,inventory:12}));
 
-// 17. 理想準備狀態在10:00遇到系統+8，庫存達MAX
-tests.push(() => {
-  const s = { field: 11, unfinished: 0, completed: 11, inventory: 22, maxInventory: 30 };
-  return assertEqual("17. MAX30理想狀態→10:00庫存MAX", systemFree(s),
-    { field: 11, unfinished: 0, completed: 11, inventory: 30, maxInventory: 30 });
-});
+tests.push(()=>{const s={field:11,unfinished:0,completed:11,inventory:22,maxInventory:30};return assertEqual("17. MAX30理想狀態→10:00庫存MAX",systemFree(s),{field:11,unfinished:0,completed:11,inventory:30,maxInventory:30});});
 
-// 18. 衝分日前預計可收割 = 場上 + 庫存
-tests.push(() => {
-  const field = 11, inventory = 10;
-  return assertEqual("18. 跨日前預計可收割", field + inventory, 21);
-});
+tests.push(()=>assertEqual("18. 跨日前預計可收割",11+10,21));
 
-// 19. 衝分日系統自由雷達固定計入10:00、18:00、02:00，共24
-tests.push(() => {
-  let s = { field: 11, unfinished: 0, completed: 11, inventory: 10, maxInventory: 30 };
-  s = systemFree(s, 8);
-  s = systemFree(s, 8);
-  s = systemFree(s, 8);
-  return assertEqual("19. 衝分日三次系統+8共24", s.inventory, 30);
-});
+tests.push(()=>{let s={field:11,unfinished:0,completed:11,inventory:10,maxInventory:30};s=systemFree(s,8);s=systemFree(s,8);s=systemFree(s,8);return assertEqual("19. 衝分日三次系統+8共24",s.inventory,30);});
 
-// 20. 目前規劃模型不預測盟友瞬間幫助，因此基準資源估算不額外+雷達
-tests.push(() => {
-  const preField = 11;
-  const preInventory = 10;
-  const system = 24;
-  const laura = 20;
-  const estimated = preField + preInventory + system + laura;
-  return assertEqual("20. 預計收割基準不加入盟友瞬間幫助", estimated, 65);
-});
+tests.push(()=>assertEqual("20. 預計收割基準不加入盟友瞬間幫助",11+10+24+20,65));
 
-function runAllTests() {
-  const results = tests.map((fn) => {
-    try {
-      return fn();
-    } catch (e) {
-      return `❌ 測試執行錯誤：${e.message}`;
-    }
-  });
-
-  const passed = results.filter(x => x.startsWith("✅")).length;
-  const failed = results.length - passed;
-
-  console.log(`\n===== planner-sequence-test-v1 =====`);
-  console.log(`通過：${passed}/${results.length}`);
-  console.log(`失敗：${failed}`);
-  results.forEach(x => console.log(x));
-
-  return { passed, failed, results };
+function runAllTests(){
+  const results=tests.map(fn=>{try{return fn();}catch(e){return `❌ 測試執行錯誤：${e.message}`;}});
+  const passed=results.filter(x=>x.startsWith("✅")).length;
+  const failed=results.length-passed;
+  document.getElementById("summary").textContent=`通過：${passed}/${results.length}　失敗：${failed}`;
+  document.getElementById("results").textContent=results.join("\n\n");
 }
-
-runAllTests();
+</script>
+</body>
+</html>
