@@ -100,7 +100,7 @@ function idealPrep(maxInventory){
 
 const tests=[];
 
-tests.push(()=>{let s={field:11,unfinished:3,completed:8,inventory:10};s=complete(s,3);s=harvest(s,3);return assertEqual("1. 完成3→收割3的完整序列",s,{field:8,unfinished:0,completed:8,inventory:10});});
+tests.push(()=>{let s={field:11,unfinished:3,completed:8,inventory:10,treasure:0};s=complete(s,3);s=harvest(s,3);return assertEqual("1. 完成3→收割3的完整序列",s,{field:8,unfinished:0,completed:8,inventory:10,treasure:0});});
 
 tests.push(()=>{let s={field:11,unfinished:0,completed:11,inventory:0};s=harvest(s,3);return assertEqual("2. 場上11收割3、庫存0",s,{field:8,unfinished:0,completed:8,inventory:0,treasure:0});});
 
@@ -108,17 +108,17 @@ tests.push(()=>{let s={field:11,unfinished:0,completed:11,inventory:5};s=harvest
 
 tests.push(()=>{let s={field:7,unfinished:2,completed:5,inventory:4};s=complete(s,1);return assertEqual("4. 完成事件不觸發自動補充",s,{field:7,unfinished:1,completed:6,inventory:4});});
 
-tests.push(()=>{let s={field:7,unfinished:0,completed:7,inventory:4};s=harvest(s,1);return assertEqual("5. 收割後才觸發自動補充",s,{field:8,unfinished:0,completed:6,inventory:3,treasure:0});});
+tests.push(()=>{let s={field:7,unfinished:0,completed:7,inventory:4};s=harvest(s,1);return assertEqual("5. 收割後才觸發自動補充",s,{field:8,unfinished:0,completed:6,inventory:2,treasure:0});});
 
 tests.push(()=>{let s={field:11,unfinished:0,completed:11,inventory:0,treasure:9};s=harvest(s,3,true);return assertEqual("6. 5星Laura寶箱9/10收割3→10/10",s,{field:8,unfinished:0,completed:8,inventory:0,treasure:10});});
 
-tests.push(()=>{let s={field:8,unfinished:0,completed:8,inventory:0,treasure:0,lauraUsed:false};s=harvest(s,2,true);s=useLaura(s,5);return assertEqual("7. 寶箱進度不阻止當日Laura使用",s,{field:11,unfinished:0,completed:6,inventory:17,treasure:2,lauraUsed:true});});
+tests.push(()=>{let s={field:8,unfinished:0,completed:8,inventory:0,treasure:0,lauraUsed:false};s=harvest(s,2,true);s=useLaura(s,5);return assertEqual("7. 寶箱進度不阻止當日Laura使用",s,{field:8,unfinished:0,completed:6,inventory:18,treasure:2,lauraUsed:true});});
 
 tests.push(()=>{let s={field:8,unfinished:0,completed:8,inventory:0,lauraUsed:false};s=useLaura(s,4);const afterFirst=clone(s);s=useLaura(s,4);return assertEqual("8. Laura同日第二次使用無效",s,afterFirst);});
 
 tests.push(()=>{let s={field:8,unfinished:0,completed:8,inventory:0,lauraUsed:true,treasure:7,maxInventory:30};s=rollover(s);s=useLaura(s,0);return assertEqual("9. 10:00後Laura重置可使用",s,{field:11,unfinished:0,completed:8,inventory:10,lauraUsed:true,treasure:0,maxInventory:30});});
 
-tests.push(()=>{const s={field:6,unfinished:2,completed:4,inventory:10,maxInventory:30};return assertEqual("10. 系統+8先補場上",systemFree(s),{field:8,unfinished:2,completed:4,inventory:8,maxInventory:30});});
+tests.push(()=>{const s={field:6,unfinished:2,completed:4,inventory:10,maxInventory:30};return assertEqual("10. 系統+8先補場上",systemFree(s),{field:8,unfinished:2,completed:4,inventory:16,maxInventory:30});});
 
 tests.push(()=>{const s={field:11,unfinished:3,completed:8,inventory:27,maxInventory:30};return assertEqual("11. 系統+8進庫存且受MAX限制",systemFree(s),{field:11,unfinished:3,completed:8,inventory:30,maxInventory:30});});
 
