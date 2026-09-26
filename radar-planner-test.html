@@ -3,529 +3,292 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>雷達規劃器測試 - 衝分日判定</title>
+<title>雷達規則引擎測試</title>
 
 <style>
-
 body {
-    margin: 0;
-    padding: 20px;
-
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC",
+                 "PingFang TC", sans-serif;
     background: #111827;
     color: #f9fafb;
-
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Noto Sans TC",
-        "PingFang TC",
-        sans-serif;
-
+    padding: 20px;
     line-height: 1.6;
 }
 
-.container {
-    max-width: 520px;
+.card {
+    max-width: 500px;
     margin: 0 auto;
+    padding: 20px;
+    background: #1f2937;
+    border-radius: 16px;
 }
 
 h1 {
-    font-size: 23px;
-}
-
-.subtitle {
-    color: #cbd5e1;
-    margin-bottom: 20px;
+    font-size: 22px;
+    margin-top: 0;
 }
 
 .test {
-    background: #1f2937;
-    border-radius: 14px;
+    background: #111827;
     padding: 16px;
-    margin-bottom: 18px;
+    border-radius: 12px;
+    margin-top: 16px;
 }
 
-.test-title {
-    font-size: 17px;
-    font-weight: 700;
-    margin-bottom: 12px;
+.test h2 {
+    font-size: 16px;
+    margin-top: 0;
 }
 
 .state {
-    background: #111827;
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 14px;
+    margin: 10px 0;
 }
 
 button {
     width: 100%;
-    margin-top: 12px;
-
     padding: 14px;
-
+    margin-top: 12px;
     border: 0;
     border-radius: 12px;
-
-    background: #d98224;
+    background: #d9821b;
     color: white;
-
     font-size: 16px;
-    font-weight: 700;
+    font-weight: bold;
 }
 
 .result {
     margin-top: 12px;
-    padding: 12px;
-    border-radius: 10px;
+    padding: 14px;
     background: #111827;
+    border-radius: 12px;
 }
 
 .pass {
-    color: #4ade80;
-    font-weight: 700;
+    color: #22c55e;
+    font-weight: bold;
 }
 
 .fail {
-    color: #f87171;
-    font-weight: 700;
+    color: #ef4444;
+    font-weight: bold;
 }
 
 .summary {
+    margin-top: 20px;
+    padding: 14px;
     background: #111827;
     border-radius: 12px;
-    padding: 16px;
-    margin-top: 24px;
-    margin-bottom: 30px;
 }
-
-.highlight {
-    color: #fbbf24;
-    font-weight: 700;
-}
-
 </style>
 </head>
 
-
 <body>
 
-<div class="container">
+<div class="card">
 
-<h1>雷達規劃器測試</h1>
-
-<div class="subtitle">
-第一階段：下一個衝分日判定
-</div>
+<h1>雷達規則引擎測試</h1>
 
 <div id="tests"></div>
 
 <div class="summary" id="summary">
-    尚未執行測試
+尚未執行測試
 </div>
 
 </div>
-
 
 <script>
 
 /* =========================================================
-   基本設定
-   =========================================================
-
-   JavaScript Date 的月份是 0～11。
-
-   這裡所有測試輸入都是：
-   「台灣時間」
-
-   台灣時間：
-   UTC+8
-
-   遊戲時間：
-   台灣時間 - 10 小時
+   雷達規則引擎 v1.0
+   第 21～30 測試
    ========================================================= */
 
 
-/* =========================================================
-   建立台灣時間
-   ========================================================= */
+/* ---------------------------------------------------------
+   建立狀態
+--------------------------------------------------------- */
 
-function taiwanDate(
-    year,
-    month,
-    day,
-    hour,
-    minute = 0
-) {
+function createState({
+    field = 0,
+    completed = 0,
+    inventory = 0,
+    maxInventory = 30,
 
-    /*
-       使用 UTC 儲存，
-       避免手機所在地區影響測試。
+    warriorPassEnabled = false,
+    warriorTarget = 0,
+    warriorProgress = 0,
 
-       台灣 UTC+8
-    */
+    dawnEnabled = false,
+    dawnTarget = 0,
+    dawnProgress = 0
 
-    return new Date(
-        Date.UTC(
-            year,
-            month - 1,
-            day,
-            hour - 8,
-            minute,
-            0
-        )
-    );
+} = {}) {
+
+    return {
+        field,
+        completed,
+        inventory,
+        maxInventory,
+
+        warriorPassEnabled,
+        warriorTarget,
+        warriorProgress,
+
+        dawnEnabled,
+        dawnTarget,
+        dawnProgress
+    };
 }
 
 
-/* =========================================================
-   星期
-   ========================================================= */
+/* ---------------------------------------------------------
+   任務進度增加
+--------------------------------------------------------- */
 
-const weekdayNames = [
-    "日",
-    "一",
-    "二",
-    "三",
-    "四",
-    "五",
-    "六"
-];
+function addCompletionProgress(state) {
 
+    /*
+       一次「完成事件」：
 
-/* =========================================================
-   格式化台灣時間
-   ========================================================= */
+       未完成 → 已完成
 
-function formatTaiwanTime(date) {
+       同時：
+       勇士戰令 +1（如果啟用）
+       黎明曙光 +1（如果啟用）
 
-    const utc =
-        date.getTime();
+       兩個任務彼此獨立。
+    */
 
-    const taiwan =
-        new Date(
-            utc + 8 * 60 * 60 * 1000
+    if (state.warriorPassEnabled) {
+
+        state.warriorProgress = Math.min(
+            state.warriorProgress + 1,
+            state.warriorTarget
         );
+    }
 
-    const year =
-        taiwan.getUTCFullYear();
+    if (state.dawnEnabled) {
 
-    const month =
-        String(
-            taiwan.getUTCMonth() + 1
-        ).padStart(2, "0");
-
-    const day =
-        String(
-            taiwan.getUTCDate()
-        ).padStart(2, "0");
-
-    const hour =
-        String(
-            taiwan.getUTCHours()
-        ).padStart(2, "0");
-
-    const minute =
-        String(
-            taiwan.getUTCMinutes()
-        ).padStart(2, "0");
-
-    const weekday =
-        weekdayNames[
-            taiwan.getUTCDay()
-        ];
-
-    return `${year}/${month}/${day}（${weekday}）${hour}:${minute}`;
+        state.dawnProgress = Math.min(
+            state.dawnProgress + 1,
+            state.dawnTarget
+        );
+    }
 }
 
 
-/* =========================================================
-   台灣時間 → 遊戲時間
-   ========================================================= */
+/* ---------------------------------------------------------
+   玩家完成一個未完成雷達
+--------------------------------------------------------- */
 
-function toGameTime(taiwanDateValue) {
+function completeRadar(state) {
+
+    if (state.field - state.completed <= 0) {
+
+        return {
+            success: false,
+            reason: "沒有未完成雷達"
+        };
+    }
 
     /*
-       遊戲時間 = 台灣時間 - 10 小時
+       未完成 -1
+       已完成 +1
+
+       場上總數不變。
+       庫存不變。
+       不觸發自動補回。
     */
 
-    return new Date(
-        taiwanDateValue.getTime()
-        -
-        10 * 60 * 60 * 1000
-    );
+    state.completed++;
+
+    addCompletionProgress(state);
+
+    return {
+        success: true
+    };
 }
 
 
-/* =========================================================
-   格式化遊戲時間
-   ========================================================= */
+/* ---------------------------------------------------------
+   盟友瞬間幫助
+--------------------------------------------------------- */
 
-function formatGameTime(date) {
+function allyInstantHelp(state) {
 
-    const year =
-        date.getUTCFullYear();
+    if (state.field - state.completed <= 0) {
 
-    const month =
-        String(
-            date.getUTCMonth() + 1
-        ).padStart(2, "0");
+        return {
+            success: false,
+            reason: "沒有未完成雷達"
+        };
+    }
 
-    const day =
-        String(
-            date.getUTCDate()
-        ).padStart(2, "0");
+    /*
+       盟友瞬間幫助與玩家完成
+       在規則引擎中視為相同的「完成事件」。
 
-    const hour =
-        String(
-            date.getUTCHours()
-        ).padStart(2, "0");
+       未完成 -1
+       已完成 +1
+       場上總數不變
+       庫存不變
+       任務進度 +1
+    */
 
-    const minute =
-        String(
-            date.getUTCMinutes()
-        ).padStart(2, "0");
+    state.completed++;
 
-    const weekday =
-        weekdayNames[
-            date.getUTCDay()
-        ];
+    addCompletionProgress(state);
 
-    return `${year}/${month}/${day}（${weekday}）${hour}:${minute}`;
+    return {
+        success: true
+    };
 }
 
 
-/* =========================================================
-   取得「下一個衝分日」
-   =========================================================
+/* ---------------------------------------------------------
+   收割一個已完成雷達
+--------------------------------------------------------- */
 
-   規則：
+function harvestRadar(state) {
 
-   Monday / Friday：
+    if (state.completed <= 0) {
 
-   < 10:00
-   → 今天 10:00 是衝分日
+        return {
+            success: false,
+            reason: "沒有已完成雷達"
+        };
+    }
 
-   >= 10:00
-   → 今天就是衝分日
+    state.completed--;
+    state.field--;
 
-   Tuesday / Wednesday / Thursday
-   → 下一個 Friday 10:00
+    /*
+       場上低於 8 時，
+       才從庫存自動補回。
+    */
 
-   Saturday / Sunday
-   → 下一個 Monday 10:00
+    if (state.field < 8 && state.inventory > 0) {
 
+        const need = 8 - state.field;
 
-   注意：
-
-   這裡的判定完全以「台灣時間」為基準。
-   ========================================================= */
-
-function getScoringDayInfo(taiwanDateValue) {
-
-    const date =
-        new Date(
-            taiwanDateValue.getTime()
+        const refill = Math.min(
+            need,
+            state.inventory
         );
 
-
-    /*
-       取得台灣日期與時間
-    */
-
-    const taiwan =
-        new Date(
-            date.getTime()
-            +
-            8 * 60 * 60 * 1000
-        );
-
-
-    const weekday =
-        taiwan.getUTCDay();
-
-    const hour =
-        taiwan.getUTCHours();
-
-    const minute =
-        taiwan.getUTCMinutes();
-
-
-    /*
-       是否已經過今天 10:00
-    */
-
-    const after10 =
-        hour > 10 ||
-        (
-            hour === 10 &&
-            minute >= 0
-        );
-
-
-    let target;
-
-
-    /*
-       Monday
-    */
-
-    if (weekday === 1) {
-
-        target =
-            new Date(
-                Date.UTC(
-                    taiwan.getUTCFullYear(),
-                    taiwan.getUTCMonth(),
-                    taiwan.getUTCDate(),
-                    2,
-                    0,
-                    0
-                )
-            );
-
-        /*
-           上面的 UTC 02:00
-           對應台灣 10:00
-        */
-
-        if (after10) {
-
-            /*
-               今天已經是衝分日，
-               仍然把「今天」視為目前衝分日。
-            */
-
-            return {
-                mode: "scoring",
-                target
-            };
-        }
-
-
-        return {
-            mode: "prepare",
-            target
-        };
+        state.field += refill;
+        state.inventory -= refill;
     }
 
-
     /*
-       Friday
+       重要：
+       收割不增加勇士戰令
+       收割不增加黎明曙光
     */
 
-    if (weekday === 5) {
-
-        target =
-            new Date(
-                Date.UTC(
-                    taiwan.getUTCFullYear(),
-                    taiwan.getUTCMonth(),
-                    taiwan.getUTCDate(),
-                    2,
-                    0,
-                    0
-                )
-            );
-
-
-        if (after10) {
-
-            return {
-                mode: "scoring",
-                target
-            };
-        }
-
-
-        return {
-            mode: "prepare",
-            target
-        };
-    }
-
-
-    /*
-       Tuesday～Thursday
-       → 下一個 Friday
-    */
-
-    if (
-        weekday === 2 ||
-        weekday === 3 ||
-        weekday === 4
-    ) {
-
-        const daysUntilFriday =
-            5 - weekday;
-
-
-        target =
-            new Date(
-                Date.UTC(
-                    taiwan.getUTCFullYear(),
-                    taiwan.getUTCMonth(),
-                    taiwan.getUTCDate()
-                    +
-                    daysUntilFriday,
-                    2,
-                    0,
-                    0
-                )
-            );
-
-
-        return {
-            mode: "prepare",
-            target
-        };
-    }
-
-
-    /*
-       Saturday / Sunday
-       → 下一個 Monday
-    */
-
-    if (
-        weekday === 6 ||
-        weekday === 0
-    ) {
-
-        let daysUntilMonday;
-
-
-        if (weekday === 6) {
-
-            daysUntilMonday = 2;
-
-        } else {
-
-            daysUntilMonday = 1;
-        }
-
-
-        target =
-            new Date(
-                Date.UTC(
-                    taiwan.getUTCFullYear(),
-                    taiwan.getUTCMonth(),
-                    taiwan.getUTCDate()
-                    +
-                    daysUntilMonday,
-                    2,
-                    0,
-                    0
-                )
-            );
-
-
-        return {
-            mode: "prepare",
-            target
-        };
-    }
+    return {
+        success: true
+    };
 }
 
 
@@ -536,475 +299,565 @@ function getScoringDayInfo(taiwanDateValue) {
 const tests = [];
 
 
-function addTest(
-    title,
-    input,
-    expected
-) {
+function addTest(title, initialState, action, expected) {
 
     tests.push({
         title,
-        input,
+        initialState,
+        action,
         expected
     });
-
 }
 
 
 /* =========================================================
-   51A
-   週一 09:00
-   → 今天 10:00
+   第 21～30 測試
    ========================================================= */
 
+
+/* ---------------------------------------------------------
+   21
+   玩家完成一個未完成雷達
+
+   場上10
+   已完成2
+   → 未完成8
+
+   完成後：
+   場上10
+   已完成3
+--------------------------------------------------------- */
+
 addTest(
+    "第二十一個測試：玩家完成一個未完成雷達",
 
-    "測試 A：週一 09:00 → 今天 10:00 衝分",
+    createState({
+        field: 10,
+        completed: 2
+    }),
 
-    taiwanDate(
-        2026,
-        9,
-        28,
-        9,
-        0
-    ),
+    state => completeRadar(state),
 
     {
-        mode: "prepare",
+        field: 10,
+        completed: 3
+    }
+);
 
-        targetTaiwan:
-            "2026/09/28（一）10:00"
+
+/* ---------------------------------------------------------
+   22
+   完成雷達不改變場上總數，也不改變庫存
+--------------------------------------------------------- */
+
+addTest(
+    "第二十二個測試：完成雷達不改變場上總數與庫存",
+
+    createState({
+        field: 8,
+        completed: 0,
+        inventory: 15
+    }),
+
+    state => completeRadar(state),
+
+    {
+        field: 8,
+        completed: 1,
+        inventory: 15
+    }
+);
+
+
+/* ---------------------------------------------------------
+   23
+   勇士戰令啟用
+
+   17/20
+   完成一次
+   → 18/20
+--------------------------------------------------------- */
+
+addTest(
+    "第二十三個測試：完成雷達增加勇士戰令",
+
+    createState({
+        field: 8,
+        completed: 0,
+
+        warriorPassEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 17
+    }),
+
+    state => completeRadar(state),
+
+    {
+        completed: 1,
+        warriorProgress: 18
+    }
+);
+
+
+/* ---------------------------------------------------------
+   24
+   黎明曙光啟用
+
+   5/10
+   完成一次
+   → 6/10
+--------------------------------------------------------- */
+
+addTest(
+    "第二十四個測試：完成雷達增加黎明曙光",
+
+    createState({
+        field: 8,
+        completed: 0,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 5
+    }),
+
+    state => completeRadar(state),
+
+    {
+        completed: 1,
+        dawnProgress: 6
+    }
+);
+
+
+/* ---------------------------------------------------------
+   25
+   兩個任務同時啟用
+
+   一次完成事件
+   → 勇士戰令 +1
+   → 黎明曙光 +1
+--------------------------------------------------------- */
+
+addTest(
+    "第二十五個測試：一次完成同時增加兩個任務",
+
+    createState({
+        field: 8,
+        completed: 0,
+
+        warriorPassEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 10,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 5
+    }),
+
+    state => completeRadar(state),
+
+    {
+        completed: 1,
+        warriorProgress: 11,
+        dawnProgress: 6
+    }
+);
+
+
+/* ---------------------------------------------------------
+   26
+   勇士戰令已經 20/20
+
+   再完成雷達：
+   顯示仍然 20/20
+--------------------------------------------------------- */
+
+addTest(
+    "第二十六個測試：勇士戰令達標後進度封頂",
+
+    createState({
+        field: 8,
+        completed: 0,
+
+        warriorPassEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 20
+    }),
+
+    state => completeRadar(state),
+
+    {
+        completed: 1,
+        warriorProgress: 20
+    }
+);
+
+
+/* ---------------------------------------------------------
+   27
+   黎明曙光已經 10/10
+
+   再完成雷達：
+   仍然 10/10
+--------------------------------------------------------- */
+
+addTest(
+    "第二十七個測試：黎明曙光達標後進度封頂",
+
+    createState({
+        field: 8,
+        completed: 0,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 10
+    }),
+
+    state => completeRadar(state),
+
+    {
+        completed: 1,
+        dawnProgress: 10
+    }
+);
+
+
+/* ---------------------------------------------------------
+   28
+   盟友瞬間幫助
+
+   未完成 → 已完成
+
+   任務也 +1
+--------------------------------------------------------- */
+
+addTest(
+    "第二十八個測試：盟友瞬間幫助視為完成事件",
+
+    createState({
+        field: 11,
+        completed: 2,
+
+        warriorPassEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 17,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 5
+    }),
+
+    state => allyInstantHelp(state),
+
+    {
+        field: 11,
+        completed: 3,
+        warriorProgress: 18,
+        dawnProgress: 6
+    }
+);
+
+
+/* ---------------------------------------------------------
+   29
+   收割不增加任務進度
+
+   勇士戰令 17/20
+   黎明曙光 5/10
+
+   收割已完成雷達
+   → 任務都不變
+--------------------------------------------------------- */
+
+addTest(
+    "第二十九個測試：收割不增加勇士戰令與黎明曙光",
+
+    createState({
+        field: 8,
+        completed: 1,
+        inventory: 5,
+
+        warriorPassEnabled: true,
+        warriorTarget: 20,
+        warriorProgress: 17,
+
+        dawnEnabled: true,
+        dawnTarget: 10,
+        dawnProgress: 5
+    }),
+
+    state => harvestRadar(state),
+
+    {
+        field: 8,
+        completed: 0,
+        inventory: 4,
+        warriorProgress: 17,
+        dawnProgress: 5
+    }
+);
+
+
+/* ---------------------------------------------------------
+   30
+   完成事件不會觸發自動補回
+
+   場上8
+   庫存20
+
+   完成一個未完成雷達：
+   場上仍然8
+   庫存仍然20
+--------------------------------------------------------- */
+
+addTest(
+    "第三十個測試：完成雷達不觸發庫存自動補回",
+
+    createState({
+        field: 8,
+        completed: 0,
+        inventory: 20
+    }),
+
+    state => completeRadar(state),
+
+    {
+        field: 8,
+        completed: 1,
+        inventory: 20
     }
 );
 
 
 /* =========================================================
-   51B
-   週一 15:00
-   → 今天是衝分日
+   執行測試
    ========================================================= */
 
-addTest(
+function runTest(test) {
 
-    "測試 B：週一 15:00 → 今天是衝分日",
+    const state = JSON.parse(
+        JSON.stringify(test.initialState)
+    );
 
-    taiwanDate(
-        2026,
-        9,
-        28,
-        15,
-        0
-    ),
+    let actionResult = null;
 
-    {
-        mode: "scoring",
+    try {
 
-        targetTaiwan:
-            "2026/09/28（一）10:00"
+        actionResult = test.action(state);
+
+    } catch (error) {
+
+        return {
+            pass: false,
+            state,
+            error: error.message
+        };
     }
-);
+
+    let pass = true;
+
+    for (const key in test.expected) {
+
+        if (state[key] !== test.expected[key]) {
+            pass = false;
+        }
+    }
+
+    return {
+        pass,
+        state,
+        actionResult
+    };
+}
 
 
 /* =========================================================
-   51C
-   週二
-   → 下一個週五
+   顯示
    ========================================================= */
 
-addTest(
+function renderTests() {
 
-    "測試 C：週二 → 下一個週五 10:00",
+    const container = document.getElementById("tests");
 
-    taiwanDate(
-        2026,
-        9,
-        29,
-        12,
-        0
-    ),
+    container.innerHTML = "";
 
-    {
-        mode: "prepare",
+    tests.forEach((test, index) => {
 
-        targetTaiwan:
-            "2026/10/02（五）10:00"
-    }
-);
+        const box = document.createElement("div");
+
+        box.className = "test";
+
+        box.innerHTML = `
+            <h2>${test.title}</h2>
+
+            <div class="state">
+                <strong>初始狀態：</strong><br>
+
+                場上：${test.initialState.field}<br>
+
+                已完成：${test.initialState.completed}<br>
+
+                庫存：${test.initialState.inventory}<br>
+
+                勇士戰令：
+                ${
+                    test.initialState.warriorPassEnabled
+                    ? test.initialState.warriorProgress
+                      + "/"
+                      + test.initialState.warriorTarget
+                    : "未啟用"
+                }<br>
+
+                黎明曙光：
+                ${
+                    test.initialState.dawnEnabled
+                    ? test.initialState.dawnProgress
+                      + "/"
+                      + test.initialState.dawnTarget
+                    : "未啟用"
+                }
+            </div>
+
+            <button onclick="executeSingleTest(${index})">
+                執行測試
+            </button>
+
+            <div
+                class="result"
+                id="result-${index}"
+            >
+                尚未執行測試
+            </div>
+        `;
+
+        container.appendChild(box);
+    });
+}
 
 
 /* =========================================================
-   51D
-   週四
-   → 明天週五
+   執行單項
    ========================================================= */
 
-addTest(
+function executeSingleTest(index) {
 
-    "測試 D：週四 → 下一個週五 10:00",
+    const test = tests[index];
 
-    taiwanDate(
-        2026,
-        10,
-        1,
-        20,
-        0
-    ),
+    const result = runTest(test);
 
-    {
-        mode: "prepare",
-
-        targetTaiwan:
-            "2026/10/02（五）10:00"
-    }
-);
-
-
-/* =========================================================
-   51E
-   週五 09:00
-   → 今天 10:00
-   ========================================================= */
-
-addTest(
-
-    "測試 E：週五 09:00 → 今天 10:00 衝分",
-
-    taiwanDate(
-        2026,
-        10,
-        2,
-        9,
-        0
-    ),
-
-    {
-        mode: "prepare",
-
-        targetTaiwan:
-            "2026/10/02（五）10:00"
-    }
-);
-
-
-/* =========================================================
-   51F
-   週五 15:00
-   → 今天是衝分日
-   ========================================================= */
-
-addTest(
-
-    "測試 F：週五 15:00 → 今天是衝分日",
-
-    taiwanDate(
-        2026,
-        10,
-        2,
-        15,
-        0
-    ),
-
-    {
-        mode: "scoring",
-
-        targetTaiwan:
-            "2026/10/02（五）10:00"
-    }
-);
-
-
-/* =========================================================
-   51G
-   週六
-   → 下一個週一
-   ========================================================= */
-
-addTest(
-
-    "測試 G：週六 → 下一個週一 10:00",
-
-    taiwanDate(
-        2026,
-        10,
-        3,
-        15,
-        0
-    ),
-
-    {
-        mode: "prepare",
-
-        targetTaiwan:
-            "2026/10/05（一）10:00"
-    }
-);
-
-
-/* =========================================================
-   顯示測試
-   ========================================================= */
-
-let executed = 0;
-let passed = 0;
-let failed = 0;
-
-
-function runTest(index) {
-
-    const test =
-        tests[index];
-
-
-    const result =
-        getScoringDayInfo(
-            test.input
-        );
-
-
-    const actualTarget =
-        formatTaiwanTime(
-            result.target
-        );
-
-
-    const success =
-        result.mode ===
-            test.expected.mode
-        &&
-        actualTarget ===
-            test.expected.targetTaiwan;
-
-
-    executed++;
-
-
-    if (success) {
-
-        passed++;
-
-    } else {
-
-        failed++;
-    }
-
-
-    const resultBox =
+    const el =
         document.getElementById(
             `result-${index}`
         );
 
+    el.dataset.executed = "true";
 
-    const gameTarget =
-        formatGameTime(
-            toGameTime(
-                result.target
-            )
-        );
+    el.dataset.pass =
+        result.pass ? "true" : "false";
 
 
-    if (success) {
+    if (result.pass) {
 
-        resultBox.innerHTML = `
+        el.innerHTML = `
+            <strong>測試結果</strong><br><br>
 
-            <strong>測試結果</strong>
+            場上：${result.state.field}<br>
 
-            <br><br>
+            已完成：${result.state.completed}<br>
 
-            規劃模式：
+            庫存：${result.state.inventory}<br>
+
+            勇士戰令：
             ${
-                result.mode === "scoring"
-                ? "🏆 今天是衝分日"
-                : "📦 準備衝分日"
+                result.state.warriorPassEnabled
+                ? result.state.warriorProgress
+                  + "/"
+                  + result.state.warriorTarget
+                : "未啟用"
+            }<br>
+
+            黎明曙光：
+            ${
+                result.state.dawnEnabled
+                ? result.state.dawnProgress
+                  + "/"
+                  + result.state.dawnTarget
+                : "未啟用"
             }
-
-            <br>
-
-            衝分時間：
-            ${actualTarget}
-
-            <br>
-
-            遊戲時間：
-            ${gameTarget}
 
             <br><br>
 
             <span class="pass">
                 ✅ 測試通過
             </span>
-
         `;
 
     } else {
 
-        resultBox.innerHTML = `
+        el.innerHTML = `
+            <strong>測試結果</strong><br><br>
 
-            <strong>測試結果</strong>
+            場上：${result.state.field}<br>
 
-            <br><br>
+            已完成：${result.state.completed}<br>
+
+            庫存：${result.state.inventory}<br>
+
+            <br>
 
             <span class="fail">
                 ❌ 測試失敗
             </span>
-
-            <br><br>
-
-            實際模式：
-            ${
-                result.mode === "scoring"
-                ? "衝分日"
-                : "準備日"
-            }
-
-            <br>
-
-            實際衝分時間：
-            ${actualTarget}
-
-            <br>
-
-            實際遊戲時間：
-            ${gameTarget}
-
-            <br><br>
-
-            預期模式：
-            ${
-                test.expected.mode === "scoring"
-                ? "衝分日"
-                : "準備日"
-            }
-
-            <br>
-
-            預期衝分時間：
-            ${test.expected.targetTaiwan}
-
         `;
     }
-
 
     updateSummary();
 }
 
 
 /* =========================================================
-   建立畫面
-   ========================================================= */
-
-function renderTests() {
-
-    const container =
-        document.getElementById(
-            "tests"
-        );
-
-
-    tests.forEach(
-        (test, index) => {
-
-            const div =
-                document.createElement(
-                    "div"
-                );
-
-
-            div.className =
-                "test";
-
-
-            div.innerHTML = `
-
-                <div class="test-title">
-
-                    ${test.title}
-
-                </div>
-
-
-                <div class="state">
-
-                    <strong>
-                        計算基準時間
-                    </strong>
-
-                    <br>
-
-                    台灣時間：
-                    ${formatTaiwanTime(test.input)}
-
-                    <br>
-
-                    遊戲時間：
-                    ${
-                        formatGameTime(
-                            toGameTime(
-                                test.input
-                            )
-                        )
-                    }
-
-                </div>
-
-
-                <button
-                    onclick="runTest(${index})"
-                >
-                    執行測試
-                </button>
-
-
-                <div
-                    class="result"
-                    id="result-${index}"
-                >
-
-                    尚未執行
-
-                </div>
-
-            `;
-
-
-            container.appendChild(div);
-        }
-    );
-}
-
-
-/* =========================================================
-   更新摘要
+   更新總進度
    ========================================================= */
 
 function updateSummary() {
 
-    document.getElementById(
-        "summary"
-    ).innerHTML = `
+    let executed = 0;
+    let passed = 0;
+    let failed = 0;
 
-        <strong>
-            測試進度
-        </strong>
+    tests.forEach((_, index) => {
 
-        <br><br>
+        const el =
+            document.getElementById(
+                `result-${index}`
+            );
 
-        已執行：
-        ${executed} / ${tests.length}
+        if (!el.dataset.executed) {
+            return;
+        }
 
-        <br>
+        executed++;
+
+        if (el.dataset.pass === "true") {
+            passed++;
+        } else {
+            failed++;
+        }
+    });
+
+
+    document.getElementById("summary").innerHTML = `
+        <strong>目前測試進度</strong><br><br>
+
+        已執行：${executed} 個<br>
 
         <span class="pass">
-            ✅ 通過：
-            ${passed}
-        </span>
-
-        <br>
+            ✅ 通過：${passed} 個
+        </span><br>
 
         <span class="fail">
-            ❌ 失敗：
-            ${failed}
+            ❌ 失敗：${failed} 個
         </span>
-
     `;
 }
 
