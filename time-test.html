@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>時間核心測試</title>
+
+<style>
+body {
+    margin: 0;
+    padding: 20px;
+    background: #111827;
+    color: #f9fafb;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Noto Sans TC",
+        "PingFang TC",
+        sans-serif;
+}
+
+.container {
+    max-width: 520px;
+    margin: auto;
+}
+
+h1 {
+    font-size: 24px;
+}
+
+.subtitle {
+    color: #cbd5e1;
+    margin-bottom: 20px;
+}
+
+.test {
+    background: #1f2937;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.info {
+    background: #111827;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px;
+
+    border: 0;
+    border-radius: 12px;
+
+    background: #d98224;
+    color: white;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.result {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #111827;
+}
+
+.pass {
+    color: #4ade80;
+    font-weight: 700;
+}
+
+.fail {
+    color: #f87171;
+    font-weight: 700;
+}
+
+.summary {
+    margin-top: 24px;
+    padding: 16px;
+    background: #111827;
+    border-radius: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🕐 時間核心測試</h1>
+
+<div class="subtitle">
+末日時間固定 UTC−2
+</div>
+
+<div id="tests"></div>
+
+<div class="summary" id="summary">
+尚未執行測試
+</div>
+
+</div>
+
+<script>
+
+/*
+=========================================================
+時間核心
+
+核心規則：
+
+末日時間 = UTC−2
+
+所有計算先建立「絕對時間」。
+
+顯示時才轉成：
+
+① 指定當地時區
+② 末日時間 UTC−2
+
+因此：
+切換顯示模式不會改變真正的時間點。
+=========================================================
+*/
+
+
+/*
+=========================================================
+建立絕對時間
+
+輸入：
+
+年、月、日、時、分、時區 UTC offset
+
+例如：
+
+台灣 2026/09/28 10:00
+UTC+8
+
+就會得到真正的絕對時間。
+=========================================================
+*/
+
+function createAbsoluteTime(
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    utcOffset
+) {
+
+    const utcMillis =
+        Date.UTC(
+            year,
+            month - 1,
+            day,
+            hour,
+            minute,
+            0,
+            0
+        );
+
+    return new Date(
+        utcMillis
+        -
+        utcOffset * 60 * 60 * 1000
+    );
+}
+
+
+/*
+=========================================================
+格式化指定時區
+=========================================================
+*/
+
+function formatInOffset(
+    absoluteTime,
+    utcOffset
+) {
+
+    const local =
+        new Date(
+            absoluteTime.getTime()
+            +
+            utcOffset * 60 * 60 * 1000
+        );
+
+    const year =
+        local.getUTCFullYear();
+
+    const month =
+        String(
+            local.getUTCMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            local.getUTCDate()
+        ).padStart(2, "0");
+
+    const hour =
+        String(
+            local.getUTCHours()
+        ).padStart(2, "0");
+
+    const minute =
+        String(
+            local.getUTCMinutes()
+        ).padStart(2, "0");
+
+    return `${year}/${month}/${day} ${hour}:${minute}`;
+}
+
+
+/*
+=========================================================
+格式化末日時間
+
+UTC−2
+=========================================================
+*/
+
+function formatDoomsdayTime(
+    absoluteTime
+) {
+
+    return formatInOffset(
+        absoluteTime,
+        -2
+    );
+}
+
+
+/*
+=========================================================
+測試資料
+=========================================================
+*/
+
+const tests = [];
+
+
+function addTest(
+    title,
+    absoluteTime,
+    expectedDoomsday,
+    description
+) {
+
+    tests.push({
+        title,
+        absoluteTime,
+        expectedDoomsday,
+        description
+    });
+
+}
+
+
+/*
+=========================================================
+測試 1
+
+台灣 UTC+8
+10:00
+
+→ 末日 UTC−2
+00:00
+=========================================================
+*/
+
+addTest(
+
+    "測試 1：台灣 10:00 → 末日 00:00",
+
+    createAbsoluteTime(
+        2026,
+        9,
+        28,
+        10,
+        0,
+        8
+    ),
+
+    "2026/09/28 00:00",
+
+    "UTC+8 與 UTC−2 相差 10 小時"
+);
+
+
+/*
+=========================================================
+測試 2
+
+UTC+7
+09:00
+
+→ 末日 00:00
+=========================================================
+*/
+
+addTest(
+
+    "測試 2：UTC+7 09:00 → 末日 00:00",
+
+    createAbsoluteTime(
+        2026,
+        9,
+        28,
+        9,
+        0,
+        7
+    ),
+
+    "2026/09/28 00:00",
+
+    "人在 UTC+7 時，當地 09:00 對應末日 00:00"
+);
+
+
+/*
+=========================================================
+測試 3
+
+UTC+9
+11:00
+
+→ 末日 00:00
+=========================================================
+*/
+
+addTest(
+
+    "測試 3：UTC+9 11:00 → 末日 00:00",
+
+    createAbsoluteTime(
+        2026,
+        9,
+        28,
+        11,
+        0,
+        9
+    ),
+
+    "2026/09/28 00:00",
+
+    "人在 UTC+9 時，當地 11:00 對應末日 00:00"
+);
+
+
+/*
+=========================================================
+測試 4
+
+末日 00:00
+
+→ UTC 02:00
+
+→ 台灣 10:00
+=========================================================
+*/
+
+addTest(
+
+    "測試 4：末日 00:00 → 台灣 10:00",
+
+    createAbsoluteTime(
+        2026,
+        9,
+        28,
+        0,
+        0,
+        -2
+    ),
+
+    "2026/09/28 00:00",
+
+    "末日 00:00 就是換日時間"
+);
+
+
+/*
+=========================================================
+測試 5
+
+末日：
+
+09/28 16:00
+
+→ 台灣：
+
+09/29 02:00
+
+確認跨日。
+=========================================================
+*/
+
+addTest(
+
+    "測試 5：末日 16:00 → 台灣隔日 02:00",
+
+    createAbsoluteTime(
+        2026,
+        9,
+        28,
+        16,
+        0,
+        -2
+    ),
+
+    "2026/09/28 16:00",
+
+    "末日 16:00 對應 UTC 18:00，也就是台灣隔日 02:00"
+);
+
+
+/*
+=========================================================
+測試 6
+
+同一個絕對時間：
+
+台灣：
+10:00
+
+末日：
+00:00
+
+兩者必須是同一個 timestamp。
+=========================================================
+*/
+
+function testSameAbsoluteTime() {
+
+    const taiwan =
+        createAbsoluteTime(
+            2026,
+            9,
+            28,
+            10,
+            0,
+            8
+        );
+
+    const doomsday =
+        createAbsoluteTime(
+            2026,
+            9,
+            28,
+            0,
+            0,
+            -2
+        );
+
+    return (
+        taiwan.getTime()
+        ===
+        doomsday.getTime()
+    );
+}
+
+
+/*
+=========================================================
+執行測試
+=========================================================
+*/
+
+let executed = 0;
+let passed = 0;
+let failed = 0;
+
+
+function runTest(index) {
+
+    const test =
+        tests[index];
+
+    const actual =
+        formatDoomsdayTime(
+            test.absoluteTime
+        );
+
+    const success =
+        actual ===
+        test.expectedDoomsday;
+
+    executed++;
+
+    if (success) {
+        passed++;
+    } else {
+        failed++;
+    }
+
+
+    const result =
+        document.getElementById(
+            `result-${index}`
+        );
+
+
+    const utc =
+        formatInOffset(
+            test.absoluteTime,
+            0
+        );
+
+
+    if (success) {
+
+        result.innerHTML = `
+
+            <strong>結果</strong>
+
+            <br><br>
+
+            UTC：
+            ${utc}
+
+            <br>
+
+            末日時間：
+            ${actual}
+
+            <br><br>
+
+            ${test.description}
+
+            <br><br>
+
+            <span class="pass">
+                ✅ 測試通過
+            </span>
+
+        `;
+
+    } else {
+
+        result.innerHTML = `
+
+            <strong>結果</strong>
+
+            <br><br>
+
+            UTC：
+            ${utc}
+
+            <br>
+
+            實際末日時間：
+            ${actual}
+
+            <br>
+
+            預期末日時間：
+            ${test.expectedDoomsday}
+
+            <br><br>
+
+            <span class="fail">
+                ❌ 測試失敗
+            </span>
+
+        `;
+    }
+
+
+    updateSummary();
+}
+
+
+/*
+=========================================================
+測試 6 特別處理
+=========================================================
+*/
+
+function runTest6() {
+
+    const success =
+        testSameAbsoluteTime();
+
+    executed++;
+
+    if (success) {
+        passed++;
+    } else {
+        failed++;
+    }
+
+
+    const result =
+        document.getElementById(
+            "result-5"
+        );
+
+
+    if (success) {
+
+        result.innerHTML = `
+
+            <strong>結果</strong>
+
+            <br><br>
+
+            台灣時間：
+            2026/09/28 10:00
+
+            <br>
+
+            末日時間：
+            2026/09/28 00:00
+
+            <br><br>
+
+            兩者 timestamp 完全相同。
+
+            <br><br>
+
+            <span class="pass">
+                ✅ 測試通過
+            </span>
+
+        `;
+
+    } else {
+
+        result.innerHTML = `
+
+            <span class="fail">
+                ❌ 測試失敗
+            </span>
+
+        `;
+    }
+
+
+    updateSummary();
+}
+
+
+/*
+=========================================================
+建立畫面
+=========================================================
+*/
+
+function renderTests() {
+
+    const container =
+        document.getElementById(
+            "tests"
+        );
+
+
+    tests.forEach(
+        (test, index) => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "test";
+
+
+            const localExample =
+                index === 0
+                ? "台灣 UTC+8"
+                : index === 1
+                ? "UTC+7"
+                : index === 2
+                ? "UTC+9"
+                : index === 3
+                ? "末日 UTC−2"
+                : index === 4
+                ? "末日 UTC−2"
+                : "台灣 / 末日";
+
+
+            div.innerHTML = `
+
+                <div class="title">
+                    ${test.title}
+                </div>
+
+                <div class="info">
+
+                    <strong>
+                        測試情境
+                    </strong>
+
+                    <br>
+
+                    ${localExample}
+
+                    <br><br>
+
+                    ${test.description}
+
+                </div>
+
+
+                <button
+                    onclick="
+                        ${
+                            index === 5
+                            ? `runTest6()`
+                            : `runTest(${index})`
+                        }
+                    "
+                >
+                    執行測試
+                </button>
+
+
+                <div
+                    class="result"
+                    id="result-${index}"
+                >
+
+                    尚未執行
+
+                </div>
+
+            `;
+
+
+            container.appendChild(div);
+
+        }
+    );
+}
+
+
+/*
+=========================================================
+摘要
+=========================================================
+*/
+
+function updateSummary() {
+
+    document.getElementById(
+        "summary"
+    ).innerHTML = `
+
+        <strong>
+            測試進度
+        </strong>
+
+        <br><br>
+
+        已執行：
+        ${executed} / ${tests.length}
+
+        <br>
+
+        <span class="pass">
+            ✅ 通過：
+            ${passed}
+        </span>
+
+        <br>
+
+        <span class="fail">
+            ❌ 失敗：
+            ${failed}
+        </span>
+
+    `;
+}
+
+
+/*
+=========================================================
+初始化
+=========================================================
+*/
+
+renderTests();
+
+</script>
+
+</body>
+</html>
