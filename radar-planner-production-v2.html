@@ -13,17 +13,17 @@ h2{font-size:19px;margin:0 0 12px}
 label{display:block;color:#bbb;font-size:14px;margin-bottom:5px}
 input,select{width:100%;box-sizing:border-box;background:#292929;color:#fff;border:1px solid #444;border-radius:9px;padding:10px;font-size:16px}
 button{font-size:17px;font-weight:700;padding:12px 18px;border:0;border-radius:11px;background:#1683ff;color:#fff}
+button.secondary{background:#444}
 .row{display:flex;gap:9px;flex-wrap:wrap}.result{font-size:17px;line-height:1.65}
-.good{color:#20d879}.warn{color:#ffc44d}.bad{color:#ff5964}.big{font-size:23px;font-weight:800}.muted{color:#aaa}
-hr{border:0;border-top:1px solid #333;margin:14px 0}
-ol,ul{margin:8px 0;padding-left:24px}li{margin:7px 0}
-.small{font-size:14px}.pill{display:inline-block;padding:4px 8px;border-radius:8px;background:#292929;margin:2px 4px 2px 0}
+.good{color:#20d879}.warn{color:#ffc44d}.bad{color:#ff5964}
+.big{font-size:23px;font-weight:800}.muted{color:#aaa}
+ul{margin:8px 0;padding-left:22px}
 @media(max-width:520px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <h1>雷達規劃器</h1>
-<div class="desc">Production v2｜使用已確認的雷達規則計算理想狀態、衝分日與操作順序。規劃只產生建議，不會直接修改玩家狀態。</div>
+<div class="desc">Production v2｜以目前玩家狀態計算理想準備狀態、預計可達與操作順序。規劃只產生建議，不會直接修改玩家狀態。</div>
 
 <div class="card">
 <h2>① 目前狀態</h2>
@@ -70,7 +70,6 @@ ol,ul{margin:8px 0;padding-left:24px}li{margin:7px 0}
 
 <script>
 const $=id=>document.getElementById(id);
-const LAURA={0:5,1:10,2:10,3:10,4:20,5:20};
 function clone(x){return JSON.parse(JSON.stringify(x));}
 function makeState(){
  return {
@@ -86,6 +85,16 @@ function makeState(){
 }
 function normalize(s){s=clone(s);s.unfinished=s.field-s.completed;return s;}
 function ideal(max){return {field:11,inventory:max-8};}
+function planner(s){
+ s=normalize(s);
+ const target=ideal(s.maxInventory);
+ return {
+  target,
+  done:s.field>=target.field&&s.inventory>=target.inventory,
+  needsField:Math.max(0,target.field-s.field),
+  needsInventory:Math.max(0,target.inventory-s.inventory)
+ };
+}
 function complete(s,n=1){
  s=clone(s);
  for(let i=0;i<n&&s.unfinished>0;i++){
@@ -118,7 +127,7 @@ function system8(s){
 }
 function laura(s){
  s=clone(s);if(s.lauraUsed)return s;
- const amount=LAURA[s.lauraStar];
+ const amount={0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar];
  if(s.field<8){
   const add=Math.min(8-s.field,amount);
   s.field+=add;s.inventory+=amount-add;
@@ -140,184 +149,94 @@ function validate(s){
  }
  return e;
 }
-
-/* Taiwan game-day:
-   10:00 Taiwan = new game day. Before 10:00 belongs to the previous game date.
-   Monday/Friday 10:00 are scoring points.
-*/
-function gameDayDate(base){
- const d=new Date(base);
- const parts=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Taipei",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",hour12:false}).formatToParts(d);
- const o={};parts.forEach(p=>o[p.type]=p.value);
- let x=new Date(Date.UTC(+o.year,+o.month-1,+o.day));
- if(+o.hour<10)x.setUTCDate(x.getUTCDate()-1);
- return x;
-}
-function taipeiHour(base){
- const parts=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Taipei",hour:"2-digit",hour12:false}).formatToParts(new Date(base));
- return +(parts.find(x=>x.type==="hour").value);
-}
-function weekdayUTCDate(d){return d.getUTCDay();}
-function taipeiDateTime(dateUTCday,hour){
- // Convert a Taiwan calendar date + hour to an absolute Date.
- // Taiwan is UTC+8.
- return new Date(Date.UTC(dateUTCday.getUTCFullYear(),dateUTCday.getUTCMonth(),dateUTCday.getUTCDate(),hour-8,0,0));
-}
 function nextScoring(base){
- const gd=gameDayDate(base);
- const h=taipeiHour(base);
+ const d=new Date(base);
+ const h=d.getHours(), day=d.getDay();
+ const before10=h<10;
+ if((day===1||day===5)&&before10)return new Date(d.getFullYear(),d.getMonth(),d.getDate(),10,0,0);
  for(let i=0;i<14;i++){
-  const d=new Date(gd.getTime()+i*86400000);
-  const w=weekdayUTCDate(d);
-  if((w===1||w===5) && (i>0 || h<10))return taipeiDateTime(d,10);
+  const x=new Date(d.getTime()+i*86400000);
+  if((x.getDay()===1||x.getDay()===5) && (i>0||h>=10))return new Date(x.getFullYear(),x.getMonth(),x.getDate(),10,0,0);
  }
- return taipeiDateTime(new Date(gd.getTime()+14*86400000),10);
 }
 function modeText(base){
- const gd=gameDayDate(base), w=weekdayUTCDate(gd), h=taipeiHour(base);
- if((w===1||w===5)&&h>=10)return "衝分日";
- if((w===1||w===5)&&h<10)return "衝分日前準備";
+ const d=new Date(base), day=d.getDay(), h=d.getHours();
+ if((day===1||day===5)&&h>=10)return "衝分日";
+ if((day===1||day===5)&&h<10)return "衝分日前準備";
  return "準備期";
-}
-function nextSystemEvent(base){
- const d=new Date(base);
- const candidates=[];
- for(let i=0;i<3;i++){
-  const x=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+i,2,0,0));
-  candidates.push(x);
-  candidates.push(new Date(x.getTime()+8*3600000));
-  candidates.push(new Date(x.getTime()+16*3600000));
- }
- return candidates.filter(x=>x.getTime()>d.getTime()).sort((a,b)=>a-b)[0];
 }
 function fmt(d){
  const mode=$("timeMode").value;
- return new Intl.DateTimeFormat("zh-TW",{timeZone:mode==="doom"?"Etc/GMT+2":"Asia/Taipei",hour12:false,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).format(new Date(d));
+ return new Intl.DateTimeFormat("zh-TW",{timeZone:mode==="doom"?"Etc/GMT+2":"Asia/Taipei",hour12:false,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).format(d);
 }
-function scoringLabel(d){
- return fmt(d);
+function setNow(){
+ const d=new Date(), pad=n=>String(n).padStart(2,"0");
+ $("baseTime").value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-
-/* Build a conservative, deterministic operation sequence.
-   It never assumes ally instant help and never assumes an unfinished radar expires early.
-   Completing changes unfinished -> completed and advances active tasks; it does not change field.
-   Harvesting changes field/inventory only through the confirmed auto-refill rule.
-*/
-function buildPreparationPlan(original,base){
- let s=normalize(original), steps=[], target=ideal(s.maxInventory);
-
- // Complete all currently unfinished radars when preparing a scoring day if active tasks need progress.
- // If no active task needs progress, completion is still allowed but not required for resource preparation.
- const activeNeed=Object.values(s.tasks).some(t=>t.active&&t.current<t.target);
- if(s.unfinished>0&&activeNeed){
-  const n=s.unfinished;s=complete(s,n);
-  steps.push(`完成目前 ${n} 個未完成雷達：場上總數不變為 ${s.field}，已完成變為 ${s.completed}。`);
- }
-
- // Laura is the known one-click-per-day source. Use it before waiting when field is below 11
- // or inventory is below the ideal target, because it can add resources immediately.
- if(!s.lauraUsed&&(s.field<target.field||s.inventory<target.inventory)){
-  const before=clone(s);s=laura(s);
-  steps.push(`使用 ${s.lauraStar} 星 Laura：場上 ${before.field}→${s.field}、庫存 ${before.inventory}→${s.inventory}。`);
- }
-
- // Known system +8 events are simulated only as future resource entries.
- let guard=0;
- while((s.field<target.field||s.inventory<target.inventory)&&guard<12){
-  const ev=nextSystemEvent(base);
-  if(!ev)break;
-  const before=clone(s);s=system8(s);
-  const f=s.field-before.field, inv=s.inventory-before.inventory;
-  steps.push(`等待系統 +8（${fmt(ev)}）：場上 +${f}、庫存 +${inv}。`);
-  guard++;
-  if(f===0&&inv===0)break;
- }
-
- const reached=s.field>=target.field&&s.inventory>=target.inventory;
- return {s,steps,reached,target};
-}
-function buildScoringPlan(original,base){
- let s=normalize(original),steps=[];
- if(s.unfinished>0){
-  const n=s.unfinished;s=complete(s,n);
-  steps.push(`先完成 ${n} 個未完成雷達：完成只改變完成狀態，不增加或減少場上總數。`);
- }
- if(!s.lauraUsed){
-  const before=clone(s);s=laura(s);
-  steps.push(`Laura 今日尚未使用，可安排使用：場上 ${before.field}→${s.field}、庫存 ${before.inventory}→${s.inventory}。`);
- }
- if(s.completed>0){
-  const n=s.completed;s=harvest(s,n);
-  steps.push(`收割 ${n} 個已完成雷達；每次收割後依規則在場上低於 8 時自動用庫存補回。`);
- }
- return {s,steps};
-}
-function scoringEstimatePrep(s){
- const lauraExtra=s.lauraUsed?0:LAURA[s.lauraStar];
- return s.field+s.inventory+24+lauraExtra;
-}
-function scoringEstimateCurrent(s,base){
- const d=new Date(base);
- let count=0;
- for(let i=0;i<3;i++){
-  const x=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+i,2,0,0));
-  for(const ev of [x,new Date(x.getTime()+8*3600000),new Date(x.getTime()+16*3600000)]){
-   if(ev> d && ev<=new Date(d.getTime()+24*3600000))count++;
-  }
- }
- const lauraExtra=s.lauraUsed?0:LAURA[s.lauraStar];
- return s.field+s.inventory+count*8+lauraExtra;
-}
-function renderPlan(){
+$("now").onclick=setNow;
+$("timeMode").onchange=()=>{$("timeInfo").textContent="顯示："+($("timeMode").value==="doom"?"末日時間（UTC−2）":"當地時間");};
+$("plan").onclick=()=>{
  const s=makeState(), errors=validate(s);
- if(errors.length){
-  $("output").innerHTML=`<h2>規劃結果</h2><div class="bad">❌ 無法規劃</div><ul>${errors.map(e=>`<li>${e}</li>`).join("")}</ul>`;return;
- }
+ if(errors.length){$("output").innerHTML=`<h2>規劃結果</h2><div class="bad">❌ 無法規劃</div><ul>${errors.map(e=>`<li>${e}</li>`).join("")}</ul>`;return;}
  const base=$("baseTime").value?new Date($("baseTime").value):new Date();
- const mode=modeText(base), score=nextScoring(base), target=ideal(s.maxInventory);
- let html=`<h2>規劃結果</h2><div class="big">${mode}</div>`;
- html+=`<div class="muted">計算基準：${fmt(base)}<br>下一個衝分時間：${fmt(score)}<br>下一次系統 +8：${fmt(nextSystemEvent(base))}</div><hr>`;
- html+=`<div><b>理想狀態</b></div><div class="result">場上：<b>${target.field}</b> 個<br>庫存：<b>${target.inventory}</b> 個</div>`;
-
- if(mode==="衝分日"){
-  const p=buildScoringPlan(s,base);
-  const estimate=scoringEstimateCurrent(s,base);
-  html+=`<div class="result" style="margin-top:12px"><b>目前狀態</b><br>場上 ${s.field}／已完成 ${s.completed}／庫存 ${s.inventory}</div>`;
-  html+=`<div class="card"><div class="big">🏆 目前往後預計可收割：約 ${estimate} 個</div><div class="muted">以目前狀態＋接下來 24 小時內尚未發生的系統 +8＋尚未使用的 Laura 計算；不預設盟友瞬間幫助。</div></div>`;
-  html+=`<div class="result"><b>衝分日操作順序</b><ol>`;
-  p.steps.forEach(x=>html+=`<li>${x}</li>`);
-  html+=`<li><b>收割可收割的已完成雷達。</b>衝分日不需要為下一個衝分日保留資源。</li></ol></div>`;
-  html+=`<div class="good"><b>原則：</b>完成事件計入啟用中的每日任務；收割本身不增加任務進度。5 星 Laura 的寶藏每收割 1 個 +1，當日最多 10。</div>`;
+ const p=planner(s), mode=modeText(base), score=nextScoring(base);
+ let html=`<h2>規劃結果</h2>`;
+ html+=`<div class="big">${mode}</div>`;
+ html+=`<div class="muted">計算基準：${fmt(base)}<br>下一個衝分時間：${fmt(score)}</div>`;
+ html+=`<hr style="border:0;border-top:1px solid #333;margin:14px 0">`;
+ html+=`<div><b>理想狀態</b></div><div class="result">場上：<b>${p.target.field}</b> 個<br>庫存：<b>${p.target.inventory}</b> 個</div>`;
+ if(p.done){
+  html+=`<div class="good big" style="margin-top:12px">✅ 目前已達理想準備狀態</div>`;
  }else{
-  const p=buildPreparationPlan(s,base);
-  html+=`<div class="result" style="margin-top:12px"><b>目前狀態</b><br>場上 ${s.field}／未完成 ${s.field-s.completed}／已完成 ${s.completed}／庫存 ${s.inventory}</div>`;
-  if(p.reached){
-   html+=`<div class="good big" style="margin-top:12px">✅ 已達理想準備狀態</div>`;
-  }else{
-   html+=`<div class="warn big" style="margin-top:12px">🟡 目前尚未能靠已知來源直接達標</div>`;
-  }
-  html+=`<div class="result"><b>操作順序建議</b><ol>`;
-  if(p.steps.length===0)html+=`<li>目前沒有需要執行的資源準備操作。</li>`;
-  p.steps.forEach(x=>html+=`<li>${x}</li>`);
-  html+=`</ol></div>`;
-  html+=`<div class="card"><div><b>操作後預估</b></div><div class="result">場上：<b>${p.s.field}</b> 個<br>庫存：<b>${p.s.inventory}</b> 個</div></div>`;
-  if(p.reached)html+=`<div class="good">完成上述步驟後，預計可達理想準備狀態。</div>`;
-  else html+=`<div class="warn">完成目前可計算的已知來源後仍不足；到下一個時間點再按「開始規劃」，用最新狀態重新計算。</div>`;
+  html+=`<div class="warn big" style="margin-top:12px">⏳ 目前尚未達理想準備狀態</div>`;
+  html+=`<div class="result" style="margin-top:8px">目前還需要：場上 ${p.needsField} 個、庫存 ${p.needsInventory} 個</div>`;
  }
- html+=`<hr><div class="small muted">保守基準：不預設盟友瞬間幫助；不預測目前未完成雷達提前消失；自動補回是庫存→場上的移動，不算新增資源。</div>`;
+ if(mode==="衝分日"){
+  const lauraAmount={0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar];
+  const estimate=s.field+s.inventory+24+lauraAmount;
+  html+=`<div class="card" style="margin-top:14px"><div class="big">🏆 本次衝分日預計可收割：${estimate} 個</div><div class="muted">基準：目前場上＋目前庫存＋本次衝分日系統 +24＋Laura ${lauraAmount}<br>不預設盟友瞬間幫助；自動補回不視為新增資源。</div></div>`;
+  html+=`<div class="result"><b>衝分日操作方向</b><ul><li>完成可完成的未完成雷達</li><li>收割已完成雷達</li><li>不需要為下一個衝分日保留資源</li></ul></div>`;
+ }else{
+  html+=`<div class="result"><b>操作順序建議</b><ol>`;
+  let planState=clone(s);
+  let step=1;
+
+  // Laura is a known resource source. When field is already 8 or more,
+  // it adds +3 field and sends the rest to inventory.
+  if(!planState.lauraUsed && planState.lauraStar>=0 && planState.field<11){
+    planState=laura(planState);
+    html+=`<li><b>使用 Laura</b>：${({0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar])} 個。使用後預計場上 ${planState.field}、庫存 ${planState.inventory}。</li>`;
+    step++;
+  }
+
+  // If field is still below target, the planner cannot invent a source.
+  // It therefore tells the player to preserve the field and wait for a known +8.
+  if(planState.field<11){
+    html+=`<li><b>等待已知雷達來源</b>：目前場上仍低於理想 11，先不要把場上降到更低。</li>`;
+  }
+
+  // Simulate the next system +8 as the known future source.
+  if(planState.inventory<planState.maxInventory){
+    const before=clone(planState);
+    planState=system8(planState);
+    const gained=planState.inventory-before.inventory;
+    const fieldGained=planState.field-before.field;
+    html+=`<li><b>等待下一次系統 +8</b>：預計場上 +${fieldGained}、庫存 +${gained}。</li>`;
+  }
+
+  const reached=planState.field>=p.target.field && planState.inventory>=p.target.inventory;
+  if(reached){
+    html+=`</ol><div class="good" style="margin-top:10px"><b>完成上述步驟後，預計可達理想準備狀態。</b></div>`;
+  }else{
+    html+=`</ol><div class="warn" style="margin-top:10px"><b>完成上述已知來源後仍不足，需等待下一個已知來源，再重新規劃。</b></div>`;
+  }
+
+  html+=`<div class="muted" style="margin-top:10px">Planner 只提供操作順序，不會直接修改玩家狀態；未預設盟友瞬間幫助，也不預測未完成雷達提前消失。</div></div>`;
+ }
  $("output").innerHTML=html;
  $("timeInfo").textContent=`${mode}｜基準 ${fmt(base)}`;
-}
-$("now").onclick=()=>{
- const d=new Date(),p=n=>String(n).padStart(2,"0");
- $("baseTime").value=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
- $("timeInfo").textContent="已更新為現在時間";
 };
-$("plan").onclick=renderPlan;
-$("timeMode").onchange=()=>{
- $("timeInfo").textContent="顯示："+($("timeMode").value==="doom"?"末日時間（UTC−2）":"當地時間");
-};
-$("now").click();
+setNow();$("timeMode").onchange();
 </script>
 </body>
 </html>
