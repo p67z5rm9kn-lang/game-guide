@@ -1,28 +1,194 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>planner-action-decision-test-v1</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC",sans-serif;padding:20px;line-height:1.6;background:#111;color:#eee}button{font-size:18px;padding:12px 18px;border-radius:10px;border:0;margin:8px 0}#summary{font-size:20px;font-weight:700;margin:12px 0}#results{white-space:pre-wrap;font-family:ui-monospace,monospace;background:#1d1d1d;padding:14px;border-radius:10px}</style></head><body><h2>planner-action-decision-test-v1</h2><button onclick="runAllTests()">▶ 全部執行</button><div id="summary">尚未執行</div><div id="results"></div><script>
-function ae(n,a,e){a=JSON.stringify(a);e=JSON.stringify(e);return a===e?"✅ "+n:"❌ "+n+"\n   實際："+a+"\n   預期："+e}
-function clone(x){return JSON.parse(JSON.stringify(x))}
-function decide(s){const a=[];const target=s.maxInventory-8;if(s.unfinished>0)a.push("優先完成未完成雷達");if(!s.lauraUsed){if(s.inventory<target)a.push("可規劃Laura使用時機");else a.push("暫不使用Laura")}if(s.completed>0){if(s.field>11)a.push("可收割多出的已完成雷達");else if(s.field===11&&s.inventory>=target)a.push("可開始收割已完成雷達");else a.push("先保留已完成雷達")}a.push("不預測盟友瞬間幫助");return a}
-const t=[
-()=>ae("1. 場上7有未完成→先完成未完成雷達",decide({field:7,unfinished:3,completed:4,inventory:10,maxInventory:30,lauraUsed:true})[0],"優先完成未完成雷達"),
-()=>ae("2. MAX30庫存低於理想22→Laura列入規劃",decide({field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,lauraUsed:false}).includes("可規劃Laura使用時機"),true),
-()=>ae("3. MAX30庫存已達理想22→不急著使用Laura",decide({field:8,unfinished:0,completed:8,inventory:22,maxInventory:30,lauraUsed:false}).includes("暫不使用Laura"),true),
-()=>ae("4. MAX30理想準備狀態",{field:11,inventory:22},{field:11,inventory:22}),
-()=>ae("5. 場上超過11且有完成雷達→可收割多出的雷達",decide({field:13,unfinished:0,completed:13,inventory:0,maxInventory:30,lauraUsed:true}).includes("可收割多出的已完成雷達"),true),
-()=>ae("6. 場上11但庫存低於理想值→保留已完成雷達",decide({field:11,unfinished:0,completed:11,inventory:10,maxInventory:30,lauraUsed:true}).includes("先保留已完成雷達"),true),
-()=>ae("7. 場上11且庫存達理想值→可開始收割",decide({field:11,unfinished:0,completed:11,inventory:22,maxInventory:30,lauraUsed:true}).includes("可開始收割已完成雷達"),true),
-()=>ae("8. 場上8且庫存不足→不直接收割",decide({field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,lauraUsed:true}).includes("先保留已完成雷達"),true),
-()=>ae("9. Laura已使用→不再提出Laura建議",decide({field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,lauraUsed:true}).some(x=>x.includes("Laura")),false),
-()=>ae("10. Laura星級由玩家提供不由決策器改變",{inputStar:5,outputStar:5},{inputStar:5,outputStar:5}),
-()=>ae("11. 0星Laura仍可進入時機規劃",decide({field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,lauraUsed:false,lauraStar:0}).includes("可規劃Laura使用時機"),true),
-()=>ae("12. 5星Laura不自動修改星級",{lauraStar:5,plannerChangesStar:false},{lauraStar:5,plannerChangesStar:false}),
-()=>ae("13. 勇士戰令啟用未達標→完成事件可推進",{active:true,current:17,target:20,completionAdds:1},{active:true,current:17,target:20,completionAdds:1}),
-()=>ae("14. 黎明曙光啟用未達標→完成事件可推進",{active:true,current:8,target:10,completionAdds:1},{active:true,current:8,target:10,completionAdds:1}),
-()=>ae("15. 一次完成事件可同時推進兩任務",{warriorAdd:1,dawnAdd:1},{warriorAdd:1,dawnAdd:1}),
-()=>ae("16. 不預測盟友瞬間幫助",decide({field:8,unfinished:2,completed:6,inventory:10,maxInventory:30,lauraUsed:false}).includes("不預測盟友瞬間幫助"),true),
-()=>ae("17. 不把未完成雷達到期納入預測",{modelExpiresCurrentUnfinished:false},{modelExpiresCurrentUnfinished:false}),
-()=>ae("18. 玩家更新現況後可重新規劃",{rerunAfterStateUpdate:true},{rerunAfterStateUpdate:true}),
-()=>ae("19. 庫存高於理想值時不強制使用Laura",decide({field:8,unfinished:0,completed:8,inventory:25,maxInventory:30,lauraUsed:false}).includes("暫不使用Laura"),true),
-()=>ae("20. 準備日核心目標是場上11與理想庫存",{targetField:11,targetInventory:22,notField8Cap:true},{targetField:11,targetInventory:22,notField8Cap:true})
-];
-function runAllTests(){const r=t.map(f=>{try{return f()}catch(e){return"❌ 測試執行錯誤："+e.message}}),p=r.filter(x=>x.startsWith("✅")).length;document.getElementById("summary").textContent=`通過：${p}/${r.length}　失敗：${r.length-p}`;document.getElementById("results").textContent=r.join("\n\n")}
-</script></body></html>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>planner-sequence-decision-test-v1</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;padding:20px;line-height:1.6;background:#111;color:#eee}
+button{font-size:18px;padding:12px 18px;border-radius:10px;border:0;margin:8px 0}
+#summary{font-size:20px;font-weight:700;margin:12px 0}
+#results{white-space:pre-wrap;font-family:ui-monospace,monospace;background:#1d1d1d;padding:14px;border-radius:10px}
+</style>
+</head>
+<body>
+<h2>planner-sequence-decision-test-v1</h2>
+<button onclick="runAllTests()">▶ 全部執行</button>
+<div id="summary">尚未執行</div>
+<div id="results"></div>
+
+<script>
+function ae(n,a,e){
+  const x=JSON.stringify(a),y=JSON.stringify(e);
+  return x===y?"✅ "+n:"❌ "+n+"\\n   實際："+x+"\\n   預期："+y;
+}
+function clone(x){return JSON.parse(JSON.stringify(x));}
+
+/*
+本批重點：
+「多個操作串起來後，規劃器的決策是否仍符合已確認規則」。
+
+這裡不假設盟友幫助，也不預測目前未完成雷達到期。
+*/
+
+function complete(s,count=1){
+  s=clone(s);
+  for(let i=0;i<count;i++){
+    if(s.unfinished<=0) break;
+    s.unfinished--; s.completed++;
+  }
+  return s;
+}
+
+function harvest(s,count=1){
+  s=clone(s);
+  s.treasure=s.treasure??0;
+  for(let i=0;i<count;i++){
+    if(s.completed<=0) break;
+    s.completed--; s.field--;
+    if(s.field<8 && s.inventory>0){
+      const move=Math.min(8-s.field,s.inventory);
+      s.field+=move; s.inventory-=move;
+    }
+    if(s.lauraStar===5) s.treasure=Math.min(10,s.treasure+1);
+  }
+  return s;
+}
+
+function systemFree(s){
+  s=clone(s);
+  const need=Math.max(0,8-s.field);
+  const toField=Math.min(8,need);
+  s.field+=toField;
+  const rem=8-toField;
+  const room=Math.max(0,(s.maxInventory??0)-s.inventory);
+  s.inventory+=Math.min(rem,room);
+  return s;
+}
+
+function useLaura(s,star){
+  s=clone(s);
+  if(s.lauraUsed)return s;
+  const amount=[5,10,10,10,20,20][star];
+  if(s.field<8){
+    const toField=Math.min(amount,8-s.field);
+    s.field+=toField;
+    s.inventory+=amount-toField;
+  }else{
+    s.field+=3;
+    s.inventory+=amount-3;
+  }
+  s.lauraUsed=true;
+  return s;
+}
+
+function rollover(s){
+  s=clone(s);
+  s.lauraUsed=false;
+  s.treasure=0;
+  return s;
+}
+
+function decision(s){
+  const target=s.maxInventory-8;
+  const a=[];
+  if(s.unfinished>0)a.push("完成未完成雷達");
+  if(!s.lauraUsed && s.inventory<target)a.push("保留Laura供後續補資源");
+  if(s.field>11 && s.completed>0)a.push("可收割超過目標的完成雷達");
+  if(s.field===11 && s.inventory>=target && s.completed>0)a.push("可開始收割");
+  if(s.inventory>=target && s.field<11 && !s.lauraUsed)a.push("Laura暫不急用");
+  return a;
+}
+
+const tests=[];
+
+// 1-5：完成→收割的連續狀態
+tests.push(()=>ae("1. 場上11未完成3→完成3後總數仍11",
+  complete({field:11,unfinished:3,completed:8,inventory:10}).field,11));
+
+tests.push(()=>ae("2. 場上11未完成3→完成3後已完成11",
+  complete({field:11,unfinished:3,completed:8,inventory:10}).completed,11));
+
+tests.push(()=>ae("3. 完成不改變庫存",
+  complete({field:11,unfinished:3,completed:8,inventory:10}).inventory,10));
+
+tests.push(()=>ae("4. 完成3後再收割3→場上8",
+  harvest(complete({field:11,unfinished:3,completed:8,inventory:10}),3),
+  {field:8,unfinished:3,completed:8,inventory:10,treasure:0}));
+
+tests.push(()=>ae("5. 場上8收割1、庫存10→自動補回8",
+  harvest({field:8,unfinished:0,completed:8,inventory:10,treasure:0},1),
+  {field:8,unfinished:0,completed:7,inventory:9,treasure:0}));
+
+// 6-9：多次收割與資源保留
+tests.push(()=>ae("6. 場上11庫存22收割3→場上8、庫存22",
+  harvest({field:11,unfinished:0,completed:11,inventory:22,treasure:0},3),
+  {field:8,unfinished:0,completed:8,inventory:22,treasure:0}));
+
+tests.push(()=>ae("7. 場上8庫存5收割3→每次自動補回，最後庫存2",
+  harvest({field:8,unfinished:0,completed:8,inventory:5,treasure:0},3),
+  {field:8,unfinished:0,completed:5,inventory:2,treasure:0}));
+
+tests.push(()=>ae("8. 場上8庫存0收割3→不可能補回，場上變5",
+  harvest({field:8,unfinished:0,completed:8,inventory:0,treasure:0},3),
+  {field:5,unfinished:0,completed:5,inventory:0,treasure:0}));
+
+tests.push(()=>ae("9. 收割不會增加任務完成次數",
+  {warrior:17,dawn:8,harvested:3},
+  {warrior:17,dawn:8,harvested:3}));
+
+// 10-13：Laura 串接
+tests.push(()=>ae("10. 場上8庫存0使用4星Laura→場上11庫存17",
+  useLaura({field:8,unfinished:0,completed:8,inventory:0,lauraUsed:false},4),
+  {field:11,unfinished:0,completed:8,inventory:17,lauraUsed:true}));
+
+tests.push(()=>ae("11. Laura使用後再使用→狀態不變",
+  useLaura(useLaura({field:8,unfinished:0,completed:8,inventory:0,lauraUsed:false},4),4),
+  {field:11,unfinished:0,completed:8,inventory:17,lauraUsed:true}));
+
+tests.push(()=>ae("12. 場上7庫存0使用0星Laura→場上8庫存4",
+  useLaura({field:7,unfinished:0,completed:7,inventory:0,lauraUsed:false},0),
+  {field:8,unfinished:0,completed:7,inventory:4,lauraUsed:true}));
+
+tests.push(()=>ae("13. Laura不受MAX30限制，場上8庫存25使用4星→庫存42",
+  useLaura({field:8,unfinished:0,completed:8,inventory:25,maxInventory:30,lauraUsed:false},4).inventory,42));
+
+// 14-16：系統+8與Laura連續事件
+tests.push(()=>ae("14. 場上0庫存0→系統+8全進場上",
+  systemFree({field:0,unfinished:0,completed:0,inventory:0,maxInventory:30}),
+  {field:8,unfinished:0,completed:0,inventory:0,maxInventory:30}));
+
+tests.push(()=>ae("15. 場上6庫存0→系統+8，場上變8、庫存4",
+  systemFree({field:6,unfinished:0,completed:6,inventory:0,maxInventory:30}),
+  {field:8,unfinished:0,completed:6,inventory:4,maxInventory:30}));
+
+tests.push(()=>ae("16. 場上8庫存29/MAX30→系統+8只進庫存1",
+  systemFree({field:8,unfinished:0,completed:8,inventory:29,maxInventory:30}),
+  {field:8,unfinished:0,completed:8,inventory:30,maxInventory:30}));
+
+// 17-20：規劃順序與跨日
+tests.push(()=>ae("17. 未完成存在時，決策清單優先出現完成",
+  decision({field:11,unfinished:3,completed:8,inventory:10,maxInventory:30,lauraUsed:false})[0],
+  "完成未完成雷達"));
+
+tests.push(()=>ae("18. 庫存低於22且Laura未用→保留Laura供後續補資源",
+  decision({field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,lauraUsed:false}).includes("保留Laura供後續補資源"),
+  true));
+
+tests.push(()=>ae("19. 理想準備狀態11/22且有完成雷達→可開始收割",
+  decision({field:11,unfinished:0,completed:11,inventory:22,maxInventory:30,lauraUsed:true}).includes("可開始收割"),
+  true));
+
+tests.push(()=>ae("20. 10:00後新遊戲日Laura與寶箱重置",
+  rollover({field:11,unfinished:0,completed:11,inventory:22,lauraUsed:true,treasure:10}),
+  {field:11,unfinished:0,completed:11,inventory:22,lauraUsed:false,treasure:0}));
+
+function runAllTests(){
+  const r=tests.map(f=>{try{return f()}catch(e){return"❌ 測試執行錯誤："+e.message}});
+  const p=r.filter(x=>x.startsWith("✅")).length;
+  document.getElementById("summary").textContent=`通過：${p}/${r.length}　失敗：${r.length-p}`;
+  document.getElementById("results").textContent=r.join("\\n\\n");
+}
+</script>
+</body>
+</html>
