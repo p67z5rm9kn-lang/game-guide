@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>雷達規則引擎測試</title>
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang TC",
+        "Noto Sans TC", sans-serif;
+      background: #111827;
+      color: #f9fafb;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .card {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1f2937;
+      border-radius: 16px;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-top: 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      background: #d97706;
+      color: white;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #111827;
+      border-radius: 10px;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h1>雷達規則引擎測試</h1>
+
+    <p>第一個測試：系統 +8 雷達</p>
+
+    <p>
+      初始狀態：<br>
+      場上：6<br>
+      庫存：20<br>
+      庫存上限：30
+    </p>
+
+    <button onclick="runTest()">
+      執行測試
+    </button>
+
+    <div id="result">
+      尚未執行測試
+    </div>
+  </div>
+
+  <script>
+    function applySystemRadar(state) {
+      const radarGenerated = 8;
+
+      const fieldSpace = Math.max(0, 8 - state.fieldTotal);
+
+      const toField = Math.min(
+        radarGenerated,
+        fieldSpace
+      );
+
+      const toInventory = radarGenerated - toField;
+
+      state.fieldTotal += toField;
+
+      const inventorySpace = Math.max(
+        0,
+        state.inventoryMax - state.inventory
+      );
+
+      state.inventory += Math.min(
+        toInventory,
+        inventorySpace
+      );
+
+      return state;
+    }
+
+    function runTest() {
+      const state = {
+        fieldTotal: 6,
+        inventory: 20,
+        inventoryMax: 30
+      };
+
+      applySystemRadar(state);
+
+      const passed =
+        state.fieldTotal === 8 &&
+        state.inventory === 26;
+
+      document.getElementById("result").textContent =
+        "測試結果\n\n" +
+        "場上：" + state.fieldTotal + "\n" +
+        "庫存：" + state.inventory + "\n\n" +
+        (passed
+          ? "✅ 測試通過"
+          : "❌ 測試失敗");
+    }
+  </script>
+
+</body>
+</html>
