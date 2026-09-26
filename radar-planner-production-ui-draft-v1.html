@@ -18,7 +18,7 @@ input[type="number"]{text-align:center}
 .state-label,.task-label{color:#bbb;font-size:15px;flex:1;min-width:0}
 .state-value,.task-value{display:flex;align-items:center;gap:6px;white-space:nowrap}
 .compact-input{width:86px!important;flex:0 0 86px}
-.fixed-target{min-width:58px;text-align:center;color:#ddd;background:#292929;border:1px solid #444;border-radius:9px;padding:10px 8px;box-sizing:border-box}
+.fixed-target{min-width:22px;text-align:center;color:#ddd;font-weight:700}
 .time-line{display:flex;align-items:center;gap:10px}
 .time-line label{margin:0;white-space:nowrap}
 .time-input{flex:1;min-width:0}
@@ -35,6 +35,7 @@ input[type="number"]{text-align:center}
 .time-segment button:first-child{border-radius:9px 0 0 9px}
 .time-segment button:last-child{border-radius:0 9px 9px 0}
 .time-segment button.active{background:#1683ff;color:#fff;border-color:#1683ff}
+button{font-size:17px;font-weight:700;padding:12px 18px;border:0;border-radius:11px;background:#1683ff;color:#fff}
 button.secondary{background:#444}
 button:disabled{opacity:.72;cursor:wait}
 button.planning{position:relative;transform:scale(.97);filter:brightness(.88);box-shadow:0 0 0 3px rgba(22,131,255,.18);transition:all .15s ease}
@@ -45,7 +46,7 @@ button.planning::before{content:"";display:inline-block;width:13px;height:13px;m
 .good{color:#20d879}.warn{color:#ffc44d}.bad{color:#ff5964}
 .big{font-size:23px;font-weight:800}.muted{color:#aaa}
 ul{margin:8px 0;padding-left:22px}
-@media(max-width:520px){.grid{grid-template-columns:1fr}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.state-label,.task-label{font-size:14px}.compact-input{width:78px!important;flex-basis:78px}.state-row,.task-row{gap:7px}}
 </style>
 </head>
 <body>
@@ -72,7 +73,17 @@ ul{margin:8px 0;padding-left:22px}
   </div>
 </div>
 <div class="state-row">
-  <div class="state-label">勞拉星級</div>
+  <div class="state-label">勞拉</div>
+  <div class="state-value">
+    <span id="lauraAvailableText" class="switch-text">無</span>
+    <label class="switch" aria-label="是否有勞拉">
+      <input id="lauraAvailable" type="checkbox">
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+<div id="lauraDetailRow" class="state-row" style="display:none">
+  <div class="state-label">星級 / 今日狀態</div>
   <div class="state-value">
     <select id="lauraStar" class="compact-input" aria-label="勞拉星級">
       <option value="0">0 星</option><option value="1">1 星</option><option value="2">2 星</option>
@@ -132,6 +143,7 @@ ul{margin:8px 0;padding-left:22px}
   <input id="baseTime" class="time-input" type="datetime-local">
 </div>
 <div id="baseTimePreview" class="time-preview">尚未設定</div>
+<input id="timeMode" type="hidden" value="local">
 <div class="time-segment">
   <button type="button" id="localTimeBtn" class="active">當地時間</button>
   <button type="button" id="doomTimeBtn">末日時間（UTC−2）</button>
@@ -155,7 +167,9 @@ function makeState(){
  return {
   field:+$("field").value, completed:+$("completed").value,
   inventory:+$("inventory").value, maxInventory:+$("maxInventory").value,
-  lauraStar:+$("lauraStar").value, lauraUsed:$("lauraUsed").checked,
+  lauraAvailable:$("lauraAvailable").checked,
+  lauraStar:$("lauraAvailable").checked ? +$("lauraStar").value : 0,
+  lauraUsed:$("lauraAvailable").checked && $("lauraUsed").checked,
   treasure:Math.min(10,Math.max(0,+$("treasure").value)),
   tasks:{
    warriors:{active:$("warActive").checked,target:10,current:+$("warCurrent").value},
@@ -250,8 +264,8 @@ function fmt(d){
  const zone=mode==="doom"?"Etc/GMT+2":undefined;
  const parts=new Intl.DateTimeFormat("zh-TW",{timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",weekday:"short",hour12:false}).formatToParts(d);
  const get=k=>parts.find(x=>x.type===k)?.value||"";
- const weekdayMap={"週日":"日","週一":"一","週二":"二","週三":"三","週四":"四","週五":"五","週六":"六"};
- return `${get("year")}/${get("month")}/${get("day")}（${weekdayMap[get("weekday")]||get("weekday")}） ${get("hour")}:${get("minute")}`;
+ const weekdayMap={"星期日":"日","星期一":"一","星期二":"二","星期三":"三","星期四":"四","星期五":"五","星期六":"六"};
+ return `${get("year")}/${get("month")}/${get("day")}（${weekdayMap[get("weekday")]||get("weekday").replace("星期","")}） ${get("hour")}:${get("minute")}`;
 }
 function updateTimePreview(){
  const base=$("baseTime").value?new Date($("baseTime").value):null;
@@ -261,7 +275,7 @@ function setNow(){
  const d=new Date(), pad=n=>String(n).padStart(2,"0");
  $("baseTime").value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-const planInputs=["maxInventory","inventory","field","completed","lauraStar","lauraUsed","treasure","warActive","warCurrent","dawnActive","dawnCurrent","baseTime"];
+const planInputs=["maxInventory","inventory","field","completed","lauraAvailable","lauraStar","lauraUsed","treasure","warActive","warCurrent","dawnActive","dawnCurrent","baseTime"];
 function markPlanDirty(){
   const btn=$("plan");
   if(btn.classList.contains("planning")) return;
@@ -276,10 +290,15 @@ function syncTaskUI(){
   $("warCurrent").placeholder=war?"目前":"—"; $("dawnCurrent").placeholder=dawn?"目前":"—";
 }
 function syncLauraUI(){
+  const available=$("lauraAvailable").checked;
   const used=$("lauraUsed").checked, star=+$("lauraStar").value;
+  $("lauraAvailableText").textContent=available?"有":"無";
+  $("lauraDetailRow").style.display=available?"flex":"none";
+  $("lauraStar").disabled=!available;
+  $("lauraUsed").disabled=!available;
   $("lauraUsedText").textContent=used?"已使用":"未使用";
-  $("treasureRow").style.display=star===5?"flex":"none";
-  $("treasure").disabled=star!==5;
+  $("treasureRow").style.display=available && star===5?"flex":"none";
+  $("treasure").disabled=!(available && star===5);
 }
 for(const id of planInputs){
   const el=$(id);
@@ -311,7 +330,7 @@ $("plan").onclick=()=>{
   html+=`<div class="result" style="margin-top:8px">目前還需要：場上 ${p.needsField} 個、庫存 ${p.needsInventory} 個</div>`;
  }
  if(mode==="衝分日"){
-  const lauraAmount={0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar];
+  const lauraAmount=s.lauraAvailable?({0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar]):0;
   const estimate=s.field+s.inventory+24+lauraAmount;
   html+=`<div class="card" style="margin-top:14px"><div class="big">🏆 本次衝分日預計可收割：${estimate} 個</div><div class="muted">基準：目前場上＋目前庫存＋本次衝分日系統 +24＋勞拉 ${lauraAmount}<br>不預設盟友瞬間幫助；自動補回不視為新增資源。</div></div>`;
   html+=`<div class="result"><b>衝分日操作方向</b><ul><li>完成可完成的未完成雷達</li><li>收割已完成雷達</li><li>不需要為下一個衝分日保留資源</li></ul></div>`;
@@ -322,7 +341,7 @@ $("plan").onclick=()=>{
 
   // 勞拉 is a known resource source. When field is already 8 or more,
   // it adds +3 field and sends the rest to inventory.
-  if(!planState.lauraUsed && planState.lauraStar>=0 && planState.field<11){
+  if(planState.lauraAvailable && !planState.lauraUsed && planState.field<11){
     planState=laura(planState);
     html+=`<li><b>使用 勞拉</b>：${({0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar])} 個。使用後預計場上 ${planState.field}、庫存 ${planState.inventory}。</li>`;
     step++;
