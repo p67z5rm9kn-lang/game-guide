@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>衝分日時間判定測試</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: #111827;
+    color: #f9fafb;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Noto Sans TC",
+        "PingFang TC",
+        sans-serif;
+}
+
+.container {
+    max-width: 600px;
+    margin: auto;
+}
+
+h1 {
+    margin: 0 0 8px;
+    font-size: 24px;
+}
+
+.subtitle {
+    color: #cbd5e1;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.controls {
+    background: #1f2937;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: 0;
+    border-radius: 12px;
+    background: #d98224;
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.test {
+    background: #1f2937;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.info {
+    background: #111827;
+    padding: 12px;
+    border-radius: 10px;
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.result {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #111827;
+    line-height: 1.7;
+}
+
+.pass {
+    color: #4ade80;
+    font-weight: 700;
+}
+
+.fail {
+    color: #f87171;
+    font-weight: 700;
+}
+
+.summary {
+    position: sticky;
+    bottom: 10px;
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 14px;
+    background: #0f172a;
+    border: 1px solid #475569;
+    line-height: 1.8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📅 衝分日時間判定測試</h1>
+
+<div class="subtitle">
+核心時間：末日時間 UTC−2<br>
+目標時間：每週一、週五 00:00（末日時間）<br>
+也就是台灣時間週一、週五 10:00
+</div>
+
+<div class="controls">
+    <button onclick="runAllTests()">
+        ▶ 全部執行測試
+    </button>
+</div>
+
+<div id="tests"></div>
+
+<div class="summary" id="summary">
+尚未執行測試
+</div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   時間核心
+   ========================================================= */
+
+/*
+   建立一個「絕對時間」。
+
+   utcOffset：
+   +8 = 台灣
+   +7 = UTC+7
+   +9 = 日本
+   -2 = 末日時間
+*/
+
+function createAbsoluteTime(
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    utcOffset
+) {
+    const utcMillis =
+        Date.UTC(
+            year,
+            month - 1,
+            day,
+            hour,
+            minute,
+            0,
+            0
+        );
+
+    return new Date(
+        utcMillis
+        -
+        utcOffset * 60 * 60 * 1000
+    );
+}
+
+
+/*
+   把絕對時間轉成指定 UTC offset。
+*/
+
+function getPartsAtOffset(
+    absoluteTime,
+    utcOffset
+) {
+    const local =
+        new Date(
+            absoluteTime.getTime()
+            +
+            utcOffset * 60 * 60 * 1000
+        );
+
+    return {
+        year: local.getUTCFullYear(),
+        month: local.getUTCMonth() + 1,
+        day: local.getUTCDate(),
+        hour: local.getUTCHours(),
+        minute: local.getUTCMinutes(),
+        weekday: local.getUTCDay()
+    };
+}
+
+
+/*
+   末日時間 = UTC−2
+*/
+
+function getDoomsdayParts(
+    absoluteTime
+) {
+    return getPartsAtOffset(
+        absoluteTime,
+        -2
+    );
+}
+
+
+/*
+   星期名稱
+*/
+
+const weekdayNames = [
+    "星期日",
+    "星期一",
+    "星期二",
+    "星期三",
+    "星期四",
+    "星期五",
+    "星期六"
+];
+
+
+/*
+   格式化末日時間
+*/
+
+function formatDoomsday(
+    absoluteTime
+) {
+    const p =
+        getDoomsdayParts(
+            absoluteTime
+        );
+
+    return `${p.year}/${String(p.month).padStart(2,"0")}/${String(p.day).padStart(2,"0")} ${String(p.hour).padStart(2,"0")}:${String(p.minute).padStart(2,"0")}`;
+}
+
+
+/* =========================================================
+   衝分日核心
+   ========================================================= */
+
+/*
+   衝分日：
+
+   每週一、週五
+   末日時間 00:00 開始。
+
+   注意：
+
+   週一 00:00～23:59
+   整天都視為週一衝分日。
+
+   週五 00:00～23:59
+   整天都視為週五衝分日。
+
+   若目前已經是衝分日：
+   → 今天就是衝分日
+
+   若目前不是衝分日：
+   → 找下一個週一／週五 00:00
+*/
+
+function getNextScoringTarget(
+    absoluteTime
+) {
+
+    const p =
+        getDoomsdayParts(
+            absoluteTime
+        );
+
+    /*
+       如果今天是星期一或星期五，
+       今天就是衝分日。
+    */
+
+    if (
+        p.weekday === 1 ||
+        p.weekday === 5
+    ) {
+
+        return {
+            mode: "scoring",
+            target: createAbsoluteTime(
+                p.year,
+                p.month,
+                p.day,
+                0,
+                0,
+                -2
+            )
+        };
+    }
+
+
+    /*
+       非衝分日：
+
+       往後尋找最近的星期一或星期五。
+    */
+
+    const base =
+        createAbsoluteTime(
+            p.year,
+            p.month,
+            p.day,
+            0,
+            0,
+            -2
+        );
+
+
+    for (
+        let i = 1;
+        i <= 7;
+        i++
+    ) {
+
+        const candidate =
+            new Date(
+                base.getTime()
+                +
+                i * 24 * 60 * 60 * 1000
+            );
+
+        const cp =
+            getDoomsdayParts(
+                candidate
+            );
+
+        if (
+            cp.weekday === 1 ||
+            cp.weekday === 5
+        ) {
+
+            return {
+                mode: "prepare",
+                target: candidate
+            };
+        }
+    }
+
+
+    /*
+       理論上不會走到這裡。
+    */
+
+    throw new Error(
+        "找不到下一個衝分日"
+    );
+}
+
+
+/* =========================================================
+   測試資料
+   ========================================================= */
+
+const tests = [
+
+    {
+        id: 1,
+        title: "週六 → 準備週一",
+        input: "2026/09/26 15:00",
+        timeZone: -2,
+
+        expectedMode: "prepare",
+        expectedTarget: "2026/09/28 00:00",
+
+        note: "週六下午應準備下一個週一衝分日"
+    },
+
+    {
+        id: 2,
+        title: "週日 → 準備週一",
+        input: "2026/09/27 23:00",
+        timeZone: -2,
+
+        expectedMode: "prepare",
+        expectedTarget: "2026/09/28 00:00",
+
+        note: "週日深夜仍然是準備週一"
+    },
+
+    {
+        id: 3,
+        title: "週一 00:00 → 衝分日",
+        input: "2026/09/28 00:00",
+        timeZone: -2,
+
+        expectedMode: "scoring",
+        expectedTarget: "2026/09/28 00:00",
+
+        note: "正好到達週一衝分時間"
+    },
+
+    {
+        id: 4,
+        title: "週一 05:00 → 衝分日",
+        input: "2026/09/28 05:00",
+        timeZone: -2,
+
+        expectedMode: "scoring",
+        expectedTarget: "2026/09/28 00:00",
+
+        note: "週一開始後，整天都屬於衝分日"
+    },
+
+    {
+        id: 5,
+        title: "週一 23:59 → 衝分日",
+        input: "2026/09/28 23:59",
+        timeZone: -2,
+
+        expectedMode: "scoring",
+        expectedTarget: "2026/09/28 00:00",
+
+        note: "週一最後一分鐘仍屬於衝分日"
+    },
+
+    {
+        id: 6,
+        title: "週二 → 準備週五",
+        input: "2026/09/29 03:00",
+        timeZone: -2,
+
+        expectedMode: "prepare",
+        expectedTarget: "2026/10/02 00:00",
+
+        note: "週二應找下一個週五"
+    },
+
+    {
+        id: 7,
+        title: "週三 → 準備週五",
+        input: "2026/09/30 12:00",
+        timeZone: -2,
+
+        expectedMode: "prepare",
+        expectedTarget: "2026/10/02 00:00",
+
+        note: "週三應準備週五"
+    },
+
+    {
+        id: 8,
+        title: "週四 → 準備週五",
+        input: "2026/10/01 23:59",
+        timeZone: -2,
+
+        expectedMode: "prepare",
+        expectedTarget: "2026/10/02 00:00",
+
+        note: "週四深夜仍然準備隔天週五"
+    },
+
+    {
+        id: 9,
+        title: "週五 00:00 → 衝分日",
+        input: "2026/10/02 00:00",
+        timeZone: -2,
+
+        expectedMode: "scoring",
+        expectedTarget: "2026/10/02 00:00",
+
+        note: "正好到達週五衝分時間"
+    },
+
+    {
+        id: 10,
+        title: "週五下午 → 衝分日",
+        input: "2026/10/02 15:00",
+        timeZone: -2,
+
+        expectedMode: "scoring",
+        expectedTarget: "2026/10/02 00:00",
+
+        note: "週五下午仍然是衝分日"
+    },
+
+    {
+        id: 11,
+        title: "週六 → 跨週準備週一",
+        input: "2026/10/03 01:00",
+        timeZone: -2,
+
+        expectedMode: "prepare",
+        expectedTarget: "2026/10/05 00:00",
+
+        note: "週五結束後下一個目標是週一"
+    },
+
+    {
+        id: 12,
+        title: "台灣週六 10:00 → 末日週六 00:00",
+        input: "2026/09/26 10:00",
+        timeZone: 8,
+
+        expectedMode: "prepare",
+        expectedTarget: "2026/09/28 00:00",
+
+        note: "驗證台灣時間與末日時間的絕對時間轉換"
+    },
+
+    {
+        id: 13,
+        title: "UTC+7 週一 09:00 → 末日週一 00:00",
+        input: "2026/09/28 09:00",
+        timeZone: 7,
+
+        expectedMode: "scoring",
+        expectedTarget: "2026/09/28 00:00",
+
+        note: "不同時區的同一瞬間仍應判定為衝分日"
+    },
+
+    {
+        id: 14,
+        title: "UTC+9 週一 11:00 → 末日週一 00:00",
+        input: "2026/09/28 11:00",
+        timeZone: 9,
+
+        expectedMode: "scoring",
+        expectedTarget: "2026/09/28 00:00",
+
+        note: "不同時區仍應得到同一個衝分日"
+    },
+
+    {
+        id: 15,
+        title: "週一 → 不應跳到下一個週五",
+        input: "2026/09/28 10:00",
+        timeZone: -2,
+
+        expectedMode: "scoring",
+        expectedTarget: "2026/09/28 00:00",
+
+        note: "週一當天必須視為今天衝分，而不是尋找下一個週五"
+    },
+
+    {
+        id: 16,
+        title: "週五 → 不應跳到下一個週一",
+        input: "2026/10/02 20:00",
+        timeZone: -2,
+
+        expectedMode: "scoring",
+        expectedTarget: "2026/10/02 00:00",
+
+        note: "週五當天必須視為今天衝分"
+    }
+
+];
+
+
+/* =========================================================
+   解析測試時間
+   ========================================================= */
+
+function parseTestTime(
+    input,
+    utcOffset
+) {
+
+    const [
+        datePart,
+        timePart
+    ] = input.split(" ");
+
+    const [
+        year,
+        month,
+        day
+    ] =
+        datePart
+        .split("/")
+        .map(Number);
+
+    const [
+        hour,
+        minute
+    ] =
+        timePart
+        .split(":")
+        .map(Number);
+
+    return createAbsoluteTime(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        utcOffset
+    );
+}
+
+
+/* =========================================================
+   顯示模式名稱
+   ========================================================= */
+
+function modeName(mode) {
+
+    if (mode === "scoring") {
+        return "衝分日";
+    }
+
+    return "準備期";
+}
+
+
+/* =========================================================
+   執行單一測試
+   ========================================================= */
+
+function runTest(test) {
+
+    const absoluteTime =
+        parseTestTime(
+            test.input,
+            test.timeZone
+        );
+
+    const result =
+        getNextScoringTarget(
+            absoluteTime
+        );
+
+
+    const actualTarget =
+        formatDoomsday(
+            result.target
+        );
+
+
+    const actualMode =
+        result.mode;
+
+
+    const modeCorrect =
+        actualMode ===
+        test.expectedMode;
+
+
+    const targetCorrect =
+        actualTarget ===
+        test.expectedTarget;
+
+
+    const success =
+        modeCorrect &&
+        targetCorrect;
+
+
+    return {
+        success,
+        actualMode,
+        actualTarget,
+        modeCorrect,
+        targetCorrect
+    };
+}
+
+
+/* =========================================================
+   建立測試畫面
+   ========================================================= */
+
+function renderTests() {
+
+    const container =
+        document.getElementById(
+            "tests"
+        );
+
+
+    container.innerHTML = "";
+
+
+    tests.forEach(
+        test => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "test";
+
+
+            div.innerHTML = `
+
+                <div class="title">
+                    ${test.id}. ${test.title}
+                </div>
+
+                <div class="info">
+
+                    <strong>
+                        輸入時間：
+                    </strong>
+
+                    ${test.input}
+
+                    <br>
+
+                    <strong>
+                        時區：
+                    </strong>
+
+                    UTC${test.timeZone >= 0 ? "+" : ""}${test.timeZone}
+
+                    <br>
+
+                    <strong>
+                        預期：
+                    </strong>
+
+                    ${modeName(test.expectedMode)}
+
+                    <br>
+
+                    <strong>
+                        目標：
+                    </strong>
+
+                    ${test.expectedTarget}
+
+                    <br><br>
+
+                    ${test.note}
+
+                </div>
+
+
+                <div
+                    class="result"
+                    id="result-${test.id}"
+                >
+                    尚未執行
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                div
+            );
+
+        }
+    );
+}
+
+
+/* =========================================================
+   全部測試
+   ========================================================= */
+
+function runAllTests() {
+
+    let passed = 0;
+    let failed = 0;
+
+
+    tests.forEach(
+        test => {
+
+            const result =
+                runTest(test);
+
+
+            const box =
+                document.getElementById(
+                    `result-${test.id}`
+                );
+
+
+            if (result.success) {
+
+                passed++;
+
+
+                box.innerHTML = `
+
+                    <span class="pass">
+                        ✅ 通過
+                    </span>
+
+                    <br><br>
+
+                    實際判定：
+                    ${modeName(result.actualMode)}
+
+                    <br>
+
+                    實際目標：
+                    ${result.actualTarget}
+
+                `;
+
+            } else {
+
+                failed++;
+
+
+                box.innerHTML = `
+
+                    <span class="fail">
+                        ❌ 失敗
+                    </span>
+
+                    <br><br>
+
+                    實際判定：
+                    ${modeName(result.actualMode)}
+
+                    <br>
+
+                    預期判定：
+                    ${modeName(test.expectedMode)}
+
+                    <br><br>
+
+                    實際目標：
+                    ${result.actualTarget}
+
+                    <br>
+
+                    預期目標：
+                    ${test.expectedTarget}
+
+                `;
+
+            }
+
+        }
+    );
+
+
+    const summary =
+        document.getElementById(
+            "summary"
+        );
+
+
+    if (failed === 0) {
+
+        summary.innerHTML = `
+
+            <span class="pass">
+                🎉 全部測試通過！
+            </span>
+
+            <br><br>
+
+            ${passed} / ${tests.length}
+
+            <br><br>
+
+            時間核心與衝分日判定目前一致。
+
+        `;
+
+    } else {
+
+        summary.innerHTML = `
+
+            <span class="fail">
+                ⚠️ 有測試失敗
+            </span>
+
+            <br><br>
+
+            通過：
+            ${passed}
+
+            <br>
+
+            失敗：
+            ${failed}
+
+            <br>
+
+            總數：
+            ${tests.length}
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   初始化
+   ========================================================= */
+
+renderTests();
+
+</script>
+
+</body>
+</html>
