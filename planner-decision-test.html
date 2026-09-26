@@ -89,19 +89,19 @@ const tests=[
 ()=>assert("5. 場上6/0等待系統+8→8/6",()=>same(systemFree({field:6,unfinished:0,completed:6,inventory:0,maxInventory:30}),{field:8,unfinished:0,completed:6,inventory:6,maxInventory:30})),
 ()=>assert("6. 場上6/4等待系統+8→8/10",()=>same(systemFree({field:6,unfinished:0,completed:6,inventory:4,maxInventory:30}),{field:8,unfinished:0,completed:6,inventory:10,maxInventory:30})),
 ()=>assert("7. 場上11/29等待系統+8→11/30，只有1進庫存",()=>same(systemFree({field:11,unfinished:0,completed:11,inventory:29,maxInventory:30}),{field:11,unfinished:0,completed:11,inventory:30,maxInventory:30})),
-()=>assert("8. 場上11/29先收割1再等系統→10/30",()=>same(runActions({field:11,unfinished:0,completed:11,inventory:29,maxInventory:30},[{type:"harvest",n:1},{type:"system"}]),{field:10,unfinished:0,completed:10,inventory:30,maxInventory:30})),
-()=>assert("9. 場上11/29先收割10→8/22，再系統+8→8/30，可完整吃滿+8",()=>same(runActions({field:11,unfinished:0,completed:20,inventory:29,maxInventory:30},[{type:"harvest",n:10},{type:"system"}]),{field:8,unfinished:0,completed:10,inventory:30,maxInventory:30})),
-()=>assert("10. 只收割9個→8/23，再系統+8只到8/30，會少吃1個系統雷達",()=>same(runActions({field:11,unfinished:0,completed:20,inventory:29,maxInventory:30},[{type:"harvest",n:9},{type:"system"}]),{field:8,unfinished:0,completed:11,inventory:30,maxInventory:30})),
+()=>assert("8. 場上11/29先收割1再等系統→10/30",()=>same(runActions({field:11,unfinished:0,completed:11,inventory:29,maxInventory:30},[{type:"harvest",n:1},{type:"system"}]),{field:10,unfinished:0,completed:10,inventory:30,maxInventory:30,treasure:0})),
+()=>assert("9. 場上11/29先收割10→8/22，再系統+8→8/30，可完整吃滿+8",()=>same(runActions({field:11,unfinished:0,completed:20,inventory:29,maxInventory:30},[{type:"harvest",n:10},{type:"system"}]),{field:8,unfinished:0,completed:10,inventory:30,maxInventory:30,treasure:0})),
+()=>assert("10. 只收割9個→8/23，再系統+8只到8/30，會少吃1個系統雷達",()=>same(runActions({field:11,unfinished:0,completed:20,inventory:29,maxInventory:30},[{type:"harvest",n:9},{type:"system"}]),{field:8,unfinished:0,completed:11,inventory:30,maxInventory:30,treasure:0})),
 ()=>assert("11. 場上未滿8時，Laura先補場上再進庫存",()=>same(useLaura({field:7,unfinished:0,completed:7,inventory:5,maxInventory:30,lauraUsed:false},0),{field:8,unfinished:0,completed:7,inventory:9,maxInventory:30,lauraUsed:true,lauraStar:0})),
 ()=>assert("12. 場上0/0，4星Laura→場上8、庫存12",()=>same(useLaura({field:0,unfinished:0,completed:0,inventory:0,maxInventory:30,lauraUsed:false},4),{field:8,unfinished:0,completed:0,inventory:12,maxInventory:30,lauraUsed:true,lauraStar:4})),
 ()=>assert("13. 場上0/0，0星Laura只產生5個場上雷達",()=>same(useLaura({field:0,unfinished:0,completed:0,inventory:0,maxInventory:30,lauraUsed:false},0),{field:5,unfinished:0,completed:0,inventory:0,maxInventory:30,lauraUsed:true,lauraStar:0})),
 ()=>assert("14. 4星Laura不受MAX20限制，可到22庫存",()=>useLaura({field:8,unfinished:0,completed:8,inventory:5,maxInventory:20,lauraUsed:false},4).inventory===22),
-()=>assert("15. 5星Laura收割後寶箱+1，且不影響場上/庫存規則",()=>same(harvest({field:8,unfinished:0,completed:1,inventory:10,maxInventory:30,lauraStar:5,treasure:0},1),{field:7,unfinished:0,completed:0,inventory:10,maxInventory:30,lauraStar:5,treasure:1})),
+()=>assert("15. 5星Laura收割後寶箱+1，且不影響場上/庫存規則",()=>same(harvest({field:8,unfinished:0,completed:1,inventory:10,maxInventory:30,lauraStar:5,treasure:0},1),{field:8,unfinished:0,completed:0,inventory:9,maxInventory:30,lauraStar:5,treasure:1})),
 ()=>assert("16. 5星寶箱9/10收割2次後封頂10/10",()=>harvest({field:8,unfinished:0,completed:2,inventory:0,maxInventory:30,lauraStar:5,treasure:9},2).treasure===10),
 ()=>assert("17. 完成3個再收割3個，場上總數只因收割減3",()=>{
   const s={field:11,unfinished:3,completed:8,inventory:10,maxInventory:30};
   const a=runActions(s,[{type:"complete",n:3},{type:"harvest",n:3}]);
-  return same(a,{field:8,unfinished:0,completed:8,inventory:10,maxInventory:30});
+  return same(a,{field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,treasure:0});
 }),
 ()=>assert("18. 完成事件不會為了補場而自動動用庫存",()=>{
   const a=complete({field:7,unfinished:1,completed:6,inventory:4,maxInventory:30},1);
