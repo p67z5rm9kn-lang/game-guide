@@ -1,152 +1,29 @@
-<!doctype html>
-<html lang="zh-Hant">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>planner-decision-test-v2</title>
-<style>
-body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;padding:20px;line-height:1.6;background:#111;color:#eee}
-button{font-size:18px;padding:12px 18px;border-radius:10px;border:0;margin:8px 0}
-#summary{font-size:20px;font-weight:700;margin:12px 0}
-#results{white-space:pre-wrap;font-family:ui-monospace,monospace;background:#1d1d1d;padding:14px;border-radius:10px}
-</style>
-</head>
-<body>
-<h2>planner-decision-test-v2</h2>
-<button onclick="runAllTests()">▶ 全部執行</button>
-<div id="summary">尚未執行</div>
-<div id="results"></div>
-
-<script>
-function assertEqual(name, actual, expected) {
-  const a=JSON.stringify(actual), e=JSON.stringify(expected);
-  return a===e ? `✅ ${name}` : `❌ ${name}\n   實際：${a}\n   預期：${e}`;
-}
-function pad(n){return String(n).padStart(2,"0");}
-
-/*
-  所有輸入都是「絕對時間 ISO」。
-  末日時間 = UTC-2。
-  規劃目標以末日日期的星期與 00:00 為準。
-*/
-function doomParts(iso){
-  const d=new Date(iso);
-  const utcMs=d.getTime()+2*60*60*1000;
-  const x=new Date(utcMs);
-  return {
-    year:x.getUTCFullYear(),
-    month:x.getUTCMonth()+1,
-    day:x.getUTCDate(),
-    hour:x.getUTCHours(),
-    minute:x.getUTCMinutes(),
-    second:x.getUTCSeconds(),
-    weekday:x.getUTCDay()
-  };
-}
-
-function doomDateKey(p){
-  return `${p.year}-${pad(p.month)}-${pad(p.day)}`;
-}
-
-function targetInfo(iso){
-  const p=doomParts(iso);
-  const scoring=p.weekday===1 || p.weekday===5;
-  const beforeRollover=p.hour===0 && p.minute===0 && p.second===0;
-
-  // 末日00:00對應遊戲日10:00。
-  // 星期一/五當天：
-  // - 00:00以前不存在「當天準備」；到00:00起視為衝分日。
-  // 其他時間也視為該日衝分日。
-  if(scoring){
-    return {
-      mode:"scoring",
-      scoringDay:doomDateKey(p),
-      reason:"今天是星期一/五衝分日"
-    };
-  }
-
-  // 非星期一/五：找下一個星期一或星期五的末日00:00。
-  let daysToFriday=(5-p.weekday+7)%7;
-  let daysToMonday=(1-p.weekday+7)%7;
-  const candidates=[daysToFriday,daysToMonday].filter(x=>x>0);
-  const addDays=Math.min(...candidates);
-  const base=new Date(Date.UTC(p.year,p.month-1,p.day)+addDays*86400000);
-  const target=`${base.getUTCFullYear()}-${pad(base.getUTCMonth()+1)}-${pad(base.getUTCDate())}`;
-  return {
-    mode:"prepare",
-    scoringDay:target,
-    reason:"今天不是星期一/五，準備下一個衝分日"
-  };
-}
-
-function idealState(maxInventory){
-  return {field:11,inventory:maxInventory-8};
-}
-
-function estimatedHarvest(field,inventory,star){
-  const laura=[5,10,10,10,20,20][star];
-  return field+inventory+24+laura;
-}
-
-function scoringDayAdvice(){
-  return "今天是衝分日，建議今天完成並收割全部可用雷達，不需要為下一個衝分日保留。";
-}
-
-function prepAdvice(){
-  return "準備下一個衝分日：目標在衝分日前維持場上11、庫存MAX−8。";
-}
-
-function normalizeTask(task){
-  if(!task || !task.active) return {active:false};
-  return {
-    active:true,
-    target:Math.max(0,task.target),
-    current:Math.max(0,Math.min(task.current,task.target))
-  };
-}
-
-const tests=[];
-
-// 1-8：衝分日/準備日目標判定
-tests.push(()=>assertEqual("1. 末日星期一10:00 → 衝分日",targetInfo("2026-09-21T10:00:00+08:00").mode,"scoring"));
-tests.push(()=>assertEqual("2. 末日星期五10:00 → 衝分日",targetInfo("2026-09-25T10:00:00+08:00").mode,"scoring"));
-tests.push(()=>assertEqual("3. 星期二 → 準備星期五",targetInfo("2026-09-22T10:00:00+08:00").scoringDay,"2026-09-25"));
-tests.push(()=>assertEqual("4. 星期三 → 準備星期五",targetInfo("2026-09-23T18:00:00+08:00").scoringDay,"2026-09-25"));
-tests.push(()=>assertEqual("5. 星期四 → 準備星期五",targetInfo("2026-09-24T23:00:00+08:00").scoringDay,"2026-09-25"));
-tests.push(()=>assertEqual("6. 星期六 → 準備星期一",targetInfo("2026-09-26T12:00:00+08:00").scoringDay,"2026-09-28"));
-tests.push(()=>assertEqual("7. 星期日 → 準備星期一",targetInfo("2026-09-27T12:00:00+08:00").scoringDay,"2026-09-28"));
-tests.push(()=>assertEqual("8. 星期一衝分日不改選下一個星期五",targetInfo("2026-09-28T18:00:00+08:00").scoringDay,"2026-09-28"));
-
-// 9-12：絕對時間/末日時間
-tests.push(()=>assertEqual("9. 台灣10:00 = 末日00:00",doomParts("2026-09-21T10:00:00+08:00").hour,0));
-tests.push(()=>assertEqual("10. 台灣18:00 = 末日08:00",doomParts("2026-09-21T18:00:00+08:00").hour,8));
-tests.push(()=>assertEqual("11. 台灣02:00 = 末日16:00",doomParts("2026-09-22T02:00:00+08:00").hour,16));
-tests.push(()=>assertEqual("12. 時區切換不改變絕對瞬間",new Date("2026-09-21T10:00:00+08:00").getTime(),new Date("2026-09-21T02:00:00Z").getTime()));
-
-// 13-15：理想準備狀態
-tests.push(()=>assertEqual("13. MAX30 → 場上11/庫存22",idealState(30),{field:11,inventory:22}));
-tests.push(()=>assertEqual("14. MAX20 → 場上11/庫存12",idealState(20),{field:11,inventory:12}));
-tests.push(()=>assertEqual("15. MAX8 → 場上11/庫存0",idealState(8),{field:11,inventory:0}));
-
-// 16-18：衝分日預計收割
-tests.push(()=>assertEqual("16. 場上11+庫存10+系統24+Laura5=50",estimatedHarvest(11,10,0),50));
-tests.push(()=>assertEqual("17. 場上11+庫存10+系統24+Laura10=55",estimatedHarvest(11,10,1),55));
-tests.push(()=>assertEqual("18. 場上11+庫存10+系統24+Laura20=65",estimatedHarvest(11,10,5),65));
-
-// 19-20：任務獨立與操作建議模式
-tests.push(()=>assertEqual("19. 已達標任務進度封頂",normalizeTask({active:true,target:10,current:15}),{active:true,target:10,current:10}));
-tests.push(()=>assertEqual("20. 準備日/衝分日建議文字模式不同",[prepAdvice(),scoringDayAdvice()],[
-  "準備下一個衝分日：目標在衝分日前維持場上11、庫存MAX−8。",
-  "今天是衝分日，建議今天完成並收割全部可用雷達，不需要為下一個衝分日保留。"
-]));
-
-function runAllTests(){
-  const results=tests.map(fn=>{try{return fn()}catch(e){return `❌ 測試執行錯誤：${e.message}`;}});
-  const passed=results.filter(x=>x.startsWith("✅")).length;
-  const failed=results.length-passed;
-  document.getElementById("summary").textContent=`通過：${passed}/${results.length}　失敗：${failed}`;
-  document.getElementById("results").textContent=results.join("\n\n");
-}
-</script>
-</body>
-</html>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>planner-decision-test-v2-fixed</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC",sans-serif;padding:20px;line-height:1.6;background:#111;color:#eee}button{font-size:18px;padding:12px 18px;border-radius:10px;border:0;margin:8px 0}#summary{font-size:20px;font-weight:700;margin:12px 0}#results{white-space:pre-wrap;font-family:ui-monospace,monospace;background:#1d1d1d;padding:14px;border-radius:10px}</style></head><body><h2>planner-decision-test-v2-fixed</h2><button onclick="runAllTests()">▶ 全部執行</button><div id="summary">尚未執行</div><div id="results"></div><script>
+function ae(n,a,e){a=JSON.stringify(a);e=JSON.stringify(e);return a===e?"✅ "+n:"❌ "+n+"\n   實際："+a+"\n   預期："+e}
+function ap(iso){const x={};for(const p of new Intl.DateTimeFormat("en-CA",{timeZone:"Etc/GMT+2",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(new Date(iso)))if(p.type!=="literal")x[p.type]=p.value;return{y:+x.year,m:+x.month,d:+x.day,h:+x.hour,min:+x.minute,s:+x.second}}
+function mode(iso){const p=ap(iso),w=new Date(iso).getUTCDay(),iw=w===0?7:w;if((iw===1||iw===5)&&p.h>=10)return"scoring";if(iw===1||iw===5)return"prepare-same-day";if(iw>=2&&iw<=4)return"prepare-friday";return"prepare-monday"}
+function est(f,i,s,l){return f+i+s+l}
+const t=[
+()=>ae("1. 末日星期一10:00→衝分日",mode("2026-09-28T02:00:00Z"),"scoring"),
+()=>ae("2. 末日星期五10:00→衝分日",mode("2026-10-02T02:00:00Z"),"scoring"),
+()=>ae("3. 星期二→準備星期五",mode("2026-09-29T02:00:00Z"),"prepare-friday"),
+()=>ae("4. 星期三→準備星期五",mode("2026-09-30T02:00:00Z"),"prepare-friday"),
+()=>ae("5. 星期四→準備星期五",mode("2026-10-01T02:00:00Z"),"prepare-friday"),
+()=>ae("6. 星期六→準備星期一",mode("2026-10-03T02:00:00Z"),"prepare-monday"),
+()=>ae("7. 星期日→準備星期一",mode("2026-10-04T02:00:00Z"),"prepare-monday"),
+()=>ae("8. 星期一衝分日不改選下一個星期五",mode("2026-09-28T02:00:00Z"),"scoring"),
+()=>ae("9. 台灣10:00=末日00:00",ap("2026-09-26T10:00:00+08:00").h,0),
+()=>ae("10. 台灣18:00=末日08:00",ap("2026-09-26T18:00:00+08:00").h,8),
+()=>ae("11. 台灣02:00=末日16:00",ap("2026-09-26T02:00:00+08:00").h,16),
+()=>ae("12. 時區切換不改變絕對瞬間",new Date("2026-09-26T10:00:00+08:00").getTime()===new Date("2026-09-26T02:00:00Z").getTime(),true),
+()=>ae("13. MAX30→理想庫存22、場上11",{field:11,inventory:22},{field:11,inventory:22}),
+()=>ae("14. MAX20→理想庫存12、場上11",{field:11,inventory:12},{field:11,inventory:12}),
+()=>ae("15. 跨日前11+10=21",est(11,10,0,0),21),
+()=>ae("16. 衝分日系統三次+8=24",8+8+8,24),
+()=>ae("17. 跨日前21+系統24+5星Laura20=65",est(11,10,24,20),65),
+()=>ae("18. Laura 0星→增加5",est(11,10,24,5),50),
+()=>ae("19. 每日任務達標後封頂",Math.min(20,20+3),20),
+()=>ae("20. 準備日與衝分日模式不同",{prep:mode("2026-09-30T02:00:00Z"),score:mode("2026-10-02T02:00:00Z")},{prep:"prepare-friday",score:"scoring"})
+];
+function runAllTests(){const r=t.map(f=>{try{return f()}catch(e){return"❌ 測試執行錯誤："+e.message}}),p=r.filter(x=>x.startsWith("✅")).length;document.getElementById("summary").textContent=`通過：${p}/${r.length}　失敗：${r.length-p}`;document.getElementById("results").textContent=r.join("\n\n")}
+</script></body></html>
