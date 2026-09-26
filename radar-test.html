@@ -55,12 +55,12 @@
   <div class="card">
     <h1>雷達規則引擎測試</h1>
 
-    <p>第一個測試：系統 +8 雷達</p>
+    <p>第二個測試：系統 +8｜庫存接近 MAX</p>
 
     <p>
       初始狀態：<br>
-      場上：6<br>
-      庫存：20<br>
+      場上：8<br>
+      庫存：29<br>
       庫存上限：30
     </p>
 
@@ -103,8 +103,8 @@
 
     function runTest() {
       const state = {
-        fieldTotal: 6,
-        inventory: 20,
+        fieldTotal: 8,
+        inventory: 29,
         inventoryMax: 30
       };
 
@@ -112,7 +112,7 @@
 
       const passed =
         state.fieldTotal === 8 &&
-        state.inventory === 26;
+        state.inventory === 30;
 
       document.getElementById("result").textContent =
         "測試結果\n\n" +
