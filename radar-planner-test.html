@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>雷達規劃器測試 - 10:00 邊界</title>
+<title>雷達規劃器測試 - 10:00 理想狀態</title>
 
 <style>
 
@@ -47,7 +47,7 @@ h1 {
 }
 
 .test-title {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 700;
     margin-bottom: 12px;
 }
@@ -55,8 +55,8 @@ h1 {
 .state {
     background: #111827;
     border-radius: 10px;
-    padding: 12px;
-    font-size: 14px;
+    padding: 14px;
+    font-size: 15px;
 }
 
 button {
@@ -77,7 +77,7 @@ button {
 
 .result {
     margin-top: 12px;
-    padding: 12px;
+    padding: 14px;
     border-radius: 10px;
     background: #111827;
 }
@@ -100,6 +100,11 @@ button {
     margin-bottom: 30px;
 }
 
+.ideal {
+    color: #fbbf24;
+    font-weight: 700;
+}
+
 </style>
 </head>
 
@@ -111,7 +116,7 @@ button {
 <h1>雷達規劃器測試</h1>
 
 <div class="subtitle">
-第二階段：10:00 衝分日邊界測試
+第三階段：10:00 理想狀態計算
 </div>
 
 <div id="tests"></div>
@@ -126,324 +131,159 @@ button {
 <script>
 
 /* =========================================================
-   時間工具
+   10:00 理想狀態規則
+
+   目標：
+
+   10:00 之後
+   場上 = 11
+   庫存 = MAX
+
+   因為系統 +8：
+
+   場上 >= 8 時
+   +8 全部進入庫存。
+
+   所以一般情況：
+
+   10:00 前庫存 = MAX - 8
+
+
+   但如果 MAX < 8：
+
+   MAX - 8 會變成負數，
+   這是不可能的。
+
+   因此準備庫存最低為 0。
+
+   公式：
+
+   beforeInventory = max(0, MAX - 8)
    ========================================================= */
 
-const weekdayNames = [
-    "日",
-    "一",
-    "二",
-    "三",
-    "四",
-    "五",
-    "六"
-];
 
+/* =========================================================
+   計算 10:00 前理想狀態
+   ========================================================= */
 
-/*
-   建立台灣時間
+function getIdealBefore10State(maxInventory) {
 
-   台灣 UTC+8
-*/
-function taiwanDate(
-    year,
-    month,
-    day,
-    hour,
-    minute = 0
-) {
+    if (
+        !Number.isFinite(maxInventory) ||
+        maxInventory <= 0
+    ) {
 
-    return new Date(
-        Date.UTC(
-            year,
-            month - 1,
-            day,
-            hour - 8,
-            minute,
-            0
-        )
-    );
-}
-
-
-/*
-   取得台灣時間資料
-*/
-function getTaiwanParts(date) {
-
-    const taiwan =
-        new Date(
-            date.getTime()
-            +
-            8 * 60 * 60 * 1000
+        throw new Error(
+            "庫存上限 MAX 必須大於 0"
         );
+    }
+
 
     return {
-        year: taiwan.getUTCFullYear(),
-        month: taiwan.getUTCMonth(),
-        day: taiwan.getUTCDate(),
-        hour: taiwan.getUTCHours(),
-        minute: taiwan.getUTCMinutes(),
-        weekday: taiwan.getUTCDay()
+
+        field: 11,
+
+        inventory:
+            Math.max(
+                0,
+                maxInventory - 8
+            )
+
     };
 }
 
 
-/*
-   台灣時間顯示
-*/
-function formatTaiwanTime(date) {
-
-    const p =
-        getTaiwanParts(date);
-
-    const month =
-        String(p.month + 1)
-        .padStart(2, "0");
-
-    const day =
-        String(p.day)
-        .padStart(2, "0");
-
-    const hour =
-        String(p.hour)
-        .padStart(2, "0");
-
-    const minute =
-        String(p.minute)
-        .padStart(2, "0");
-
-    return `${p.year}/${month}/${day}（${weekdayNames[p.weekday]}）${hour}:${minute}`;
-}
-
-
-/*
-   遊戲時間
-
-   遊戲時間 = 台灣時間 - 10 小時
-*/
-function toGameTime(taiwanDateValue) {
-
-    return new Date(
-        taiwanDateValue.getTime()
-        -
-        10 * 60 * 60 * 1000
-    );
-}
-
-
-/*
-   遊戲時間顯示
-*/
-function formatGameTime(date) {
-
-    const year =
-        date.getUTCFullYear();
-
-    const month =
-        String(date.getUTCMonth() + 1)
-        .padStart(2, "0");
-
-    const day =
-        String(date.getUTCDate())
-        .padStart(2, "0");
-
-    const hour =
-        String(date.getUTCHours())
-        .padStart(2, "0");
-
-    const minute =
-        String(date.getUTCMinutes())
-        .padStart(2, "0");
-
-    const weekday =
-        weekdayNames[
-            date.getUTCDay()
-        ];
-
-    return `${year}/${month}/${day}（${weekday}）${hour}:${minute}`;
-}
-
-
 /* =========================================================
-   衝分日判定
+   模擬 10:00 系統 +8
+
+   系統產生 8 個雷達。
+
+   新增雷達先填場上到 8。
+
+   如果場上原本已經 >= 8，
+   則 8 個全部進入庫存。
+
+   庫存受 MAX 限制。
    ========================================================= */
 
-function getScoringDayInfo(taiwanDateValue) {
+function simulateSystemPlus8(
+    field,
+    inventory,
+    maxInventory
+) {
 
-    const p =
-        getTaiwanParts(
-            taiwanDateValue
-        );
+    let newField =
+        field;
 
-    const weekday =
-        p.weekday;
-
-    const hour =
-        p.hour;
-
-    const minute =
-        p.minute;
+    let newInventory =
+        inventory;
 
 
-    /*
-       10:00 以前：
-
-       還沒有進入今天的衝分日。
-
-       10:00 整開始：
-       今天就是衝分日。
-    */
-
-    const reached10 =
-        hour > 10 ||
-        (
-            hour === 10 &&
-            minute >= 0
-        );
+    let generated =
+        8;
 
 
     /*
-       星期一
+       第一階段：
+       場上不足 8，
+       先補場上。
     */
 
-    if (weekday === 1) {
+    if (newField < 8) {
 
-        const target =
-            new Date(
-                Date.UTC(
-                    p.year,
-                    p.month,
-                    p.day,
-                    2,
-                    0,
-                    0
-                )
+        const need =
+            8 - newField;
+
+        const toField =
+            Math.min(
+                generated,
+                need
             );
 
-        return {
-            mode:
-                reached10
-                ? "scoring"
-                : "prepare",
+        newField +=
+            toField;
 
-            target
-        };
+        generated -=
+            toField;
     }
 
 
     /*
-       星期五
+       第二階段：
+       剩餘雷達進庫存。
+
+       MAX 是庫存上限。
     */
 
-    if (weekday === 5) {
+    if (generated > 0) {
 
-        const target =
-            new Date(
-                Date.UTC(
-                    p.year,
-                    p.month,
-                    p.day,
-                    2,
-                    0,
-                    0
-                )
+        const room =
+            Math.max(
+                0,
+                maxInventory -
+                newInventory
             );
 
-        return {
-            mode:
-                reached10
-                ? "scoring"
-                : "prepare",
+        const toInventory =
+            Math.min(
+                generated,
+                room
+            );
 
-            target
-        };
+        newInventory +=
+            toInventory;
     }
 
 
-    /*
-       星期二～星期四
-       → 下一個星期五
-    */
+    return {
 
-    if (
-        weekday >= 2 &&
-        weekday <= 4
-    ) {
+        field:
+            newField,
 
-        const daysUntilFriday =
-            5 - weekday;
+        inventory:
+            newInventory
 
-        const target =
-            new Date(
-                Date.UTC(
-                    p.year,
-                    p.month,
-                    p.day + daysUntilFriday,
-                    2,
-                    0,
-                    0
-                )
-            );
-
-        return {
-            mode: "prepare",
-            target
-        };
-    }
-
-
-    /*
-       星期六
-       → 下一個星期一
-    */
-
-    if (weekday === 6) {
-
-        const target =
-            new Date(
-                Date.UTC(
-                    p.year,
-                    p.month,
-                    p.day + 2,
-                    2,
-                    0,
-                    0
-                )
-            );
-
-        return {
-            mode: "prepare",
-            target
-        };
-    }
-
-
-    /*
-       星期日
-       → 明天星期一
-    */
-
-    if (weekday === 0) {
-
-        const target =
-            new Date(
-                Date.UTC(
-                    p.year,
-                    p.month,
-                    p.day + 1,
-                    2,
-                    0,
-                    0
-                )
-            );
-
-        return {
-            mode: "prepare",
-            target
-        };
-    }
-
+    };
 }
 
 
@@ -456,16 +296,12 @@ const tests = [];
 
 function addTest(
     title,
-    input,
-    expectedMode,
-    expectedTarget
+    maxInventory
 ) {
 
     tests.push({
         title,
-        input,
-        expectedMode,
-        expectedTarget
+        maxInventory
     });
 
 }
@@ -473,120 +309,52 @@ function addTest(
 
 /* =========================================================
    A
-   週一 09:59
+   MAX = 30
    ========================================================= */
 
 addTest(
-    "測試 A：週一 09:59 → 還是準備日",
-    taiwanDate(
-        2026,
-        9,
-        28,
-        9,
-        59
-    ),
-    "prepare",
-    "2026/09/28（一）10:00"
+    "測試 A：MAX = 30",
+    30
 );
 
 
 /* =========================================================
    B
-   週一 10:00
+   MAX = 20
    ========================================================= */
 
 addTest(
-    "測試 B：週一 10:00 → 正式進入衝分日",
-    taiwanDate(
-        2026,
-        9,
-        28,
-        10,
-        0
-    ),
-    "scoring",
-    "2026/09/28（一）10:00"
+    "測試 B：MAX = 20",
+    20
 );
 
 
 /* =========================================================
    C
-   週一 10:01
+   MAX = 8
    ========================================================= */
 
 addTest(
-    "測試 C：週一 10:01 → 仍是衝分日",
-    taiwanDate(
-        2026,
-        9,
-        28,
-        10,
-        1
-    ),
-    "scoring",
-    "2026/09/28（一）10:00"
+    "測試 C：MAX = 8",
+    8
 );
 
 
 /* =========================================================
    D
-   週五 09:59
+   MAX = 5
+
+   特別測試 MAX < 8
    ========================================================= */
 
 addTest(
-    "測試 D：週五 09:59 → 還是準備日",
-    taiwanDate(
-        2026,
-        10,
-        2,
-        9,
-        59
-    ),
-    "prepare",
-    "2026/10/02（五）10:00"
+    "測試 D：MAX = 5（MAX 小於 8）",
+    5
 );
 
 
 /* =========================================================
-   E
-   週五 10:00
-   ========================================================= */
-
-addTest(
-    "測試 E：週五 10:00 → 正式進入衝分日",
-    taiwanDate(
-        2026,
-        10,
-        2,
-        10,
-        0
-    ),
-    "scoring",
-    "2026/10/02（五）10:00"
-);
-
-
-/* =========================================================
-   F
-   週五 10:01
-   ========================================================= */
-
-addTest(
-    "測試 F：週五 10:01 → 仍是衝分日",
-    taiwanDate(
-        2026,
-        10,
-        2,
-        10,
-        1
-    ),
-    "scoring",
-    "2026/10/02（五）10:00"
-);
-
-
-/* =========================================================
-   測試執行
+   執行測試
    ========================================================= */
 
 let executed = 0;
@@ -599,92 +367,221 @@ function runTest(index) {
     const test =
         tests[index];
 
-    const result =
-        getScoringDayInfo(
-            test.input
-        );
+
+    try {
+
+        /*
+           計算 10:00 前理想狀態
+        */
+
+        const before =
+            getIdealBefore10State(
+                test.maxInventory
+            );
 
 
-    const actualTarget =
-        formatTaiwanTime(
-            result.target
-        );
+        /*
+           模擬 10:00 +8
+        */
+
+        const after =
+            simulateSystemPlus8(
+                before.field,
+                before.inventory,
+                test.maxInventory
+            );
 
 
-    const success =
-        result.mode ===
-            test.expectedMode
-        &&
-        actualTarget ===
-            test.expectedTarget;
+        /*
+           預期：
+
+           10:00 前
+           field = 11
+           inventory = max(0, MAX - 8)
+
+           10:00 後
+           field = 11
+           inventory = MAX
+        */
+
+        const expectedBeforeInventory =
+            Math.max(
+                0,
+                test.maxInventory - 8
+            );
 
 
-    executed++;
+        const beforeCorrect =
+            before.field === 11
+            &&
+            before.inventory ===
+                expectedBeforeInventory;
 
 
-    if (success) {
-        passed++;
-    } else {
+        const afterCorrect =
+            after.field === 11
+            &&
+            after.inventory ===
+                test.maxInventory;
+
+
+        const success =
+            beforeCorrect &&
+            afterCorrect;
+
+
+        executed++;
+
+
+        if (success) {
+
+            passed++;
+
+        } else {
+
+            failed++;
+        }
+
+
+        const resultBox =
+            document.getElementById(
+                `result-${index}`
+            );
+
+
+        if (success) {
+
+            resultBox.innerHTML = `
+
+                <strong>測試結果</strong>
+
+                <br><br>
+
+                <span class="ideal">
+                    10:00 前理想狀態
+                </span>
+
+                <br>
+
+                場上：
+                ${before.field}
+
+                <br>
+
+                庫存：
+                ${before.inventory}
+
+                <br><br>
+
+                <span class="ideal">
+                    10:00 系統 +8 後
+                </span>
+
+                <br>
+
+                場上：
+                ${after.field}
+
+                <br>
+
+                庫存：
+                ${after.inventory}
+
+                <br><br>
+
+                <span class="pass">
+                    ✅ 測試通過
+                </span>
+
+            `;
+
+        } else {
+
+            failed++;
+
+
+            resultBox.innerHTML = `
+
+                <strong>測試結果</strong>
+
+                <br><br>
+
+                <span class="fail">
+                    ❌ 測試失敗
+                </span>
+
+                <br><br>
+
+                10:00 前：
+
+                <br>
+
+                實際場上：
+                ${before.field}
+
+                <br>
+
+                實際庫存：
+                ${before.inventory}
+
+                <br><br>
+
+                10:00 後：
+
+                <br>
+
+                實際場上：
+                ${after.field}
+
+                <br>
+
+                實際庫存：
+                ${after.inventory}
+
+                <br><br>
+
+                預期 10:00 前：
+
+                <br>
+
+                場上：11
+
+                <br>
+
+                庫存：
+                ${expectedBeforeInventory}
+
+                <br><br>
+
+                預期 10:00 後：
+
+                <br>
+
+                場上：11
+
+                <br>
+
+                庫存：
+                ${test.maxInventory}
+
+            `;
+        }
+
+
+        updateSummary();
+
+
+    } catch (error) {
+
+        executed++;
         failed++;
-    }
 
 
-    const resultBox =
-        document.getElementById(
-            `result-${index}`
-        );
+        const resultBox =
+            document.getElementById(
+                `result-${index}`
+            );
 
-
-    const modeText =
-        result.mode === "scoring"
-        ? "🏆 今天是衝分日"
-        : "📦 準備衝分日";
-
-
-    const expectedModeText =
-        test.expectedMode === "scoring"
-        ? "🏆 今天是衝分日"
-        : "📦 準備衝分日";
-
-
-    const gameTarget =
-        formatGameTime(
-            toGameTime(
-                result.target
-            )
-        );
-
-
-    if (success) {
-
-        resultBox.innerHTML = `
-
-            <strong>測試結果</strong>
-
-            <br><br>
-
-            實際模式：
-            ${modeText}
-
-            <br>
-
-            實際衝分時間：
-            ${actualTarget}
-
-            <br>
-
-            實際遊戲時間：
-            ${gameTarget}
-
-            <br><br>
-
-            <span class="pass">
-                ✅ 測試通過
-            </span>
-
-        `;
-
-    } else {
 
         resultBox.innerHTML = `
 
@@ -698,29 +595,13 @@ function runTest(index) {
 
             <br><br>
 
-            實際模式：
-            ${modeText}
-
-            <br>
-
-            實際衝分時間：
-            ${actualTarget}
-
-            <br>
-
-            預期模式：
-            ${expectedModeText}
-
-            <br>
-
-            預期衝分時間：
-            ${test.expectedTarget}
+            ${error.message}
 
         `;
+
+
+        updateSummary();
     }
-
-
-    updateSummary();
 }
 
 
@@ -738,6 +619,13 @@ function renderTests() {
 
     tests.forEach(
         (test, index) => {
+
+            const beforeInventory =
+                Math.max(
+                    0,
+                    test.maxInventory - 8
+                );
+
 
             const div =
                 document.createElement(
@@ -759,24 +647,40 @@ function renderTests() {
                 <div class="state">
 
                     <strong>
-                        計算基準時間
+                        庫存上限 MAX：
+                    </strong>
+
+                    ${test.maxInventory}
+
+                    <br><br>
+
+                    <strong>
+                        預計 10:00 前：
                     </strong>
 
                     <br>
 
-                    台灣時間：
-                    ${formatTaiwanTime(test.input)}
+                    場上：11
 
                     <br>
 
-                    遊戲時間：
-                    ${
-                        formatGameTime(
-                            toGameTime(
-                                test.input
-                            )
-                        )
-                    }
+                    庫存：
+                    ${beforeInventory}
+
+                    <br><br>
+
+                    <strong>
+                        預計 10:00 後：
+                    </strong>
+
+                    <br>
+
+                    場上：11
+
+                    <br>
+
+                    庫存：
+                    ${test.maxInventory}
 
                 </div>
 
@@ -792,7 +696,9 @@ function renderTests() {
                     class="result"
                     id="result-${index}"
                 >
+
                     尚未執行
+
                 </div>
 
             `;
@@ -806,7 +712,7 @@ function renderTests() {
 
 
 /* =========================================================
-   測試摘要
+   摘要
    ========================================================= */
 
 function updateSummary() {
