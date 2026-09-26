@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>雷達規劃器 Production 實戰驗收 v2</title>
+<style>
+body{margin:0;background:#111;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;padding:18px}
+h1{font-size:24px;margin:0 0 8px}.desc{color:#bbb;line-height:1.6}
+button{width:100%;padding:15px;margin:12px 0;border:0;border-radius:12px;background:#1683ff;color:#fff;font-size:18px;font-weight:700}
+.summary{background:#1d1d1d;border-radius:14px;padding:14px;margin:14px 0}
+.pass{color:#20d879}.fail{color:#ff4050}.case{padding:13px 0;border-top:1px solid #333}
+.small{color:#aaa;font-size:14px;margin-top:4px}
+</style>
+</head>
+<body>
+<h1>雷達規劃器 Production 實戰驗收 v2</h1>
+<div class="desc">操作流程驗收：模擬玩家執行完成、收割、Laura、系統 +8 後，再重新規劃。</div>
+<button onclick="runAll()">▶ 全部執行</button>
+<div id="summary" class="summary">尚未執行</div>
+<div id="results"></div>
+
+<script>
+const tests=[];
+
+function add(name,actual,expected,detail=""){
+  const ok=JSON.stringify(actual)===JSON.stringify(expected);
+  tests.push({name,actual,expected,ok,detail});
+}
+
+function complete(s,n=1){
+  s={...s,tasks:{...s.tasks}};
+  for(let i=0;i<n&&s.field-s.completed>0;i++){
+    s.completed++;
+    for(const k of ["warriors","dawn"]){
+      const t=s.tasks[k];
+      if(t&&t.active)t.current=Math.min(t.target,t.current+1);
+    }
+  }
+  return s;
+}
+
+function harvest(s,n=1){
+  s={...s,tasks:{...s.tasks}};
+  for(let i=0;i<n&&s.completed>0;i++){
+    s.completed--;s.field--;
+    if(s.field<8&&s.inventory>0){
+      const refill=Math.min(8-s.field,s.inventory);
+      s.field+=refill;s.inventory-=refill;
+    }
+  }
+  return s;
+}
+
+function useLaura(s){
+  if(s.lauraUsed)return s;
+  const amount={0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar];
+  let field=s.field,inventory=s.inventory;
+  if(field<8){
+    const toField=Math.min(8-field,amount);
+    field+=toField;inventory+=amount-toField;
+  }else{
+    field+=3;inventory+=amount-3;
+  }
+  return {...s,field,inventory,lauraUsed:true};
+}
+
+function system8(s){
+  const toField=Math.min(Math.max(0,8-s.field),8);
+  const field=s.field+toField;
+  const rem=8-toField;
+  const inv=s.inventory+Math.min(rem,Math.max(0,s.maxInventory-s.inventory));
+  return {...s,field,inventory:inv};
+}
+
+function plannerSnapshot(s){
+  return {
+    field:s.field,
+    unfinished:s.field-s.completed,
+    completed:s.completed,
+    inventory:s.inventory,
+    lauraUsed:s.lauraUsed
+  };
+}
+
+function runAll(){
+  tests.length=0;
+
+  // 1 完成 1 個未完成雷達
+  let s={field:11,completed:8,inventory:22,lauraUsed:false,lauraStar:4,
+    maxInventory:30,tasks:{warriors:{active:true,target:20,current:7},dawn:{active:true,target:20,current:9}}};
+  s=complete(s,1);
+  add("1. 完成1個未完成雷達",
+    plannerSnapshot(s),
+    {field:11,unfinished:2,completed:9,inventory:22,lauraUsed:false});
+
+  // 2 完成事件只增加任務，不增加資源
+  add("2. 完成事件同步增加兩個啟用任務",
+    {warriors:s.tasks.warriors.current,dawn:s.tasks.dawn.current},
+    {warriors:8,dawn:10});
+
+  // 3 收割1個，場上仍>=8，不自動補場
+  s=harvest(s,1);
+  add("3. 收割1個後場上減1、庫存不變",
+    {field:s.field,completed:s.completed,inventory:s.inventory},
+    {field:10,completed:8,inventory:22});
+
+  // 4 收割造成場上低於8時自動補場
+  let h={field:8,completed:8,inventory:5,lauraUsed:true,lauraStar:4,maxInventory:30,
+    tasks:{warriors:{active:false,target:0,current:0},dawn:{active:false,target:0,current:0}}};
+  h=harvest(h,1);
+  add("4. 收割後場上低於8自動補回",
+    {field:h.field,inventory:h.inventory},
+    {field:8,inventory:4});
+
+  // 5 使用 Laura 後狀態可重新規劃
+  let l={field:8,completed:8,inventory:0,lauraUsed:false,lauraStar:4,maxInventory:30,
+    tasks:{warriors:{active:false,target:0,current:0},dawn:{active:false,target:0,current:0}}};
+  l=useLaura(l);
+  add("5. 使用4星Laura後重新規劃狀態",
+    plannerSnapshot(l),
+    {field:11,unfinished:3,completed:8,inventory:17,lauraUsed:true});
+
+  // 6 Laura同日再次規劃不重複增加
+  const l2=useLaura(l);
+  add("6. Laura同日再次執行不重複增加",
+    plannerSnapshot(l2),
+    plannerSnapshot(l));
+
+  // 7 系統+8後重新規劃
+  let g={field:8,completed:8,inventory:0,lauraUsed:true,lauraStar:4,maxInventory:30,
+    tasks:{warriors:{active:false,target:0,current:0},dawn:{active:false,target:0,current:0}}};
+  g=system8(g);
+  add("7. 系統+8後重新規劃",
+    plannerSnapshot(g),
+    {field:8,unfinished:0,completed:8,inventory:8,lauraUsed:true});
+
+  // 8 系統+8場上不足8時先補場
+  let g2={field:6,completed:6,inventory:10,lauraUsed:true,lauraStar:4,maxInventory:30,
+    tasks:{warriors:{active:false,target:0,current:0},dawn:{active:false,target:0,current:0}}};
+  g2=system8(g2);
+  add("8. 系統+8先補場上再進庫存",
+    {field:g2.field,inventory:g2.inventory},
+    {field:8,inventory:16});
+
+  // 9 完成後再收割，任務不因收割增加
+  let q={field:9,completed:8,inventory:3,lauraUsed:true,lauraStar:4,maxInventory:30,
+    tasks:{warriors:{active:true,target:20,current:4},dawn:{active:true,target:20,current:6}}};
+  q=complete(q,1);
+  const before={warriors:q.tasks.warriors.current,dawn:q.tasks.dawn.current};
+  q=harvest(q,1);
+  add("9. 完成後收割，任務進度不因收割增加",
+    {warriors:q.tasks.warriors.current,dawn:q.tasks.dawn.current,field:q.field,completed:q.completed},
+    {warriors:before.warriors,dawn:before.dawn,field:8,completed:8});
+
+  // 10 更新最新狀態後重新規劃
+  const latest={field:11,completed:11,inventory:22,lauraUsed:true,lauraStar:5,maxInventory:30,
+    tasks:{warriors:{active:false,target:0,current:0},dawn:{active:false,target:0,current:0}}};
+  add("10. 操作後重新規劃讀取最新玩家狀態",
+    plannerSnapshot(latest),
+    {field:11,unfinished:0,completed:11,inventory:22,lauraUsed:true});
+
+  render();
+}
+
+function render(){
+  const pass=tests.filter(t=>t.ok).length;
+  const fail=tests.length-pass;
+  document.getElementById("summary").innerHTML=
+    `<strong>${pass}/${tests.length} 通過</strong> `+
+    (fail?`<span class="fail">失敗 ${fail}</span>`:`<span class="pass">全部通過 ✓</span>`);
+  document.getElementById("results").innerHTML=tests.map((t,i)=>`
+    <div class="case">
+      <strong>${t.ok?"✅":"❌"} ${i+1}. ${t.name}</strong>
+      <div class="small">預期：${JSON.stringify(t.expected)}</div>
+      <div class="small">實際：${JSON.stringify(t.actual)}</div>
+      ${t.detail?`<div class="small">${t.detail}</div>`:""}
+    </div>`).join("");
+}
+</script>
+</body>
+</html>
