@@ -89,7 +89,7 @@ ul{margin:8px 0;padding-left:22px}
       <option value="0">0 星</option><option value="1">1 星</option><option value="2">2 星</option>
       <option value="3">3 星</option><option value="4" selected>4 星</option><option value="5">5 星</option>
     </select>
-    <span id="lauraUsedText" class="switch-text">未使用</span>
+    <span id="lauraUsedText" class="switch-text">未點擊</span>
     <label class="switch" aria-label="勞拉今日狀態">
       <input id="lauraUsed" type="checkbox">
       <span class="slider"></span>
@@ -127,9 +127,9 @@ ul{margin:8px 0;padding-left:22px}
   </div>
 </div>
 <div id="treasureRow" class="task-row" style="display:none">
-  <div class="task-label">勞拉寶藏</div>
+  <div class="task-label">勞拉寶箱</div>
   <div class="task-value">
-    <input id="treasure" class="compact-input" type="number" min="0" max="10" value="0" aria-label="勞拉寶藏目前進度">
+    <input id="treasure" class="compact-input" type="number" min="0" max="10" value="0" aria-label="勞拉寶箱目前進度">
     <span>/</span><span class="fixed-target">10</span>
   </div>
 </div>
@@ -296,7 +296,7 @@ function syncLauraUI(){
   $("lauraDetailRow").style.display=available?"flex":"none";
   $("lauraStar").disabled=!available;
   $("lauraUsed").disabled=!available;
-  $("lauraUsedText").textContent=used?"已使用":"未使用";
+  $("lauraUsedText").textContent=used?"已點擊":"未點擊";
   $("treasureRow").style.display=available && star===5?"flex":"none";
   $("treasure").disabled=!(available && star===5);
 }
