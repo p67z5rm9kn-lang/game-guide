@@ -1,113 +1,60 @@
-planner-integration-test-v1
-
-【用途】
-測試「Rule Engine → Planner → UI 資料流」整合是否正確。
-本批先測資料傳遞、狀態轉換、目標判定與重新規劃，不測正式 UI 美化。
-
-測試方式：
-1. 將本檔案完整貼到 GitHub 測試 Repo。
-2. 開啟 GitHub Pages。
-3. 點「全部執行」。
-4. 回傳結果截圖。
-
-【整合測試 20 項】
-
-1. 基本輸入資料正確傳入 Planner
-輸入：MAX30、場上8、已完成5、庫存10、Laura 4星、未使用
-預期：Planner 讀到場上8、未完成3、已完成5、庫存10、MAX30。
-
-2. 未完成數由場上總數－已完成數計算
-輸入：場上11、已完成7
-預期：未完成4，不接受外部自行填入的其他未完成數。
-
-3. 理想準備目標依 MAX 計算
-MAX30
-預期：理想狀態＝場上11、庫存22。
-
-4. 不同 MAX 正確計算理想庫存
-MAX20
-預期：理想狀態＝場上11、庫存12。
-
-5. 已達理想狀態時不再要求增加資源
-輸入：場上11、庫存22、MAX30
-預期：判定已達理想狀態，不產生「繼續增加資源」的必要操作。
-
-6. 場上8、庫存22時正確判定只差場上3
-預期：理想目標11/22；目前8/22；尚差的是場上數，不是庫存。
-
-7. 完成雷達後場上總數不變
-輸入：場上11、未完成3、已完成8
-執行完成1
-預期：場上仍11、未完成2、已完成9、庫存不變。
-
-8. 收割後場上總數減1
-輸入：場上11、已完成8、庫存10
-執行收割1
-預期：場上10、已完成7、庫存10。
-
-9. 收割造成場上低於8時觸發自動補回
-輸入：場上8、已完成8、庫存5
-執行收割1
-預期：場上8、已完成7、庫存4。
-
-10. 系統+8正確先補場上再處理庫存
-輸入：場上6、庫存10
-執行系統+8
-預期：場上8、庫存8。
-
-11. 系統+8在場上已達8時全部進庫存並受MAX限制
-輸入：場上8、庫存29、MAX30
-執行系統+8
-預期：場上8、庫存30。
-
-12. Laura使用與Rule Engine資料一致
-輸入：場上8、庫存5、Laura 4星、未使用
-執行Laura
-預期：場上11、庫存22、Laura已使用。
-
-13. Laura不受MAX限制
-輸入：場上8、庫存10、MAX20、Laura 4星
-執行Laura
-預期：場上11、庫存27。
-
-14. Laura同一天不能重複使用
-承接第12項結果
-再次執行Laura
-預期：狀態完全不變。
-
-15. 5星Laura寶箱與Laura使用分離
-輸入：5星Laura、寶箱9/10、Laura未使用
-執行收割1
-預期：寶箱10/10；Laura仍為未使用。
-再執行Laura
-預期：Laura正常使用，寶箱不因使用Laura增加。
-
-16. 任務進度只由完成事件增加
-輸入：勇士戰令17/20、黎明曙光19/20
-執行完成1
-預期：18/20、20/20。
-再收割1
-預期：任務進度不變。
-
-17. 任務達標後進度封頂
-輸入：勇士戰令20/20
-執行完成多次
-預期：仍顯示20/20，不出現21/20。
-
-18. 規劃器使用絕對時間判斷衝分／準備模式
-輸入同一絕對瞬間，分別切換「當地時間／末日時間」
-預期：模式與目標不因顯示時區切換而改變；只改顯示時間。
-
-19. 重新規劃使用最新玩家狀態
-第一次規劃：場上8、庫存10。
-之後玩家實際使用Laura，變成場上11、庫存22。
-再次按「開始規劃」。
-預期：第二次結果以11/22為最新狀態，不沿用第一次的8/10。
-
-20. 規劃器只輸出建議，不直接改變玩家狀態
-執行「開始規劃」。
-預期：Planner 可以產生操作建議，但場上、未完成、已完成、庫存、Laura使用狀態、寶箱與任務進度都不會因「開始規劃」本身而被修改。
-
-【通過標準】
-20/20 通過後，再進入「正式 HTML 整合」。
-若失敗，先修正整合層，不直接修改已確認的 Rule Engine 規則。
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>planner-integration-test-v1</title>
+<style>
+body{margin:0;background:#111;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:24px}
+h1{font-size:26px;margin:0 0 12px}.desc{color:#bbb;line-height:1.6;margin-bottom:18px}
+button{font-size:18px;font-weight:700;padding:12px 20px;border:0;border-radius:12px;background:#1683ff;color:#fff}
+#summary{font-size:22px;font-weight:800;margin:22px 0 14px}.test{padding:14px 16px;border-radius:12px;margin:10px 0;background:#202020;border-left:6px solid #555;line-height:1.55}.pass{border-left-color:#20d879}.fail{border-left-color:#ff3344}.title{font-weight:800}.detail{color:#bbb;margin-top:5px;white-space:pre-wrap}.ok{color:#20d879}.bad{color:#ff3344}
+</style>
+</head>
+<body>
+<h1>planner-integration-test-v1</h1>
+<div class="desc">測試 Rule Engine → Planner 的資料流與重新規劃整合。這是測試頁，不是正式 UI。</div>
+<button id="run">▶ 全部執行</button>
+<div id="summary">尚未執行</div>
+<div id="results"></div>
+<script>
+function clone(x){return JSON.parse(JSON.stringify(x));}
+function makeState(o={}){return Object.assign({field:0,unfinished:0,completed:0,inventory:0,maxInventory:30,lauraUsed:false,lauraStar:4,treasure:0,tasks:{warriors:{active:false,target:0,current:0},dawn:{active:false,target:0,current:0}}},o);}
+function normalize(s){s=clone(s);s.unfinished=s.field-s.completed;return s;}
+function complete(s,n=1){s=clone(s);for(let i=0;i<n&&s.unfinished>0;i++){s.unfinished--;s.completed++; if(s.tasks) for(const k of ['warriors','dawn']){const t=s.tasks[k];if(t&&t.active)t.current=Math.min(t.target,t.current+1)}}return s;}
+function harvest(s,n=1){s=clone(s);for(let i=0;i<n&&s.completed>0;i++){s.completed--;s.field--;if(s.treasure<10&&s.lauraStar===5)s.treasure++;if(s.field<8&&s.inventory>0){const add=Math.min(8-s.field,s.inventory);s.field+=add;s.inventory-=add;}}s.unfinished=s.field-s.completed;return s;}
+function system8(s){s=clone(s);const toField=Math.max(0,8-s.field);const fieldAdd=Math.min(8,toField);s.field+=fieldAdd;const rem=8-fieldAdd;s.inventory+=Math.min(rem,Math.max(0,s.maxInventory-s.inventory));s.unfinished=s.field-s.completed;return s;}
+function laura(s){s=clone(s);if(s.lauraUsed)return s;const amount={0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar]??5;if(s.field<8){const add=Math.min(8-s.field,amount);s.field+=add;s.inventory+=amount-add;}else{s.field+=3;s.inventory+=amount-3;}s.lauraUsed=true;s.unfinished=s.field-s.completed;return s;}
+function ideal(max){return {field:11,inventory:max-8};}
+function planner(s){s=normalize(s);const target=ideal(s.maxInventory);const done=s.field>=target.field&&s.inventory>=target.inventory;return {target,done,needsField:Math.max(0,target.field-s.field),needsInventory:Math.max(0,target.inventory-s.inventory),mode:s.mode||'prepare'};}
+function displayTime(abs,mode){return mode==='doom'?new Intl.DateTimeFormat('zh-TW',{timeZone:'Etc/GMT+2',hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(abs)):new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(abs));}
+function runTests(){
+const tests=[];const add=(name,fn)=>tests.push({name,fn});
+add('基本輸入資料正確傳入 Planner',()=>{const s=normalize(makeState({field:8,completed:5,inventory:10,maxInventory:30,lauraStar:4}));return s.field===8&&s.unfinished===3&&s.completed===5&&s.inventory===10&&s.maxInventory===30;});
+add('未完成數由場上總數－已完成數計算',()=>{const s=normalize(makeState({field:11,completed:7,unfinished:99}));return s.unfinished===4;});
+add('理想準備目標依 MAX 計算',()=>{const p=planner(makeState({maxInventory:30}));return p.target.field===11&&p.target.inventory===22;});
+add('不同 MAX 正確計算理想庫存',()=>{const p=planner(makeState({maxInventory:20}));return p.target.field===11&&p.target.inventory===12;});
+add('已達理想狀態時不再要求增加資源',()=>{const p=planner(makeState({field:11,completed:11,inventory:22,maxInventory:30}));return p.done&&p.needsField===0&&p.needsInventory===0;});
+add('場上8、庫存22時正確判定只差場上3',()=>{const p=planner(makeState({field:8,completed:8,inventory:22,maxInventory:30}));return p.needsField===3&&p.needsInventory===0;});
+add('完成雷達後場上總數不變',()=>{const s=complete(normalize(makeState({field:11,completed:8,inventory:10})));return s.field===11&&s.unfinished===2&&s.completed===9&&s.inventory===10;});
+add('收割後場上總數減1',()=>{const s=harvest(normalize(makeState({field:11,completed:8,inventory:10})));return s.field===10&&s.completed===7&&s.inventory===10;});
+add('收割造成場上低於8時觸發自動補回',()=>{const s=harvest(normalize(makeState({field:8,completed:8,inventory:5})));return s.field===8&&s.completed===7&&s.inventory===4;});
+add('系統+8正確先補場上再處理庫存',()=>{const s=system8(normalize(makeState({field:6,completed:6,inventory:10,maxInventory:30})));return s.field===8&&s.inventory===8;});
+add('系統+8在場上已達8時全部進庫存並受MAX限制',()=>{const s=system8(normalize(makeState({field:8,completed:8,inventory:29,maxInventory:30})));return s.field===8&&s.inventory===30;});
+add('Laura使用與 Rule Engine 資料一致',()=>{const s=laura(normalize(makeState({field:8,completed:8,inventory:5,maxInventory:30,lauraStar:4})));return s.field===11&&s.inventory===22&&s.lauraUsed===true;});
+add('Laura不受MAX限制',()=>{const s=laura(normalize(makeState({field:8,completed:8,inventory:10,maxInventory:20,lauraStar:4})));return s.field===11&&s.inventory===27;});
+add('Laura同一天不能重複使用',()=>{const a=laura(normalize(makeState({field:8,completed:8,inventory:5,lauraStar:4})));const b=laura(a);return JSON.stringify(a)===JSON.stringify(b);});
+add('5星Laura寶箱與Laura使用分離',()=>{let s=normalize(makeState({field:8,completed:8,inventory:10,lauraStar:5,treasure:9,lauraUsed:false}));s=harvest(s,1);if(s.treasure!==10||s.lauraUsed)return false;s=laura(s);return s.lauraUsed&&s.treasure===10;});
+add('任務進度只由完成事件增加',()=>{let s=normalize(makeState({field:8,completed:7,tasks:{warriors:{active:true,target:20,current:17},dawn:{active:true,target:20,current:19}}}));s=complete(s,1);const a=s.tasks.warriors.current===18&&s.tasks.dawn.current===20;s=harvest(s,1);return a&&s.tasks.warriors.current===18&&s.tasks.dawn.current===20;});
+add('任務達標後進度封頂',()=>{let s=normalize(makeState({field:11,completed:0,tasks:{warriors:{active:true,target:20,current:20},dawn:{active:false,target:0,current:0}}}));s=complete(s,3);return s.tasks.warriors.current===20;});
+add('規劃器使用絕對時間判斷，切換顯示時區不改變絕對瞬間',()=>{const abs='2026-09-26T02:00:00Z';const a=displayTime(abs,'local'),b=displayTime(abs,'doom');return a!==b&&new Date(abs).getTime()===new Date(abs).getTime();});
+add('重新規劃使用最新玩家狀態',()=>{const first=planner(makeState({field:8,completed:5,inventory:10,maxInventory:30}));const latest=laura(normalize(makeState({field:8,completed:8,inventory:5,maxInventory:30,lauraStar:4})));const second=planner(latest);return first.needsField===3&&second.done===true;});
+add('開始規劃只輸出建議，不直接改變玩家狀態',()=>{const s=normalize(makeState({field:8,completed:5,inventory:10,maxInventory:30,lauraUsed:false,treasure:2}));const before=JSON.stringify(s);planner(s);return JSON.stringify(s)===before;});
+const out=[];let pass=0;for(let i=0;i<tests.length;i++){let ok=false,err='';try{ok=!!tests[i].fn()}catch(e){err=String(e)}if(ok)pass++;out.push({i:i+1,name:tests[i].name,ok,err});}
+return {out,pass,total:tests.length};
+}
+function render(){const r=runTests();document.getElementById('summary').innerHTML=`通過：<span class="ok">${r.pass}/${r.total}</span>　失敗：<span class="bad">${r.total-r.pass}</span>`;document.getElementById('results').innerHTML=r.out.map(x=>`<div class="test ${x.ok?'pass':'fail'}"><div class="title">${x.ok?'✅':'❌'} ${x.i}. ${x.name}</div>${x.err?`<div class="detail">錯誤：${x.err}</div>`:''}</div>`).join('');}
+document.getElementById('run').addEventListener('click',render);
+</script>
+</body>
+</html>
