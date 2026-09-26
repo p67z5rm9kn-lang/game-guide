@@ -10,15 +10,31 @@ h1{font-size:25px;margin:0 0 8px}.desc{color:#aaa;line-height:1.55;margin-bottom
 .card{background:#1d1d1d;border:1px solid #333;border-radius:14px;padding:15px;margin:12px 0}
 h2{font-size:19px;margin:0 0 12px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.pair:last-child{margin-bottom:0}
-.status-row{display:flex;align-items:end;gap:10px}.status-row>div{flex:1}
-.switch{display:flex;align-items:center;gap:8px;min-height:42px}.switch input{width:46px;height:26px;margin:0;accent-color:#1683ff}.switch span{font-size:14px;color:#bbb}
-.segment{display:flex;gap:8px}.segment button{flex:1;background:#292929;border:1px solid #444;color:#bbb;padding:10px 8px;font-size:15px}.segment button.active{background:#1683ff;color:#fff;border-color:#1683ff}
-.fixed-target{height:42px;display:flex;align-items:center;padding:0 12px;background:#292929;border:1px solid #444;border-radius:9px;box-sizing:border-box;font-size:16px}
-.hidden{display:none!important}
 label{display:block;color:#bbb;font-size:14px;margin-bottom:5px}
 input,select{width:100%;box-sizing:border-box;background:#292929;color:#fff;border:1px solid #444;border-radius:9px;padding:10px;font-size:16px}
-button{font-size:17px;font-weight:700;padding:12px 18px;border:0;border-radius:11px;background:#1683ff;color:#fff}
+input[type="number"]{text-align:center}
+.state-list,.task-list{display:flex;flex-direction:column;gap:10px}
+.state-row,.task-row,.laura-row{display:flex;align-items:center;gap:10px;min-height:42px}
+.state-label,.task-label{color:#bbb;font-size:15px;flex:1;min-width:0}
+.state-value,.task-value{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.compact-input{width:86px!important;flex:0 0 86px}
+.fixed-target{min-width:58px;text-align:center;color:#ddd;background:#292929;border:1px solid #444;border-radius:9px;padding:10px 8px;box-sizing:border-box}
+.time-line{display:flex;align-items:center;gap:10px}
+.time-line label{margin:0;white-space:nowrap}
+.time-input{flex:1;min-width:0}
+.time-preview{margin-top:7px;font-size:13px;color:#aaa}
+.switch{position:relative;display:inline-block;width:48px;height:28px;flex:0 0 auto}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#555;border-radius:28px;cursor:pointer;transition:.18s}
+.slider:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.18s}
+.switch input:checked + .slider{background:#1683ff}
+.switch input:checked + .slider:before{transform:translateX(20px)}
+.switch-text{font-size:14px;color:#bbb;min-width:54px}
+.time-segment{display:flex;gap:0;margin-top:8px}
+.time-segment button{flex:1;border-radius:0;background:#292929;border:1px solid #444;color:#bbb;padding:9px 8px;font-size:14px}
+.time-segment button:first-child{border-radius:9px 0 0 9px}
+.time-segment button:last-child{border-radius:0 9px 9px 0}
+.time-segment button.active{background:#1683ff;color:#fff;border-color:#1683ff}
 button.secondary{background:#444}
 button:disabled{opacity:.72;cursor:wait}
 button.planning{position:relative;transform:scale(.97);filter:brightness(.88);box-shadow:0 0 0 3px rgba(22,131,255,.18);transition:all .15s ease}
@@ -29,7 +45,7 @@ button.planning::before{content:"";display:inline-block;width:13px;height:13px;m
 .good{color:#20d879}.warn{color:#ffc44d}.bad{color:#ff5964}
 .big{font-size:23px;font-weight:800}.muted{color:#aaa}
 ul{margin:8px 0;padding-left:22px}
-@media(max-width:520px){.grid{grid-template-columns:1fr}.pair{grid-template-columns:1fr 1fr}.status-row{gap:8px}.segment{gap:6px}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -38,41 +54,89 @@ ul{margin:8px 0;padding-left:22px}
 
 <div class="card">
 <h2>① 目前狀態</h2>
-<div class="pair">
-<div><label>庫存</label><input id="inventory" type="number" min="0" value="22"></div>
-<div><label>庫存上限</label><input id="maxInventory" type="number" min="1" value="30"></div>
+<div class="state-list">
+<div class="state-row">
+  <div class="state-label">庫存 / 庫存上限</div>
+  <div class="state-value">
+    <input id="inventory" class="compact-input" type="number" min="0" value="22" aria-label="庫存">
+    <span>/</span>
+    <input id="maxInventory" class="compact-input" type="number" min="1" value="30" aria-label="庫存上限">
+  </div>
 </div>
-<div class="pair">
-<div><label>場上已完成</label><input id="completed" type="number" min="0" value="8"></div>
-<div><label>場上雷達總數</label><input id="field" type="number" min="0" value="11"></div>
+<div class="state-row">
+  <div class="state-label">場上已完成 / 場上雷達總數</div>
+  <div class="state-value">
+    <input id="completed" class="compact-input" type="number" min="0" value="8" aria-label="場上已完成">
+    <span>/</span>
+    <input id="field" class="compact-input" type="number" min="0" value="11" aria-label="場上雷達總數">
+  </div>
 </div>
-<div class="pair">
-<div><label>勞拉星級</label><select id="lauraStar"><option value="0">0 星</option><option value="1">1 星</option><option value="2">2 星</option><option value="3">3 星</option><option value="4" selected>4 星</option><option value="5">5 星</option></select></div>
-<div><label>勞拉今日狀態</label><div class="switch"><input id="lauraUsed" type="checkbox"><span id="lauraUsedText">未使用</span></div></div>
+<div class="state-row">
+  <div class="state-label">勞拉星級</div>
+  <div class="state-value">
+    <select id="lauraStar" class="compact-input" aria-label="勞拉星級">
+      <option value="0">0 星</option><option value="1">1 星</option><option value="2">2 星</option>
+      <option value="3">3 星</option><option value="4" selected>4 星</option><option value="5">5 星</option>
+    </select>
+    <span id="lauraUsedText" class="switch-text">未使用</span>
+    <label class="switch" aria-label="勞拉今日狀態">
+      <input id="lauraUsed" type="checkbox">
+      <span class="slider"></span>
+    </label>
+  </div>
 </div>
-<div id="treasureRow"><label>勞拉寶藏</label><input id="treasure" type="number" min="0" max="10" value="0"></div>
+</div>
 </div>
 
 <div class="card">
 <h2>② 每日任務</h2>
-<div class="pair">
-<div><label>勇士戰令</label><div class="switch"><input id="warActive" type="checkbox"><span id="warActiveText">未啟用</span></div></div>
-<div><label>目前進度 / 目標</label><div class="status-row"><input id="warCurrent" type="number" min="0" value="0" placeholder="—"><div class="fixed-target">/ 10</div></div></div>
+<div class="task-list">
+<div class="task-row">
+  <div class="task-label">勇士戰令</div>
+  <label class="switch">
+    <input id="warActive" type="checkbox">
+    <span class="slider"></span>
+  </label>
+  <span id="warActiveText" class="switch-text">未啟用</span>
+  <div class="task-value">
+    <input id="warCurrent" class="compact-input" type="number" min="0" value="0" placeholder="—" aria-label="勇士戰令目前進度">
+    <span>/</span><span class="fixed-target">10</span>
+  </div>
 </div>
-<div class="pair">
-<div><label>黎明曙光</label><div class="switch"><input id="dawnActive" type="checkbox"><span id="dawnActiveText">未啟用</span></div></div>
-<div><label>目前進度 / 目標</label><div class="status-row"><input id="dawnCurrent" type="number" min="0" value="0" placeholder="—"><div class="fixed-target">/ 20</div></div></div>
+<div class="task-row">
+  <div class="task-label">黎明曙光</div>
+  <label class="switch">
+    <input id="dawnActive" type="checkbox">
+    <span class="slider"></span>
+  </label>
+  <span id="dawnActiveText" class="switch-text">未啟用</span>
+  <div class="task-value">
+    <input id="dawnCurrent" class="compact-input" type="number" min="0" value="0" placeholder="—" aria-label="黎明曙光目前進度">
+    <span>/</span><span class="fixed-target">20</span>
+  </div>
+</div>
+<div id="treasureRow" class="task-row" style="display:none">
+  <div class="task-label">勞拉寶藏</div>
+  <div class="task-value">
+    <input id="treasure" class="compact-input" type="number" min="0" max="10" value="0" aria-label="勞拉寶藏目前進度">
+    <span>/</span><span class="fixed-target">10</span>
+  </div>
+</div>
 </div>
 </div>
 
 <div class="card">
 <h2>③ 規劃時間</h2>
-<div class="grid">
-<div><label>計算基準時間</label><input id="baseTime" type="datetime-local"></div>
-<div><label>時間顯示</label><div class="segment"><button type="button" id="timeLocal" data-mode="local">當地時間</button><button type="button" id="timeDoom" data-mode="doom">末日時間</button></div></div>
+<div class="time-line">
+  <label for="baseTime">計算基準時間</label>
+  <input id="baseTime" class="time-input" type="datetime-local">
 </div>
-<input id="timeMode" type="hidden" value="local">
-<div id="timeInfo" class="muted" style="margin-top:10px">尚未規劃</div>
+<div id="baseTimePreview" class="time-preview">尚未設定</div>
+<div class="time-segment">
+  <button type="button" id="localTimeBtn" class="active">當地時間</button>
+  <button type="button" id="doomTimeBtn">末日時間（UTC−2）</button>
+</div>
+<div id="timeInfo" class="muted" style="margin-top:8px">尚未規劃</div>
 <div class="row" style="margin-top:12px">
 <button id="now">使用現在時間</button>
 <button id="plan">開始規劃</button>
@@ -154,7 +218,7 @@ function laura(s){
 }
 function validate(s){
  const e=[];
- if(s.maxInventory<=0)e.push("庫存上限必須大於 0");
+ if(s.maxInventory<=0)e.push("庫存上限 必須大於 0");
  if(s.inventory<0)e.push("庫存不可小於 0");
  if(s.field<0)e.push("場上雷達總數不可小於 0");
  if(s.completed<0)e.push("已完成數不可小於 0");
@@ -183,48 +247,48 @@ function modeText(base){
 }
 function fmt(d){
  const mode=$("timeMode").value;
- return new Intl.DateTimeFormat("zh-TW",{timeZone:mode==="doom"?"Etc/GMT+2":"Asia/Taipei",hour12:false,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).format(d);
+ const zone=mode==="doom"?"Etc/GMT+2":undefined;
+ const parts=new Intl.DateTimeFormat("zh-TW",{timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",weekday:"short",hour12:false}).formatToParts(d);
+ const get=k=>parts.find(x=>x.type===k)?.value||"";
+ const weekdayMap={"週日":"日","週一":"一","週二":"二","週三":"三","週四":"四","週五":"五","週六":"六"};
+ return `${get("year")}/${get("month")}/${get("day")}（${weekdayMap[get("weekday")]||get("weekday")}） ${get("hour")}:${get("minute")}`;
+}
+function updateTimePreview(){
+ const base=$("baseTime").value?new Date($("baseTime").value):null;
+ $("baseTimePreview").textContent=base?`顯示：${fmt(base)}`:"尚未設定";
 }
 function setNow(){
  const d=new Date(), pad=n=>String(n).padStart(2,"0");
  $("baseTime").value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-const planInputs=["maxInventory","inventory","field","completed","lauraStar","lauraUsed","treasure","timeMode","warActive","warCurrent","dawnActive","dawnCurrent","baseTime"];
+const planInputs=["maxInventory","inventory","field","completed","lauraStar","lauraUsed","treasure","warActive","warCurrent","dawnActive","dawnCurrent","baseTime"];
 function markPlanDirty(){
   const btn=$("plan");
   if(btn.classList.contains("planning")) return;
   btn.classList.remove("plan-done");
   btn.textContent="開始規劃";
 }
-for(const id of planInputs){
-  const el=$(id);
-  el.addEventListener("input",markPlanDirty);
-  el.addEventListener("change",markPlanDirty);
+function syncTaskUI(){
+  const war=$("warActive").checked, dawn=$("dawnActive").checked;
+  $("warActiveText").textContent=war?"啟用":"未啟用";
+  $("dawnActiveText").textContent=dawn?"啟用":"未啟用";
+  $("warCurrent").disabled=!war; $("dawnCurrent").disabled=!dawn;
+  $("warCurrent").placeholder=war?"目前":"—"; $("dawnCurrent").placeholder=dawn?"目前":"—";
 }
 function syncLauraUI(){
-  const is5=$("lauraStar").value==="5";
-  $("treasureRow").classList.toggle("hidden",!is5);
-  $("treasure").disabled=!is5;
-  $("lauraUsedText").textContent=$("lauraUsed").checked?"已使用":"未使用";
+  const used=$("lauraUsed").checked, star=+$("lauraStar").value;
+  $("lauraUsedText").textContent=used?"已使用":"未使用";
+  $("treasureRow").style.display=star===5?"flex":"none";
+  $("treasure").disabled=star!==5;
 }
-function syncTaskUI(id,textId,currentId){
-  const active=$(id).checked;
-  $(textId).textContent=active?"已啟用":"未啟用";
-  $(currentId).disabled=!active;
-  if(active && $(currentId).value==="")$(currentId).value="0";
+for(const id of planInputs){
+  const el=$(id);
+  el.addEventListener("input",()=>{syncTaskUI();syncLauraUI();updateTimePreview();markPlanDirty();});
+  el.addEventListener("change",()=>{syncTaskUI();syncLauraUI();updateTimePreview();markPlanDirty();});
 }
-function syncTimeUI(){
-  const mode=$("timeMode").value;
-  $("timeLocal").classList.toggle("active",mode==="local");
-  $("timeDoom").classList.toggle("active",mode==="doom");
-}
-$("lauraStar").addEventListener("change",()=>{syncLauraUI();markPlanDirty();});
-$("lauraUsed").addEventListener("change",()=>{syncLauraUI();markPlanDirty();});
-$("warActive").addEventListener("change",()=>{syncTaskUI("warActive","warActiveText","warCurrent");markPlanDirty();});
-$("dawnActive").addEventListener("change",()=>{syncTaskUI("dawnActive","dawnActiveText","dawnCurrent");markPlanDirty();});
-for(const b of [$("timeLocal"),$("timeDoom")]) b.onclick=()=>{$("timeMode").value=b.dataset.mode;syncTimeUI();markPlanDirty();};
-$("now").onclick=()=>{setNow();markPlanDirty();};
-$("timeMode").onchange=()=>{syncTimeUI();$("timeInfo").textContent="顯示："+($("timeMode").value==="doom"?"末日時間（UTC−2）":"當地時間");markPlanDirty();};
+$("now").onclick=()=>{setNow();updateTimePreview();markPlanDirty();};
+$("localTimeBtn").onclick=()=>{ $("timeMode").value="local"; $("localTimeBtn").classList.add("active"); $("doomTimeBtn").classList.remove("active"); updateTimePreview(); markPlanDirty(); };
+$("doomTimeBtn").onclick=()=>{ $("timeMode").value="doom"; $("doomTimeBtn").classList.add("active"); $("localTimeBtn").classList.remove("active"); updateTimePreview(); markPlanDirty(); };
 $("plan").onclick=()=>{
  const planBtn=$("plan");
  planBtn.disabled=true;
@@ -256,11 +320,11 @@ $("plan").onclick=()=>{
   let planState=clone(s);
   let step=1;
 
-  // Laura is a known resource source. When field is already 8 or more,
+  // 勞拉 is a known resource source. When field is already 8 or more,
   // it adds +3 field and sends the rest to inventory.
   if(!planState.lauraUsed && planState.lauraStar>=0 && planState.field<11){
     planState=laura(planState);
-    html+=`<li><b>使用勞拉</b>：${({0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar])} 個。使用後預計場上 ${planState.field}、庫存 ${planState.inventory}。</li>`;
+    html+=`<li><b>使用 勞拉</b>：${({0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar])} 個。使用後預計場上 ${planState.field}、庫存 ${planState.inventory}。</li>`;
     step++;
   }
 
@@ -295,7 +359,7 @@ $("plan").onclick=()=>{
  planBtn.classList.add("plan-done");
  planBtn.textContent="✓ 已完成規劃";
 };
-setNow();syncLauraUI();syncTaskUI("warActive","warActiveText","warCurrent");syncTaskUI("dawnActive","dawnActiveText","dawnCurrent");syncTimeUI();$("timeMode").onchange();
+setNow(); syncTaskUI(); syncLauraUI(); updateTimePreview();
 </script>
 </body>
 </html>
