@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>雷達規劃器 Production v3</title>
+<title>雷達規劃器 Production v5</title>
 <style>
 body{margin:0;background:#111;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px}
 h1{font-size:25px;margin:0 0 8px}.desc{color:#aaa;line-height:1.55;margin-bottom:18px}
@@ -16,6 +16,7 @@ button{font-size:17px;font-weight:700;padding:12px 18px;border:0;border-radius:1
 button.secondary{background:#444}
 button:disabled{opacity:.72;cursor:wait}
 button.planning{position:relative;transform:scale(.97);filter:brightness(.88);box-shadow:0 0 0 3px rgba(22,131,255,.18);transition:all .15s ease}
+button.plan-done{background:#168f55;box-shadow:0 0 0 3px rgba(32,216,121,.14)}
 button.planning::before{content:"";display:inline-block;width:13px;height:13px;margin-right:8px;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;vertical-align:-2px;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .row{display:flex;gap:9px;flex-wrap:wrap}.result{font-size:17px;line-height:1.65}
@@ -27,7 +28,7 @@ ul{margin:8px 0;padding-left:22px}
 </head>
 <body>
 <h1>雷達規劃器</h1>
-<div class="desc">Production v3｜以目前玩家狀態計算理想準備狀態、預計可達與操作順序。規劃只產生建議，不會直接修改玩家狀態。</div>
+<div class="desc">Production v5｜以目前玩家狀態計算理想準備狀態、預計可達與操作順序。規劃只產生建議，不會直接修改玩家狀態。</div>
 
 <div class="card">
 <h2>① 目前狀態</h2>
@@ -177,8 +178,20 @@ function setNow(){
  const d=new Date(), pad=n=>String(n).padStart(2,"0");
  $("baseTime").value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-$("now").onclick=setNow;
-$("timeMode").onchange=()=>{$("timeInfo").textContent="顯示："+($("timeMode").value==="doom"?"末日時間（UTC−2）":"當地時間");};
+const planInputs=["maxInventory","inventory","field","completed","lauraStar","lauraUsed","treasure","timeMode","warActive","warTarget","warCurrent","dawnActive","dawnTarget","dawnCurrent","baseTime"];
+function markPlanDirty(){
+  const btn=$("plan");
+  if(btn.classList.contains("planning")) return;
+  btn.classList.remove("plan-done");
+  btn.textContent="開始規劃";
+}
+for(const id of planInputs){
+  const el=$(id);
+  el.addEventListener("input",markPlanDirty);
+  el.addEventListener("change",markPlanDirty);
+}
+$("now").onclick=()=>{setNow();markPlanDirty();};
+$("timeMode").onchange=()=>{$("timeInfo").textContent="顯示："+($("timeMode").value==="doom"?"末日時間（UTC−2）":"當地時間");markPlanDirty();};
 $("plan").onclick=()=>{
  const planBtn=$("plan");
  planBtn.disabled=true;
@@ -246,8 +259,8 @@ $("plan").onclick=()=>{
  $("timeInfo").textContent=`${mode}｜基準 ${fmt(base)}`;
  planBtn.classList.remove("planning");
  planBtn.disabled=false;
+ planBtn.classList.add("plan-done");
  planBtn.textContent="✓ 已完成規劃";
- setTimeout(()=>{planBtn.textContent=planBtn.dataset.originalText||"開始規劃";},1200);
 };
 setNow();$("timeMode").onchange();
 </script>
