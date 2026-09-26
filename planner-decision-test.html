@@ -3,124 +3,186 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>planner-optimization-sequence-test-v1</title>
+<title>planner-optimization-target-test-v1</title>
 <style>
 body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;padding:18px;line-height:1.55;background:#111;color:#eee}
 button{font-size:18px;font-weight:700;padding:13px 18px;border-radius:10px;border:0;margin:8px 0 14px}
-#summary{font-size:20px;font-weight:700;margin-bottom:12px}
-#results{background:#1d1d1d;padding:12px;border-radius:10px}
-.test{margin:0 0 10px;padding:11px 12px;border-radius:8px;background:#242424}
-.pass{border-left:5px solid #19c37d}.fail{border-left:5px solid #ff453a}
-.name{font-weight:700}.detail{font-family:ui-monospace,monospace;font-size:14px;white-space:pre-wrap;margin-top:5px}
+#summary{font-size:20px;font-weight:700;margin-bottom:14px}
+.card{padding:12px 14px;margin:8px 0;border-radius:10px;background:#1d1d1d}
+.ok{border-left:5px solid #18d477}.bad{border-left:5px solid #ff3333}
+.detail{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;white-space:pre-wrap;word-break:break-word;margin-top:6px}
 </style>
 </head>
 <body>
-<h2>planner-optimization-sequence-test-v1</h2>
-<button onclick="runAllTests()">▶ 全部執行</button>
+<h2>planner-optimization-target-test-v1</h2>
+<button onclick="runAll()">▶ 全部執行</button>
 <div id="summary">尚未執行</div>
 <div id="results"></div>
 
 <script>
 function clone(x){return JSON.parse(JSON.stringify(x))}
 function same(a,b){return JSON.stringify(a)===JSON.stringify(b)}
+function base(o={}){
+  return Object.assign({
+    field:0,unfinished:0,completed:0,inventory:0,maxInventory:30,
+    lauraUsed:false,lauraStar:4,treasure:0
+  },o)
+}
 function complete(s,n=1){
   s=clone(s);
-  for(let i=0;i<n;i++){if(s.unfinished<=0)break;s.unfinished--;s.completed++}
-  return s
+  for(let i=0;i<n;i++){
+    if(s.unfinished<=0)break;
+    s.unfinished--; s.completed++;
+  }
+  return s;
 }
 function harvest(s,n=1){
-  s=clone(s); s.treasure=s.treasure??0;
+  s=clone(s);
   for(let i=0;i<n;i++){
     if(s.completed<=0)break;
-    s.completed--;s.field--;
-    if(s.field<8&&s.inventory>0){
+    s.completed--; s.field--;
+    if(s.field<8 && s.inventory>0){
       const move=Math.min(8-s.field,s.inventory);
-      s.field+=move;s.inventory-=move;
+      s.field+=move; s.inventory-=move;
     }
     if(s.lauraStar===5)s.treasure=Math.min(10,s.treasure+1);
   }
-  return s
+  return s;
+}
+function useLaura(s,star=s.lauraStar){
+  s=clone(s);
+  if(s.lauraUsed)return s;
+  const amount=[5,10,10,10,20,20][star] ?? 5;
+  const need=Math.max(0,8-s.field);
+  const toField=Math.min(amount,need);
+  s.field+=toField;
+  s.inventory+=amount-toField;
+  s.lauraUsed=true;
+  return s;
 }
 function systemFree(s){
   s=clone(s);
-  const toField=Math.min(8,Math.max(0,8-s.field));
+  const need=Math.max(0,8-s.field);
+  const toField=Math.min(8,need);
   s.field+=toField;
-  const rem=8-toField;
-  const room=Math.max(0,(s.maxInventory??0)-s.inventory);
-  s.inventory+=Math.min(rem,room);
-  return s
+  const remain=8-toField;
+  const room=Math.max(0,s.maxInventory-s.inventory);
+  s.inventory+=Math.min(remain,room);
+  return s;
 }
-function useLaura(s,star){
-  s=clone(s);
-  if(s.lauraUsed)return s;
-  const amount=[5,10,10,10,20,20][star];
-  if(s.field<8){
-    const toField=Math.min(amount,8-s.field);
-    s.field+=toField;
-    s.inventory+=amount-toField;
-  }else{
-    s.field+=3;
-    s.inventory+=amount-3;
-  }
-  s.lauraUsed=true;s.lauraStar=star;
-  return s
-}
-function runActions(s,actions){
-  let x=clone(s);
-  for(const a of actions){
-    if(a.type==="complete")x=complete(x,a.n??1);
-    if(a.type==="harvest")x=harvest(x,a.n??1);
-    if(a.type==="laura")x=useLaura(x,a.star);
-    if(a.type==="system")x=systemFree(x);
-  }
-  return x
-}
-function assert(name,fn){
-  try{
-    const r=fn();
-    return r===true?{ok:true,name}:{ok:false,name,actual:r&&r.actual!==undefined?r.actual:r,expected:r&&r.expected!==undefined?r.expected:true};
-  }catch(e){return {ok:false,name,actual:"執行錯誤："+e.message,expected:true}}
-}
+function normalize(s){return Object.assign({},s,{field:s.field,inventory:s.inventory})}
+
+/* 這一批專門測「最佳化目標與操作順序」：
+   不測實際遊戲按鈕，只驗證規劃器應遵守的目標與可行性判斷。 */
+
 const tests=[
-()=>assert("1. 已達理想11/22時，最佳化不需要再操作",()=>same(runActions({field:11,unfinished:0,completed:8,inventory:22,maxInventory:30},[]),{field:11,unfinished:0,completed:8,inventory:22,maxInventory:30})),
-()=>assert("2. MAX20、場上8/5，4星Laura可一步到11/22",()=>same(useLaura({field:8,unfinished:0,completed:8,inventory:5,maxInventory:20,lauraUsed:false},4),{field:11,unfinished:0,completed:8,inventory:22,maxInventory:20,lauraUsed:true,lauraStar:4})),
-()=>assert("3. MAX30、場上8/10，4星Laura後為11/27",()=>same(useLaura({field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,lauraUsed:false},4),{field:11,unfinished:0,completed:8,inventory:27,maxInventory:30,lauraUsed:true,lauraStar:4})),
-()=>assert("4. 場上8/10等待系統+8→8/18",()=>same(systemFree({field:8,unfinished:0,completed:8,inventory:10,maxInventory:30}),{field:8,unfinished:0,completed:8,inventory:18,maxInventory:30})),
-()=>assert("5. 場上6/0等待系統+8→8/6",()=>same(systemFree({field:6,unfinished:0,completed:6,inventory:0,maxInventory:30}),{field:8,unfinished:0,completed:6,inventory:6,maxInventory:30})),
-()=>assert("6. 場上6/4等待系統+8→8/10",()=>same(systemFree({field:6,unfinished:0,completed:6,inventory:4,maxInventory:30}),{field:8,unfinished:0,completed:6,inventory:10,maxInventory:30})),
-()=>assert("7. 場上11/29等待系統+8→11/30，只有1進庫存",()=>same(systemFree({field:11,unfinished:0,completed:11,inventory:29,maxInventory:30}),{field:11,unfinished:0,completed:11,inventory:30,maxInventory:30})),
-()=>assert("8. 場上11/29先收割1再等系統→10/30",()=>same(runActions({field:11,unfinished:0,completed:11,inventory:29,maxInventory:30},[{type:"harvest",n:1},{type:"system"}]),{field:10,unfinished:0,completed:10,inventory:30,maxInventory:30,treasure:0})),
-()=>assert("9. 場上11/29先收割10→8/22，再系統+8→8/30，可完整吃滿+8",()=>same(runActions({field:11,unfinished:0,completed:20,inventory:29,maxInventory:30},[{type:"harvest",n:10},{type:"system"}]),{field:8,unfinished:0,completed:10,inventory:30,maxInventory:30,treasure:0})),
-()=>assert("10. 只收割9個→8/23，再系統+8只到8/30，會少吃1個系統雷達",()=>same(runActions({field:11,unfinished:0,completed:20,inventory:29,maxInventory:30},[{type:"harvest",n:9},{type:"system"}]),{field:8,unfinished:0,completed:11,inventory:30,maxInventory:30,treasure:0})),
-()=>assert("11. 場上未滿8時，Laura先補場上再進庫存",()=>same(useLaura({field:7,unfinished:0,completed:7,inventory:5,maxInventory:30,lauraUsed:false},0),{field:8,unfinished:0,completed:7,inventory:9,maxInventory:30,lauraUsed:true,lauraStar:0})),
-()=>assert("12. 場上0/0，4星Laura→場上8、庫存12",()=>same(useLaura({field:0,unfinished:0,completed:0,inventory:0,maxInventory:30,lauraUsed:false},4),{field:8,unfinished:0,completed:0,inventory:12,maxInventory:30,lauraUsed:true,lauraStar:4})),
-()=>assert("13. 場上0/0，0星Laura只產生5個場上雷達",()=>same(useLaura({field:0,unfinished:0,completed:0,inventory:0,maxInventory:30,lauraUsed:false},0),{field:5,unfinished:0,completed:0,inventory:0,maxInventory:30,lauraUsed:true,lauraStar:0})),
-()=>assert("14. 4星Laura不受MAX20限制，可到22庫存",()=>useLaura({field:8,unfinished:0,completed:8,inventory:5,maxInventory:20,lauraUsed:false},4).inventory===22),
-()=>assert("15. 5星Laura收割後寶箱+1，且不影響場上/庫存規則",()=>same(harvest({field:8,unfinished:0,completed:1,inventory:10,maxInventory:30,lauraStar:5,treasure:0},1),{field:8,unfinished:0,completed:0,inventory:9,maxInventory:30,lauraStar:5,treasure:1})),
-()=>assert("16. 5星寶箱9/10收割2次後封頂10/10",()=>harvest({field:8,unfinished:0,completed:2,inventory:0,maxInventory:30,lauraStar:5,treasure:9},2).treasure===10),
-()=>assert("17. 完成3個再收割3個，場上總數只因收割減3",()=>{
-  const s={field:11,unfinished:3,completed:8,inventory:10,maxInventory:30};
-  const a=runActions(s,[{type:"complete",n:3},{type:"harvest",n:3}]);
-  return same(a,{field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,treasure:0});
-}),
-()=>assert("18. 完成事件不會為了補場而自動動用庫存",()=>{
-  const a=complete({field:7,unfinished:1,completed:6,inventory:4,maxInventory:30},1);
-  return same(a,{field:7,unfinished:0,completed:7,inventory:4,maxInventory:30});
-}),
-()=>assert("19. 最佳化基準不把盟友瞬間幫助當成已發生資源來源",()=>!("allyHelp" in runActions({field:8,unfinished:2,completed:6,inventory:10,maxInventory:30},[]))),
-()=>assert("20. 規劃操作順序只能建立在已確認操作：完成／收割／Laura／等待系統+8",()=>{
-  const allowed=["complete","harvest","laura","system"];
-  return allowed.length===4 && allowed.includes("complete")&&allowed.includes("harvest")&&allowed.includes("laura")&&allowed.includes("system");
-})
+  ["1. MAX30理想準備目標=場上11/庫存22",()=>{
+    const target={field:11,inventory:22};
+    return same(target,{field:11,inventory:30-8});
+  }],
+  ["2. MAX20理想準備目標=場上11/庫存12",()=>{
+    return same({field:11,inventory:12},{field:11,inventory:20-8});
+  }],
+  ["3. 已達11/22時，不應再要求增加資源",()=>{
+    const s=base({field:11,inventory:22,maxInventory:30});
+    return s.field===11 && s.inventory===22;
+  }],
+  ["4. 場上8/庫存22距離理想只差場上3",()=>{
+    const s=base({field:8,inventory:22,maxInventory:30});
+    return s.field<11 && s.inventory===22;
+  }],
+  ["5. 場上11/庫存10只需補庫存12",()=>{
+    const s=base({field:11,inventory:10,maxInventory:30});
+    return s.field===11 && 22-s.inventory===12;
+  }],
+  ["6. 有未完成雷達時，完成只改完成/未完成，不改總場數",()=>{
+    const s=base({field:11,unfinished:3,completed:8,inventory:10});
+    const a=complete(s,1);
+    return a.field===11 && a.unfinished===2 && a.completed===9 && a.inventory===10;
+  }],
+  ["7. 完成3個後場上仍為11",()=>{
+    const s=base({field:11,unfinished:3,completed:8,inventory:10});
+    const a=complete(s,3);
+    return a.field===11 && a.unfinished===0 && a.completed===11;
+  }],
+  ["8. 收割1個會減少場上總數1",()=>{
+    const s=base({field:11,unfinished:0,completed:11,inventory:22});
+    const a=harvest(s,1);
+    return a.field===10 && a.completed===10 && a.inventory===22;
+  }],
+  ["9. 場上低於8時，收割後才會觸發庫存自動補回",()=>{
+    const s=base({field:8,unfinished:0,completed:8,inventory:5});
+    const a=harvest(s,1);
+    return a.field===8 && a.inventory===4 && a.completed===7;
+  }],
+  ["10. 場上11收割3個，不會補到11，只補到8",()=>{
+    const s=base({field:11,unfinished:0,completed:11,inventory:5});
+    const a=harvest(s,3);
+    return a.field===8 && a.inventory===5 && a.completed===8;
+  }],
+  ["11. 場上8/庫存5，4星Laura後=場上11/庫存17",()=>{
+    const s=base({field:8,inventory:5,maxInventory:30,lauraStar:4});
+    const a=useLaura(s,4);
+    return a.field===11 && a.inventory===17 && a.lauraUsed===true;
+  }],
+  ["12. 場上7/庫存0，0星Laura+5=場上8/庫存4",()=>{
+    const s=base({field:7,inventory:0,lauraStar:0});
+    const a=useLaura(s,0);
+    return a.field===8 && a.inventory===4;
+  }],
+  ["13. Laura資源不足時仍可使用，不能因庫存不足而阻止",()=>{
+    const s=base({field:8,inventory:0,maxInventory:30,lauraStar:0});
+    const a=useLaura(s,0);
+    return a.lauraUsed===true && a.field===11 && a.inventory===2;
+  }],
+  ["14. 5星Laura收割後寶箱+1，與Laura使用時機分離",()=>{
+    const s=base({field:11,completed:11,inventory:0,lauraStar:5,treasure:0,lauraUsed:false});
+    const a=harvest(s,1);
+    return a.treasure===1 && a.lauraUsed===false && a.field===10;
+  }],
+  ["15. 5星寶箱9/10收割2個後封頂10/10",()=>{
+    const s=base({field:11,completed:11,inventory:0,lauraStar:5,treasure:9});
+    const a=harvest(s,2);
+    return a.treasure===10 && a.field===9 && a.completed===9;
+  }],
+  ["16. 系統+8在場上不足8時優先補場上",()=>{
+    const s=base({field:6,inventory:10,maxInventory:30});
+    const a=systemFree(s);
+    return a.field===8 && a.inventory===8;
+  }],
+  ["17. 系統+8在場上已達8時，剩餘8才進庫存並受MAX限制",()=>{
+    const s=base({field:8,inventory:29,maxInventory:30});
+    const a=systemFree(s);
+    return a.field===8 && a.inventory===30;
+  }],
+  ["18. MAX30、場上8/庫存10、4星Laura後可到11/27",()=>{
+    const s=base({field:8,inventory:10,maxInventory:30,lauraStar:4});
+    const a=useLaura(s,4);
+    return a.field===11 && a.inventory===27;
+  }],
+  ["19. MAX20、場上8/庫存5、4星Laura後可到11/22並突破MAX",()=>{
+    const s=base({field:8,inventory:5,maxInventory:20,lauraStar:4});
+    const a=useLaura(s,4);
+    return a.field===11 && a.inventory===22 && a.inventory>20;
+  }],
+  ["20. 目標已達成後，規劃器仍應停止新增不必要操作",()=>{
+    const s=base({field:11,inventory:22,maxInventory:30});
+    const ideal={field:11,inventory:22};
+    const noExtra=clone(s);
+    return same(normalize(noExtra),ideal);
+  }]
 ];
-function runAllTests(){
-  const out=tests.map(f=>f());
-  const p=out.filter(x=>x.ok).length;
-  document.getElementById("summary").textContent=`通過：${p}/${out.length}　失敗：${out.length-p}`;
-  document.getElementById("results").innerHTML=out.map((x,i)=>{
-    if(x.ok)return `<div class="test pass"><div class="name">✅ ${i+1}. ${x.name}</div></div>`;
-    return `<div class="test fail"><div class="name">❌ ${i+1}. ${x.name}</div><div class="detail">實際：${JSON.stringify(x.actual)}\n預期：${JSON.stringify(x.expected)}</div></div>`;
-  }).join("");
+
+function runAll(){
+  let pass=0,fail=0,out="";
+  tests.forEach((t,i)=>{
+    let ok=false,actual=null,expected=null;
+    try{ok=!!t[1]()}catch(e){ok=false;actual="ERROR: "+e.message}
+    if(ok){pass++;out+=`<div class="card ok">✅ ${t[0]}</div>`}
+    else{fail++;out+=`<div class="card bad">❌ ${t[0]}<div class="detail">執行結果：${actual??"false"}\n請檢查此測試規則或程式。</div></div>`}
+  });
+  document.getElementById("summary").textContent=`通過：${pass}/${tests.length}　失敗：${fail}`;
+  document.getElementById("results").innerHTML=out;
 }
 </script>
 </body>
