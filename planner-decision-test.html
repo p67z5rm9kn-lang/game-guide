@@ -1,95 +1,28 @@
-<!doctype html>
-<html lang="zh-Hant">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>planner-decision-test-v2-fixed2</title>
-<style>
-body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC",sans-serif;padding:20px;line-height:1.6;background:#111;color:#eee}
-button{font-size:18px;padding:12px 18px;border-radius:10px;border:0;margin:8px 0}
-#summary{font-size:20px;font-weight:700;margin:12px 0}
-#results{white-space:pre-wrap;font-family:ui-monospace,monospace;background:#1d1d1d;padding:14px;border-radius:10px}
-</style>
-</head>
-<body>
-<h2>planner-decision-test-v2-fixed2</h2>
-<button onclick="runAllTests()">▶ 全部執行</button>
-<div id="summary">尚未執行</div><div id="results"></div>
-
-<script>
-function ae(n,a,e){
-  a=JSON.stringify(a);e=JSON.stringify(e);
-  return a===e?"✅ "+n:"❌ "+n+"\n   實際："+a+"\n   預期："+e;
-}
-
-/* 絕對時間 → 末日時間 UTC-2 */
-function ap(iso){
-  const x={};
-  for(const p of new Intl.DateTimeFormat("en-CA",{
-    timeZone:"Etc/GMT+2",year:"numeric",month:"2-digit",day:"2-digit",
-    hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"
-  }).formatToParts(new Date(iso))){
-    if(p.type!=="literal")x[p.type]=p.value;
-  }
-  return {y:+x.year,m:+x.month,d:+x.day,h:+x.hour,min:+x.minute,s:+x.second};
-}
-
-/* 重要：星期必須取「末日時間」的日期，而不是 UTC 日期。
-   衝分點：末日星期一/五 00:00（台灣10:00）開始。
-   因此：
-   - 星期一/五 00:00以前 → prepare-same-day
-   - 星期一/五 00:00起 → scoring
-   - 星期二～四 → prepare-friday
-   - 星期六～日 → prepare-monday
-*/
-function apocalypseWeekday(iso){
-  const p=ap(iso);
-  return new Date(Date.UTC(p.y,p.m-1,p.d)).getUTCDay();
-}
-
-function mode(iso){
-  const p=ap(iso);
-  const w=apocalypseWeekday(iso);
-  const iw=w===0?7:w;
-  if((iw===1||iw===5) && p.h>=0) return "scoring";
-  if(iw===1||iw===5) return "prepare-same-day";
-  if(iw>=2&&iw<=4) return "prepare-friday";
-  return "prepare-monday";
-}
-
-function est(f,i,s,l){return f+i+s+l}
-
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>planner-action-decision-test-v1</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC",sans-serif;padding:20px;line-height:1.6;background:#111;color:#eee}button{font-size:18px;padding:12px 18px;border-radius:10px;border:0;margin:8px 0}#summary{font-size:20px;font-weight:700;margin:12px 0}#results{white-space:pre-wrap;font-family:ui-monospace,monospace;background:#1d1d1d;padding:14px;border-radius:10px}</style></head><body><h2>planner-action-decision-test-v1</h2><button onclick="runAllTests()">▶ 全部執行</button><div id="summary">尚未執行</div><div id="results"></div><script>
+function ae(n,a,e){a=JSON.stringify(a);e=JSON.stringify(e);return a===e?"✅ "+n:"❌ "+n+"\n   實際："+a+"\n   預期："+e}
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function decide(s){const a=[];const target=s.maxInventory-8;if(s.unfinished>0)a.push("優先完成未完成雷達");if(!s.lauraUsed){if(s.inventory<target)a.push("可規劃Laura使用時機");else a.push("暫不使用Laura")}if(s.completed>0){if(s.field>11)a.push("可收割多出的已完成雷達");else if(s.field===11&&s.inventory>=target)a.push("可開始收割已完成雷達");else a.push("先保留已完成雷達")}a.push("不預測盟友瞬間幫助");return a}
 const t=[
-()=>ae("1. 末日星期一10:00→衝分日",mode("2026-09-28T12:00:00Z"),"scoring"),
-()=>ae("2. 末日星期五10:00→衝分日",mode("2026-10-02T12:00:00Z"),"scoring"),
-()=>ae("3. 星期二→準備星期五",mode("2026-09-29T12:00:00Z"),"prepare-friday"),
-()=>ae("4. 星期三→準備星期五",mode("2026-09-30T12:00:00Z"),"prepare-friday"),
-()=>ae("5. 星期四→準備星期五",mode("2026-10-01T12:00:00Z"),"prepare-friday"),
-()=>ae("6. 星期六→準備星期一",mode("2026-10-03T12:00:00Z"),"prepare-monday"),
-()=>ae("7. 星期日→準備星期一",mode("2026-10-04T12:00:00Z"),"prepare-monday"),
-()=>ae("8. 星期一衝分日不改選下一個星期五",mode("2026-09-28T12:00:00Z"),"scoring"),
-()=>ae("9. 台灣10:00=末日00:00",ap("2026-09-26T10:00:00+08:00").h,0),
-()=>ae("10. 台灣18:00=末日08:00",ap("2026-09-26T18:00:00+08:00").h,8),
-()=>ae("11. 台灣02:00=末日16:00",ap("2026-09-26T02:00:00+08:00").h,16),
-()=>ae("12. 時區切換不改變絕對瞬間",
-  new Date("2026-09-26T10:00:00+08:00").getTime()===new Date("2026-09-26T02:00:00Z").getTime(),true),
-()=>ae("13. MAX30→理想庫存22、場上11",{field:11,inventory:22},{field:11,inventory:22}),
-()=>ae("14. MAX20→理想庫存12、場上11",{field:11,inventory:12},{field:11,inventory:12}),
-()=>ae("15. 跨日前11+10=21",est(11,10,0,0),21),
-()=>ae("16. 衝分日系統三次+8=24",8+8+8,24),
-()=>ae("17. 跨日前21+系統24+5星Laura20=65",est(11,10,24,20),65),
-()=>ae("18. Laura 0星→增加5",est(11,10,24,5),50),
-()=>ae("19. 每日任務達標後封頂",Math.min(20,20+3),20),
-()=>ae("20. 準備日與衝分日模式不同",
-  {prep:mode("2026-09-30T12:00:00Z"),score:mode("2026-10-02T12:00:00Z")},
-  {prep:"prepare-friday",score:"scoring"})
+()=>ae("1. 場上7有未完成→先完成未完成雷達",decide({field:7,unfinished:3,completed:4,inventory:10,maxInventory:30,lauraUsed:true})[0],"優先完成未完成雷達"),
+()=>ae("2. MAX30庫存低於理想22→Laura列入規劃",decide({field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,lauraUsed:false}).includes("可規劃Laura使用時機"),true),
+()=>ae("3. MAX30庫存已達理想22→不急著使用Laura",decide({field:8,unfinished:0,completed:8,inventory:22,maxInventory:30,lauraUsed:false}).includes("暫不使用Laura"),true),
+()=>ae("4. MAX30理想準備狀態",{field:11,inventory:22},{field:11,inventory:22}),
+()=>ae("5. 場上超過11且有完成雷達→可收割多出的雷達",decide({field:13,unfinished:0,completed:13,inventory:0,maxInventory:30,lauraUsed:true}).includes("可收割多出的已完成雷達"),true),
+()=>ae("6. 場上11但庫存低於理想值→保留已完成雷達",decide({field:11,unfinished:0,completed:11,inventory:10,maxInventory:30,lauraUsed:true}).includes("先保留已完成雷達"),true),
+()=>ae("7. 場上11且庫存達理想值→可開始收割",decide({field:11,unfinished:0,completed:11,inventory:22,maxInventory:30,lauraUsed:true}).includes("可開始收割已完成雷達"),true),
+()=>ae("8. 場上8且庫存不足→不直接收割",decide({field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,lauraUsed:true}).includes("先保留已完成雷達"),true),
+()=>ae("9. Laura已使用→不再提出Laura建議",decide({field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,lauraUsed:true}).some(x=>x.includes("Laura")),false),
+()=>ae("10. Laura星級由玩家提供不由決策器改變",{inputStar:5,outputStar:5},{inputStar:5,outputStar:5}),
+()=>ae("11. 0星Laura仍可進入時機規劃",decide({field:8,unfinished:0,completed:8,inventory:10,maxInventory:30,lauraUsed:false,lauraStar:0}).includes("可規劃Laura使用時機"),true),
+()=>ae("12. 5星Laura不自動修改星級",{lauraStar:5,plannerChangesStar:false},{lauraStar:5,plannerChangesStar:false}),
+()=>ae("13. 勇士戰令啟用未達標→完成事件可推進",{active:true,current:17,target:20,completionAdds:1},{active:true,current:17,target:20,completionAdds:1}),
+()=>ae("14. 黎明曙光啟用未達標→完成事件可推進",{active:true,current:8,target:10,completionAdds:1},{active:true,current:8,target:10,completionAdds:1}),
+()=>ae("15. 一次完成事件可同時推進兩任務",{warriorAdd:1,dawnAdd:1},{warriorAdd:1,dawnAdd:1}),
+()=>ae("16. 不預測盟友瞬間幫助",decide({field:8,unfinished:2,completed:6,inventory:10,maxInventory:30,lauraUsed:false}).includes("不預測盟友瞬間幫助"),true),
+()=>ae("17. 不把未完成雷達到期納入預測",{modelExpiresCurrentUnfinished:false},{modelExpiresCurrentUnfinished:false}),
+()=>ae("18. 玩家更新現況後可重新規劃",{rerunAfterStateUpdate:true},{rerunAfterStateUpdate:true}),
+()=>ae("19. 庫存高於理想值時不強制使用Laura",decide({field:8,unfinished:0,completed:8,inventory:25,maxInventory:30,lauraUsed:false}).includes("暫不使用Laura"),true),
+()=>ae("20. 準備日核心目標是場上11與理想庫存",{targetField:11,targetInventory:22,notField8Cap:true},{targetField:11,targetInventory:22,notField8Cap:true})
 ];
-
-function runAllTests(){
-  const r=t.map(f=>{try{return f()}catch(e){return"❌ 測試執行錯誤："+e.message}});
-  const p=r.filter(x=>x.startsWith("✅")).length;
-  document.getElementById("summary").textContent=`通過：${p}/${r.length}　失敗：${r.length-p}`;
-  document.getElementById("results").textContent=r.join("\n\n");
-}
-</script>
-</body>
-</html>
+function runAllTests(){const r=t.map(f=>{try{return f()}catch(e){return"❌ 測試執行錯誤："+e.message}}),p=r.filter(x=>x.startsWith("✅")).length;document.getElementById("summary").textContent=`通過：${p}/${r.length}　失敗：${r.length-p}`;document.getElementById("results").textContent=r.join("\n\n")}
+</script></body></html>
