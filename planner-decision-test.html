@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>planner-integration-test-v1</title>
+<title>planner-integration-test-v2-fixed</title>
 <style>
 body{margin:0;background:#111;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:24px}
 h1{font-size:26px;margin:0 0 12px}.desc{color:#bbb;line-height:1.6;margin-bottom:18px}
@@ -12,7 +12,7 @@ button{font-size:18px;font-weight:700;padding:12px 20px;border:0;border-radius:1
 </style>
 </head>
 <body>
-<h1>planner-integration-test-v1</h1>
+<h1>planner-integration-test-v2-fixed</h1>
 <div class="desc">測試 Rule Engine → Planner 的資料流與重新規劃整合。這是測試頁，不是正式 UI。</div>
 <button id="run">▶ 全部執行</button>
 <div id="summary">尚未執行</div>
@@ -39,7 +39,7 @@ add('場上8、庫存22時正確判定只差場上3',()=>{const p=planner(makeSt
 add('完成雷達後場上總數不變',()=>{const s=complete(normalize(makeState({field:11,completed:8,inventory:10})));return s.field===11&&s.unfinished===2&&s.completed===9&&s.inventory===10;});
 add('收割後場上總數減1',()=>{const s=harvest(normalize(makeState({field:11,completed:8,inventory:10})));return s.field===10&&s.completed===7&&s.inventory===10;});
 add('收割造成場上低於8時觸發自動補回',()=>{const s=harvest(normalize(makeState({field:8,completed:8,inventory:5})));return s.field===8&&s.completed===7&&s.inventory===4;});
-add('系統+8正確先補場上再處理庫存',()=>{const s=system8(normalize(makeState({field:6,completed:6,inventory:10,maxInventory:30})));return s.field===8&&s.inventory===8;});
+add('系統+8正確先補場上再處理庫存',()=>{const s=system8(normalize(makeState({field:6,completed:6,inventory:10,maxInventory:30})));return s.field===8&&s.inventory===16;});
 add('系統+8在場上已達8時全部進庫存並受MAX限制',()=>{const s=system8(normalize(makeState({field:8,completed:8,inventory:29,maxInventory:30})));return s.field===8&&s.inventory===30;});
 add('Laura使用與 Rule Engine 資料一致',()=>{const s=laura(normalize(makeState({field:8,completed:8,inventory:5,maxInventory:30,lauraStar:4})));return s.field===11&&s.inventory===22&&s.lauraUsed===true;});
 add('Laura不受MAX限制',()=>{const s=laura(normalize(makeState({field:8,completed:8,inventory:10,maxInventory:20,lauraStar:4})));return s.field===11&&s.inventory===27;});
