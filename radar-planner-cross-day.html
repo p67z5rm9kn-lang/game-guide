@@ -265,13 +265,17 @@ function crossDayPlan(startMs,state){
  const beforeScore=(day===1||day===5)&&h<10;
  const label=ms=>fmt(new Date(ms)).split(" ")[0];
  const add=(ms,kind,n=0)=>actions.push({t:ms,kind,n,day:label(ms)});
- // 固定節點：只建立實際會用到的 10:00、18:00、02:00 與目標點。
+ // 固定節點：系統 +8 永遠是「台灣時間 02:00／10:00／18:00」。
+ // 先以台灣日期建立絕對時間，再交給 fmt() 依顯示模式轉成當地／末日時間。
+ // 這樣不會把 UTC−2 的 00:00／08:00／16:00 誤當成瀏覽器本地的 00:00／08:00／16:00。
  const nodes=[];
+ const tw=new Date(startMs+8*HOUR);
+ const ty=tw.getUTCFullYear(), tm=tw.getUTCMonth(), td=tw.getUTCDate();
  for(let d=0;d<4;d++){
-  const baseDay=new Date(start.getFullYear(),start.getMonth(),start.getDate()+d,0,0,0);
+  const day0=Date.UTC(ty,tm,td+d,0,0,0)-8*HOUR;
   for(const hh of [2,10,18]){
-   const ev=new Date(baseDay.getFullYear(),baseDay.getMonth(),baseDay.getDate(),hh,0,0);
-   if(ev.getTime()>startMs && ev.getTime()<score.getTime()) nodes.push(ev);
+   const evMs=day0+hh*HOUR;
+   if(evMs>startMs && evMs<score.getTime()) nodes.push(new Date(evMs));
   }
  }
  nodes.sort((a,b)=>a-b);
