@@ -89,7 +89,7 @@ function system8(s){
   s=clone(s);
   const fieldAdd=Math.min(8,Math.max(0,8-s.field));
   const inventoryAdd=8-fieldAdd;
-  const room=Math.max(0,s.max-inventory);
+  const room=Math.max(0,s.max-s.inventory);
   if(inventoryAdd>room) return null; // 硬性禁止浪費
   s.field+=fieldAdd;
   s.inventory+=inventoryAdd;
