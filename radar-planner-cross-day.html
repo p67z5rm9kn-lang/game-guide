@@ -2,442 +2,208 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>雷達規劃器 Production v7</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>雷達規劃器 Production v8</title>
 <style>
-body{margin:0;background:#111;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px}
-h1{font-size:25px;margin:0 0 8px}.desc{color:#aaa;line-height:1.55;margin-bottom:18px}
-.card{background:#1d1d1d;border:1px solid #333;border-radius:14px;padding:15px;margin:12px 0}
-h2{font-size:19px;margin:0 0 12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-label{display:block;color:#bbb;font-size:14px;margin-bottom:5px}
-input,select{width:100%;box-sizing:border-box;background:#292929;color:#fff;border:1px solid #444;border-radius:9px;padding:10px;font-size:16px}
-input[type="number"]{text-align:center}
-.state-list,.task-list{display:flex;flex-direction:column;gap:10px}
-.state-row,.task-row,.laura-row{display:flex;align-items:center;gap:10px;min-height:42px}
-.state-label,.task-label{color:#bbb;font-size:15px;flex:1;min-width:0}
-.state-value,.task-value{display:flex;align-items:center;gap:6px;white-space:nowrap}
-.compact-input{width:86px!important;flex:0 0 86px}
-.fixed-target{min-width:22px;text-align:center;color:#ddd;font-weight:700}
-.time-line{display:flex;align-items:center;gap:10px}
-.time-line label{margin:0;white-space:nowrap}
-.time-input{flex:1;min-width:0}
-.time-preview{margin-top:7px;font-size:13px;color:#aaa}
-.switch{position:relative;display:inline-block;width:48px;height:28px;flex:0 0 auto}
-.switch input{opacity:0;width:0;height:0}
-.slider{position:absolute;inset:0;background:#555;border-radius:28px;cursor:pointer;transition:.18s}
-.slider:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.18s}
-.switch input:checked + .slider{background:#1683ff}
-.switch input:checked + .slider:before{transform:translateX(20px)}
-.switch-text{font-size:14px;color:#bbb;min-width:54px}
-.time-segment{display:flex;gap:0;margin-top:8px}
-.time-segment button{flex:1;border-radius:0;background:#292929;border:1px solid #444;color:#bbb;padding:9px 8px;font-size:14px}
-.time-segment button:first-child{border-radius:9px 0 0 9px}
-.time-segment button:last-child{border-radius:0 9px 9px 0}
-.time-segment button.active{background:#1683ff;color:#fff;border-color:#1683ff}
-button{font-size:17px;font-weight:700;padding:12px 18px;border:0;border-radius:11px;background:#1683ff;color:#fff}
-button.secondary{background:#444}
-button:disabled{opacity:.72;cursor:wait}
-button.planning{position:relative;transform:scale(.97);filter:brightness(.88);box-shadow:0 0 0 3px rgba(22,131,255,.18);transition:all .15s ease}
-button.plan-done{background:#168f55;box-shadow:0 0 0 3px rgba(32,216,121,.14)}
-button.planning::before{content:"";display:inline-block;width:13px;height:13px;margin-right:8px;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;vertical-align:-2px;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.row{display:flex;gap:9px;flex-wrap:wrap}.result{font-size:17px;line-height:1.65}
-.good{color:#20d879}.warn{color:#ffc44d}.bad{color:#ff5964}
-.big{font-size:23px;font-weight:800}.muted{color:#aaa}
-ul{margin:8px 0;padding-left:22px}
-@media(max-width:520px){.grid{grid-template-columns:1fr}.state-label,.task-label{font-size:14px}.compact-input{width:78px!important;flex-basis:78px}.state-row,.task-row{gap:7px}}
+*{box-sizing:border-box}
+body{margin:0;background:#0f1115;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:16px;line-height:1.5}
+h1{font-size:25px;margin:0 0 6px}.desc{color:#aeb4bf;margin-bottom:14px;font-size:14px}
+.card{background:#1a1d23;border:1px solid #303640;border-radius:14px;padding:14px;margin:12px 0}
+h2{font-size:18px;margin:0 0 11px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;color:#aeb4bf;font-size:13px;margin-bottom:4px}
+input,select,button{font:inherit}input,select{width:100%;background:#272c34;color:#fff;border:1px solid #414957;border-radius:9px;padding:9px;font-size:16px}
+button{border:0;border-radius:10px;padding:11px 15px;background:#167ee8;color:#fff;font-weight:750;font-size:16px}button.secondary{background:#41464f}button:disabled{opacity:.7}
+.row{display:flex;gap:8px;flex-wrap:wrap}.muted{color:#9ea6b2;font-size:14px}.big{font-size:22px;font-weight:800}.good{color:#25d77b}.warn{color:#ffc44d}.bad{color:#ff626d}
+.result{font-size:16px;line-height:1.65}.result ul,.result ol{margin:7px 0;padding-left:23px}.divider{height:1px;background:#303640;margin:12px 0}
+.badge{display:inline-block;border:1px solid #48505d;border-radius:999px;padding:3px 8px;font-size:12px;color:#cbd1da;margin:2px 4px 2px 0}
+.event{padding:10px 11px;border-left:3px solid #4b7fc4;background:#171a20;border-radius:8px;margin:8px 0}.event b{font-size:15px}
+.stat{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.stat>div{background:#171a20;border-radius:8px;padding:7px 9px}.stat span{color:#9ea6b2;font-size:12px;display:block}.stat strong{font-size:17px}
+#plan{min-width:145px}.donebtn{background:#198a56!important}
+@media(max-width:520px){body{padding:12px}.grid{grid-template-columns:1fr}.stat{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 <h1>雷達規劃器</h1>
-<div class="desc">Production v7｜跨日完整策略規劃／效能修正版：從目前時間一路模擬到下一個衝分日，包含每日任務、系統 +8、勞拉、完成、收割與自動補回。規劃只產生建議，不會直接修改玩家狀態。</div>
+<div class="desc">Production v8｜事件驅動跨日規劃。只沿著 10:00、18:00、02:00 等固定事件逐段計算，不做大量操作排列組合搜尋。</div>
 
 <div class="card">
 <h2>① 目前狀態</h2>
-<div class="state-list">
-<div class="state-row">
-  <div class="state-label">庫存 / 庫存上限</div>
-  <div class="state-value">
-    <input id="inventory" class="compact-input" type="number" min="0" value="22" aria-label="庫存">
-    <span>/</span>
-    <input id="maxInventory" class="compact-input" type="number" min="1" value="30" aria-label="庫存上限">
-  </div>
-</div>
-<div class="state-row">
-  <div class="state-label">場上已完成 / 場上雷達總數</div>
-  <div class="state-value">
-    <input id="completed" class="compact-input" type="number" min="0" value="8" aria-label="場上已完成">
-    <span>/</span>
-    <input id="field" class="compact-input" type="number" min="0" value="11" aria-label="場上雷達總數">
-  </div>
-</div>
-<div class="state-row">
-  <div class="state-label">勞拉</div>
-  <div class="state-value">
-    <span id="lauraAvailableText" class="switch-text">無</span>
-    <label class="switch" aria-label="是否有勞拉">
-      <input id="lauraAvailable" type="checkbox">
-      <span class="slider"></span>
-    </label>
-  </div>
-</div>
-<div id="lauraDetailRow" class="state-row" style="display:none">
-  <div class="state-label">星級 / 今日狀態</div>
-  <div class="state-value">
-    <select id="lauraStar" class="compact-input" aria-label="勞拉星級">
-      <option value="0">0 星</option><option value="1">1 星</option><option value="2">2 星</option>
-      <option value="3">3 星</option><option value="4" selected>4 星</option><option value="5">5 星</option>
-    </select>
-    <span id="lauraUsedText" class="switch-text">未點擊</span>
-    <label class="switch" aria-label="勞拉今日狀態">
-      <input id="lauraUsed" type="checkbox">
-      <span class="slider"></span>
-    </label>
-  </div>
-</div>
+<div class="grid">
+<div><label>庫存上限</label><input id="maxInventory" type="number" min="1" value="30"></div>
+<div><label>庫存</label><input id="inventory" type="number" min="0" value="22"></div>
+<div><label>場上雷達總數</label><input id="field" type="number" min="0" value="11"></div>
+<div><label>場上已完成</label><input id="completed" type="number" min="0" value="8"></div>
+<div><label>勞拉</label><select id="lauraHas"><option value="false">無</option><option value="true" selected>有</option></select></div>
+<div id="lauraStarWrap"><label>勞拉星級</label><select id="lauraStar"><option value="0">0 星</option><option value="1">1 星</option><option value="2">2 星</option><option value="3">3 星</option><option value="4" selected>4 星</option><option value="5">5 星</option></select></div>
+<div id="lauraUsedWrap"><label>勞拉今日狀態</label><select id="lauraUsed"><option value="false">未點擊</option><option value="true">已點擊</option></select></div>
+<div id="treasureWrap"><label>勞拉寶箱</label><input id="treasure" type="number" min="0" max="10" value="0"></div>
 </div>
 </div>
 
 <div class="card">
-<h2>② 每日任務</h2>
-<div class="task-list">
-<div class="task-row">
-  <div class="task-label">勇士戰令</div>
-  <label class="switch">
-    <input id="warActive" type="checkbox">
-    <span class="slider"></span>
-  </label>
-  <span id="warActiveText" class="switch-text">未啟用</span>
-  <div class="task-value">
-    <input id="warCurrent" class="compact-input" type="number" min="0" value="0" placeholder="—" aria-label="勇士戰令目前進度">
-    <span>/</span><span class="fixed-target">10</span>
-  </div>
+<h2>② 今日任務</h2>
+<div class="grid">
+<div><label>勇士戰令</label><select id="warActive"><option value="false">未啟用</option><option value="true" selected>啟用</option></select></div>
+<div><label>目前進度</label><input id="warCurrent" type="number" min="0" value="0"></div>
+<div><label>黎明曙光</label><select id="dawnActive"><option value="false">未啟用</option><option value="true" selected>啟用</option></select></div>
+<div><label>目前進度</label><input id="dawnCurrent" type="number" min="0" value="0"></div>
 </div>
-<div class="task-row">
-  <div class="task-label">黎明曙光</div>
-  <label class="switch">
-    <input id="dawnActive" type="checkbox">
-    <span class="slider"></span>
-  </label>
-  <span id="dawnActiveText" class="switch-text">未啟用</span>
-  <div class="task-value">
-    <input id="dawnCurrent" class="compact-input" type="number" min="0" value="0" placeholder="—" aria-label="黎明曙光目前進度">
-    <span>/</span><span class="fixed-target">20</span>
-  </div>
-</div>
-<div id="treasureRow" class="task-row" style="display:none">
-  <div class="task-label">勞拉寶箱</div>
-  <div class="task-value">
-    <input id="treasure" class="compact-input" type="number" min="0" max="10" value="0" aria-label="勞拉寶箱目前進度">
-    <span>/</span><span class="fixed-target">10</span>
-  </div>
-</div>
-</div>
+<div class="muted" style="margin-top:8px">任務目標固定：勇士戰令 10、黎明曙光 20。未啟用時不納入規劃。</div>
 </div>
 
 <div class="card">
-<h2>③ 規劃時間</h2>
-<div class="time-line">
-  <label for="baseTime">計算基準時間</label>
-  <input id="baseTime" class="time-input" type="datetime-local">
+<h2>③ 計算基準時間</h2>
+<div class="grid">
+<div><label>時間</label><input id="baseTime" type="datetime-local"></div>
+<div><label>時間顯示</label><select id="timeMode"><option value="local">當地時間</option><option value="doom">末日時間（UTC−2）</option></select></div>
 </div>
-<div id="baseTimePreview" class="time-preview">尚未設定</div>
-<input id="timeMode" type="hidden" value="local">
-<div class="time-segment">
-  <button type="button" id="localTimeBtn" class="active">當地時間</button>
-  <button type="button" id="doomTimeBtn">末日時間（UTC−2）</button>
-</div>
-<div id="timeInfo" class="muted" style="margin-top:8px">尚未規劃</div>
-<div class="row" style="margin-top:12px">
-<button id="now">使用現在時間</button>
-<button id="plan">開始規劃</button>
-</div>
+<div id="timeInfo" class="muted" style="margin-top:8px">—</div>
+<div class="row" style="margin-top:11px"><button id="now" class="secondary">使用現在時間</button><button id="plan">開始規劃</button></div>
 </div>
 
-<div id="output" class="card">
-<h2>規劃結果</h2>
-<div class="muted">尚未執行規劃。</div>
-</div>
+<div id="output" class="card"><h2>④ 規劃結果</h2><div class="muted">尚未執行規劃。</div></div>
 
 <script>
 const $=id=>document.getElementById(id);
+const DAY=86400000;
+const LAURA={0:5,1:10,2:10,3:10,4:20,5:20};
+const WD=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
 function clone(x){return JSON.parse(JSON.stringify(x));}
-function makeState(){
- return {
-  field:+$("field").value, completed:+$("completed").value,
-  inventory:+$("inventory").value, maxInventory:+$("maxInventory").value,
-  lauraAvailable:$("lauraAvailable").checked,
-  lauraStar:$("lauraAvailable").checked ? +$("lauraStar").value : 0,
-  lauraUsed:$("lauraAvailable").checked && $("lauraUsed").checked,
-  treasure:Math.min(10,Math.max(0,+$("treasure").value)),
-  tasks:{
-   warriors:{active:$("warActive").checked,target:10,current:+$("warCurrent").value},
-   dawn:{active:$("dawnActive").checked,target:20,current:+$("dawnCurrent").value}
-  }
- };
-}
-function normalize(s){s=clone(s);s.unfinished=s.field-s.completed;return s;}
-function ideal(max){return {field:11,inventory:max-8};}
-const PLANNER_LIMITS={maxEvents:32,maxActions:240,maxLoopGuard:120};
-function planner(s,baseMs){
- s=normalize(s);
- const target=ideal(s.maxInventory);
- return {target,done:s.field>=target.field&&s.inventory>=target.inventory,needsField:Math.max(0,target.field-s.field),needsInventory:Math.max(0,target.inventory-s.inventory),score:nextScoring(baseMs)};
-}
-function requiredToday(s){
- const req=[];
- for(const k of ["warriors","dawn"]){
-  const t=s.tasks[k];
-  if(t&&t.active) req.push(Math.max(0,t.target-t.current));
- }
- return req.length?Math.max(...req):0;
-}
-function futureTaskReset(s){
- s=clone(s);
- s.lauraUsed=false;s.treasure=0;
- s.tasks={warriors:{active:true,target:10,current:0},dawn:{active:true,target:20,current:0}};
- return s;
-}
-function system8At(s){return system8(s);}
-function simulateTaskGoal(s,required,actions,t,dayLabel){
- let guard=0;
- while(required>0&&guard++<PLANNER_LIMITS.maxLoopGuard){
-  if(s.unfinished>0){
-   const n=Math.min(required,s.unfinished);s=complete(s,n);actions.push({t,kind:"complete",n,day:dayLabel});required-=n;continue;
-  }
-  if(s.completed>0){
-   const n=Math.min(s.completed,Math.max(1,s.field-7));const beforeInv=s.inventory;s=harvest(s,n);actions.push({t,kind:"harvest",n,inventoryUsed:beforeInv-s.inventory,day:dayLabel});continue;
-  }
-  break;
- }
- return {state:s,remaining:required};
-}
-function crossDayPlan(startMs,state){
- const score=nextScoring(startMs);
- let s=normalize(state), actions=[], cursor=startMs;
- const dayLabel=ms=>fmt(ms).split(" ")[0];
- let currentDayKey=gameDayKey(startMs);
- let nextReset=dayEnd(startMs);
- // Current day: respect the user's actual task switches/progress.
- let req=requiredToday(s);
- let sim=simulateTaskGoal(s,req,actions,cursor,dayLabel(cursor)); s=sim.state;
- // Known future system +8 events.
- const events=[];
- const utc2=new Date(startMs-2*HOUR);
- const baseUtc=Date.UTC(utc2.getUTCFullYear(),utc2.getUTCMonth(),utc2.getUTCDate(),0,0,0);
- for(let i=-1;i<8;i++) for(const h of [0,8,16]){
-  const t=baseUtc+i*DAY+h*HOUR;
-  if(t>startMs&&t<score) events.push(t);
- }
- events.sort((a,b)=>a-b);
- let allTimes=[...events,score].sort((a,b)=>a-b);
- for(const t of allTimes.slice(0,PLANNER_LIMITS.maxEvents)){
-  while(nextReset<=t && nextReset<score){
-   s=futureTaskReset(s);currentDayKey=gameDayKey(nextReset);actions.push({t:nextReset,kind:"reset",day:dayLabel(nextReset)});
-   // Future days assume both daily tasks are mandatory. Use Laura once per day.
-   if(s.lauraAvailable===undefined){s.lauraAvailable=true;}
-   if(!s.lauraUsed){s=laura(s);actions.push({t:nextReset,kind:"laura",day:dayLabel(nextReset)});}
-   req=20;sim=simulateTaskGoal(s,req,actions,nextReset,dayLabel(nextReset));s=sim.state;
-   if(actions.length>PLANNER_LIMITS.maxActions) return {score,state:s,actions:actions.slice(0,PLANNER_LIMITS.maxActions),taskOK:false,target:ideal(s.maxInventory),limited:true};
-   nextReset+=DAY;
-  }
-  if(t>=score) break;
-  s=system8At(s);actions.push({t,kind:"system8",day:dayLabel(t)});
-  // After a known source arrives, continue satisfying the current/future day's mandatory task.
-  const remaining=requiredToday(s);
-  if(remaining>0){sim=simulateTaskGoal(s,remaining,actions,t,dayLabel(t));s=sim.state;}
- }
- // Final scoring checkpoint: aim for field 11 / inventory MAX without inventing resources.
- if(s.field>11&&s.completed>0){
-  const n=Math.min(s.completed,s.field-11);if(n>0){s=harvest(s,n);actions.push({t:score,kind:"harvest-final",n,day:dayLabel(score)});}
- }
- const taskOK=requiredToday(s)===0;
- return {score,state:s,actions,taskOK,target:ideal(s.maxInventory)};
-}
-function gameDayKey(ms){return new Date(ms-2*HOUR).toISOString().slice(0,10);}
-function dayEnd(ms){const p=taiwanParts(ms);return Date.UTC(p.y,p.m-1,p.d,2,0,0);}
-function taiwanParts(ms){const d=new Date(ms+8*HOUR);return {y:d.getUTCFullYear(),m:d.getUTCMonth()+1,d:d.getUTCDate(),h:d.getUTCHours(),mi:d.getUTCMinutes()};}
-function weekday(ms){return new Date(ms+8*HOUR).getUTCDay();}
-function complete(s,n=1){
- s=clone(s);
- for(let i=0;i<n&&s.unfinished>0;i++){
-  s.unfinished--;s.completed++;
-  for(const k of ["warriors","dawn"]){
-   const t=s.tasks[k];if(t&&t.active)t.current=Math.min(t.target,t.current+1);
-  }
- }
- return s;
-}
-function harvest(s,n=1){
- s=clone(s);
- for(let i=0;i<n&&s.completed>0;i++){
-  s.completed--;s.field--;
-  if(s.lauraStar===5&&s.treasure<10)s.treasure++;
-  if(s.field<8&&s.inventory>0){
-   const add=Math.min(8-s.field,s.inventory);
-   s.field+=add;s.inventory-=add;
-  }
- }
- s.unfinished=s.field-s.completed;return s;
-}
-function system8(s){
- s=clone(s);
- const fieldAdd=Math.min(8,Math.max(0,8-s.field));
- s.field+=fieldAdd;
- const rem=8-fieldAdd;
- s.inventory+=Math.min(rem,Math.max(0,s.maxInventory-s.inventory));
- s.unfinished=s.field-s.completed;return s;
-}
-function laura(s){
- s=clone(s);if(s.lauraUsed)return s;
- const amount={0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar];
- if(s.field<8){
-  const add=Math.min(8-s.field,amount);
-  s.field+=add;s.inventory+=amount-add;
- }else{
-  s.field+=3;s.inventory+=amount-3;
- }
- s.lauraUsed=true;s.unfinished=s.field-s.completed;return s;
-}
-function validate(s){
- const e=[];
- if(s.maxInventory<=0)e.push("庫存上限 必須大於 0");
- if(s.inventory<0)e.push("庫存不可小於 0");
- if(s.field<0)e.push("場上雷達總數不可小於 0");
- if(s.completed<0)e.push("已完成數不可小於 0");
- if(s.completed>s.field)e.push("已完成數不可大於場上總數");
- for(const k of ["warriors","dawn"]){
-  const t=s.tasks[k];
-  if(t.target<0||t.current<0)e.push("每日任務數值不可小於 0");
- }
- return e;
-}
-function nextScoring(base){
- const d=new Date(base);
- const h=d.getHours(), day=d.getDay();
- const before10=h<10;
- if((day===1||day===5)&&before10)return new Date(d.getFullYear(),d.getMonth(),d.getDate(),10,0,0);
- for(let i=0;i<14;i++){
-  const x=new Date(d.getTime()+i*86400000);
-  if((x.getDay()===1||x.getDay()===5) && (i>0||h>=10))return new Date(x.getFullYear(),x.getMonth(),x.getDate(),10,0,0);
- }
-}
-function modeText(base){
- const d=new Date(base), day=d.getDay(), h=d.getHours();
- if((day===1||day===5)&&h>=10)return "衝分日";
- if((day===1||day===5)&&h<10)return "衝分日前準備";
- return "準備期";
-}
+function pad(n){return String(n).padStart(2,'0');}
 function fmt(d){
- const mode=$("timeMode").value;
- const zone=mode==="doom"?"Etc/GMT+2":undefined;
- const parts=new Intl.DateTimeFormat("zh-TW",{timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",weekday:"short",hour12:false}).formatToParts(d);
- const get=k=>parts.find(x=>x.type===k)?.value||"";
- const weekdayMap={"星期日":"日","星期一":"一","星期二":"二","星期三":"三","星期四":"四","星期五":"五","星期六":"六"};
- return `${get("year")}/${get("month")}/${get("day")}（${weekdayMap[get("weekday")]||get("weekday").replace("星期","")}） ${get("hour")}:${get("minute")}`;
+ const tz=$("timeMode").value==='doom'?'Etc/GMT+2':Intl.DateTimeFormat().resolvedOptions().timeZone;
+ return new Intl.DateTimeFormat('zh-TW',{timeZone:tz,hour12:false,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short',hour:'2-digit',minute:'2-digit'}).format(d);
 }
-function updateTimePreview(){
- const base=$("baseTime").value?new Date($("baseTime").value):null;
- $("baseTimePreview").textContent=base?`顯示：${fmt(base)}`:"尚未設定";
+function setNow(){const d=new Date();$("baseTime").value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;updateTimeInfo();}
+function makeState(){
+ const has=$("lauraHas").value==='true';
+ const star=+$("lauraStar").value;
+ return {field:+$("field").value,completed:+$("completed").value,inventory:+$("inventory").value,maxInventory:+$("maxInventory").value,
+  lauraHas:has,lauraStar:star,lauraUsed:has&&$("lauraUsed").value==='true',treasure:Math.min(10,Math.max(0,+$("treasure").value||0)),
+  tasks:{warriors:{active:$("warActive").value==='true',target:10,current:Math.max(0,+$("warCurrent").value||0)},dawn:{active:$("dawnActive").value==='true',target:20,current:Math.max(0,+$("dawnCurrent").value||0)}}};
 }
-function setNow(){
- const d=new Date(), pad=n=>String(n).padStart(2,"0");
- $("baseTime").value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+function normalize(s){s=clone(s);s.field=Math.max(0,s.field);s.completed=Math.max(0,Math.min(s.completed,s.field));s.unfinished=s.field-s.completed;return s;}
+function validate(s){
+ const e=[];if(s.maxInventory<=0)e.push('庫存上限必須大於 0');if(s.inventory<0)e.push('庫存不可小於 0');if(s.field<0)e.push('場上雷達總數不可小於 0');if(s.completed<0)e.push('場上已完成不可小於 0');if(s.completed>s.field)e.push('場上已完成不可大於場上雷達總數');
+ for(const k of ['warriors','dawn'])if(s.tasks[k].current<0)e.push('任務目前進度不可小於 0');
+ if(s.treasure<0)e.push('勞拉寶箱不可小於 0');return e;
 }
-const planInputs=["maxInventory","inventory","field","completed","lauraAvailable","lauraStar","lauraUsed","treasure","warActive","warCurrent","dawnActive","dawnCurrent","baseTime"];
-function markPlanDirty(){
-  const btn=$("plan");
-  if(btn.classList.contains("planning")) return;
-  btn.classList.remove("plan-done");
-  btn.textContent="開始規劃";
+function complete(s,n){s=clone(s);n=Math.min(Math.max(0,n),s.unfinished);s.unfinished-=n;s.completed+=n;for(const k of ['warriors','dawn']){const t=s.tasks[k];if(t.active)t.current=Math.min(t.target,t.current+n);}return s;}
+function harvest(s,n){s=clone(s);let got=0;for(let i=0;i<n&&s.completed>0;i++){s.completed--;s.field--;got++;if(s.lauraHas&&s.lauraStar===5)s.treasure=Math.min(10,s.treasure+1);if(s.field<8&&s.inventory>0){const add=Math.min(8-s.field,s.inventory);s.field+=add;s.inventory-=add;}}s.unfinished=s.field-s.completed;return {s,got};}
+function system8(s){s=clone(s);const toField=Math.min(8,Math.max(0,8-s.field));s.field+=toField;const rem=8-toField;s.inventory+=Math.min(rem,Math.max(0,s.maxInventory-s.inventory));s.unfinished=s.field-s.completed;return s;}
+function useLaura(s){s=clone(s);if(!s.lauraHas||s.lauraUsed)return s;const amount=LAURA[s.lauraStar];if(s.field<8){const a=Math.min(8-s.field,amount);s.field+=a;s.inventory+=amount-a;}else{s.field+=3;s.inventory+=amount-3;}s.lauraUsed=true;s.unfinished=s.field-s.completed;return s;}
+function resetDay(s){s=clone();s.lauraUsed=false;s.treasure=0;for(const k of ['warriors','dawn'])if(s.tasks[k].active)s.tasks[k].current=0;return s;}
+function localBoundary(d){const x=new Date(d);x.setHours(10,0,0,0);return x;}
+function nextScore(base){const d=new Date(base),day=d.getDay(),h=d.getHours();if((day===1||day===5)&&h<10)return localBoundary(d);for(let i=1;i<=7;i++){const x=new Date(d.getTime()+i*DAY);if(x.getDay()===1||x.getDay()===5)return localBoundary(x);}return localBoundary(new Date(d.getTime()+7*DAY));}
+function eventTimes(base,target){const out=[];let t=localBoundary(base);if(t<=base)t=new Date(t.getTime()+DAY);while(t<target){out.push({time:new Date(t),type:'10'});const a=new Date(t);a.setHours(18,0,0,0);if(a>base&&a<target)out.push({time:a,type:'18'});const b=new Date(t.getTime()+DAY);b.setHours(2,0,0,0);if(b>base&&b<target)out.push({time:b,type:'02'});t=new Date(t.getTime()+DAY);}out.sort((a,b)=>a.time-b.time);return out;}
+function dayStartKey(d){const x=new Date(d);if(x.getHours()<10)x.setDate(x.getDate()-1);x.setHours(10,0,0,0);return x.toISOString().slice(0,10);}
+function requiredToday(s){let r=0;for(const k of ['warriors','dawn']){const t=s.tasks[k];if(t.active)r=Math.max(r,Math.max(0,t.target-t.current));}return r;}
+function futureTasksState(s){s=clone(s);for(const k of ['warriors','dawn'])s.tasks[k]={active:true,target:k==='warriors'?10:20,current:0};return s;}
+function taskNeedForFuture(){return 20;}
+
+/* v8 的核心：不枚舉「完成/收割/勞拉」的所有排列。
+   每個固定事件只做一次必要性判斷：
+   1) 先處理當日必須完成的任務；
+   2) 若未完成雷達不足，只有在必要時才收割已完成雷達，把庫存自動補回場上；
+   3) 再處理系統 +8；
+   4) 每日只使用一次勞拉，且只在確有助於跨日資源/任務時安排；
+   5) 到衝分日 10:00 前，停止為任務做額外消耗，保留資源。
+   因此計算量只與「事件數」成正比，而不是操作排列數。 */
+function ensureUnfinished(s,need,actions){
+ s=clone(s);if(s.unfinished>=need)return s;
+ let shortage=need-s.unfinished;
+ // 每次 harvest 1 個已完成雷達，若場上跌到 7，會自動從庫存補回 1 個。
+ // 因而最多只需要把場上降到 7 再補回，重複轉換庫存。
+ const possible=s.completed;
+ const h=Math.min(shortage,possible);
+ if(h>0){const r=harvest(s,h);s=r.s;actions.push(`必要收割 ${h} 個已完成雷達，利用自動補回把庫存轉回場上，取得新的未完成雷達。`);}
+ return s;
 }
-function syncTaskUI(){
-  const war=$("warActive").checked, dawn=$("dawnActive").checked;
-  $("warActiveText").textContent=war?"啟用":"未啟用";
-  $("dawnActiveText").textContent=dawn?"啟用":"未啟用";
-  $("warCurrent").disabled=!war; $("dawnCurrent").disabled=!dawn;
-  $("warCurrent").placeholder=war?"目前":"—"; $("dawnCurrent").placeholder=dawn?"目前":"—";
-}
-function syncLauraUI(){
-  const available=$("lauraAvailable").checked;
-  const used=$("lauraUsed").checked, star=+$("lauraStar").value;
-  $("lauraAvailableText").textContent=available?"有":"無";
-  $("lauraDetailRow").style.display=available?"flex":"none";
-  $("lauraStar").disabled=!available;
-  $("lauraUsed").disabled=!available;
-  $("lauraUsedText").textContent=used?"已點擊":"未點擊";
-  $("treasureRow").style.display=available && star===5?"flex":"none";
-  $("treasure").disabled=!(available && star===5);
-}
-for(const id of planInputs){
-  const el=$(id);
-  el.addEventListener("input",()=>{syncTaskUI();syncLauraUI();updateTimePreview();markPlanDirty();});
-  el.addEventListener("change",()=>{syncTaskUI();syncLauraUI();updateTimePreview();markPlanDirty();});
-}
-$("now").onclick=()=>{setNow();updateTimePreview();markPlanDirty();};
-$("localTimeBtn").onclick=()=>{ $("timeMode").value="local"; $("localTimeBtn").classList.add("active"); $("doomTimeBtn").classList.remove("active"); updateTimePreview(); markPlanDirty(); };
-$("doomTimeBtn").onclick=()=>{ $("timeMode").value="doom"; $("doomTimeBtn").classList.add("active"); $("localTimeBtn").classList.remove("active"); updateTimePreview(); markPlanDirty(); };
-$("plan").onclick=async()=>{
- const planBtn=$("plan");
- planBtn.disabled=true;
- planBtn.classList.add("planning");
- planBtn.dataset.originalText=planBtn.textContent;
- planBtn.textContent="規劃中…";
- const s=makeState(), errors=validate(s);
- if(errors.length){$("output").innerHTML=`<h2>規劃結果</h2><div class="bad">❌ 無法規劃</div><ul>${errors.map(e=>`<li>${e}</li>`).join("")}</ul>`; planBtn.disabled=false; planBtn.classList.remove("planning"); planBtn.textContent="規劃失敗，請檢查輸入"; setTimeout(()=>{planBtn.textContent=planBtn.dataset.originalText||"開始規劃";},1400); return;}
- const base=$("baseTime").value?new Date($("baseTime").value):new Date();
- await new Promise(resolve=>setTimeout(resolve,0));
- const p=planner(s,base.getTime()), mode=modeText(base), score=nextScoring(base);
- let html=`<h2>規劃結果</h2>`;
- html+=`<div class="big">${mode}</div>`;
- html+=`<div class="muted">計算基準：${fmt(base)}<br>下一個衝分時間：${fmt(score)}</div>`;
- html+=`<hr style="border:0;border-top:1px solid #333;margin:14px 0">`;
- html+=`<div><b>理想狀態</b></div><div class="result">場上：<b>${p.target.field}</b> 個<br>庫存：<b>${p.target.inventory}</b> 個</div>`;
- if(p.done){
-  html+=`<div class="good big" style="margin-top:12px">✅ 目前已達理想準備狀態</div>`;
- }else{
-  html+=`<div class="warn big" style="margin-top:12px">⏳ 目前尚未達理想準備狀態</div>`;
-  html+=`<div class="result" style="margin-top:8px">目前還需要：場上 ${p.needsField} 個、庫存 ${p.needsInventory} 個</div>`;
+function doRequiredCompletions(s,need,actions){s=ensureUnfinished(s,need,actions);const n=Math.min(need,s.unfinished);if(n>0){s=complete(s,n);actions.push(`完成 ${n} 個未完成雷達，推進今日任務。`);}return {s,done:n};}
+function maybeLaura(s,need,actions,reason){if(!s.lauraHas||s.lauraUsed)return s;const before=s.field+s.inventory;s=useLaura(s);const gain=s.field+s.inventory-before;if(gain>0){actions.push(`使用勞拉（${s.lauraStar} 星，+${gain} 個），${reason}`);}return s;}
+function simulate(base,initial,target){
+ let s=normalize(initial), now=new Date(base), actions=[], timeline=[];
+ let currentKey=dayStartKey(now), isFutureDay=false;
+ // 如果目前不是衝分日，當日任務使用玩家實際輸入；跨過 10:00 後，後續日期全部視為 10/20 必做。
+ const events=eventTimes(now,target);
+ let dayIndex=0;
+ function push(label,items){timeline.push({label,time:new Date(now),items:items.slice(),state:clone(s)});}
+ function prepareCurrentDay(){
+  const need=requiredToday(s);if(need>0){const r=doRequiredCompletions(s,need,actions);s=r.s;if(r.done<need)actions.push(`目前場上可完成數不足，剩餘 ${need-r.done} 個需等後續雷達來源。`);}
  }
- if(mode==="衝分日"){
-  const lauraAmount=s.lauraAvailable?({0:5,1:10,2:10,3:10,4:20,5:20}[s.lauraStar]):0;
-  const estimate=s.field+s.inventory+24+lauraAmount;
-  html+=`<div class="card" style="margin-top:14px"><div class="big">🏆 本次衝分日預計可收割：${estimate} 個</div><div class="muted">基準：目前場上＋目前庫存＋本次衝分日系統 +24＋勞拉 ${lauraAmount}<br>不預設盟友瞬間幫助；自動補回不視為新增資源。</div></div>`;
-  html+=`<div class="result"><b>衝分日操作方向</b><ul><li>完成可完成的未完成雷達</li><li>收割已完成雷達</li><li>不需要為下一個衝分日保留資源</li></ul></div>`;
+ // 事件驅動主迴圈：基準時刻先處理一次「必要任務」，之後只在固定事件點重算。
+ const beforeScore=((new Date(now).getDay()===1||new Date(now).getDay()===5)&&new Date(now).getHours()<10);
+ if(beforeScore){
+  // 同日 10:00 就是目標點，不在此時預先消耗可收割資源。
  }else{
-  const cp=crossDayPlan(base.getTime(),s);
-  const grouped={};
-  for(const a of cp.actions){const key=a.day||fmt(a.t);(grouped[key]??=[]).push(a);}
-  html+=`<div class="result"><b>跨日完整規劃</b>`;
-  html+=`<div class="muted" style="margin-top:6px">不是只計算下一次 +8，而是一路模擬到 ${fmt(cp.score)}；未來完整遊戲日自動假設勇士戰令 10、黎明曙光 20 都要完成。</div>`;
-  const entries=Object.entries(grouped);
-  if(!entries.length){html+=`<div class="muted" style="margin-top:10px">目前沒有需要安排的跨日操作。</div>`;}
-  for(const [day,acts] of entries){
-   html+=`<div style="margin-top:12px"><b>📅 ${day}</b><ul>`;
-   for(const a of acts){
-    if(a.kind==="reset") html+=`<li><b>${fmt(a.t)}｜10:00 新一天</b>：每日任務重置 0/10、0/20；勞拉重新可點擊；勞拉寶箱歸零。</li>`;
-    else if(a.kind==="laura") html+=`<li><b>${fmt(a.t)}｜點擊勞拉</b>：使用今日勞拉資源，支援後續任務完成與資源準備。</li>`;
-    else if(a.kind==="system8") html+=`<li><b>${fmt(a.t)}｜系統 +8</b>：新增 8 個雷達，依場上 8 個優先、剩餘進庫存。</li>`;
-    else if(a.kind==="complete") html+=`<li><b>${fmt(a.t)}｜完成雷達 ×${a.n}</b>：同時推進啟用中的每日任務。</li>`;
-    else if(a.kind==="harvest") html+=`<li><b>${fmt(a.t)}｜收割 ×${a.n}</b>：需要時用已完成雷達觸發場上自動補回，取得新的未完成雷達。</li>`;
-    else if(a.kind==="harvest-final") html+=`<li><b>${fmt(a.t)}｜衝分前整理：收割 ×${a.n}</b>，將場上整理回理想 11 個。</li>`;
+  prepareCurrentDay();
+ }
+ let cursor=now;
+ for(const ev of events){
+  cursor=ev.time;
+  const dayKey=dayStartKey(cursor);
+  const changed=dayKey!==currentKey;
+  if(changed){s=resetDay(s);s=futureTasksState(s);currentKey=dayKey;dayIndex++;actions=[];}
+  const localActions=[];
+  if(ev.type==='10'){
+   // 10:00：新的一天先結算/重置，再發系統 +8。
+   s=system8(s);localActions.push('10:00 系統 +8。');
+   if(s.lauraHas&&!s.lauraUsed){
+    // 未來日：若任務需要 20 個，優先讓新增雷達在本日可用。
+    s=maybeLaura(s,20,localActions,'讓今日任務有足夠的新雷達來源。');
    }
-   html+=`</ul></div>`;
+   const need=requiredToday(s);
+   if(need>0){const r=doRequiredCompletions(s,need,localActions);s=r.s;if(r.done<need)localActions.push(`目前仍不足 ${need-r.done} 個未完成雷達，保留至下一個已知來源。`);}
+  }else if(ev.type==='18'){
+   // 18:00：若今天仍欠任務，才動用既有資源；否則不做額外操作。
+   const need=requiredToday(s);if(need>0){const r=doRequiredCompletions(s,need,localActions);s=r.s;if(r.done<need)localActions.push(`今日任務尚欠 ${need-r.done} 個，等待 02:00/其他已知來源。`);}else localActions.push('今日任務已達標，保留資源。');
+  }else if(ev.type==='02'){
+   s=system8(s);localActions.push('02:00 系統 +8。');
+   const need=requiredToday(s);if(need>0){const r=doRequiredCompletions(s,need,localActions);s=r.s;if(r.done<need)localActions.push(`今日任務仍欠 ${need-r.done} 個，將於後續事件再檢查。`);}else localActions.push('今日任務已達標，保留資源。');
   }
-  const finalOK=cp.state.field>=cp.target.field&&cp.state.inventory>=cp.target.inventory;
-  if(cp.limited){html+=`<div class="warn" style="margin-top:10px"><b>⚠️ 本次規劃已達安全計算上限，為避免手機長時間卡住，已停止繼續搜尋。請先依目前結果重新規劃。</b></div>`;}
-  html+=`<div class="${finalOK?"good":"warn"}" style="margin-top:10px"><b>${finalOK?"預計可在衝分前達到理想準備狀態。":"目前已知資源模擬後，仍未能保證達到理想準備狀態；請依序執行並在新狀態下重新規劃。"}</b></div>`;
-  html+=`<div class="muted" style="margin-top:10px">模擬終點：場上 ${cp.state.field}、已完成 ${cp.state.completed}、未完成 ${cp.state.unfinished}、庫存 ${cp.state.inventory}。不預設盟友瞬間幫助，也不預測未完成雷達提前消失。</div>`;
-  html+=`</div>`;
- } $("output").innerHTML=html;
- $("timeInfo").textContent=`${mode}｜基準 ${fmt(base)}`;
- planBtn.classList.remove("planning");
- planBtn.disabled=false;
- planBtn.classList.add("plan-done");
- planBtn.textContent="✓ 已完成規劃";
+  timeline.push({time:new Date(cursor),label:ev.type==='10'?'10:00｜新日開始':ev.type==='18'?'18:00｜晚間事件':'02:00｜凌晨事件',items:localActions,state:clone(s)});
+ }
+ // 到目標衝分日 10:00：先套用該時刻的系統 +8，再安排尚未使用的勞拉。
+ // 這兩者都屬於衝分日可收割資源；因此時間軸本身不提前消耗它們。
+ let scoring=system8(clone(s));
+ if(scoring.lauraHas&&!scoring.lauraUsed)scoring=useLaura(scoring);
+ const ideal={field:11,inventory:scoring.maxInventory};
+ return {state:scoring,timeline,target:ideal,estimatedHarvest:scoring.field+scoring.inventory+16,actions,score:target};
+}
+function dayName(d){return WD[d.getDay()];}
+function render(s,sim,base){
+ let html='<h2>④ 規劃結果</h2>';
+ const score=sim.score;html+=`<div class="big">🎯 目標：${dayName(score)} 10:00 衝分</div>`;
+ html+=`<div class="muted">計算基準：${fmt(base)}<br>目標時間：${fmt(score)}</div>`;
+ html+='<div class="divider"></div>';
+ html+=`<div><b>理想狀態</b></div><div class="stat"><div><span>場上</span><strong>${sim.target.field}</strong></div><div><span>庫存</span><strong>${sim.target.inventory}</strong></div></div>`;
+ html+=`<div style="margin-top:9px"><b>預計可達</b></div><div class="stat"><div><span>場上</span><strong>${sim.state.field}</strong></div><div><span>庫存</span><strong>${sim.state.inventory}</strong></div></div>`;
+ const ok=sim.state.field>=sim.target.field&&sim.state.inventory>=sim.target.inventory;
+ html+=`<div class="${ok?'good':'warn'} big" style="margin-top:10px">${ok?'✓ 預計可達理想準備狀態':'⏳ 依目前已知來源，先維持可達狀態並於下一個事件重新檢查'}</div>`;
+ html+=`<div class="card" style="margin:12px 0 0"><div class="big">🏆 本次衝分日預計可收割：${sim.estimatedHarvest} 個</div><div class="muted">以目前資源＋跨日已知系統來源計算；不預設盟友瞬間幫助。</div></div>`;
+ html+='<div class="divider"></div><div><b>📅 跨日操作時間軸</b></div>';
+ for(const e of sim.timeline){html+=`<div class="event"><b>${fmt(e.time)}｜${e.label}</b>`;if(e.items.length)html+='<ul>'+e.items.map(x=>`<li>${x}</li>`).join('')+'</ul>';else html+='<div class="muted">本事件無需操作。</div>';html+=`<div class="muted">事件後：場上 ${e.state.field}（已完成 ${e.state.completed}）／庫存 ${e.state.inventory}</div></div>`;}
+ html+='<div class="divider"></div><div class="result"><b>衝分日操作</b><ol><li>衝分開始後，完成可完成的未完成雷達。</li><li>收割已完成雷達。</li><li>5 星勞拉的寶箱按實際收割增加，當日上限 10。</li></ol></div>';
+ html+='<div class="muted">v8 不枚舉所有操作排列；只在固定事件點做必要性判斷。基準不預測未完成雷達提前消失，也不預設盟友瞬間幫助。</div>';
+ return html;
+}
+function updateLauraUI(){const has=$("lauraHas").value==='true';$("lauraStarWrap").style.display=has?'block':'none';$("lauraUsedWrap").style.display=has?'block':'none';$("treasureWrap").style.display=has&&$("lauraStar").value==='5'?'block':'none';}
+function updateTimeInfo(){if(!$('baseTime').value)return;const d=new Date($('baseTime').value);$('timeInfo').textContent=`${dayName(d)}｜${fmt(d)}｜${(d.getDay()===1||d.getDay()===5)?(d.getHours()<10?'衝分日前準備':'衝分日'):'準備期'}`;}
+const inputs=['maxInventory','inventory','field','completed','lauraHas','lauraStar','lauraUsed','treasure','warActive','warCurrent','dawnActive','dawnCurrent','baseTime','timeMode'];
+function dirty(){const b=$('plan');if(b.disabled)return;b.classList.remove('donebtn');b.textContent='開始規劃';}
+for(const id of inputs){$(id).addEventListener('input',()=>{updateLauraUI();updateTimeInfo();dirty();});$(id).addEventListener('change',()=>{updateLauraUI();updateTimeInfo();dirty();});}
+$('now').onclick=()=>{setNow();dirty();};
+$('plan').onclick=()=>{
+ const s=makeState(),err=validate(s);if(err.length){$('output').innerHTML='<h2>④ 規劃結果</h2><div class="bad">❌ 無法規劃</div><ul>'+err.map(x=>`<li>${x}</li>`).join('')+'</ul>';return;}
+ const base=$('baseTime').value?new Date($('baseTime').value):new Date();
+ const score=nextScore(base);
+ $('plan').disabled=true;$('plan').textContent='規劃中…';
+ // v8 全程同步、事件數很少，不使用 setInterval/大量搜尋。
+ const sim=simulate(base,s,score);sim.score=score;
+ $('output').innerHTML=render(s,sim,base);
+ $('plan').disabled=false;$('plan').classList.add('donebtn');$('plan').textContent='✓ 已完成規劃';
 };
-setNow(); syncTaskUI(); syncLauraUI(); updateTimePreview();
+setNow();updateLauraUI();updateTimeInfo();
 </script>
 </body>
 </html>
