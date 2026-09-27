@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>雷達規劃器速度診斷</title>
+<style>body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;background:#111;color:#eee;padding:24px}button{font-size:20px;padding:14px 22px;border:0;border-radius:12px;background:#1683ff;color:white}#result{margin-top:20px;padding:16px;border:1px solid #444;border-radius:12px;line-height:1.8}.ok{color:#20e080}.bad{color:#ff6b6b}</style>
+<h1>雷達規劃器｜速度診斷</h1><p>這不是正式規劃器，只用來確認手機／GitHub Pages 執行 JavaScript 是否正常。</p>
+<button id="run">開始速度測試</button><div id="result">尚未測試</div>
+<script>
+const $=id=>document.getElementById(id);
+$("run").onclick=()=>{
+ const btn=$("run"),out=$("result");
+ const t0=performance.now();
+ btn.disabled=true;btn.textContent="測試中…";
+ let x=0;
+ // 固定少量計算，故意與正式規劃規則無關。
+ for(let i=0;i<100000;i++) x=(x+i*8)%1000003;
+ const t1=performance.now();
+ out.innerHTML=`<div class="ok">✅ JavaScript 執行完成</div>執行時間：<b>${(t1-t0).toFixed(3)} ms</b><br>測試結果：${x}<br><br>如果這裡也是點擊後長時間沒有結果，問題就不是雷達規則，而是瀏覽器／GitHub Pages／舊快取或執行環境。`;
+ btn.disabled=false;btn.textContent="再測一次";
+};
+</script></html>
