@@ -133,9 +133,19 @@ function system8(s){
 function applyLaura(s){
   if(!s.lauraExists||s.lauraUsed)return 0;
   const n=lauraAmount(s.star);
-  const fill=Math.min(n,Math.max(0,8-s.field));
-  s.field+=fill;
-  s.inventory+=n-fill;
+
+  // 勞拉固定規則：
+  // 場上 < 8：先補到 8，剩餘進庫存。
+  // 場上 >= 8：直接增加 3 個到場上，其餘進庫存。
+  if(s.field<8){
+    const fill=Math.min(n,8-s.field);
+    s.field+=fill;
+    s.inventory+=n-fill;
+  }else{
+    s.field+=3;
+    s.inventory+=n-3;
+  }
+
   s.unfinished+=n;
   s.lauraUsed=true;
   return n;
@@ -220,7 +230,7 @@ function plan(){
       add("⚠️",fmt(first18),`為了讓 ${fmt(first02)} 點擊勞拉後，衝分日前的 +8 不浪費，先完成並收割 ${got} 個雷達`);
     }
 
-    // 02:00: Laura first, then no more harvest until score.
+    // 02:00：場上已有 8，因此勞拉 +20 = 場上 +3、庫存 +17；之後直到衝分日不再收割。
     const n=applyLaura(s);
     if(n)add("🧭",fmt(first02),`點擊勞拉 +${n}`);
 
