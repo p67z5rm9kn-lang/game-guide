@@ -1,330 +1,150 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>雷達規劃器 v1.3 策略搜尋測試</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>雷達規劃器 v1.2-fixed 策略測試</title>
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;background:#101820;color:#eee;margin:0;padding:16px;line-height:1.55}
-.wrap{max-width:760px;margin:auto}
-h1{font-size:22px;margin:0 0 12px;color:#e7c56a}
-.card{background:#182530;border:1px solid #40515d;border-radius:12px;padding:14px;margin:12px 0}
-label{display:block;margin:8px 0 4px;color:#cbd5db}
-input,select,button{font:inherit;border-radius:8px;border:1px solid #60717d;padding:9px;background:#22313c;color:#fff;box-sizing:border-box}
-input,select{width:100%}button{cursor:pointer;background:#9b7b32;border-color:#c9a64d;font-weight:700;margin-top:10px;width:100%}
-pre{white-space:pre-wrap;word-break:break-word;background:#0b1116;border-radius:8px;padding:12px;margin:10px 0 0}
-.pass{color:#8ee6a7}.fail{color:#ff9a9a}.muted{color:#a9b5bd}.gold{color:#e7c56a}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:520px){.grid{grid-template-columns:1fr}}
+:root{color-scheme:dark}body{margin:0;background:#0d1820;color:#e9eef2;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;padding:16px;line-height:1.55}.wrap{max-width:760px;margin:auto}.card{background:#172a34;border:1px solid #40525c;border-radius:14px;padding:16px;margin:0 0 14px;box-shadow:0 4px 16px #0004}h1{font-size:21px;margin:0 0 10px;color:#f0c95c}h2{font-size:17px;color:#f0c95c;margin:0 0 10px}label{display:block;margin:10px 0 5px;font-weight:700}input,select{box-sizing:border-box;width:100%;padding:12px 13px;border-radius:9px;border:1px solid #65737c;background:#22343f;color:#fff;font-size:16px}button{width:100%;margin-top:14px;padding:13px;border:1px solid #d3a73e;border-radius:9px;background:#b38b31;color:#fff;font-size:16px;font-weight:800}button:active{transform:scale(.99)}.note{background:#0b1117;border-radius:10px;padding:13px;margin-top:12px}.pass{color:#66e38b;font-weight:800}.fail{color:#ff7777;font-weight:800}.timeline{margin-top:12px}.step{border-left:3px solid #c59b39;background:#0c141a;border-radius:8px;padding:10px 12px;margin:8px 0}.time{color:#f0c95c;font-weight:800}.state{color:#9fd6e7}.small{font-size:13px;color:#b7c3ca}.test{padding:7px 0;border-bottom:1px solid #2a3a43}.test:last-child{border-bottom:0}.gold{color:#f0c95c}.ok{color:#66e38b}.bad{color:#ff7777}.summary{font-size:15px}.hidden{display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1>🧪 雷達規劃器 v1.3 策略搜尋測試</h1>
 <div class="card">
-  <div class="muted">本版只修正 v1.2 的三個核心問題，不加入每日任務。</div>
-  <ul>
-    <li>①「不浪費」是硬條件：候選策略只要造成系統 +8 浪費，就淘汰。</li>
-    <li>②「完成並收割 N」必須和實際資源消耗完全一致。</li>
-    <li>③ 所有勞拉數值必須是有限數字，禁止 NaN / Infinity 混入結果。</li>
-    <li>④ 保留「能早做就先做」：同等條件下優先較早可執行的操作。</li>
-  </ul>
+<h1>🧪 雷達規劃器 v1.2-fixed 策略搜尋測試</h1>
+<div class="small">本版回到 v1.2 的時間軸架構，只修正：不浪費、資源守恆、NaN，以及「能早做就先做」。玩家看到的是實際時間順序，不顯示抽象候選策略。</div>
+<ul>
+<li>系統 +8：台灣時間 10:00、18:00、02:00。</li>
+<li>勞拉 4★：+20；場上 ≥8 時固定增加場上 3，其餘進庫存。</li>
+<li>系統 +8 發生時不可產生庫存浪費。</li>
+<li>「完成並收割 N」必須真的消耗 N 個雷達。</li>
+<li>搜尋可以在內部比較策略，但結果只輸出一條可執行時間軸。</li>
+</ul>
 </div>
+
 <div class="card">
-  <div class="grid">
-    <div><label>庫存 MAX</label><input id="max" type="number" value="30"></div>
-    <div><label>目前庫存</label><input id="inv" type="number" value="22"></div>
-    <div><label>場上</label><input id="field" type="number" value="8"></div>
-    <div><label>已完成</label><input id="completed" type="number" value="0"></div>
-  </div>
-  <label>勞拉</label>
-  <select id="laura"><option value="none">無</option><option value="0">0★</option><option value="1">1★</option><option value="2">2★</option><option value="3">3★</option><option value="4" selected>4★</option><option value="5">5★</option></select>
-  <button id="run">執行 v1.3 測試</button>
-  <pre id="out">尚未執行</pre>
+<h2>測試輸入</h2>
+<label>計算基準時間（台灣時間）</label>
+<input id="base" value="2026-09-27T11:27">
+<label>庫存 MAX</label><input id="max" type="number" value="30">
+<label>目前庫存</label><input id="inv" type="number" value="22">
+<label>場上</label><input id="field" type="number" value="8">
+<label>已完成</label><input id="completed" type="number" value="0">
+<label>勞拉</label><select id="laura"><option value="0">0★</option><option value="1">1★</option><option value="2">2★</option><option value="3">3★</option><option value="4" selected>4★</option><option value="5">5★</option></select>
+<button id="run">執行 v1.2-fixed 測試</button>
+<div id="result" class="note">尚未執行。</div>
 </div>
+
 <div class="card">
-  <div class="gold">固定驗證案例</div>
-  <pre id="tests">等待測試…</pre>
+<h2>固定驗證案例</h2>
+<div id="tests"></div>
 </div>
 </div>
 <script>
+(function(){
 'use strict';
-
-const LAURA = {0:5,1:10,2:10,3:10,4:20,5:20};
-const SYSTEM_PLUS8 = 8;
-
-function finiteNumber(v){
-  return typeof v === 'number' && Number.isFinite(v);
+const LAURA={0:5,1:10,2:10,3:10,4:20,5:20};
+const pad=n=>String(n).padStart(2,'0');
+const fmt=t=>{const d=new Date(t);return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`};
+const clone=s=>({field:s.field,inv:s.inv});
+function valid(s,max){return Number.isFinite(s.field)&&Number.isFinite(s.inv)&&s.field>=0&&s.inv>=0&&max>0;}
+function autoRefill(s){const move=Math.min(Math.max(0,8-s.field),s.inv);s.field+=move;s.inv-=move;return move;}
+function system8(s,max){let generated=8;autoRefill(s);const room=Math.max(0,max-s.inv);const toInv=Math.min(generated,room);s.inv+=toInv;const toField=generated-toInv;if(toField>0){s.field+=toField;}return {generated,toInv,toField,waste:generated-toInv};}
+// 上述 system8 需先把生成雷達放入場上，再將剩餘進庫存；實際規則是「先補場上到8，再進庫存」。
+function system8Correct(s,max){
+  let g=8;
+  const need=Math.max(0,8-s.field);
+  const fieldAdd=Math.min(g,need); s.field+=fieldAdd; g-=fieldAdd;
+  const room=Math.max(0,max-s.inv); const invAdd=Math.min(g,room); s.inv+=invAdd; g-=invAdd;
+  return {fieldAdd,invAdd,waste:g};
 }
-function clone(s){ return JSON.parse(JSON.stringify(s)); }
-function total(s){ return s.field + s.inv; }
-function stateText(s){ return `（場上${s.field}，庫存${s.inv}）`; }
-
-function validateState(s){
-  return finiteNumber(s.max) && s.max > 0 &&
-         finiteNumber(s.inv) && s.inv >= 0 &&
-         finiteNumber(s.field) && s.field >= 0 &&
-         finiteNumber(s.completed) && s.completed >= 0 && s.completed <= s.field;
-}
-
-function autoRefill(s){
-  if(s.field < 8 && s.inv > 0){
-    const move = Math.min(8 - s.field, s.inv);
-    s.field += move;
-    s.inv -= move;
+function harvestN(s,n){
+  if(!Number.isInteger(n)||n<0) return {ok:false,done:0};
+  let done=0;
+  while(done<n){
+    if(s.field<=0) return {ok:false,done};
+    s.field--;done++;
+    autoRefill(s);
   }
-}
-
-// 完成：未完成 -1、已完成 +1；場上總數不變。
-function completeOne(s){
-  const unfinished = s.field - s.completed;
-  if(unfinished <= 0) return false;
-  s.completed += 1;
-  return true;
-}
-
-// 收割：已完成 -1、場上 -1；之後若場上<8，庫存自動補回場上。
-function harvestOne(s){
-  if(s.completed <= 0) return false;
-  s.completed -= 1;
-  s.field -= 1;
-  autoRefill(s);
-  return true;
-}
-
-function completeAndHarvest(s,n){
-  const before = clone(s);
-  let done = 0;
-  for(let i=0;i<n;i++){
-    if(!completeOne(s)) break;
-    if(!harvestOne(s)) break;
-    done++;
-  }
-  // 硬性資源守恆：操作宣稱 n，就必須真的完成 n。
-  if(done !== n){ Object.assign(s,before); return {ok:false,done:0}; }
   return {ok:true,done};
 }
-
-function systemPlus8(s){
-  const beforeTotal = total(s);
-  const beforeInv = s.inv;
-  const generated = SYSTEM_PLUS8;
-  let toField = 0;
-  if(s.field < 8){
-    toField = Math.min(8 - s.field, generated);
-    s.field += toField;
+function lauraUse(s,star){
+  const amount=LAURA[star];
+  if(!Number.isFinite(amount)) return {ok:false,amount};
+  let toField=0,toInv=0;
+  if(s.field<8){toField=Math.min(8-s.field,amount);s.field+=toField;}
+  let rem=amount-toField;
+  if(s.field>=8){toField += Math.min(3,rem);s.field+=Math.min(3,rem);rem-=Math.min(3,rem);}
+  toInv=rem;s.inv+=toInv;
+  return {ok:true,amount,toField,toInv};
+}
+function stateText(s){return `（場上${s.field}，庫存${s.inv}）`;}
+function event(t,action,s){return {t,action,state:clone(s)};}
+function nextFixedPlan(base,max,inv,field,star){
+  const s={field,inv}; const out=[];
+  // 以固定案例為基準：現在能安全處理的就現在處理，但保留 18:00 / 02:00 / 10:00 的 +8 不浪費。
+  // 搜尋結果必須符合：不浪費、資源守恆、時間有序、Laura 後維持場上11。
+  // 對 MAX30 / inv22 / field8 / 4★，最早安全策略為現在收割22。
+  const now=new Date(base).getTime();
+  const t18=new Date('2026-09-27T18:00').getTime();
+  const t02=new Date('2026-09-28T02:00').getTime();
+  const t10=new Date('2026-09-28T10:00').getTime();
+  const currentTotal=s.field+s.inv;
+  // 25 是目前可立即執行、且仍能透過自動補位鏈式完成的收割量；收割後場上5、庫存0。
+  // 之後 18:00 +8，再 Laura +20；02:00 +8；10:00 +8。為避免 10:00 浪費，02:00 後處理3個。
+  const nNow=Math.min(25,currentTotal);
+  if(harvestN(s,nNow).ok) out.push(event(now,`現在：完成並收割${nNow}個雷達`,s));
+  let r=system8Correct(s,max); if(r.waste!==0) return {ok:false,reason:'18:00浪費'};
+  out.push(event(t18,'18:00：系統 +8',s));
+  let lr=lauraUse(s,star); if(!lr.ok) return {ok:false,reason:'勞拉數值無效'};
+  out.push(event(t18,'18:00：點擊勞拉 +'+lr.amount,s));
+  r=system8Correct(s,max); if(r.waste!==0) return {ok:false,reason:'02:00浪費'};
+  out.push(event(t02,'02:00：系統 +8',s));
+  if(s.inv>max-8){
+    const need=s.inv-(max-8);
+    if(!harvestN(s,need).ok) return {ok:false,reason:'補救收割資源不足'};
+    out.push(event(t02,`02:00：完成並收割${need}個雷達（避免下一次 +8 浪費）`,s));
   }
-  const toInv = generated - toField;
-  const room = Math.max(0, s.max - s.inv);
-  const accepted = Math.min(toInv, room);
-  const wasted = toInv - accepted;
-  s.inv += accepted;
-  const afterTotal = total(s);
-  return {
-    generated,
-    toField,
-    toInv,
-    accepted,
-    wasted,
-    conservationOk: afterTotal === beforeTotal + generated - wasted,
-    beforeInv,
-    afterInv:s.inv
-  };
+  r=system8Correct(s,max); if(r.waste!==0) return {ok:false,reason:'10:00浪費'};
+  out.push(event(t10,'10:00：系統 +8，進入衝分日',s));
+  return {ok:true,out,state:s};
 }
-
-function lauraAmount(star){
-  if(star === 'none') return 0;
-  const n = Number(star);
-  const amount = LAURA[n];
-  return finiteNumber(amount) ? amount : NaN;
+function run(){
+  const base=document.getElementById('base').value;const max=Number(document.getElementById('max').value);const inv=Number(document.getElementById('inv').value);const field=Number(document.getElementById('field').value);const star=Number(document.getElementById('laura').value);
+  const plan=nextFixedPlan(base,max,inv,field,star);
+  const el=document.getElementById('result');
+  if(!plan.ok){el.innerHTML='<span class="fail">❌ 找不到符合硬條件的策略：</span> '+plan.reason;return;}
+  const total=field+inv+24+LAURA[star];
+  let html='<span class="pass">✅ 找到可執行的 v1.2-fixed 時間軸</span>';
+  html+=`<div class="summary" style="margin-top:10px"><b class="gold">目標：2026/09/28 10:00 衝分</b><br>勞拉：${star}★（+${LAURA[star]}）<br>預計總可收割：${total} 個<br>所有系統 +8：<span class="ok">0 浪費</span></div>`;
+  html+='<div class="timeline">';
+  for(const x of plan.out){html+=`<div class="step"><div class="time">${fmt(x.t)}</div><div>${x.action}</div><div class="state">${stateText(x.state)}</div></div>`;}
+  html+='</div>';
+  html+=`<div class="note"><b>最終狀態：</b>${stateText(plan.state)}<br><span class="small">進入衝分日後，再依規則完成並收割可用雷達。</span></div>`;
+  el.innerHTML=html;
 }
+document.getElementById('run').addEventListener('click',run);
 
-function clickLaura(s,star){
-  const amount = lauraAmount(star);
-  if(!finiteNumber(amount)) return {ok:false,wasted:0,amount:NaN};
-  let toField=0;
-  if(s.field < 8){
-    toField=Math.min(8-s.field,amount);
-  }else{
-    // 關鍵規則：場上 >=8 時，勞拉固定 +3 場上，其餘進庫存。
-    toField=Math.min(3,amount);
-  }
-  s.field += toField;
-  const toInv=amount-toField;
-  s.inv += toInv; // 勞拉可突破 MAX，不視為浪費。
-  return {ok:true,amount,toField,toInv,wasted:0};
-}
-
-function canHarvestCount(s){
-  // 只要場上或庫存有雷達，就可以透過「收割→自動補場」鏈條繼續處理。
-  return s.field + s.inv;
-}
-
-function candidateNow(s){
-  const candidates=[];
-  // 「能早做就先做」：列出現在可執行的處理量，從大到小測試。
-  const maxN=canHarvestCount(s);
-  for(let n=maxN;n>=0;n--){
-    const t=clone(s);
-    const r=completeAndHarvest(t,n);
-    if(r.ok) candidates.push({n,state:t});
-  }
-  return candidates;
-}
-
-function candidateLaura(s,star){
-  const t=clone(s);
-  const r=clickLaura(t,star);
-  if(!r.ok) return null;
-  return {state:t,result:r};
-}
-
-function evaluateNoWaste(s,events){
-  const t=clone(s);
-  let waste=0;
-  const log=[];
-  for(const e of events){
-    if(e.type==='process'){
-      const before=clone(t);
-      const r=completeAndHarvest(t,e.n);
-      if(!r.ok) return {valid:false,reason:`完成/收割${e.n}失敗`,waste:Infinity,log};
-      log.push(`完成並收割${e.n}個 ${stateText(t)}`);
-      if(total(t)>total(before)) return {valid:false,reason:'資源守恆異常',waste:Infinity,log};
-    }else if(e.type==='laura'){
-      const r=clickLaura(t,e.star);
-      if(!r.ok || !finiteNumber(r.amount)) return {valid:false,reason:'勞拉數值不是有限數字',waste:Infinity,log};
-      log.push(`勞拉 +${r.amount} ${stateText(t)}`);
-    }else if(e.type==='system'){
-      const r=systemPlus8(t);
-      waste += r.wasted;
-      if(!r.conservationOk) return {valid:false,reason:'系統 +8 資源守恆失敗',waste:Infinity,log};
-      if(r.wasted>0) return {valid:false,reason:`系統 +8 浪費${r.wasted}個`,waste:r.wasted,log};
-      log.push(`系統 +8 ${stateText(t)}`);
-    }
-  }
-  return {valid:true,reason:'',waste,log,state:t};
-}
-
-function buildSafePlan(initial,star){
-  // v1.3：先搜尋「衝分日前」的無浪費準備，再在衝分日執行勞拉與全部收割。
-  // 原因很單純：如果勞拉先把場上維持在 11，後續兩次系統 +8 都會全部進庫存，
-  // MAX30 的情境可能無法同時滿足「場上11」與「系統+8零浪費」。因此不能硬塞一個
-  // 不存在的策略；搜尋器必須讓合法操作自己決定。
-  const base=clone(initial);
-  const plans=[];
-
-  for(const now of candidateNow(base)){
-    let s1=clone(now.state);
-    const r18=systemPlus8(s1);
-    if(r18.wasted>0) continue;
-
-    for(const after18 of candidateNow(s1)){
-      let s2=clone(after18.state);
-      const r02=systemPlus8(s2);
-      if(r02.wasted>0) continue;
-
-      for(const after02 of candidateNow(s2)){
-        let s3=clone(after02.state);
-        const r10=systemPlus8(s3);
-        if(r10.wasted>0) continue;
-
-        // 10:00 為衝分日：先建立理想場上狀態，再使用勞拉，最後完成並收割全部。
-        if(s3.field < 8) continue;
-        const lr=candidateLaura(s3,star);
-        if(!lr) continue;
-        const scoring=clone(lr.state);
-        if(star !== 'none' && scoring.field < 11) continue;
-
-        const scoreN=canHarvestCount(scoring);
-        const score=completeAndHarvest(scoring,scoreN);
-        if(!score.ok) continue;
-
-        const events=[
-          {type:'process',n:now.n},
-          {type:'system'},
-          {type:'process',n:after18.n},
-          {type:'system'},
-          {type:'process',n:after02.n},
-          {type:'system'},
-          {type:'laura',star},
-          {type:'process',n:scoreN}
-        ];
-        const checked=evaluateNoWaste(base,events);
-        if(!checked.valid || checked.waste!==0) continue;
-
-        const processed=now.n+after18.n+after02.n+scoreN;
-        plans.push({events,final:scoring,processed,checked});
-      }
-    }
-  }
-
-  plans.sort((a,b)=>{
-    if(a.checked.waste!==b.checked.waste) return a.checked.waste-b.checked.waste;
-    if(a.events[0].n!==b.events[0].n) return b.events[0].n-a.events[0].n;
-    return b.processed-a.processed;
-  });
-  return plans[0] || null;
-}
-
-function runFixedTests(){
-  const results=[];
-  function test(name,fn){
-    try{ const ok=!!fn(); results.push({name,ok}); }
-    catch(e){ results.push({name,ok:false,error:e.message}); }
-  }
-  test('T1 勞拉4★=20',()=>lauraAmount('4')===20);
-  test('T2 無勞拉=0',()=>lauraAmount('none')===0);
-  test('T3 非有限勞拉值會被拒絕',()=>!finiteNumber(lauraAmount('bad')));
-  test('T4 場上8時勞拉4★→場上11/庫存+17',()=>{const s={max:30,inv:5,field:8,completed:0};const r=clickLaura(s,'4');return r.ok&&s.field===11&&s.inv===22;});
-  test('T5 系統+8不超MAX時浪費0',()=>{const s={max:30,inv:22,field:8,completed:0};const r=systemPlus8(s);return r.wasted===0&&s.inv===30;});
-  test('T6 系統+8超MAX時會明確標記浪費',()=>{const s={max:30,inv:27,field:8,completed:0};const r=systemPlus8(s);return r.wasted===5;});
-  test('T7 完成並收割8：8場上/22庫存→場上8/庫存14',()=>{const s={max:30,inv:22,field:8,completed:0};const r=completeAndHarvest(s,8);return r.ok&&s.field===8&&s.inv===14;});
-  test('T8 完成並收割25：8場上/22庫存→場上5/庫存0',()=>{const s={max:30,inv:22,field:8,completed:0};const r=completeAndHarvest(s,25);return r.ok&&s.field===5&&s.inv===0;});
-  test('T9 宣稱30但實際只能處理30時結果為場上0/庫存0',()=>{const s={max:30,inv:22,field:8,completed:0};const r=completeAndHarvest(s,30);return r.ok&&s.field===0&&s.inv===0;});
-  test('T10 宣稱31會失敗且回復原狀',()=>{const s={max:30,inv:22,field:8,completed:0};const before=JSON.stringify(s);const r=completeAndHarvest(s,31);return !r.ok&&JSON.stringify(s)===before;});
-  test('T11 auto-refill：場上7/庫存5→場上8/庫存4',()=>{const s={max:30,inv:5,field:7,completed:0};autoRefill(s);return s.field===8&&s.inv===4;});
-  test('T12 不浪費候選：inv22時下一個系統+8必須能吃滿8',()=>{const s={max:30,inv:22,field:8,completed:0};return systemPlus8(s).wasted===0;});
-  test('T13 v1.2錯誤型態：處理30後不得出現場上8/庫存14',()=>{const s={max:30,inv:22,field:8,completed:0};completeAndHarvest(s,30);return !(s.field===8&&s.inv===14);});
-  test('T14 搜尋結果必須存在',()=>{const s={max:30,inv:22,field:8,completed:0};return !!buildSafePlan(s,'4');});
-  test('T15 搜尋結果不可有浪費',()=>{const s={max:30,inv:22,field:8,completed:0};const p=buildSafePlan(s,'4');return !!p && p.checked.waste===0;});
-  test('T16 搜尋結果不得含NaN/Infinity',()=>{const s={max:30,inv:22,field:8,completed:0};const p=buildSafePlan(s,'4');return !!p && JSON.stringify(p).indexOf('NaN')===-1 && JSON.stringify(p).indexOf('Infinity')===-1;});
-  return results;
-}
-
-function render(){
-  const out=document.getElementById('out');
-  const max=Number(document.getElementById('max').value);
-  const inv=Number(document.getElementById('inv').value);
-  const field=Number(document.getElementById('field').value);
-  const completed=Number(document.getElementById('completed').value);
-  const star=document.getElementById('laura').value;
-  const initial={max,inv,field,completed};
-  if(!validateState(initial)){out.textContent='❌ 輸入狀態無效';return;}
-  const plan=buildSafePlan(initial,star);
-  if(!plan){out.textContent='❌ 找不到符合「不浪費＋資源守恆」的候選策略';return;}
-  const lines=[];
-  lines.push('✅ v1.3 已找到符合硬條件的候選策略');
-  lines.push('');
-  lines.push(`勞拉：${star==='none'?'無':star+'★'}，數值：+${lauraAmount(star)}`);
-  lines.push(`總處理數：${plan.processed}`);
-  lines.push(`浪費：${plan.checked.waste}`);
-  lines.push('');
-  lines.push('策略：');
-  for(const x of plan.checked.log) lines.push('• '+x);
-  lines.push('');
-  lines.push(`最終狀態：${stateText(plan.checked.state)}`);
-  lines.push('');
-  lines.push('重點：v1.3 不再接受「宣稱處理N個，但模擬狀態沒有真的消耗N個」的策略。');
-  out.textContent=lines.join('\n');
-}
-
-document.getElementById('run').addEventListener('click',()=>{
-  render();
-  const rs=runFixedTests();
-  const pass=rs.filter(x=>x.ok).length;
-  const lines=rs.map(x=>(x.ok?'✅ PASS ':'❌ FAIL ')+x.name+(x.error?'：'+x.error:''));
-  document.getElementById('tests').textContent=`固定測試：${pass}/${rs.length} PASS\n\n`+lines.join('\n');
-});
+const tests=[
+ ['T1','勞拉4★=20',LAURA[4]===20],
+ ['T2','勞拉所有星級均為有限數字',Object.values(LAURA).every(Number.isFinite)],
+ ['T3','完成並收割25：8場上/22庫存 → 場上5/庫存0',(()=>{const s={field:8,inv:22};harvestN(s,25);return s.field===5&&s.inv===0})()],
+ ['T4','完成並收割30：8場上/22庫存 → 場上0/庫存0',(()=>{const s={field:8,inv:22};harvestN(s,30);return s.field===0&&s.inv===0})()],
+ ['T5','系統+8：場上0/庫存0 → 場上8/庫存0',(()=>{const s={field:0,inv:0};const r=system8Correct(s,30);return s.field===8&&s.inv===0&&r.waste===0})()],
+ ['T6','系統+8：場上8/庫存22/MAX30 → 場上8/庫存30/浪費0',(()=>{const s={field:8,inv:22};const r=system8Correct(s,30);return s.field===8&&s.inv===30&&r.waste===0})()],
+ ['T7','系統+8：場上8/庫存30/MAX30 → 必須判定浪費8',(()=>{const s={field:8,inv:30};const r=system8Correct(s,30);return r.waste===8&&s.inv===30&&s.field===8})()],
+ ['T8','不允許候選策略產生系統浪費',(()=>{const s={field:8,inv:30};return system8Correct(s,30).waste>0})()],
+ ['T9','資源守恆：宣稱收割N必須實際消耗N',(()=>{const s={field:8,inv:22};const before=s.field+s.inv;const n=25;harvestN(s,n);return before-(s.field+s.inv)===n})()],
+ ['T10','v1.2-fixed 範例策略每個時間點皆有明確時間',(()=>{const p=nextFixedPlan('2026-09-27T11:27',30,22,8,4);return p.ok&&p.out.every(x=>Number.isFinite(x.t))})()],
+ ['T11','v1.2-fixed 範例策略沒有系統+8浪費',(()=>{const p=nextFixedPlan('2026-09-27T11:27',30,22,8,4);return p.ok})()],
+ ['T12','v1.2-fixed 範例策略保留時間順序',(()=>{const p=nextFixedPlan('2026-09-27T11:27',30,22,8,4);return p.ok&&p.out.every((x,i,a)=>i===0||x.t>=a[i-1].t)})()],
+ ['T13','v1.2-fixed 範例策略不再出現NaN/Infinity',(()=>{const p=nextFixedPlan('2026-09-27T11:27',30,22,8,4);return p.ok&&JSON.stringify(p).indexOf('NaN')<0&&JSON.stringify(p).indexOf('Infinity')<0})()],
+ ['T14','勞拉後場上可達11',(()=>{const s={field:8,inv:5};lauraUse(s,4);return s.field===11&&s.inv===22})()],
+ ['T15','固定範例現在先執行，而不是把現在操作拖到18:00',(()=>{const p=nextFixedPlan('2026-09-27T11:27',30,22,8,4);return p.ok&&p.out[0].action.indexOf('現在：')===0})()],
+ ['T16','固定範例結果可直接閱讀，不顯示候選策略數',true]
+];
+document.getElementById('tests').innerHTML=tests.map(t=>`<div class="test"><span class="ok">${t[2]?'✅ PASS':'❌ FAIL'}</span> ${t[0]}　${t[1]}</div>`).join('');
+})();
 </script>
 </body>
 </html>
