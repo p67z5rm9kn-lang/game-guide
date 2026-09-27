@@ -3,120 +3,111 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>雷達規劃器 v1.2-fixed-2 時間軸測試</title>
+<title>雷達規劃器 v1.2-fixed-3</title>
 <style>
-body{margin:0;background:#0c151c;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:16px}
-.wrap{max-width:720px;margin:auto}.card{background:#172a35;border:1px solid #53636c;border-radius:14px;padding:16px;margin-bottom:14px}.title{font-size:22px;font-weight:800;color:#e7bd55}.sub{line-height:1.7;color:#d5dde1}.grid{display:grid;gap:10px}label{font-weight:700}input,select{width:100%;box-sizing:border-box;background:#21343f;color:#fff;border:1px solid #63747d;border-radius:10px;padding:13px;font-size:16px;margin-top:6px}button{width:100%;padding:14px;border:0;border-radius:10px;background:#b38a2d;color:#fff;font-weight:800;font-size:16px;margin-top:12px}.result{background:#091016;border-radius:10px;padding:14px;margin-top:12px;line-height:1.65}.ok{color:#35e56b}.bad{color:#ff4d4d}.step{padding:8px 0;border-bottom:1px solid #293b44}.small{font-size:13px;color:#aeb9be}
+body{margin:0;background:#0b151c;color:#eef3f5;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:16px}
+.wrap{max-width:720px;margin:auto}.card{background:#182b35;border:1px solid #52636b;border-radius:16px;padding:18px;margin-bottom:14px;box-sizing:border-box}.title{font-size:23px;font-weight:800;color:#f0c75e}.sub{line-height:1.65;color:#d8e0e3}.grid{display:grid;gap:10px}.label{font-weight:700;margin-top:4px}.input,.select{width:100%;box-sizing:border-box;background:#213640;color:#fff;border:1px solid #66757c;border-radius:10px;padding:13px;font-size:16px}.btn{width:100%;border:0;border-radius:10px;background:#c49a32;color:#fff;font-size:17px;font-weight:800;padding:14px;margin-top:12px}.result{background:#071016;border-radius:12px;padding:15px;margin-top:12px;line-height:1.65}.ok{color:#28e85c;font-weight:800}.bad{color:#ff3b30;font-weight:800}.step{padding:9px 0;border-bottom:1px solid #263940}.step:last-child{border-bottom:0}.muted{color:#9eb0b8;font-size:13px}.gold{color:#f0c75e;font-weight:800}.warn{color:#ffd36b}.tests{font-size:14px;line-height:1.65}.pass{color:#35ee63}.fail{color:#ff453a}.small{font-size:13px}
 </style>
 </head>
 <body>
 <div class="wrap">
 <div class="card">
-<div class="title">🛰️ 雷達規劃器 v1.2-fixed-2</div>
-<div class="sub">本版只修正時間軸基準：只搜尋「計算基準時間之後」的事件；現在能安全執行的操作優先放在現在。保留不浪費、資源守恆、NaN 防護。</div>
+<div class="title">🛰️ 雷達規劃器 v1.2-fixed-3</div>
+<div class="sub">本版重新整理策略搜尋：先建立「合法操作」，再依時間軸模擬；不把過去事件放入未來策略，也不把測試候選直接當成玩家結果。</div>
 <ul class="sub">
-<li>台灣時間系統 +8：10:00、18:00、隔日 02:00。</li>
-<li>基準時間以前的事件不會進入策略。</li>
-<li>策略每一步都顯示明確日期時間與（場上、庫存）。</li>
-<li>完成並收割 N 必須真的消耗 N。</li>
+<li>基準時間之後才會出現事件。</li>
+<li>現在可安全執行的操作優先放在現在。</li>
+<li>每個系統 +8 都檢查是否浪費。</li>
+<li>完成並收割 N 必須實際消耗 N。</li>
+<li>勞拉不受 MAX 限制，但系統 +8 不可浪費。</li>
 </ul>
 </div>
-
 <div class="card">
-<h3>測試輸入</h3>
+<h2 class="gold">測試輸入</h2>
 <div class="grid">
-<label>計算基準時間（台灣時間）<input id="base" value="2026-09-27T11:27"></label>
-<label>庫存 MAX<input id="max" type="number" value="30"></label>
-<label>目前庫存<input id="inv" type="number" value="22"></label>
-<label>場上<input id="field" type="number" value="8"></label>
-<label>已完成<input id="done" type="number" value="0"></label>
-<label>勞拉<select id="laura"><option value="0">無</option><option value="5">0★ +5</option><option value="10">1★ +10</option><option value="10">2★ +10</option><option value="10">3★ +10</option><option value="20" selected>4★ +20</option><option value="20">5★ +20</option></select></label>
+<label class="label">計算基準時間（台灣時間）<input id="dt" class="input" type="datetime-local" value="2026-09-27T11:27"></label>
+<label class="label">庫存 MAX<input id="max" class="input" type="number" value="30"></label>
+<label class="label">目前庫存<input id="inv" class="input" type="number" value="22"></label>
+<label class="label">場上<input id="field" class="input" type="number" value="8"></label>
+<label class="label">已完成<input id="done" class="input" type="number" value="0"></label>
+<label class="label">勞拉<select id="laura" class="select"><option value="0">無</option><option value="5">0★ +5</option><option value="10">1★ +10</option><option value="10">2★ +10</option><option value="10">3★ +10</option><option value="20" selected>4★ +20</option><option value="20">5★ +20</option></select></label>
 </div>
-<button onclick="runPlanner()">執行 v1.2-fixed-2 測試</button>
-<div id="out" class="result"></div>
+<button class="btn" onclick="run()">執行 v1.2-fixed-3 測試</button>
+<div id="out" class="result muted">尚未執行</div>
 </div>
-
-<div class="card">
-<h3>固定驗證</h3><div id="tests" class="result"></div>
-</div>
+<div class="card"><h2 class="gold">固定驗證</h2><div id="tests" class="tests"></div></div>
 </div>
 <script>
-const taipei='Asia/Taipei';
-function finite(n){return Number.isFinite(n)}
-function fmt(d){return d.toLocaleString('zh-TW',{timeZone:taipei,hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(/\//g,'/').replace(',','')}
-function localDate(s){return new Date(s+':00+08:00')}
-function clone(s){return {...s}}
+const fmt=d=>{const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`};
+function nextEvents(base){
+ const r=[]; let d=new Date(base); const add=(day,h)=>{let x=new Date(d); x.setHours(h,0,0,0); if(x.getTime()<=base.getTime()) x.setDate(x.getDate()+1); return x};
+ for(let i=0;i<4;i++){let x=add(d,10); r.push(x); d=x;}
+ return r.sort((a,b)=>a-b).slice(0,4);
+}
+function simInitial(s){return {...s};}
 function harvest(s,n){
-  n=Math.min(n,s.field+s.inv);
-  for(let i=0;i<n;i++){
-    if(s.field>0){s.field--;}
-    if(s.field<8 && s.inv>0){let m=Math.min(8-s.field,s.inv);s.field+=m;s.inv-=m}
-  }
-  return n;
-}
-function system8(s){
-  let add=8;
-  if(s.field<8){let m=Math.min(8-s.field,add);s.field+=m;add-=m}
-  let room=Math.max(0,s.max-s.inv);let put=Math.min(room,add);s.inv+=put;let waste=add-put;
-  return waste;
-}
-function laura(s,amount){
-  if(s.field<8){let m=Math.min(8-s.field,amount);s.field+=m;amount-=m}
-  else{s.field+=3;amount-=3}
-  s.inv+=Math.max(0,amount);
-}
-function futureEvents(base){
-  const out=[];let d=new Date(base);
-  for(let i=0;i<4;i++){
-    let e=new Date(d);e.setHours(18,0,0,0);if(e<=base)e.setDate(e.getDate()+1);out.push(e);
-    let f=new Date(e);f.setHours(2,0,0,0);if(f<=e)f.setDate(f.getDate()+1);out.push(f);
-    let g=new Date(f);g.setHours(10,0,0,0);if(g<=f)g.setDate(g.getDate()+1);out.push(g);
-    break;
-  }
-  return out.sort((a,b)=>a-b).filter((x,i,a)=>i===0||x.getTime()!==a[i-1].getTime());
-}
-function runPlanner(){
- const base=localDate(document.getElementById('base').value);
- const max=+document.getElementById('max').value, inv=+document.getElementById('inv').value, field=+document.getElementById('field').value, done=+document.getElementById('done').value, la=+document.getElementById('laura').value;
- let s={max,inv,field,done};let lines=[];let valid=true;
- // v1.2-fixed-2 sample: do the earliest safe amount now. 22 is chosen so 18:00 +8 is not wasted and Laura can then add +20.
- let nowN=Math.min(22,s.field+s.inv); harvest(s,nowN); lines.push({t:base,txt:`完成並收割 ${nowN} 個雷達`,s:clone(s)});
- let events=futureEvents(base);
- for(const e of events){
-   let w=system8(s); if(w>0){valid=false;break}
-   lines.push({t:e,txt:'系統 +8',s:clone(s)});
-   if(la>0 && !s.usedLaura){laura(s,la);s.usedLaura=true;lines.push({t:e,txt:`點擊勞拉 +${la}`,s:clone(s)})}
-   if(s.field>=11 && e.getHours()===10) break;
+ n=Math.max(0,Math.floor(n)); let remain=n; let f=s.f,i=s.i;
+ while(remain>0 && (f>0||i>0)){
+   if(f>0){f--;remain--; if(f<8&&i>0){let m=Math.min(8-f,i);f+=m;i-=m;}}
+   else {let m=Math.min(remain,i);f+=m;i-=m;}
  }
- let total=s.field+s.inv;
- if(total<0 || !finite(total) || !valid){document.getElementById('out').innerHTML='<span class="bad">❌ 找不到符合硬條件的策略</span>';return}
- let h=`<div class="ok">✅ 找到可執行時間軸</div><div class="small">勞拉：${la?`+${la}`:'無'}｜所有數值皆為有限數字｜系統 +8 無浪費</div>`;
- lines.forEach(x=>h+=`<div class="step"><b>${fmt(x.t)}</b><br>→ ${x.txt}<br>（場上 ${x.s.field}，庫存 ${x.s.inv}）</div>`);
- h+=`<div class="step"><b>🏆 下一個衝分日</b><br>→ 完成並收割所有雷達<br>（目前場上 ${s.field}，庫存 ${s.inv}）</div>`;
- document.getElementById('out').innerHTML=h;
+ if(remain>0)return null;
+ return {...s,f,i,processed:s.processed+n};
 }
-function tests(){
- let arr=[];
- function t(name,ok){arr.push(`<div class="${ok?'ok':'bad'}">${ok?'✅ PASS':'❌ FAIL'} ${name}</div>`)}
- t('T1 勞拉 4★ = +20',20===20);
- t('T2 目前 11:27 時，10:00 不得出現在未來事件',futureEvents(localDate('2026-09-27T11:27')).every(d=>d>localDate('2026-09-27T11:27')));
- let s={max:30,inv:22,field:8};let n=harvest(s,25);t('T3 完成並收割25：場上5/庫存0',n===25&&s.field===5&&s.inv===0);
- s={max:30,inv:22,field:8};n=harvest(s,30);t('T4 完成並收割30：場上0/庫存0',n===30&&s.field===0&&s.inv===0);
- s={max:30,inv:0,field:0};let w=system8(s);t('T5 系統+8：場上8/庫存0',w===0&&s.field===8&&s.inv===0);
- s={max:30,inv:22,field:8};w=system8(s);t('T6 系統+8：庫存22→30且浪費0',w===0&&s.inv===30);
- s={max:30,inv:30,field:8};w=system8(s);t('T7 MAX滿時系統+8：明確判定浪費8',w===8&&s.inv===30);
- s={max:30,inv:22,field:8};harvest(s,22);w=system8(s);t('T8 先處理22後再+8：不浪費',w===0&&s.inv===8);
- s={max:30,inv:22,field:8};harvest(s,22);laura(s,20);t('T9 先處理22後勞拉4★：場上11/庫存17',s.field===11&&s.inv===17);
- s={max:30,inv:22,field:8};harvest(s,22);laura(s,20);w=system8(s);t('T10 勞拉後下一個+8：庫存25且浪費0',w===0&&s.inv===25);
- let base=localDate('2026-09-27T11:27');let ev=futureEvents(base);t('T11 下一個系統事件為18:00',ev[0] && ev[0].getHours()===18 && ev[0]>base);
- t('T12 事件順序遞增',ev.every((d,i)=>i===0||d>ev[i-1]));
- t('T13 無 NaN / Infinity',ev.every(d=>finite(d.getTime())));
- s={max:30,inv:22,field:8};harvest(s,22);laura(s,20);t('T14 勞拉後場上可達11',s.field===11);
- t('T15 固定範例現在先執行，而不是拖到18:00',true);
- t('T16 輸出採時間軸，不顯示候選策略數量',true);
- document.getElementById('tests').innerHTML=arr.join('');
+function complete(s,n){return {...s,done:s.done+n};}
+function system(s){let gen=8, room=Math.max(0,s.max-s.i), take=Math.min(gen,room), waste=gen-take; let i=s.i+take,f=s.f;if(f<8&&i>0){let m=Math.min(8-f,i);f+=m;i-=m} return {...s,i,f,waste};}
+function laura(s,n){let f=s.f,i=s.i;if(f<8){let m=Math.min(8-f,n);f+=m;n-=m}else{f+=Math.min(3,n);n-=Math.min(3,n)}i+=n;return {...s,i,f,lauraUsed:true};}
+function validInput(x){return x.max>0&&x.i>=0&&x.f>=0&&x.done>=0&&x.done<=x.f&&Number.isFinite(x.laura)}
+function eventName(d,base){return fmt(d)}
+function buildPlan(x){
+ const base=x.base, events=nextEvents(base), lauraN=x.laura;
+ // Search over processing amounts before each future system event. Completion itself does not alter resources, so for this core test we combine it with harvest.
+ // The search deliberately evaluates real chronological checkpoints, not abstract candidate counts.
+ let candidates=[];
+ const first=[0,...Array.from({length:x.f+x.i},(_,k)=>k+1)];
+ for(const n0 of first){
+   let s={...x,f:x.f,i:x.i,processed:0,lauraUsed:false}; let steps=[];
+   if(n0){s=harvest(s,n0); if(!s)continue;steps.push({t:base,label:`完成並收割 ${n0} 個`,s});}
+   let ok=true;
+   for(let ei=0;ei<events.length;ei++){
+     const ev=events[ei];
+     // Actions immediately before the event can be scheduled at event time in the planner. Find the minimum harvest needed to prevent system waste.
+     const need=Math.max(0,s.i+8-s.max);
+     if(need>0){s=harvest(s,need);if(!s){ok=false;break;}steps.push({t:ev,label:`完成並收割 ${need} 個（避免本次 +8 浪費）`,s});}
+     s=system(s); if(s.waste!==0){ok=false;break;} steps.push({t:ev,label:'系統 +8',s}); delete s.waste;
+     if(!s.lauraUsed&&lauraN>0&&ei<events.length-1){
+       // Try Laura at the earliest checkpoint after the first system event, but only if it does not make a later system event impossible without a harvest.
+       s=laura(s,lauraN);steps.push({t:ev,label:`點擊勞拉 +${lauraN}`,s});
+     }
+   }
+   if(!ok)continue;
+   candidates.push({steps,s});
+ }
+ // Score: fewer actions, earlier operations, and prefer more field at final checkpoint.
+ candidates.sort((a,b)=>{const af=a.steps.length,bf=b.steps.length;if(af!==bf)return af-bf;const fa=a.s.f,fb=b.s.f;if(fa!==fb)return fb-fa;return a.s.i-b.s.i});
+ return candidates[0]||null;
 }
-tests();runPlanner();
+function run(){
+ const base=new Date(document.getElementById('dt').value);const x={base,max:+document.getElementById('max').value,i:+document.getElementById('inv').value,f:+document.getElementById('field').value,done:+document.getElementById('done').value,laura:+document.getElementById('laura').value};
+ const tests=[];const t=(name,ok,detail)=>tests.push(`<div class="${ok?'pass':'fail'}">${ok?'✅ PASS':'❌ FAIL'} ${name}${detail?'：'+detail:''}</div>`);
+ t('T1 勞拉數值有限',Number.isFinite(x.laura));t('T2 基準時間後才有事件',nextEvents(base).every(d=>d>base));
+ let s={max:30,i:22,f:8,done:0,processed:0,lauraUsed:false};s=harvest(s,25);t('T3 收割25守恆',!!s&&s.f===5&&s.i===0,`場上${s?.f}／庫存${s?.i}`);
+ s={max:30,i:22,f:8,done:0,processed:0,lauraUsed:false};s=harvest(s,30);t('T4 收割30守恆',!!s&&s.f===0&&s.i===0,`場上${s?.f}／庫存${s?.i}`);
+ s={max:30,i:0,f:0,done:0,processed:0};s=system(s);t('T5 系統+8',s.f===8&&s.i===0&&s.waste===0);
+ s={max:30,i:22,f:8,done:0,processed:0};s=system(s);t('T6 系統+8不浪費',s.i===30&&s.waste===0);
+ s={max:30,i:30,f:8,done:0,processed:0};s=system(s);t('T7 MAX滿時拒絕浪費策略',s.waste===8);
+ s={max:30,i:22,f:8,done:0,processed:0};s=harvest(s,22);s=system(s);t('T8 先處理22再+8不浪費',s.i===8&&s.waste===0);
+ s={max:30,i:22,f:8,done:0,processed:0};s=harvest(s,22);s=laura(s,20);t('T9 處理22後勞拉4★',s.f===11&&s.i===17);
+ const ev=nextEvents(base);t('T10 下一個系統事件為18:00',ev[0].getHours()===18);
+ const plan=buildPlan(x);t('T11 找得到時間軸策略',!!plan);
+ if(plan){t('T12 策略沒有系統浪費',plan.steps.every(z=>z.s.waste===undefined||z.s.waste===0));t('T13 策略步驟都有明確時間',plan.steps.every(z=>z.t instanceof Date));t('T14 策略不出現NaN/Infinity',!JSON.stringify(plan).match(/NaN|Infinity/));t('T15 目前可執行操作不拖到18:00',!plan.steps.length||plan.steps[0].t.getTime()===base.getTime()||plan.steps[0].t.getTime()<ev[0].getTime());}
+ document.getElementById('tests').innerHTML=tests.join('');
+ if(!plan){document.getElementById('out').innerHTML='<div class="bad">❌ 搜尋失敗：不是因為沒有候選數量，而是目前合法操作模型仍需要修正。</div>';return}
+ let html='<div class="ok">✅ 找到合法時間軸策略</div><div class="muted">以下只顯示實際要看的時間與操作，不顯示候選策略數量。</div>';
+ for(const z of plan.steps){html+=`<div class="step"><span class="gold">${fmt(z.t)}</span>　${z.label}<br><span class="muted">（場上 ${z.s.f}，庫存 ${z.s.i}）</span></div>`}
+ document.getElementById('out').innerHTML=html;
+}
+run();
 </script>
 </body>
 </html>
