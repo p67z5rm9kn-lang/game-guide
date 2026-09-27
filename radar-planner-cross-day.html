@@ -256,57 +256,64 @@ function satisfyTasksFast(s,required,t,day,actions){
 }
 function crossDayPlan(startMs,state){
  const score=nextScoring(startMs);
- const s=normalize(state),actions=[];
- const dayLabel=ms=>fmt(ms).split(" ")[0];
- let currentDay=gameDayKey(startMs);
- let nextReset=dayEnd(startMs);
- // Today is also a usable game day: if Laura is available and not clicked,
- // use her before satisfying today's task requirement.
- const baseIsScoringDay=((new Date(startMs)).getDay()===1||(new Date(startMs)).getDay()===5);
- const baseBefore10=(new Date(startMs)).getHours()<10;
- if(s.lauraAvailable&&!s.lauraUsed && !(baseIsScoringDay&&!baseBefore10)){
-  applyLauraFast(s);
-  actions.push({t:startMs,kind:"laura",day:dayLabel(startMs)});
- }
- let remaining=requiredToday(s);
- if(remaining>0) satisfyTasksFast(s,remaining,startMs,dayLabel(startMs),actions);
- 
- // Build only the fixed game events between the baseline and the target.
- const events=[];
- const utc2=startMs-2*HOUR;
- const u=new Date(utc2);
- const baseUtc=Date.UTC(u.getUTCFullYear(),u.getUTCMonth(),u.getUTCDate(),0,0,0);
- for(let d=-1;d<5;d++){
-  for(const h of [0,8,16]){
-   const t=baseUtc+d*DAY+h*HOUR;
-   if(t>startMs&&t<score)events.push(t);
-  }
- }
- events.sort((a,b)=>a-b);
- 
- for(const t of events){
-  while(nextReset<=t&&nextReset<score){
-   futureTaskReset(s);currentDay=gameDayKey(nextReset);
-   actions.push({t:nextReset,kind:"reset",day:dayLabel(nextReset)});
-   if(s.lauraAvailable){applyLauraFast(s);actions.push({t:nextReset,kind:"laura",day:dayLabel(nextReset)});}
-   satisfyTasksFast(s,20,nextReset,dayLabel(nextReset),actions);
-   nextReset+=DAY;
-  }
-  applySystem8Fast(s);
-  actions.push({t,kind:"system8",day:dayLabel(t)});
-  const req=requiredToday(s);
-  if(req)satisfyTasksFast(s,req,t,dayLabel(t),actions);
- }
- // At the scoring checkpoint, do only the minimum cleanup needed to return to
- // the ideal 11 field radars. Completed radars remain available for scoring.
- if(s.field>11&&s.completed>0){
-  const n=Math.min(s.completed,s.field-11);
-  if(n){addHarvest(s,n);actions.push({t:score,kind:"harvest-final",n,day:dayLabel(score)});}
- }
- const taskOK=requiredToday(s)===0;
+ const s=normalize(state);
+ const actions=[];
  const target=ideal(s.maxInventory);
- const finalOK=s.field>=target.field&&s.inventory>=target.inventory;
- return {score,state:s,actions,taskOK,target,finalOK};
+ const start=new Date(startMs);
+ const day=start.getDay();
+ const h=start.getHours();
+ const beforeScore=(day===1||day===5)&&h<10;
+ const label=ms=>fmt(new Date(ms)).split(" ")[0];
+ const add=(ms,kind,n=0)=>actions.push({t:ms,kind,n,day:label(ms)});
+ // 固定節點：只建立實際會用到的 10:00、18:00、02:00 與目標點。
+ const nodes=[];
+ for(let d=0;d<4;d++){
+  const baseDay=new Date(start.getFullYear(),start.getMonth(),start.getDate()+d,0,0,0);
+  for(const hh of [2,10,18]){
+   const ev=new Date(baseDay.getFullYear(),baseDay.getMonth(),baseDay.getDate(),hh,0,0);
+   if(ev.getTime()>startMs && ev.getTime()<score.getTime()) nodes.push(ev);
+  }
+ }
+ nodes.sort((a,b)=>a-b);
+ // 基準日任務：只處理目前真正啟用且尚未完成的需求。
+ if(!beforeScore){
+  let need=requiredToday(s);
+  if(need>0){
+   const c=addComplete(s,need); if(c) add(startMs,'complete',c);
+   need-=c;
+   if(need>0&&s.completed>0&&s.inventory>0){
+    const n=Math.min(need,s.completed,Math.max(1,s.inventory));
+    addHarvest(s,n); add(startMs,'harvest',n);
+    const c2=addComplete(s,need); if(c2) add(startMs,'complete',c2);
+   }
+  }
+  if(s.lauraAvailable&&!s.lauraUsed){applyLauraFast(s);add(startMs,'laura');}
+ }
+ for(const ev of nodes){
+  const ms=ev.getTime(); if(ms>=score.getTime()) continue;
+  const eh=ev.getHours();
+  if(eh===10){
+   futureTaskReset(s); add(ms,'reset');
+   if(s.lauraAvailable){applyLauraFast(s);add(ms,'laura');}
+   applySystem8Fast(s); add(ms,'system8',8);
+   const c=addComplete(s,20); if(c) add(ms,'complete',c);
+   if(c<20&&s.completed>0&&s.inventory>0){
+    const n=Math.min(20-c,s.completed,Math.max(1,s.inventory));
+    addHarvest(s,n); add(ms,'harvest',n);
+    const c2=addComplete(s,20-c); if(c2) add(ms,'complete',c2);
+   }
+  } else if(eh===18){
+   const need=requiredToday(s); if(need>0){const c=addComplete(s,need);if(c)add(ms,'complete',c);}
+  } else if(eh===2){
+   applySystem8Fast(s); add(ms,'system8',8);
+   const need=requiredToday(s); if(need>0){const c=addComplete(s,need);if(c)add(ms,'complete',c);}
+  }
+ }
+ // 衝分前只做整理，不額外消耗尚可保留的已完成雷達。
+ if(s.field>11&&s.completed>0){
+  const n=Math.min(s.completed,s.field-11); if(n){addHarvest(s,n);add(score.getTime(),'harvest-final',n);}
+ }
+ return {score,state:s,actions,taskOK:requiredToday(s)===0,target,finalOK:s.field>=target.field&&s.inventory>=target.inventory};
 }
 function gameDayKey(ms){return new Date(ms-2*HOUR).toISOString().slice(0,10);}
 function dayEnd(ms){const p=taiwanParts(ms);return Date.UTC(p.y,p.m-1,p.d,2,0,0);}
@@ -367,14 +374,12 @@ function validate(s){
  return e;
 }
 function nextScoring(base){
- const d=new Date(base);
- const h=d.getHours(), day=d.getDay();
- const before10=h<10;
- if((day===1||day===5)&&before10)return new Date(d.getFullYear(),d.getMonth(),d.getDate(),10,0,0);
- for(let i=0;i<14;i++){
-  const x=new Date(d.getTime()+i*86400000);
-  if((x.getDay()===1||x.getDay()===5) && (i>0||h>=10))return new Date(x.getFullYear(),x.getMonth(),x.getDate(),10,0,0);
- }
+ const d=new Date(base); const day=d.getDay(); const h=d.getHours();
+ const at10=new Date(d.getFullYear(),d.getMonth(),d.getDate(),10,0,0);
+ if((day===1||day===5)&&h<10)return at10;
+ const add=(day===0?1:day===1?4:day===2?3:day===3?2:day===4?1:day===5?3:2);
+ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+add,10,0,0);
+ return x;
 }
 function modeText(base){
  const d=new Date(base), day=d.getDay(), h=d.getHours();
@@ -382,10 +387,12 @@ function modeText(base){
  if((day===1||day===5)&&h<10)return "衝分日前準備";
  return "準備期";
 }
+const FMT_LOCAL=new Intl.DateTimeFormat("zh-TW",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",weekday:"short",hour12:false});
+const FMT_DOOM=new Intl.DateTimeFormat("zh-TW",{timeZone:"Etc/GMT+2",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",weekday:"short",hour12:false});
 function fmt(d){
  const mode=$("timeMode").value;
  const zone=mode==="doom"?"Etc/GMT+2":undefined;
- const parts=new Intl.DateTimeFormat("zh-TW",{timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",weekday:"short",hour12:false}).formatToParts(d);
+ const parts=(mode==="doom"?FMT_DOOM:FMT_LOCAL).formatToParts(d);
  const get=k=>parts.find(x=>x.type===k)?.value||"";
  const weekdayMap={"星期日":"日","星期一":"一","星期二":"二","星期三":"三","星期四":"四","星期五":"五","星期六":"六"};
  return `${get("year")}/${get("month")}/${get("day")}（${weekdayMap[get("weekday")]||get("weekday").replace("星期","")}） ${get("hour")}:${get("minute")}`;
@@ -440,7 +447,6 @@ $("plan").onclick=async()=>{
  const s=makeState(), errors=validate(s);
  if(errors.length){$("output").innerHTML=`<h2>規劃結果</h2><div class="bad">❌ 無法規劃</div><ul>${errors.map(e=>`<li>${e}</li>`).join("")}</ul>`; planBtn.disabled=false; planBtn.classList.remove("planning"); planBtn.textContent="規劃失敗，請檢查輸入"; setTimeout(()=>{planBtn.textContent=planBtn.dataset.originalText||"開始規劃";},1400); return;}
  const base=$("baseTime").value?new Date($("baseTime").value):new Date();
- await new Promise(resolve=>setTimeout(resolve,0));
  const p=planner(s,base.getTime()), mode=modeText(base), score=nextScoring(base);
  let html=`<h2>規劃結果</h2>`;
  html+=`<div class="big">${mode}</div>`;
