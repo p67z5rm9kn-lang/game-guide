@@ -195,65 +195,91 @@ function plan(){
   function add(icon,time,text){lines.push(`${icon} ${time}：${text} ${stateText(s)}`);}
   function harvestN(n){return completeHarvestN(s,n);}
 
-  // 目標：勞拉一旦讓場上達到 11，就直到衝分日不再收割。
-  // 因此先反推「勞拉之後還剩幾個 +8」，再找最早仍能安全點擊勞拉的時間。
-  // 本案例：9/27 18:00、9/28 02:00、9/28 10:00；若 18:00 點勞拉，
-  // 後面兩個 +8 會使容量不足，因此最早安全點擊時間是 02:00。
+  // 策略核心：找「最早可安全點擊勞拉」的時間。
+  // 勞拉若在某個系統 +8 之後點擊，必須先處理足夠數量，
+  // 讓後續到衝分日前的所有 +8 都不會因 MAX 而浪費。
+  // 一旦勞拉讓場上達到 11，直到衝分日不再安排收割。
   const nonScore=events.filter(t=>t<score);
   const first18=nonScore.find(t=>tw(t).h===18);
   const first02=nonScore.find(t=>tw(t).h===2);
 
-  // 先完成並收割目前場上雷達；收割時會用庫存補回場上 8。
-  const initialTotal=s.field+s.inventory;
-  const initialHarvest=Math.min(initialTotal, s.field+s.inventory);
-  // 先把目前場上 8 完成，然後收割，之後可繼續收割庫存補進的雷達。
-  let doneCurrent=0;
-  while(s.unfinished>0) { if(!completeOne(s)) break; doneCurrent++; }
-  let h0=harvestN(Math.min(22,s.inventory+s.completed));
-  add("🟢","現在",`完成並收割 ${h0} 個雷達`);
+  // 現在只「完成」目前場上的未完成雷達，不立即收割。
+  // 這樣玩家可以保留場上 8，等系統 +8 到來後，再在最早可行時間
+  // 一次完成並收割足夠數量，接著點擊勞拉。
+  let doneNow=0;
+  while(s.unfinished>0){
+    if(!completeOne(s))break;
+    doneNow++;
+  }
+  add("🟢","現在",`完成場上 ${doneNow} 個雷達`);
 
   if(!s.lauraExists || s.lauraUsed){
-    // no future Laura action
-  }else if(first18 && first02){
-    // 18:00: system +8 first.
-    const r=system8(s);
-    if(r.lost>0)add("🚨",fmt(first18),`系統 +8，有 ${r.lost} 個雷達因庫存上限消失`);
-    else add("⚡",fmt(first18),"系統 +8");
-
-    // Earliest safe Laura is 02:00 in this scenario.
-    // Before Laura, reduce inventory so that Laura +17 inventory plus the 10:00 +8 fits MAX.
-    // Required: inventory <= MAX - 25.
-    const targetInv=Math.max(0,s.max-25);
-    const need=Math.max(0,s.inventory-targetInv);
-    if(need>0){
-      const got=harvestN(need);
-      add("⚠️",fmt(first18),`為了讓 ${fmt(first02)} 點擊勞拉後，衝分日前的 +8 不浪費，先完成並收割 ${got} 個雷達`);
+    // 無可用勞拉時走一般事件流程。
+    for(const t of nonScore){
+      system8(s);
+      add("⚡",fmt(t),"系統 +8");
     }
-
-    // 02:00：場上已有 8，因此勞拉 +20 = 場上 +3、庫存 +17；之後直到衝分日不再收割。
-    const n=applyLaura(s);
-    if(n)add("🧭",fmt(first02),`點擊勞拉 +${n}`);
-
-    // 10:00 scoring day: system +8, then stop strategy sequence.
-    const scoreEvent=events.find(t=>t===score);
-    if(scoreEvent){
-      const r2=system8(s);
-      if(r2.lost>0)add("🚨",fmt(scoreEvent),`系統 +8，有 ${r2.lost} 個雷達因庫存上限消失`);
-      else add("⚡",fmt(scoreEvent),"系統 +8");
-      add("🏆",fmt(scoreEvent),"今天是衝分日，請完成並收割所有雷達");
-    }
+    add("🏆",fmt(score),"今天是衝分日，請完成並收割所有雷達");
   }else{
-    // Generic fallback: process non-score events, but never harvest after Laura.
-    for(const t of events){
-      const p=tw(t);
-      if(p.h===10){
-        system8(s);
-        add("⚡",fmt(t),"系統 +8");
-        add("🏆",fmt(t),"今天是衝分日，請完成並收割所有雷達");
-        break;
+    // 找最早能點勞拉且不會讓後續 +8 浪費的事件。
+    // 每個候選時間都先模擬該時間前的 +8，再計算：
+    // 點勞拉後（場上 11、庫存 +17）到衝分日的所有 +8 都必須 <= MAX。
+    let lauraTime=null;
+    if(first18){
+      // 模擬 18:00 系統 +8。
+      system8(s);
+      add("⚡",fmt(first18),"系統 +8");
+
+      // 18:00 點勞拉：若點擊後直到衝分日仍有一次 02:00 +8，
+      // 必須先在 18:00 完成並收割「剛好足夠」的數量。
+      // 勞拉在場上 >=8 時會增加場上 3、庫存 17。
+      // 02:00 再 +8，所以點擊前庫存 <= MAX-25。
+      const targetInv=Math.max(0,s.max-25);
+      const need=Math.max(0,s.inventory-targetInv);
+      if(need>0){
+        const got=harvestN(need);
+        if(got>0)add("🔄",fmt(first18),`完成並收割 ${got} 個雷達`);
       }
-      system8(s); add("⚡",fmt(t),"系統 +8");
+
+      // 若現在已經可以安全點擊，這就是最早時間。
+      const canLauraNow=(s.inventory+17+8<=s.max);
+      if(canLauraNow){
+        const n=applyLaura(s);
+        if(n)add("🧭",fmt(first18),`點擊勞拉 +${n}`);
+        lauraTime=first18;
+      }else if(first02){
+        // 只有真的無法在 18:00 安全點擊時，才延後到 02:00。
+        // 這裡不輸出「為什麼」，只輸出玩家需要做的操作。
+        const r02=system8(s);
+        if(r02.lost>0){
+          // 02:00 本身不應該發生浪費；若發生，先記錄結果。
+          add("🚨",fmt(first02),`系統 +8，有 ${r02.lost} 個雷達因庫存上限消失`);
+        }else{
+          add("⚡",fmt(first02),"系統 +8");
+        }
+        const targetInv2=Math.max(0,s.max-17);
+        const need2=Math.max(0,s.inventory-targetInv2);
+        if(need2>0){
+          const got=harvestN(need2);
+          if(got>0)add("🔄",fmt(first02),`完成並收割 ${got} 個雷達`);
+        }
+        const n=applyLaura(s);
+        if(n)add("🧭",fmt(first02),`點擊勞拉 +${n}`);
+        lauraTime=first02;
+      }
     }
+
+    // 若勞拉在 18:00 已完成，02:00 的 +8 只做內部狀態計算，不顯示給玩家。
+    // 勞拉後不再收割；衝分日 10:00 也不顯示系統 +8。
+    for(const t of nonScore){
+      if(t===first18)continue;
+      if(lauraTime!==null){
+        system8(s);
+      }
+    }
+
+    // 到衝分日：策略顯示到這一句就結束。
+    add("🏆",fmt(score),"今天是衝分日，請完成並收割所有雷達");
   }
 
   const elapsed=performance.now()-t0;
@@ -263,7 +289,7 @@ function plan(){
   <div class="row"><b>🎯 理想狀態：</b>場上 11 ／ 庫存 ${s.max}</div>
   <div class="row"><b>📦 預計可達：</b>場上 ${s.field} ／ 庫存 ${s.inventory}</div>
   <div class="row"><b>📝 規劃摘要</b><pre>${lines.join("\n")}</pre></div>
-  <div class="row"><b>🔎 核心：</b>勞拉點擊後直到衝分日不再安排收割；每個節點都標示場上／庫存；衝分日 10:00 後不再列出後續 +8 或勞拉提醒。</div>`;
+  <div class="row"><b>🔎 核心：</b>策略會優先安排最早可執行的勞拉、完成與收割時間；勞拉點擊後直到衝分日不再安排收割。</div>`;
 }
 $("plan").onclick=plan;
 </script>
