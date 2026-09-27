@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>雷達規劃 Debug Planner</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;background:#071321;color:#eee;margin:0;padding:18px}
+.card{max-width:680px;margin:auto;background:#102338;border:1px solid #8b6a2b;border-radius:14px;padding:18px}
+h1{font-size:20px;margin:0 0 14px}
+label{display:block;margin:10px 0 5px;color:#d8c38b}
+input,select,button{box-sizing:border-box;width:100%;padding:11px;border-radius:9px;border:1px solid #657487;background:#172d43;color:#fff;font-size:16px}
+button{margin-top:14px;background:#8b6a2b;border:0;font-weight:700}
+.stage{padding:10px 12px;margin:8px 0;border-radius:9px;background:#172d43}
+.ok{color:#8fe39a}.run{color:#ffd66b}.bad{color:#ff8f8f}
+pre{white-space:pre-wrap;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🧪 雷達規劃 Debug Planner</h1>
+<p>這版不是正式計算器，只用來找出「規劃超過 30 秒」卡在哪一階段。</p>
+
+<label>庫存上限</label><input id="max" type="number" value="30">
+<label>目前庫存</label><input id="inv" type="number" value="22">
+<label>場上雷達</label><input id="field" type="number" value="8">
+<label>已完成</label><input id="completed" type="number" value="0">
+<label>基準時間</label><input id="base" type="datetime-local" value="2026-09-27T11:27">
+
+<button id="run">開始 Debug 規劃</button>
+<div id="stages"></div>
+<pre id="result"></pre>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+function stage(name, state){
+  const el=document.createElement("div");
+  el.className="stage";
+  el.innerHTML=`<span class="${state==="run"?"run":"ok"}">${state==="run"?"⏳":"✅"} ${name}</span>`;
+  $("stages").appendChild(el);
+  return el;
+}
+function done(el){el.querySelector("span").className="ok";el.querySelector("span").textContent="✅ "+el.textContent.replace("⏳ ","").replace("✅ ","");}
+
+function taiwanParts(ms){
+  const d=new Date(ms+8*3600000);
+  return {y:d.getUTCFullYear(),m:d.getUTCMonth(),day:d.getUTCDate(),h:d.getUTCHours(),min:d.getUTCMinutes()};
+}
+function taiwanMs(y,m,d,h,min=0){
+  return Date.UTC(y,m,d,h,min)-8*3600000;
+}
+function nextScore(ms){
+  const p=taiwanParts(ms), wd=new Date(Date.UTC(p.y,p.m,p.day)).getUTCDay();
+  let add;
+  if((wd===1||wd===5)&&p.h<10) add=0;
+  else add=wd===0?1:wd===1?4:wd===2?3:wd===3?2:wd===4?1:wd===5?3:2;
+  return taiwanMs(p.y,p.m,p.day+add,10);
+}
+function nextEvents(start,end){
+  const out=[];
+  const p=taiwanParts(start);
+  for(let i=-1;i<=4;i++){
+    const d=taiwanMs(p.y,p.m,p.day+i,0);
+    for(const h of [2,10,18]){
+      const t=d+h*3600000;
+      if(t>start && t<=end) out.push(t);
+    }
+  }
+  return out.sort((a,b)=>a-b);
+}
+function fmt(ms){
+  const p=taiwanParts(ms);
+  return `${p.y}/${String(p.m+1).padStart(2,"0")}/${String(p.day).padStart(2,"0")} ${String(p.h).padStart(2,"0")}:${String(p.min).padStart(2,"0")}`;
+}
+
+$("run").onclick=()=>{
+  $("stages").innerHTML="";
+  $("result").textContent="";
+  const t0=performance.now();
+
+  let e=stage("① 讀取輸入","run");
+  const state={
+    max:+$("max").value, inventory:+$("inv").value,
+    field:+$("field").value, completed:+$("completed").value
+  };
+  done(e);
+
+  e=stage("② 找下一個衝分日","run");
+  const score=nextScore(Date.parse($("base").value));
+  done(e);
+
+  e=stage("③ 找 +8 事件","run");
+  const events=nextEvents(Date.parse($("base").value),score);
+  done(e);
+
+  e=stage("④ 資源計算","run");
+  let field=state.field, inventory=state.inventory;
+  const rows=[];
+  for(const t of events){
+    const add=Math.min(8,Math.max(0,8-field));
+    field+=add;
+    const remain=8-add;
+    const store=Math.min(remain,Math.max(0,state.max-inventory));
+    inventory+=store;
+    rows.push(`${fmt(t)}  +8 → 場上 ${field} / 庫存 ${inventory}`);
+  }
+  done(e);
+
+  e=stage("⑤ 顯示結果","run");
+  $("result").textContent=
+`完成。
+下一個衝分點：${fmt(score)}
+找到 ${events.length} 個 +8 事件：
+
+${rows.join("\n")}
+
+總耗時：${(performance.now()-t0).toFixed(3)} ms`;
+  done(e);
+};
+</script>
+</body>
+</html>
