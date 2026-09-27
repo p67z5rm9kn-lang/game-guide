@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>雷達規則引擎 v1｜核心測試版</title>
+<title>雷達規則引擎 v1.1｜核心測試版</title>
 <style>
 body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;background:#071321;color:#eee;margin:0;padding:16px}
 .card{max-width:760px;margin:auto;background:#102338;border:1px solid #8b6a2b;border-radius:16px;padding:18px}
@@ -17,7 +17,7 @@ pre{white-space:pre-wrap;line-height:1.55;margin:0;font-size:14px}
 </head>
 <body>
 <div class="card">
-<h1>🧭 雷達規則引擎 v1｜核心測試版</h1>
+<h1>🧭 雷達規則引擎 v1.1｜核心測試版</h1>
 <div class="note">
 這一版先不做跨日策略。只建立「遊戲規則引擎」，讓每一個遊戲動作都依照已確認規則執行，再用自動測試確認結果。<br>
 重點：場上不足 8 時，庫存會自動補場；因此可以連續「完成 → 收割 → 補場 → 再完成 → 再收割」。勞拉在場上 ≥8 時固定 +3 進場上，其餘進庫存；勞拉不受庫存 MAX 限制；系統 +8 的新增雷達不能讓庫存超過 MAX，超出的部分浪費。
@@ -30,7 +30,7 @@ pre{white-space:pre-wrap;line-height:1.55;margin:0;font-size:14px}
 'use strict';
 
 /* =========================
-   雷達規則引擎 v1
+   雷達規則引擎 v1.1
    ========================= */
 const RadarEngine = (() => {
   const LAURA = {0:5,1:10,2:10,3:10,4:20,5:20};
@@ -253,11 +253,11 @@ function runTests(){
     eq([s.field,s.inventory,s.lost],[8,5,0],'狀態');
   });
 
-  test('15 先收25後4星勞拉：8/5 -> 11/22',()=>{
+  test('15 先收25後4星勞拉：5/0 -> 8/17',()=>{
     const s=RadarEngine.state(8,22,0);
     RadarEngine.completeAndHarvest(s,25);
     RadarEngine.laura(s,4);
-    eq([s.field,s.inventory],[11,22],'狀態');
+    eq([s.field,s.inventory],[8,17],'狀態');
   });
 
   test('16 先收25→18:00+8→勞拉→02:00+8：最終11/30且0浪費',()=>{
@@ -284,11 +284,21 @@ function runTests(){
     eq([s.field,s.completed,s.inventory],[11,2,0],'狀態');
   });
 
-  test('19 5星寶箱每次收割+1且最多10（核心狀態可外接）',()=>{
-    const s=RadarEngine.state(11,0,10);
-    // 引擎 v1 先只負責資源規則；寶箱由上層動作記錄，這裡確認不會改變雷達資源。
-    RadarEngine.completeAndHarvest(s,1);
-    eq([s.field,s.inventory,s.completed,s.treasure],[10,0,0,10],'雷達資源');
+  test('19 5星寶箱：每次收割+1，最多10',()=>{
+    const s=RadarEngine.state(11,0,0);
+    // 這裡只測試寶箱規則，不改變核心雷達資源引擎的收割邏輯。
+    function harvestWithTreasure(state, star){
+      const ok=RadarEngine.harvestOne(state);
+      if(ok && Number(star)===5) state.treasure=Math.min(10,state.treasure+1);
+      return ok;
+    }
+    RadarEngine.completeOne(s);
+    harvestWithTreasure(s,5);
+    eq([s.treasure,s.field,s.completed],[1,10,0],'第一次收割');
+    s.treasure=10;
+    RadarEngine.completeOne(s);
+    harvestWithTreasure(s,5);
+    eq([s.treasure,s.field,s.completed],[10,9,0],'達到上限後不再增加');
   });
 
   test('20 未完成到期1個後可由庫存自動補場',()=>{
@@ -303,10 +313,10 @@ function runTests(){
     eq([r.requested,r.processed,s.field,s.inventory,s.completed],[30,30,0,0,0],'結果');
   });
 
-  test('22 庫存不足時無法憑空補場',()=>{
+  test('22 場上5且庫存0：自動補場不會憑空產生雷達',()=>{
     const s=RadarEngine.state(5,0,0);
-    const ok=RadarEngine.completeOne(s);
-    eq(ok,false,'完成結果');
+    const moved=RadarEngine.refill(s);
+    eq(moved,0,'補場數量');
     eq([s.field,s.inventory,s.completed],[5,0,0],'狀態');
   });
 
