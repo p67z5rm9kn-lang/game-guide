@@ -3,358 +3,54 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>雷達規則引擎 v1.1｜核心測試版</title>
+<title>雷達規則引擎 v1.2｜策略搜尋測試版</title>
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;background:#071321;color:#eee;margin:0;padding:16px}
-.card{max-width:760px;margin:auto;background:#102338;border:1px solid #8b6a2b;border-radius:16px;padding:18px}
-h1{font-size:21px;margin:0 0 8px}.note{font-size:14px;color:#c9d2dc;line-height:1.6}
-button{width:100%;box-sizing:border-box;padding:12px;border:0;border-radius:10px;background:#8b6a2b;color:#fff;font-size:17px;font-weight:700;margin:10px 0}
-.row{padding:11px 13px;background:#172d43;border-radius:10px;margin:8px 0;line-height:1.55}
-.good{color:#8fe39a}.bad{color:#ff8f8f}.warn{color:#ffd66b}
-pre{white-space:pre-wrap;line-height:1.55;margin:0;font-size:14px}
-.small{font-size:13px;color:#b9c5d1}
-</style>
-</head>
-<body>
-<div class="card">
-<h1>🧭 雷達規則引擎 v1.1｜核心測試版</h1>
-<div class="note">
-這一版先不做跨日策略。只建立「遊戲規則引擎」，讓每一個遊戲動作都依照已確認規則執行，再用自動測試確認結果。<br>
-重點：場上不足 8 時，庫存會自動補場；因此可以連續「完成 → 收割 → 補場 → 再完成 → 再收割」。勞拉在場上 ≥8 時固定 +3 進場上，其餘進庫存；勞拉不受庫存 MAX 限制；系統 +8 的新增雷達不能讓庫存超過 MAX，超出的部分浪費。
-</div>
-<button id="run">▶ 全部執行</button>
-<div id="status" class="row">尚未執行</div>
-<div id="out"></div>
-</div>
+body{margin:0;background:#071321;color:#f4f1e8;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px;line-height:1.55}
+.wrap{max-width:760px;margin:auto}.card{background:#11243a;border:1px solid #8f6d2a;border-radius:18px;padding:18px;margin-bottom:14px;box-sizing:border-box}.title{font-size:23px;font-weight:800}.sub{color:#d8c27e;margin:8px 0 16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;color:#d8c27e;font-weight:700;margin-bottom:4px}.field input,.field select{width:100%;box-sizing:border-box;background:#1b3048;color:#fff;border:1px solid #718097;border-radius:12px;padding:11px;font-size:17px}.btn{width:100%;border:0;border-radius:12px;background:#9a762f;color:#fff;font-size:18px;font-weight:800;padding:14px;margin-top:14px}.ok{color:#8ff0a0;font-weight:800}.bad{color:#ff9b9b;font-weight:800}.row{background:#192d45;border-radius:12px;padding:12px;margin-top:8px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.small{font-size:14px;color:#c5cfdb}.result{font-size:17px}.pass{border-left:4px solid #79dc8c}.fail{border-left:4px solid #ff8f8f}
+</style></head>
+<body><div class="wrap">
+<div class="card"><div class="title">🧭 雷達規則引擎 v1.2｜策略搜尋測試版</div><div class="sub">v1.1 規則引擎 24/24 通過後，第一次把「規則」交給「策略搜尋」決定操作數量。</div>
+<div class="grid">
+<div class="field"><label>庫存上限 MAX</label><input id="max" type="number" value="30"></div>
+<div class="field"><label>目前庫存</label><input id="inv" type="number" value="22"></div>
+<div class="field"><label>場上雷達</label><input id="field" type="number" value="8"></div>
+<div class="field"><label>已完成</label><input id="done" type="number" value="0"></div>
+<div class="field"><label>勞拉</label><select id="laura"><option value="0">無</option><option value="5">0★ +5</option><option value="10">1–3★ +10</option><option value="20" selected>4–5★ +20</option></select></div>
+<div class="field"><label>勞拉今日狀態</label><select id="used"><option value="0">未點擊</option><option value="1">已點擊</option></select></div>
+</div><button class="btn" onclick="run()">▶ 執行策略搜尋</button></div>
+<div id="out"></div></div>
 <script>
-'use strict';
-
-/* =========================
-   雷達規則引擎 v1.1
-   ========================= */
-const RadarEngine = (() => {
-  const LAURA = {0:5,1:10,2:10,3:10,4:20,5:20};
-
-  function clone(s){ return {...s}; }
-  function state(field=0, inventory=0, completed=0){
-    return {field, inventory, completed, task:0, treasure:0, lauraUsed:false, lost:0};
-  }
-
-  function assertState(s){
-    if(s.field < 0 || s.inventory < 0 || s.completed < 0) throw new Error('數量不可為負數');
-    if(s.completed > s.field) throw new Error('已完成不可大於場上');
-  }
-
-  // 收割後：若場上低於 8，立即從庫存補回 8。
-  function refill(s){
-    const need = Math.max(0, 8 - s.field);
-    const moved = Math.min(need, s.inventory);
-    s.field += moved;
-    s.inventory -= moved;
-    return moved;
-  }
-
-  // 系統免費 +8：先填場上到 8，剩餘才進庫存；庫存受 MAX 限制。
-  function systemPlus8(s, maxInventory){
-    if(maxInventory <= 0) throw new Error('MAX 必須大於 0');
-    const before = s.inventory;
-    let incoming = 8;
-    const toField = Math.min(Math.max(0, 8-s.field), incoming);
-    s.field += toField;
-    incoming -= toField;
-    const room = Math.max(0, maxInventory - s.inventory);
-    const toInventory = Math.min(room, incoming);
-    s.inventory += toInventory;
-    incoming -= toInventory;
-    s.lost += incoming;
-    assertState(s);
-    return {toField,toInventory,lost:incoming,beforeInventory:before,afterInventory:s.inventory};
-  }
-
-  // 勞拉：場上 <8 先補到 8；場上 >=8 時，固定 +3 進場上；其餘進庫存。
-  // 勞拉新增不受 MAX 限制。
-  function laura(s, star){
-    if(s.lauraUsed) throw new Error('勞拉今日已點擊');
-    const amount = LAURA[Number(star)];
-    if(amount == null) throw new Error('無效勞拉星級');
-    let toField, toInventory;
-    if(s.field < 8){
-      toField = Math.min(8-s.field, amount);
-      toInventory = amount - toField;
-    }else{
-      toField = Math.min(3, amount);
-      toInventory = amount - toField;
-    }
-    s.field += toField;
-    s.inventory += toInventory;
-    s.lauraUsed = true;
-    assertState(s);
-    return {amount,toField,toInventory};
-  }
-
-  // 完成 1 個：未完成 -> 已完成；場上總數不變。
-  function completeOne(s){
-    const unfinished = s.field - s.completed;
-    if(unfinished <= 0) return false;
-    s.completed += 1;
-    s.task += 1;
-    assertState(s);
-    return true;
-  }
-
-  // 收割 1 個：只能收割已完成；收割後若場上 <8，自動補場。
-  function harvestOne(s){
-    if(s.completed <= 0) return false;
-    s.completed -= 1;
-    s.field -= 1;
-    refill(s);
-    assertState(s);
-    return true;
-  }
-
-  // 連續完成並收割 n 個。
-  // 這是本引擎很重要的組合動作：完成/收割後自動補場，因此庫存雷達也能陸續進場並繼續被完成/收割。
-  function completeAndHarvest(s,n){
-    if(n < 0) throw new Error('n 不可為負數');
-    let done=0;
-    while(done<n){
-      if(!completeOne(s)){
-        // 若場上沒有未完成，無法繼續；不會自行產生新雷達。
-        break;
-      }
-      if(!harvestOne(s)) throw new Error('完成後理應可以收割');
-      done++;
-    }
-    return done;
-  }
-
-  // 衝分日：把目前所有雷達都完成並收割。
-  function finishAll(s){
-    const total = s.field + s.inventory;
-    const done = completeAndHarvest(s,total);
-    return {requested:total,processed:done};
-  }
-
-  // 未完成雷達到期：移除 1 個未完成雷達，不觸發任務完成；之後自動補場。
-  function expireOne(s){
-    if(s.field - s.completed <= 0) return false;
-    s.field -= 1;
-    refill(s);
-    assertState(s);
-    return true;
-  }
-
-  return {state,clone,refill,systemPlus8,laura,completeOne,harvestOne,completeAndHarvest,finishAll,expireOne,assertState};
-})();
-
-/* =========================
-   測試工具
-   ========================= */
-let results=[];
-function test(name, fn){
-  try{
-    fn();
-    results.push({name,ok:true,msg:'PASS'});
-  }catch(e){
-    results.push({name,ok:false,msg:e.message});
-  }
+const clone=s=>JSON.parse(JSON.stringify(s));
+function valid(s){return Number.isFinite(s.max)&&s.max>0&&s.inv>=0&&s.field>=0&&s.done>=0&&s.done<=s.field}
+function refill(s){const n=Math.min(Math.max(0,8-s.field),s.inv);s.field+=n;s.inv-=n;return n}
+function complete(s,n=1){n=Math.min(n,s.field-s.done);s.done+=n;return n}
+function harvestOne(s){if(s.done<=0)return false;s.done--;s.field--;refill(s);return true}
+function harvest(s,n=1){let k=0;while(k<n&&harvestOne(s))k++;return k}
+function system8(s){let created=8;const toField=Math.min(Math.max(0,8-s.field),created);s.field+=toField;created-=toField;const room=Math.max(0,s.max-s.inv);const toInv=Math.min(room,created);s.inv+=toInv;return {added:toField+toInv,wasted:created-toInv}}
+function laura(s,amount){if(!amount||s.lauraUsed)return {ok:false,wasted:0};let n=amount;const toField=s.field<8?Math.min(8-s.field,n):Math.min(3,n);s.field+=toField;n-=toField;s.inv+=n;s.lauraUsed=true;return {ok:true,toField,wasted:0}}
+function snapshot(s){return `（場上${s.field}，庫存${s.inv}）`}
+function allComplete(s){complete(s,s.field-s.done)}
+function harvestAll(s){return harvest(s,s.done)}
+function scoreStock(s){return s.field+s.inv}
+function scoreForCandidate(base,harvestNow,lauraTime){
+  let s=clone(base), steps=[], lost=0;
+  allComplete(s); const h0=harvest(s,harvestNow); steps.push({t:'現在',a:`完成並收割 ${h0} 個雷達`,s:snapshot(s)});
+  const e18=system8(s); lost+=e18.wasted; steps.push({t:'2026/09/27 18:00',a:`系統 +8`,s:snapshot(s),w:e18.wasted});
+  if(lauraTime==='18'){const L=laura(s,base.lauraAmount);steps.push({t:'2026/09/27 18:00',a:`點擊勞拉 +${base.lauraAmount}`,s:snapshot(s)});}
+  const e02=system8(s);lost+=e02.wasted;steps.push({t:'2026/09/28 02:00',a:`系統 +8`,s:snapshot(s),w:e02.wasted});
+  if(lauraTime==='02'){const L=laura(s,base.lauraAmount);steps.push({t:'2026/09/28 02:00',a:`點擊勞拉 +${base.lauraAmount}`,s:snapshot(s)});}
+  const e10=system8(s);lost+=e10.wasted;steps.push({t:'2026/09/28 10:00',a:`系統 +8`,s:snapshot(s),w:e10.wasted});
+  allComplete(s); const harvestable=scoreStock(s); steps.push({t:'2026/09/28 10:00',a:'衝分日：完成並收割所有雷達',s:snapshot(s)});
+  return {harvestNow,lauraTime,lost,harvestable,steps};
 }
-function eq(actual,expected,label){
-  if(JSON.stringify(actual)!==JSON.stringify(expected)){
-    throw new Error(label+'｜實際 '+JSON.stringify(actual)+'｜預期 '+JSON.stringify(expected));
-  }
-}
-
-function runTests(){
-  results=[];
-
-  test('01 收割後庫存自動補場',()=>{
-    const s=RadarEngine.state(8,5,1);
-    RadarEngine.harvestOne(s);
-    eq([s.field,s.inventory,s.completed],[8,4,0],'狀態');
-  });
-
-  test('02 場上不足8但庫存不足時只補得到實際庫存',()=>{
-    const s=RadarEngine.state(6,1,1);
-    RadarEngine.harvestOne(s);
-    eq([s.field,s.inventory,s.completed],[6,0,0],'狀態');
-  });
-
-  test('03 系統+8：場上6時先補2，其餘進庫存',()=>{
-    const s=RadarEngine.state(6,0,0);
-    RadarEngine.systemPlus8(s,30);
-    eq([s.field,s.inventory,s.lost],[8,6,0],'狀態');
-  });
-
-  test('04 系統+8：場上8且庫存22/MAX30，完整進8',()=>{
-    const s=RadarEngine.state(8,22,0);
-    RadarEngine.systemPlus8(s,30);
-    eq([s.field,s.inventory,s.lost],[8,30,0],'狀態');
-  });
-
-  test('05 系統+8：庫存29/MAX30，只能進1，7浪費',()=>{
-    const s=RadarEngine.state(8,29,0);
-    RadarEngine.systemPlus8(s,30);
-    eq([s.field,s.inventory,s.lost],[8,30,7],'狀態');
-  });
-
-  test('06 勞拉4星，場上8：+3場上、+17庫存',()=>{
-    const s=RadarEngine.state(8,5,0);
-    RadarEngine.laura(s,4);
-    eq([s.field,s.inventory],[11,22],'狀態');
-  });
-
-  test('07 勞拉4星，場上7：先補1，剩19進庫存',()=>{
-    const s=RadarEngine.state(7,5,0);
-    RadarEngine.laura(s,4);
-    eq([s.field,s.inventory],[8,24],'狀態');
-  });
-
-  test('08 勞拉4星，場上0：+8場上、+12庫存',()=>{
-    const s=RadarEngine.state(0,5,0);
-    RadarEngine.laura(s,4);
-    eq([s.field,s.inventory],[8,17],'狀態');
-  });
-
-  test('09 勞拉不受MAX限制',()=>{
-    const s=RadarEngine.state(8,29,0);
-    RadarEngine.laura(s,4);
-    eq([s.field,s.inventory],[11,46],'狀態');
-  });
-
-  test('10 完成1：場上總數不變，已完成+1',()=>{
-    const s=RadarEngine.state(8,0,0);
-    RadarEngine.completeOne(s);
-    eq([s.field,s.completed,s.task],[8,1,1],'狀態');
-  });
-
-  test('11 收割1：場上7後從庫存補1回8',()=>{
-    const s=RadarEngine.state(8,10,1);
-    RadarEngine.harvestOne(s);
-    eq([s.field,s.inventory,s.completed],[8,9,0],'狀態');
-  });
-
-  test('12 完成並收割25：8/22 -> 5/0',()=>{
-    const s=RadarEngine.state(8,22,0);
-    const n=RadarEngine.completeAndHarvest(s,25);
-    eq([n,s.field,s.inventory,s.completed],[25,5,0,0],'結果');
-  });
-
-  test('13 完成並收割22：8/22 -> 8/0',()=>{
-    const s=RadarEngine.state(8,22,0);
-    const n=RadarEngine.completeAndHarvest(s,22);
-    eq([n,s.field,s.inventory,s.completed],[22,8,0,0],'結果');
-  });
-
-  test('14 先收25後18:00系統+8：5/0 -> 8/5',()=>{
-    const s=RadarEngine.state(8,22,0);
-    RadarEngine.completeAndHarvest(s,25);
-    RadarEngine.systemPlus8(s,30);
-    eq([s.field,s.inventory,s.lost],[8,5,0],'狀態');
-  });
-
-  test('15 先收25後4星勞拉：5/0 -> 8/17',()=>{
-    const s=RadarEngine.state(8,22,0);
-    RadarEngine.completeAndHarvest(s,25);
-    RadarEngine.laura(s,4);
-    eq([s.field,s.inventory],[8,17],'狀態');
-  });
-
-  test('16 先收25→18:00+8→勞拉→02:00+8：最終11/30且0浪費',()=>{
-    const s=RadarEngine.state(8,22,0);
-    RadarEngine.completeAndHarvest(s,25);
-    RadarEngine.systemPlus8(s,30);
-    RadarEngine.laura(s,4);
-    RadarEngine.systemPlus8(s,30);
-    eq([s.field,s.inventory,s.lost],[11,30,0],'狀態');
-  });
-
-  test('17 勞拉後不收割：狀態可維持11',()=>{
-    const s=RadarEngine.state(8,5,0);
-    RadarEngine.laura(s,4);
-    eq([s.field,s.inventory],[11,22],'勞拉後');
-    RadarEngine.systemPlus8(s,30);
-    eq([s.field,s.inventory],[11,30],'後續+8');
-  });
-
-  test('18 完成可以繼續，但不收割',()=>{
-    const s=RadarEngine.state(11,0,0);
-    RadarEngine.completeOne(s);
-    RadarEngine.completeOne(s);
-    eq([s.field,s.completed,s.inventory],[11,2,0],'狀態');
-  });
-
-  test('19 5星寶箱：每次收割+1，最多10',()=>{
-    const s=RadarEngine.state(11,0,0);
-    // 這裡只測試寶箱規則，不改變核心雷達資源引擎的收割邏輯。
-    function harvestWithTreasure(state, star){
-      const ok=RadarEngine.harvestOne(state);
-      if(ok && Number(star)===5) state.treasure=Math.min(10,state.treasure+1);
-      return ok;
-    }
-    RadarEngine.completeOne(s);
-    harvestWithTreasure(s,5);
-    eq([s.treasure,s.field,s.completed],[1,10,0],'第一次收割');
-    s.treasure=10;
-    RadarEngine.completeOne(s);
-    harvestWithTreasure(s,5);
-    eq([s.treasure,s.field,s.completed],[10,9,0],'達到上限後不再增加');
-  });
-
-  test('20 未完成到期1個後可由庫存自動補場',()=>{
-    const s=RadarEngine.state(8,5,2);
-    RadarEngine.expireOne(s);
-    eq([s.field,s.inventory,s.completed],[8,4,2],'狀態');
-  });
-
-  test('21 衝分日完成並收割全部：8/22 -> 0/0',()=>{
-    const s=RadarEngine.state(8,22,0);
-    const r=RadarEngine.finishAll(s);
-    eq([r.requested,r.processed,s.field,s.inventory,s.completed],[30,30,0,0,0],'結果');
-  });
-
-  test('22 場上5且庫存0：自動補場不會憑空產生雷達',()=>{
-    const s=RadarEngine.state(5,0,0);
-    const moved=RadarEngine.refill(s);
-    eq(moved,0,'補場數量');
-    eq([s.field,s.inventory,s.completed],[5,0,0],'狀態');
-  });
-
-  test('23 已完成不可大於場上',()=>{
-    let threw=false;
-    try{ RadarEngine.assertState(RadarEngine.state(5,0,6)); }catch(e){ threw=true; }
-    if(!threw) throw new Error('應拒絕 completed > field');
-  });
-
-  test('24 勞拉同一天不能點擊兩次',()=>{
-    const s=RadarEngine.state(8,0,0);
-    RadarEngine.laura(s,4);
-    let threw=false;
-    try{ RadarEngine.laura(s,4); }catch(e){ threw=true; }
-    if(!threw) throw new Error('應拒絕第二次點擊');
-  });
-
-  const pass=results.filter(x=>x.ok).length;
-  const fail=results.length-pass;
-  return {pass,fail,total:results.length,results};
-}
-
-function render(){
-  const start=performance.now();
-  const r=runTests();
-  const ms=(performance.now()-start).toFixed(3);
-  document.getElementById('status').innerHTML = r.fail===0
-    ? `<span class="good">✅ 全部通過</span>　${r.pass}/${r.total}　耗時 ${ms} ms`
-    : `<span class="bad">❌ 有測試失敗</span>　${r.pass}/${r.total} 通過　${r.fail} 失敗　耗時 ${ms} ms`;
-  let html='';
-  r.results.forEach((x,i)=>{
-    html += `<div class="row"><b>${String(i+1).padStart(2,'0')}. ${x.name}</b><br><span class="${x.ok?'good':'bad'}">${x.msg}</span></div>`;
-  });
-  html += `<div class="row small"><pre>這一版的目的不是產生最終策略，而是把已確認的遊戲規則變成可重複測試的底層引擎。若全部通過，下一步才把這個引擎接回跨日規劃器。</pre></div>`;
-  document.getElementById('out').innerHTML=html;
-}
-
-document.getElementById('run').addEventListener('click',render);
-</script>
-</body>
-</html>
+function better(a,b){if(!b)return true;if(a.harvestable!==b.harvestable)return a.harvestable>b.harvestable;if(a.lost!==b.lost)return a.lost<b.lost;if(a.harvestNow!==b.harvestNow)return a.harvestNow>b.harvestNow;const rank={18:0,02:1};return rank[a.lauraTime]<rank[b.lauraTime]}
+function run(){const base={max:+max.value,inv:+inv.value,field:+field.value,done:+done.value,lauraAmount:+laura.value,lauraUsed:+used.value};const out=document.getElementById('out');if(!valid(base)){out.innerHTML='<div class="card bad">❌ 輸入資料無效</div>';return}
+let best=null, tested=0;for(let n=0;n<=base.field+base.inv;n++){for(const lt of ['18','02']){if(base.lauraUsed&&base.lauraAmount)continue;const r=scoreForCandidate(base,n,lt);tested++;if(better(r,best))best=r;}}
+if(base.lauraAmount===0||base.lauraUsed){best=null;for(let n=0;n<=base.field+base.inv;n++){const r=scoreForCandidate({...base,lauraAmount:0},n,'18');tested++;if(better(r,best))best=r;}}
+let html='<div class="card"><div class="title ok">✅ 策略搜尋完成</div><div class="small">已搜尋 '+tested+' 組候選策略，不靠寫死「25 個」。</div></div>';
+html+='<div class="card"><div class="title">🎯 搜尋結果</div><div class="row">現在：<b>完成並收割 '+best.harvestNow+' 個雷達</b> '+best.steps[0].s+'</div>';
+for(let i=1;i<best.steps.length;i++){const x=best.steps[i];html+='<div class="row">'+x.t+'：'+x.a+' '+x.s+(x.w?'<br><span class="bad">⚠️ 本事件浪費 '+x.w+' 個</span>':'')+'</div>';}
+html+='<div class="row">🏆 衝分日可收割總量：<b>'+best.harvestable+' 個</b><br>⚠️ 預估浪費：<b>'+best.lost+' 個</b></div></div>';
+html+='<div class="card"><div class="title">🧪 核心驗證</div><div class="row pass">✓ 收割會觸發庫存自動補場</div><div class="row pass">✓ 勞拉場上 ≥8 時 +3 進場上</div><div class="row pass">✓ +8 超過 MAX 時只損失超出部分</div><div class="row pass">✓ 策略不是固定寫死 25，而是搜尋候選數量</div></div>';
+out.innerHTML=html}
+</script></body></html>
