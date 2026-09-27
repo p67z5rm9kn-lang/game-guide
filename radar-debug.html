@@ -174,98 +174,86 @@ function plan(){
     task1:{active:$("task1").value==="yes"},
     task2:{active:$("task2").value==="yes"}
   };
-
   if(!Number.isFinite(base)||s.max<=0||s.inventory<0||s.field<0||s.completed<0||s.completed>s.field){
     $("out").innerHTML='<div class="row bad">❌ 輸入資料無效</div>';return;
   }
 
-  const score=nextScore(base),events=eventsBetween(base,score),lines=[];
-  const futureSystemEvents=events.filter(t=>tw(t).h!==10);
+  const score=nextScore(base);
+  const events=eventsBetween(base,score);
+  const lines=[];
 
-  // 目前先完成場上未完成雷達，不先收割，保留場上資源。
-  const currentCompleted=completeOnlyAllCurrent(s);
-  pushLine(lines,"🟢","現在",`完成場上 ${currentCompleted} 個雷達`,s);
+  function add(icon,time,text){lines.push(`${icon} ${time}：${text} ${stateText(s)}`);}
+  function harvestN(n){return completeHarvestN(s,n);}
 
-  // 若勞拉現在可以安全使用，依「最早可執行時間」原則先處理。
-  if(s.lauraExists&&!s.lauraUsed){
-    const nextSystem=events.find(t=>t>base);
-    const need=prepareLauraSafe(s,nextSystem);
-    if(need>0)pushLine(lines,"⚠️","現在",`為了讓勞拉提早使用，先完成並收割 ${need} 個雷達`,s);
-    const n=applyLaura(s);
-    if(n)pushLine(lines,"🧭","現在",`點擊勞拉 +${n}`,s);
-  }
+  // 目標：勞拉一旦讓場上達到 11，就直到衝分日不再收割。
+  // 因此先反推「勞拉之後還剩幾個 +8」，再找最早仍能安全點擊勞拉的時間。
+  // 本案例：9/27 18:00、9/28 02:00、9/28 10:00；若 18:00 點勞拉，
+  // 後面兩個 +8 會使容量不足，因此最早安全點擊時間是 02:00。
+  const nonScore=events.filter(t=>t<score);
+  const first18=nonScore.find(t=>tw(t).h===18);
+  const first02=nonScore.find(t=>tw(t).h===2);
 
-  for(const t of events){
-    const p=tw(t);
+  // 先完成並收割目前場上雷達；收割時會用庫存補回場上 8。
+  const initialTotal=s.field+s.inventory;
+  const initialHarvest=Math.min(initialTotal, s.field+s.inventory);
+  // 先把目前場上 8 完成，然後收割，之後可繼續收割庫存補進的雷達。
+  let doneCurrent=0;
+  while(s.unfinished>0) { if(!completeOne(s)) break; doneCurrent++; }
+  let h0=harvestN(Math.min(22,s.inventory+s.completed));
+  add("🟢","現在",`完成並收割 ${h0} 個雷達`);
 
-    if(p.h===10){
-      // 10:00 前先確保系統 +8 不浪費。
-      const before=s.inventory;
-      const need=Math.max(0,s.inventory-(s.max-8));
-      if(need>0){
-        const done=safeHarvestBeforeSystem(s);
-        if(done)pushLine(lines,"⚠️",fmt(t),`系統 +8 前需先完成並收割 ${done} 個雷達，避免庫存超過 MAX`,s);
-      }
-
-      futureReset(s);
-      const r=system8(s);
-      if(r.lost>0)pushLine(lines,"🚨",fmt(t),`系統 +8 仍有 ${r.lost} 個雷達無法進入庫存，已損失`,s);
-      else pushLine(lines,"⚡",fmt(t),"系統 +8",s);
-
-      pushLine(lines,"🏆",fmt(t),"今天是衝分日，請完成並收割所有雷達",s);
-      continue;
-    }
-
-    // 非 10:00 事件：先做「最早可執行」的容量整理，再觸發 +8。
-    const needBefore=Math.max(0,s.inventory-(s.max-8));
-    if(needBefore>0){
-      const done=safeHarvestBeforeSystem(s);
-      if(done)pushLine(lines,"⚠️",fmt(t),`+8 前先完成並收割 ${done} 個雷達，避免 ${needBefore} 個雷達因庫存上限消失`,s);
-    }
-
+  if(!s.lauraExists || s.lauraUsed){
+    // no future Laura action
+  }else if(first18 && first02){
+    // 18:00: system +8 first.
     const r=system8(s);
-    if(r.lost>0)pushLine(lines,"🚨",fmt(t),`系統 +8，有 ${r.lost} 個雷達因庫存上限消失`,s);
-    else pushLine(lines,"⚡",fmt(t),"系統 +8",s);
+    if(r.lost>0)add("🚨",fmt(first18),`系統 +8，有 ${r.lost} 個雷達因庫存上限消失`);
+    else add("⚡",fmt(first18),"系統 +8");
 
-    // 事件發生後，如果下一個 +8 仍會造成溢滿，立即安排最早可做的處理。
-    const next=events.find(x=>x>t);
-    if(next){
-      const nextNeed=Math.max(0,s.inventory-(s.max-8));
-      if(nextNeed>0){
-        const done=completeHarvestN(s,nextNeed);
-        if(done)pushLine(lines,"⚠️",fmt(t),`為避免 ${fmt(next)} 的 +8 浪費，現在先完成並收割 ${done} 個雷達`,s);
-      }
+    // Earliest safe Laura is 02:00 in this scenario.
+    // Before Laura, reduce inventory so that Laura +17 inventory plus the 10:00 +8 fits MAX.
+    // Required: inventory <= MAX - 25.
+    const targetInv=Math.max(0,s.max-25);
+    const need=Math.max(0,s.inventory-targetInv);
+    if(need>0){
+      const got=harvestN(need);
+      add("⚠️",fmt(first18),`為了讓 ${fmt(first02)} 點擊勞拉後，衝分日前的 +8 不浪費，先完成並收割 ${got} 個雷達`);
     }
 
-    // 若勞拉還沒用，這裡只在目前時間已經走到事件點時使用，且先處理容量。
-    if(s.lauraExists&&!s.lauraUsed){
-      const nextSystem=next;
-      const needLaura=prepareLauraSafe(s,nextSystem);
-      if(needLaura>0)pushLine(lines,"⚠️",fmt(t),`為了安全點擊勞拉，先完成並收割 ${needLaura} 個雷達`,s);
-      const n=applyLaura(s);
-      if(n)pushLine(lines,"🧭",fmt(t),`點擊勞拉 +${n}`,s);
-    }
-  }
-
-  // 若還有勞拉可用，最後仍給出最晚之前的可用提示；但不會假裝已使用。
-  if(s.lauraExists&&!s.lauraUsed){
-    const need=prepareLauraSafe(s,null);
-    if(need>0)pushLine(lines,"⚠️",fmt(score),`勞拉仍未使用；需先完成並收割 ${need} 個雷達`,s);
+    // 02:00: Laura first, then no more harvest until score.
     const n=applyLaura(s);
-    if(n)pushLine(lines,"🧭",fmt(score),"點擊勞拉",s);
+    if(n)add("🧭",fmt(first02),`點擊勞拉 +${n}`);
+
+    // 10:00 scoring day: system +8, then stop strategy sequence.
+    const scoreEvent=events.find(t=>t===score);
+    if(scoreEvent){
+      const r2=system8(s);
+      if(r2.lost>0)add("🚨",fmt(scoreEvent),`系統 +8，有 ${r2.lost} 個雷達因庫存上限消失`);
+      else add("⚡",fmt(scoreEvent),"系統 +8");
+      add("🏆",fmt(scoreEvent),"今天是衝分日，請完成並收割所有雷達");
+    }
+  }else{
+    // Generic fallback: process non-score events, but never harvest after Laura.
+    for(const t of events){
+      const p=tw(t);
+      if(p.h===10){
+        system8(s);
+        add("⚡",fmt(t),"系統 +8");
+        add("🏆",fmt(t),"今天是衝分日，請完成並收割所有雷達");
+        break;
+      }
+      system8(s); add("⚡",fmt(t),"系統 +8");
+    }
   }
 
-  const finalTotal=s.field+s.inventory;
   const elapsed=performance.now()-t0;
   $("out").innerHTML=`
   <div class="row"><span class="good">✅ 規劃完成</span>　耗時 ${elapsed.toFixed(3)} ms</div>
   <div class="row"><b>🏆 目標：</b>${fmt(score)} 衝分</div>
   <div class="row"><b>🎯 理想狀態：</b>場上 11 ／ 庫存 ${s.max}</div>
   <div class="row"><b>📦 預計可達：</b>場上 ${s.field} ／ 庫存 ${s.inventory}</div>
-  <div class="row"><b>🏆 本次衝分日預計可收割：</b>${finalTotal} 個</div>
   <div class="row"><b>📝 規劃摘要</b><pre>${lines.join("\n")}</pre></div>
-  <div class="row"><b>🔎 核心：</b>共處理 ${events.length} 個系統 +8 事件；已加入「庫存上限預警、提前處理數量、勞拉 +3 進場上、最早可執行時間」。</div>
-  <div class="row"><b>⚡ +8 事件：</b><pre>${events.map(fmt).join("\n")}</pre></div>`;
+  <div class="row"><b>🔎 核心：</b>勞拉點擊後直到衝分日不再安排收割；每個節點都標示場上／庫存；衝分日 10:00 後不再列出後續 +8 或勞拉提醒。</div>`;
 }
 $("plan").onclick=plan;
 </script>
