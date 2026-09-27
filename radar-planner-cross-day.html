@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>雷達規劃器 Production v5</title>
+<title>雷達規劃器 Production v7</title>
 <style>
 body{margin:0;background:#111;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px}
 h1{font-size:25px;margin:0 0 8px}.desc{color:#aaa;line-height:1.55;margin-bottom:18px}
@@ -51,7 +51,7 @@ ul{margin:8px 0;padding-left:22px}
 </head>
 <body>
 <h1>雷達規劃器</h1>
-<div class="desc">Production v6｜跨日完整策略規劃：從目前時間一路模擬到下一個衝分日，包含每日任務、系統 +8、勞拉、完成、收割與自動補回。規劃只產生建議，不會直接修改玩家狀態。</div>
+<div class="desc">Production v7｜跨日完整策略規劃／效能修正版：從目前時間一路模擬到下一個衝分日，包含每日任務、系統 +8、勞拉、完成、收割與自動補回。規劃只產生建議，不會直接修改玩家狀態。</div>
 
 <div class="card">
 <h2>① 目前狀態</h2>
@@ -179,6 +179,7 @@ function makeState(){
 }
 function normalize(s){s=clone(s);s.unfinished=s.field-s.completed;return s;}
 function ideal(max){return {field:11,inventory:max-8};}
+const PLANNER_LIMITS={maxEvents:32,maxActions:240,maxLoopGuard:120};
 function planner(s,baseMs){
  s=normalize(s);
  const target=ideal(s.maxInventory);
@@ -201,85 +202,58 @@ function futureTaskReset(s){
 function system8At(s){return system8(s);}
 function simulateTaskGoal(s,required,actions,t,dayLabel){
  let guard=0;
- while(required>0){
-  if(++guard>60) return {state:s,remaining:required,aborted:true};
+ while(required>0&&guard++<PLANNER_LIMITS.maxLoopGuard){
   if(s.unfinished>0){
-   const n=Math.min(required,s.unfinished);
-   s=complete(s,n);actions.push({t,kind:"complete",n,day:dayLabel});required-=n;continue;
+   const n=Math.min(required,s.unfinished);s=complete(s,n);actions.push({t,kind:"complete",n,day:dayLabel});required-=n;continue;
   }
   if(s.completed>0){
-   const n=Math.min(s.completed,Math.max(1,s.field-7));
-   const beforeInv=s.inventory;
-   s=harvest(s,n);actions.push({t,kind:"harvest",n,inventoryUsed:beforeInv-s.inventory,day:dayLabel});
-   continue;
+   const n=Math.min(s.completed,Math.max(1,s.field-7));const beforeInv=s.inventory;s=harvest(s,n);actions.push({t,kind:"harvest",n,inventoryUsed:beforeInv-s.inventory,day:dayLabel});continue;
   }
   break;
  }
- return {state:s,remaining:required,aborted:false};
+ return {state:s,remaining:required};
 }
 function crossDayPlan(startMs,state){
- // Deterministic event-driven planner: evaluate only real game-day resets and
- // the three fixed +8 events per game day. No permutation/brute-force search.
- const started=performance.now();
- const MAX_MS=1200, MAX_ACTIONS=500;
  const score=nextScoring(startMs);
- let s=normalize(state), actions=[], aborted=false;
+ let s=normalize(state), actions=[], cursor=startMs;
  const dayLabel=ms=>fmt(ms).split(" ")[0];
+ let currentDayKey=gameDayKey(startMs);
  let nextReset=dayEnd(startMs);
+ // Current day: respect the user's actual task switches/progress.
+ let req=requiredToday(s);
+ let sim=simulateTaskGoal(s,req,actions,cursor,dayLabel(cursor)); s=sim.state;
+ // Known future system +8 events.
  const events=[];
  const utc2=new Date(startMs-2*HOUR);
  const baseUtc=Date.UTC(utc2.getUTCFullYear(),utc2.getUTCMonth(),utc2.getUTCDate(),0,0,0);
- for(let i=-1;i<8;i++){
-  for(const h of [0,8,16]){
-   const t=baseUtc+i*DAY+h*HOUR;
-   if(t>startMs&&t<score) events.push(t);
-  }
+ for(let i=-1;i<8;i++) for(const h of [0,8,16]){
+  const t=baseUtc+i*DAY+h*HOUR;
+  if(t>startMs&&t<score) events.push(t);
  }
  events.sort((a,b)=>a-b);
- let currentTaskDay=true;
- const applyTaskGoal=(required,t)=>{
-  const r=simulateTaskGoal(s,required,actions,t,dayLabel(t));
-  s=r.state;
-  if(r.aborted || actions.length>MAX_ACTIONS || performance.now()-started>MAX_MS){aborted=true;return false;}
-  return true;
- };
- // Current day uses the actual switches/progress entered by the player.
- if(!applyTaskGoal(requiredToday(s),startMs)) return {score,state:s,actions,taskOK:false,target:ideal(s.maxInventory),aborted:true};
- for(const t of events){
-  if(performance.now()-started>MAX_MS){aborted=true;break;}
+ let allTimes=[...events,score].sort((a,b)=>a-b);
+ for(const t of allTimes.slice(0,PLANNER_LIMITS.maxEvents)){
   while(nextReset<=t && nextReset<score){
-   s=futureTaskReset(s);
-   actions.push({t:nextReset,kind:"reset",day:dayLabel(nextReset)});
-   // Future planning assumption: Laura is available every new game day.
-   s.lauraAvailable=true;
+   s=futureTaskReset(s);currentDayKey=gameDayKey(nextReset);actions.push({t:nextReset,kind:"reset",day:dayLabel(nextReset)});
+   // Future days assume both daily tasks are mandatory. Use Laura once per day.
+   if(s.lauraAvailable===undefined){s.lauraAvailable=true;}
    if(!s.lauraUsed){s=laura(s);actions.push({t:nextReset,kind:"laura",day:dayLabel(nextReset)});}
-   // Future daily hard requirement: both tasks active => 20 completions.
-   if(!applyTaskGoal(20,nextReset)) break;
+   req=20;sim=simulateTaskGoal(s,req,actions,nextReset,dayLabel(nextReset));s=sim.state;
+   if(actions.length>PLANNER_LIMITS.maxActions) return {score,state:s,actions:actions.slice(0,PLANNER_LIMITS.maxActions),taskOK:false,target:ideal(s.maxInventory),limited:true};
    nextReset+=DAY;
   }
-  if(aborted) break;
-  s=system8At(s);
-  actions.push({t,kind:"system8",day:dayLabel(t)});
-  if(actions.length>MAX_ACTIONS){aborted=true;break;}
-  // Continue only if this day's mandatory task still needs completions.
+  if(t>=score) break;
+  s=system8At(s);actions.push({t,kind:"system8",day:dayLabel(t)});
+  // After a known source arrives, continue satisfying the current/future day's mandatory task.
   const remaining=requiredToday(s);
-  if(remaining>0 && !applyTaskGoal(remaining,t)) break;
+  if(remaining>0){sim=simulateTaskGoal(s,remaining,actions,t,dayLabel(t));s=sim.state;}
  }
- if(!aborted && score>=startMs){
-  while(nextReset<=score && nextReset<score){
-   s=futureTaskReset(s);actions.push({t:nextReset,kind:"reset",day:dayLabel(nextReset)});
-   s.lauraAvailable=true;s=laura(s);actions.push({t:nextReset,kind:"laura",day:dayLabel(nextReset)});
-   if(!applyTaskGoal(20,nextReset)) break;
-   nextReset+=DAY;
-  }
+ // Final scoring checkpoint: aim for field 11 / inventory MAX without inventing resources.
+ if(s.field>11&&s.completed>0){
+  const n=Math.min(s.completed,s.field-11);if(n>0){s=harvest(s,n);actions.push({t:score,kind:"harvest-final",n,day:dayLabel(score)});}
  }
- // Final scoring checkpoint: only perform useful cleanup; never search alternatives.
- if(!aborted && s.field>11 && s.completed>0){
-  const n=Math.min(s.completed,s.field-11);
-  if(n>0){s=harvest(s,n);actions.push({t:score,kind:"harvest-final",n,day:dayLabel(score)});}
- }
- const taskOK=!aborted && requiredToday(s)===0;
- return {score,state:s,actions,taskOK,target:ideal(s.maxInventory),aborted,elapsedMs:Math.round(performance.now()-started)};
+ const taskOK=requiredToday(s)===0;
+ return {score,state:s,actions,taskOK,target:ideal(s.maxInventory)};
 }
 function gameDayKey(ms){return new Date(ms-2*HOUR).toISOString().slice(0,10);}
 function dayEnd(ms){const p=taiwanParts(ms);return Date.UTC(p.y,p.m-1,p.d,2,0,0);}
@@ -410,11 +384,11 @@ $("plan").onclick=async()=>{
  planBtn.classList.add("planning");
  planBtn.dataset.originalText=planBtn.textContent;
  planBtn.textContent="規劃中…";
- await new Promise(r=>setTimeout(r,0));
  const s=makeState(), errors=validate(s);
  if(errors.length){$("output").innerHTML=`<h2>規劃結果</h2><div class="bad">❌ 無法規劃</div><ul>${errors.map(e=>`<li>${e}</li>`).join("")}</ul>`; planBtn.disabled=false; planBtn.classList.remove("planning"); planBtn.textContent="規劃失敗，請檢查輸入"; setTimeout(()=>{planBtn.textContent=planBtn.dataset.originalText||"開始規劃";},1400); return;}
  const base=$("baseTime").value?new Date($("baseTime").value):new Date();
- const p=planner(s), mode=modeText(base), score=nextScoring(base);
+ await new Promise(resolve=>setTimeout(resolve,0));
+ const p=planner(s,base.getTime()), mode=modeText(base), score=nextScoring(base);
  let html=`<h2>規劃結果</h2>`;
  html+=`<div class="big">${mode}</div>`;
  html+=`<div class="muted">計算基準：${fmt(base)}<br>下一個衝分時間：${fmt(score)}</div>`;
@@ -433,12 +407,6 @@ $("plan").onclick=async()=>{
   html+=`<div class="result"><b>衝分日操作方向</b><ul><li>完成可完成的未完成雷達</li><li>收割已完成雷達</li><li>不需要為下一個衝分日保留資源</li></ul></div>`;
  }else{
   const cp=crossDayPlan(base.getTime(),s);
-  if(cp.aborted){
-   $("output").innerHTML=`<h2>規劃結果</h2><div class="bad">❌ 規劃計算超過安全時間，已停止，避免頁面長時間卡住。</div><div class="muted" style="margin-top:8px">這不是遊戲資源不足；請重新按「開始規劃」。若持續發生，請回報當下輸入狀態。</div>`;
-   planBtn.disabled=false; planBtn.classList.remove("planning"); planBtn.textContent="規劃時間過長，請重試";
-   setTimeout(()=>{if(!planBtn.classList.contains("planning")){planBtn.textContent="開始規劃";}},1600);
-   return;
-  }
   const grouped={};
   for(const a of cp.actions){const key=a.day||fmt(a.t);(grouped[key]??=[]).push(a);}
   html+=`<div class="result"><b>跨日完整規劃</b>`;
@@ -458,8 +426,9 @@ $("plan").onclick=async()=>{
    html+=`</ul></div>`;
   }
   const finalOK=cp.state.field>=cp.target.field&&cp.state.inventory>=cp.target.inventory;
+  if(cp.limited){html+=`<div class="warn" style="margin-top:10px"><b>⚠️ 本次規劃已達安全計算上限，為避免手機長時間卡住，已停止繼續搜尋。請先依目前結果重新規劃。</b></div>`;}
   html+=`<div class="${finalOK?"good":"warn"}" style="margin-top:10px"><b>${finalOK?"預計可在衝分前達到理想準備狀態。":"目前已知資源模擬後，仍未能保證達到理想準備狀態；請依序執行並在新狀態下重新規劃。"}</b></div>`;
-  html+=`<div class="muted" style="margin-top:10px">計算耗時：約 ${cp.elapsedMs} ms。模擬終點：場上 ${cp.state.field}、已完成 ${cp.state.completed}、未完成 ${cp.state.unfinished}、庫存 ${cp.state.inventory}。不預設盟友瞬間幫助，也不預測未完成雷達提前消失。</div>`;
+  html+=`<div class="muted" style="margin-top:10px">模擬終點：場上 ${cp.state.field}、已完成 ${cp.state.completed}、未完成 ${cp.state.unfinished}、庫存 ${cp.state.inventory}。不預設盟友瞬間幫助，也不預測未完成雷達提前消失。</div>`;
   html+=`</div>`;
  } $("output").innerHTML=html;
  $("timeInfo").textContent=`${mode}｜基準 ${fmt(base)}`;
