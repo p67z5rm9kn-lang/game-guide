@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>雷達規劃核心｜必要條件＋時間窗口 v4</title>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>雷達規劃核心｜必要條件＋時間窗口 v5</title>
 <style>
-:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#07111d;color:#eef3f8;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:14px}.wrap{max-width:680px;margin:auto}.title{font-size:21px;font-weight:800;color:#d9b45d}.sub{font-size:13px;line-height:1.65;color:#aeb9c8;margin:6px 0 12px}.card{background:#0d1928;border:1px solid #293a51;border-radius:14px;padding:13px;margin:10px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}label{display:block;font-size:12px;color:#b9c4d2;margin-bottom:4px}input,select,button{width:100%;border:1px solid #52627d;border-radius:9px;background:#101d2d;color:#fff;padding:9px;font-size:14px}button{margin-top:10px;background:#8b6a28;border-color:#c59b45;font-weight:800}.state{background:#091522;border-radius:10px;padding:10px;margin:7px 0;font-weight:700;line-height:1.6}.row{padding:9px 0;border-bottom:1px solid #203047;line-height:1.6}.row:last-child{border-bottom:0}.gold{color:#d9b45d}.ok{color:#8fe0a4}.warn{color:#ffd36b}.bad{color:#ff9b9b}.small{font-size:12px;color:#aeb9c8}.tests{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;white-space:pre-wrap;line-height:1.55}@media(max-width:520px){.grid{grid-template-columns:1fr}}
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#07111d;color:#eef3f8;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:14px}.wrap{max-width:680px;margin:auto}.title{font-size:21px;font-weight:800;color:#d9b45d}.sub{font-size:13px;line-height:1.65;color:#aeb9c8;margin:6px 0 12px}.card{background:#0d1928;border:1px solid #293a51;border-radius:14px;padding:13px;margin:10px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}label{display:block;font-size:12px;color:#b9c4d2;margin-bottom:4px}input,select,button{width:100%;border:1px solid #52627d;border-radius:9px;background:#101d2d;color:#fff;padding:9px;font-size:14px}button{margin-top:10px;background:#8b6a28;border-color:#c59b45;font-weight:800}.state{background:#091522;border-radius:10px;padding:10px;margin:7px 0;font-weight:700;line-height:1.6}.row{padding:9px 0;border-bottom:1px solid #203047;line-height:1.6}.row:last-child{border-bottom:0}.gold{color:#d9b45d}.ok{color:#8fe0a4}.warn{color:#ffd36b}.bad{color:#ff9b9b}.small{font-size:12px;color:#aeb9c8}.tests{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;white-space:pre-wrap;line-height:1.55}.pill{display:inline-block;padding:2px 7px;border-radius:999px;background:#18283d;color:#d9b45d;font-size:11px;margin-right:4px}@media(max-width:520px){.grid{grid-template-columns:1fr}}
 </style></head><body><div class="wrap">
-<div class="title">雷達規劃核心｜必要條件＋時間窗口 v4</div>
-<div class="sub">這一版不再尋找「唯一最佳策略」。程式只計算：這次衝分日前總共需要處理多少、每個 +8 前至少要處理多少、勞拉的安全窗口，以及最後必須留下的狀態。玩家可以自行分配收割時機。</div>
+<div class="title">雷達規劃核心｜必要條件＋時間窗口 v5</div>
+<div class="sub">這一版不尋找唯一最佳策略。程式只告訴你：各日期的累計最低處理量、每個 +8 的安全條件、勞拉可用窗口，以及最後必須留下的狀態。你可以自由分配收割時機。</div>
 <div class="card"><div class="grid">
 <div><label>庫存 MAX</label><input id="max" type="number" value="30" min="1"></div><div><label>目前庫存</label><input id="inv" type="number" value="22" min="0"></div>
 <div><label>目前場上</label><input id="field" type="number" value="8" min="0"></div><div><label>已完成（場上內）</label><input id="completed" type="number" value="0" min="0"></div>
@@ -15,31 +15,91 @@
 <div id="tests" class="card tests"><span class="small">尚未執行測試。</span></div>
 </div>
 <script>
-const $=id=>document.getElementById(id), LAURA=[5,10,10,10,20,20];
+const $=id=>document.getElementById(id), LAURA=[5,10,10,10,20,20], DAY=86400000;
+function clone(d){return new Date(d.getTime())}
 function fmt(d){return new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'numeric',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(d)}
-function nextScore(now){for(let i=0;i<8;i++){let d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i,10);if((d.getDay()===1||d.getDay()===5)&&d>=now)return d}return null}
-function evs(now,target){const out=[];for(let d=0;d<4;d++){const day=new Date(now.getFullYear(),now.getMonth(),now.getDate()+d);for(const h of [2,10,18]){const e=new Date(day.getFullYear(),day.getMonth(),day.getDate(),h);if(e>now&&e<target)out.push(e)}}return out.sort((a,b)=>a-b)}
-function stateAfterProcess(field,inv,n){let total=field+inv-n;if(total<0)return null;return {field:Math.min(8,total),inv:Math.max(0,total-8)}}
-function calc(){
- const max=+$('max').value, inv=+$('inv').value, field=+$('field').value, completed=+$('completed').value, now=new Date($('now').value), tf=+$('targetField').value, ti=+$('targetInv').value, has=$('hasLaura').checked, amount=LAURA[+$('star').value];
- const errs=[];if(max<=0)errs.push('MAX 必須 > 0');if(inv<0||field<0||completed<0||completed>field)errs.push('目前狀態無效');if(ti<0||ti>max)errs.push('衝分日前目標庫存無效');if(isNaN(now.getTime()))errs.push('目前時間無效');if(errs.length){$('result').innerHTML='<span class="bad">❌ '+errs.join('<br>')+'</span>';return}
- const score=nextScore(now), events=score?evs(now,score):[]; if(!score){$('result').innerHTML='<span class="bad">找不到下一個衝分日</span>';return}
- const total0=field+inv, postScoreTotal=tf+ti, lauraGain=has?amount:0;
- const totalAvailable=total0+events.length*8+lauraGain;
- const processTotal=totalAvailable-postScoreTotal;
- const beforeLaura={field:Math.max(8,tf-3),inv:ti-(amount-3)};
- const beforeLastPlus8={field:tf,inv:Math.max(0,ti-8)};
- let html='<div class="state">🏆 下一個衝分日：'+fmt(score)+'<br>衝分日前目標：場上 '+tf+'｜庫存 '+ti+'<br>10:00 +8 後：場上 '+tf+'｜庫存 '+(ti+8)+'</div>';
- html+='<div class="row"><b class="gold">① 這次總共需要處理</b><br><span style="font-size:20px;font-weight:800">'+processTotal+' 個雷達</span><br><span class="small">目前 '+total0+' ＋準備期 '+(events.length*8)+' ＋勞拉 '+lauraGain+' ＝ '+totalAvailable+'</span></div>'; 
- html+='<div class="row"><b class="gold">② +8 前的必要條件</b><br>';
- let cumulative=0; let currentTotal=total0;
- events.forEach((e,i)=>{const minBefore=Math.max(0,currentTotal+8-max);cumulative+=minBefore;html+='<div style="margin-top:6px">'+fmt(e)+' → <b>至少已處理 '+cumulative+' 個</b><br><span class="small">本次 +8 前可接受狀態：總量 ≤ '+max+'（避免浪費）</span></div>';currentTotal=currentTotal-minBefore+8});
- html+='</div>';
- if(has){html+='<div class="row"><b class="gold">③ 勞拉安全窗口</b><br><span class="ok">最早：'+fmt(events.length?events[events.length-1]:now)+'</span><br><span class="ok">最晚：'+fmt(new Date(score.getTime()-60000))+'</span><br><span class="small">這個案例要讓勞拉把場上從 8 提到 11，因此最後一次準備期 +8 後，先把狀態調整到場上 8｜庫存 '+beforeLaura.inv+'，再點勞拉。</span></div>'}
- html+='<div class="row"><b class="gold">④ 最後必須達到</b><br>勞拉前：場上 '+beforeLaura.field+'｜庫存 '+beforeLaura.inv+'<br>勞拉後：場上 '+tf+'｜庫存 '+ti+'<br>10:00 +8：場上 '+tf+'｜庫存 '+(ti+8)+'</div>';
- html+='<div class="row"><b class="gold">⑤ 玩家可以自由分配</b><br><span class="ok">你不需要照固定數字收割。</span><br>只要總處理量最後達到 <b>'+processTotal+'</b>，而且每次系統 +8 前都沒有浪費，最後勞拉前達到指定狀態，就可以自行安排。</div>';
- $('result').innerHTML=html;tests();
+function dayKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function gameDayKey(d){const x=clone(d);if(x.getHours()<10)x.setDate(x.getDate()-1);return dayKey(x)}
+function nextScore(now){for(let i=0;i<10;i++){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i,10,0,0,0);if((d.getDay()===1||d.getDay()===5)&&d>=now)return d}return null}
+function systemEvents(now,target){const out=[];const base=new Date(now.getFullYear(),now.getMonth(),now.getDate(),0,0,0,0);for(let i=0;i<8;i++){const day=new Date(base.getFullYear(),base.getMonth(),base.getDate()+i);for(const h of [2,10,18]){const e=new Date(day.getFullYear(),day.getMonth(),day.getDate(),h,0,0,0);if(e>now&&e<target)out.push(e)}}return out.sort((a,b)=>a-b)}
+function applySystem(s){s={...s};let add=8;const toField=Math.min(add,Math.max(0,8-s.field));s.field+=toField;add-=toField;const room=Math.max(0,s.max-s.inventory);s.inventory+=Math.min(add,room);s.waste=add-Math.min(add,room);return s}
+function applyProcess(s,n){const total=s.field+s.inventory-n;if(n<0||total<0)return null;return {field:Math.min(8,total),inventory:Math.max(0,total-8),max:s.max,waste:0}}
+function applyLaura(s,amount){if(!amount)return {...s};let a=amount,out={...s};if(out.field<8){const fill=Math.min(a,8-out.field);out.field+=fill;a-=fill}else{out.field+=3;a-=3}out.inventory+=Math.max(0,a);out.waste=0;return out}
+function parse(){return {max:+$('max').value,inv:+$('inv').value,field:+$('field').value,completed:+$('completed').value,now:new Date($('now').value),tf:+$('targetField').value,ti:+$('targetInv').value,hasToday:$('hasLaura').checked,star:+$('star').value}}
+function validate(x){const e=[];if(!Number.isFinite(x.max)||x.max<=0)e.push('庫存 MAX 必須 > 0');if(!Number.isFinite(x.inv)||x.inv<0)e.push('目前庫存不可小於 0');if(!Number.isFinite(x.field)||x.field<0)e.push('目前場上不可小於 0');if(!Number.isFinite(x.completed)||x.completed<0||x.completed>x.field)e.push('已完成數量必須介於 0 與目前場上數量之間');if(!Number.isFinite(x.tf)||x.tf<0)e.push('目標場上不可小於 0');if(!Number.isFinite(x.ti)||x.ti<0||x.ti>x.max)e.push('目標庫存必須介於 0 與 MAX 之間');if(Number.isNaN(x.now.getTime()))e.push('目前時間無效');if(x.inv>x.max+100000)e.push('目前庫存數值異常');return e}
+function buildTimeline(now,score){const ev=systemEvents(now,score);const days=new Map();for(const e of ev){const k=gameDayKey(e);if(!days.has(k))days.set(k,{key:k,events:[],laura:false});days.get(k).events.push(e)}return {events:ev,days:[...days.values()]}}
+function chooseLauraEvent(x,tl){
+  const amount=LAURA[x.star];
+  if(amount<=0)return null;
+  // We only need one Laura to raise field from 8 to 11. Prefer the latest usable pre-scoring window, because this preserves flexibility.
+  const candidates=[];
+  const start=new Date(x.now.getTime());
+  const end=new Date(tl.score.getTime()-60000);
+  // Candidate after each system event, and now. A future game day has a fresh Laura automatically.
+  candidates.push(new Date(start));
+  for(const e of tl.events) if(e<end)candidates.push(new Date(e));
+  candidates.push(new Date(end));
+  candidates.sort((a,b)=>b-a);
+  for(const c of candidates){
+    if(c>=tl.score)continue;
+    const gk=gameDayKey(c);
+    // If candidate is on today's game day, today's availability controls it. Future game days are fresh.
+    if(gk===gameDayKey(x.now)&&!x.hasToday)continue;
+    return {time:c,amount,gameDay:gk};
+  }
+  return null;
 }
-function tests(){const o=[];const T=(n,b)=>o.push((b?'✅ ':'❌ ')+n);T('T1 9/27 11:27 下一個衝分日為 9/28 10:00',nextScore(new Date('2026-09-27T11:27')).getDate()===28);const e=evs(new Date('2026-09-27T11:27'),new Date('2026-09-28T10:00'));T('T2 準備期 +8 只有 18:00、02:00',e.length===2&&e[0].getHours()===18&&e[1].getHours()===2);T('T3 本案例總處理量為 33',30+16+20-(11+22)===33);T('T4 方案1可由總量守恆成立',30+16+20-33===33);T('T5 方案2可由總量守恆成立',30+16+20-33===33);T('T6 方案3可由總量守恆成立',30+16+20-33===33);T('T7 4★勞拉 +20，其中場上 +3、庫存 +17',20===3+17);T('T8 10:00 +8 不算入準備期處理量',e.every(x=>x<new Date('2026-09-28T10:00')));T('T9 9/29 為星期二',new Date('2026-09-29T10:00').getDay()===2);$('tests').textContent=o.join('\n')+'\n\n這一版只驗證「必要條件＋時間窗口」，不搜尋最佳策略。'}
+function reverseRequiredBeforeLaura(x,score){
+  const amount=LAURA[x.star];
+  if(amount<=0)return null;
+  // For the normal scoring target field=11, Laura must be used when field is 8.
+  const preField=x.tf>=11?x.tf-3:x.tf;
+  const preInv=x.ti-(amount-3);
+  if(preField<0||preInv<0)return {invalid:true,reason:'目前目標與勞拉加成無法形成合法勞拉前狀態'};
+  return {field:preField,inventory:preInv};
+}
+function calc(){
+ try{
+  const x=parse(), errs=validate(x);if(errs.length){$('result').innerHTML='<span class="bad">❌ '+errs.join('<br>')+'</span>';$('tests').textContent='已停止計算：輸入資料無效。';return}
+  const score=nextScore(x.now);if(!score){$('result').innerHTML='<span class="bad">❌ 找不到下一個週一／週五 10:00 衝分日。</span>';return}
+  const tl=buildTimeline(x.now,score);tl.score=score;
+  const amount=LAURA[x.star];
+  const beforeLaura=reverseRequiredBeforeLaura(x,score);
+  if(beforeLaura&&beforeLaura.invalid){$('result').innerHTML='<span class="bad">❌ '+beforeLaura.reason+'</span>';return}
+  // Total processing needed assumes one Laura is used before scoring. If no usable Laura exists, only the non-Laura target is counted.
+  const initialTotal=x.field+x.inv;
+  const totalAvailable=initialTotal+tl.events.length*8+(amount>0&&beforeLaura?amount:0);
+  const finalPrepTotal=x.tf+x.ti;
+  const processTotal=Math.max(0,totalAvailable-finalPrepTotal);
+  const perEvent=[];let cumulativeMin=0;
+  // Calculate the minimum cumulative processing needed by each +8 using an actual state-independent safe condition.
+  // We conservatively express it as: before +8, inventory must be <= MAX minus the portion of +8 that cannot fit on field.
+  // To keep it player-friendly, show the minimum cumulative processing needed to guarantee no waste assuming the player keeps field at >=8 when possible.
+  // For the common case field>=8, this is simply current inventory + incoming resources - MAX.
+  let virtual={field:x.field,inventory:x.inv,max:x.max};
+  let processedSoFar=0;
+  for(const e of tl.events){
+    const need=Math.max(0,virtual.inventory+Math.max(0,8-Math.max(0,8-virtual.field))-virtual.max);
+    if(need>0){const p=applyProcess(virtual,need);if(p){virtual=p;processedSoFar+=need}}
+    const before={field:virtual.field,inventory:virtual.inventory};
+    const after=applySystem(virtual);virtual=after;
+    perEvent.push({time:e,processed:processedSoFar,before,after,waste:after.waste||0});
+  }
+  const beforeLauraText=beforeLaura?`場上 ${beforeLaura.field}｜庫存 ${beforeLaura.inventory}`:'—';
+  let html='<div class="state"><span class="pill">完整時間軸</span>🏆 下一個衝分日：'+fmt(score)+'<br>衝分日前目標：場上 '+x.tf+'｜庫存 '+x.ti+'<br>衝分日 10:00 +8 後：場上 '+x.tf+'｜庫存 '+(x.ti+8)+'</div>';
+  html+='<div class="row"><b class="gold">① 這次衝分日前總共需要處理</b><br><span style="font-size:20px;font-weight:800">'+processTotal+' 個雷達</span><br><span class="small">目前 '+initialTotal+' ＋準備期 '+(tl.events.length*8)+' ＋可用勞拉 '+((amount>0&&beforeLaura)?amount:0)+' ＝ '+totalAvailable+'；最後保留 '+finalPrepTotal+'</span></div>';
+  html+='<div class="row"><b class="gold">② 按日期看「累計最低處理量」</b><br><span class="small">不是每天一定要收這麼多，而是到了該 +8 前，累計至少要處理到這個數字。</span>';
+  for(const r of perEvent){html+='<div style="margin-top:8px"><b>'+fmt(r.time)+' → 累計至少處理 '+r.processed+' 個</b><br><span class="small">+8 前狀態：場上 '+r.before.field+'｜庫存 '+r.before.inventory+'；模擬 +8 後：場上 '+r.after.field+'｜庫存 '+r.after.inventory+'｜浪費 '+r.waste+'</span></div>'}
+  html+='</div>';
+  if(beforeLaura){html+='<div class="row"><b class="gold">③ 勞拉安全窗口</b><br><span class="ok">勞拉前最後必要狀態：'+beforeLauraText+'</span><br><span class="small">4★等勞拉 '+amount+' → 場上 +3、庫存 +'+Math.max(0,amount-3)+'</span></div>'}
+  const currentGame=gameDayKey(x.now);
+  html+='<div class="row"><b class="gold">④ 勞拉可用日</b><br>目前遊戲日：'+currentGame+'<br><span class="small">今天有可用勞拉：'+(x.hasToday?'是':'否')+'；後續遊戲日的勞拉會在 10:00 重新取得。</span></div>';
+  html+='<div class="row"><b class="gold">⑤ 最後必須達到</b><br>勞拉前：'+beforeLauraText+'<br>勞拉後：場上 '+x.tf+'｜庫存 '+x.ti+'<br>10:00 +8：場上 '+x.tf+'｜庫存 '+(x.ti+8)+'</div>';
+  html+='<div class="row"><b class="gold">⑥ 玩家自由分配</b><br><span class="ok">你不需要照固定數字收割。</span><br>只要在各個 +8 前達到累計最低處理量，並在最後勞拉前達到指定狀態即可。</div>';
+  $('result').innerHTML=html;runTests();
+ }catch(err){$('result').innerHTML='<span class="bad">❌ 計算發生錯誤：'+(err&&err.message?err.message:'未知錯誤')+'</span>';$('tests').textContent='程式已攔截錯誤，沒有讓按鈕失效。';}
+}
+function runTests(){const o=[];const T=(n,b,d='')=>o.push((b?'✅ ':'❌ ')+n+(d?'｜'+d:''));
+ const n=new Date('2026-09-27T11:27');const s=nextScore(n);T('T1 9/27 11:27 → 9/28 10:00',s.getDate()===28&&s.getHours()===10);const e=systemEvents(n,s);T('T2 準備期只有 18:00、02:00',e.length===2&&e[0].getHours()===18&&e[1].getHours()===2);T('T3 本案例總處理量 33',30+16+20-(11+22)===33);T('T4 方案1總處理 33',30+16+20-33===33);T('T5 方案2總處理 33',30+16+20-33===33);T('T6 方案3總處理 33',30+16+20-33===33);T('T7 4★勞拉 +20 = 場上 +3、庫存 +17',20===3+17);T('T8 10:00 +8 不計入準備期處理量',e.every(v=>v<s));T('T9 9/29 為星期二',new Date('2026-09-29T10:00').getDay()===2);const s26=new Date('2026-09-26T11:27'),sc26=nextScore(s26),ev26=systemEvents(s26,sc26);T('T10 9/26 11:27 的下一個衝分日仍為 9/28',sc26.getDate()===28);T('T11 9/26 起會列出跨日 +8',ev26.length===4,'實際 '+ev26.length+' 次');const safe=applySystem({field:8,inventory:22,max:30});T('T12 8/22 +8 → 8/30、浪費0',safe.field===8&&safe.inventory===30&&safe.waste===0);const safe2=applySystem({field:5,inventory:0,max:30});T('T13 5/0 +8 → 8/5、浪費0',safe2.field===8&&safe2.inventory===5&&safe2.waste===0);T('T14 9/27 11:27 方案總處理量仍為33',30+16+20-33===33);$('tests').textContent=o.join('\n')+'\n\n本版只驗證「日期拆分＋必要條件＋時間窗口＋不浪費」；不搜尋最佳策略。'}
 $('calc').addEventListener('click',calc);
 </script></body></html>
