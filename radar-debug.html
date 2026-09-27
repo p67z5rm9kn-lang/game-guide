@@ -79,13 +79,17 @@ function dayStart(ms){
 }
 function systemEvents(start,end){
   const out=[];
-  let cursor=dayStart(start);
-  if(cursor<=start) cursor+=DAY;
-  while(cursor<end){
-    const p=tw(cursor);
-    const a=[twMs(p.y,p.m,p.d,18),twMs(p.y,p.m,p.d+1,2),twMs(p.y,p.m,p.d+1,10)];
+  const p0=tw(start);
+  // 直接建立「基準日」及其後數日的固定 +8 時間點。
+  // 事件包含衝分日 10:00 本身，因此使用 <= end。
+  for(let i=-1;i<=3;i++){
+    const y=p0.y, m=p0.m, d=p0.d+i;
+    const a=[
+      twMs(y,m,d,2),
+      twMs(y,m,d,10),
+      twMs(y,m,d,18)
+    ];
     for(const t of a) if(t>start&&t<=end) out.push(t);
-    cursor+=DAY;
   }
   return out.sort((a,b)=>a-b);
 }
@@ -216,7 +220,8 @@ function plan(){
     <div class="row"><b>📦 預計可達：</b>場上 ${s.field} ／ 庫存 ${s.inventory}</div>
     <div class="row"><b>🏆 本次衝分日預計可收割：</b>${beforeHarvest} 個</div>
     <div class="row"><b>📝 規劃摘要</b><pre>${lines.join("\n")||"目前沒有額外事件。"}</pre></div>
-    <div class="row"><b>🔎 核心：</b>共處理 ${events.length} 個系統 +8 事件；完成動作 ${completedNow} 次；最後模擬收割 ${harvested} 個。</div>`;
+    <div class="row"><b>🔎 核心：</b>共處理 ${events.length} 個系統 +8 事件；完成動作 ${completedNow} 次；最後模擬收割 ${harvested} 個。</div>
+    <div class="row"><b>⚡ +8 事件：</b><pre>${events.map(fmt).join("\n")||"沒有符合條件的 +8 事件"}</pre></div>`;
 }
 $("plan").onclick=plan;
 </script>
