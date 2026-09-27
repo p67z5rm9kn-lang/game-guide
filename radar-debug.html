@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>雷達規劃核心｜必要條件＋時間窗口 v5</title>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>雷達規劃核心｜必要條件＋時間窗口 v6</title>
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#07111d;color:#eef3f8;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:14px}.wrap{max-width:680px;margin:auto}.title{font-size:21px;font-weight:800;color:#d9b45d}.sub{font-size:13px;line-height:1.65;color:#aeb9c8;margin:6px 0 12px}.card{background:#0d1928;border:1px solid #293a51;border-radius:14px;padding:13px;margin:10px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}label{display:block;font-size:12px;color:#b9c4d2;margin-bottom:4px}input,select,button{width:100%;border:1px solid #52627d;border-radius:9px;background:#101d2d;color:#fff;padding:9px;font-size:14px}button{margin-top:10px;background:#8b6a28;border-color:#c59b45;font-weight:800}.state{background:#091522;border-radius:10px;padding:10px;margin:7px 0;font-weight:700;line-height:1.6}.row{padding:9px 0;border-bottom:1px solid #203047;line-height:1.6}.row:last-child{border-bottom:0}.gold{color:#d9b45d}.ok{color:#8fe0a4}.warn{color:#ffd36b}.bad{color:#ff9b9b}.small{font-size:12px;color:#aeb9c8}.tests{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;white-space:pre-wrap;line-height:1.55}.pill{display:inline-block;padding:2px 7px;border-radius:999px;background:#18283d;color:#d9b45d;font-size:11px;margin-right:4px}@media(max-width:520px){.grid{grid-template-columns:1fr}}
 </style></head><body><div class="wrap">
-<div class="title">雷達規劃核心｜必要條件＋時間窗口 v5</div>
+<div class="title">雷達規劃核心｜必要條件＋時間窗口 v6</div>
 <div class="sub">這一版不尋找唯一最佳策略。程式只告訴你：各日期的累計最低處理量、每個 +8 的安全條件、勞拉可用窗口，以及最後必須留下的狀態。你可以自由分配收割時機。</div>
 <div class="card"><div class="grid">
 <div><label>庫存 MAX</label><input id="max" type="number" value="30" min="1"></div><div><label>目前庫存</label><input id="inv" type="number" value="22" min="0"></div>
@@ -59,13 +59,14 @@ function reverseRequiredBeforeLaura(x,score){
   return {field:preField,inventory:preInv};
 }
 function calc(){
+ const btn=$('calc'); btn.textContent='計算中…'; btn.disabled=true;
  try{
-  const x=parse(), errs=validate(x);if(errs.length){$('result').innerHTML='<span class="bad">❌ '+errs.join('<br>')+'</span>';$('tests').textContent='已停止計算：輸入資料無效。';return}
-  const score=nextScore(x.now);if(!score){$('result').innerHTML='<span class="bad">❌ 找不到下一個週一／週五 10:00 衝分日。</span>';return}
+  const x=parse(), errs=validate(x);if(errs.length){$('result').innerHTML='<span class="bad">❌ '+errs.join('<br>')+'</span>';$('tests').textContent='已停止計算：輸入資料無效。';btn.textContent='重新計算必要條件';btn.disabled=false;return}
+  const score=nextScore(x.now);if(!score){$('result').innerHTML='<span class="bad">❌ 找不到下一個週一／週五 10:00 衝分日。</span>';btn.textContent='重新計算必要條件';btn.disabled=false;return}
   const tl=buildTimeline(x.now,score);tl.score=score;
   const amount=LAURA[x.star];
   const beforeLaura=reverseRequiredBeforeLaura(x,score);
-  if(beforeLaura&&beforeLaura.invalid){$('result').innerHTML='<span class="bad">❌ '+beforeLaura.reason+'</span>';return}
+  if(beforeLaura&&beforeLaura.invalid){$('result').innerHTML='<span class="bad">❌ '+beforeLaura.reason+'</span>';btn.textContent='重新計算必要條件';btn.disabled=false;return}
   // Total processing needed assumes one Laura is used before scoring. If no usable Laura exists, only the non-Laura target is counted.
   const initialTotal=x.field+x.inv;
   const totalAvailable=initialTotal+tl.events.length*8+(amount>0&&beforeLaura?amount:0);
@@ -97,9 +98,10 @@ function calc(){
   html+='<div class="row"><b class="gold">⑤ 最後必須達到</b><br>勞拉前：'+beforeLauraText+'<br>勞拉後：場上 '+x.tf+'｜庫存 '+x.ti+'<br>10:00 +8：場上 '+x.tf+'｜庫存 '+(x.ti+8)+'</div>';
   html+='<div class="row"><b class="gold">⑥ 玩家自由分配</b><br><span class="ok">你不需要照固定數字收割。</span><br>只要在各個 +8 前達到累計最低處理量，並在最後勞拉前達到指定狀態即可。</div>';
   $('result').innerHTML=html;runTests();
- }catch(err){$('result').innerHTML='<span class="bad">❌ 計算發生錯誤：'+(err&&err.message?err.message:'未知錯誤')+'</span>';$('tests').textContent='程式已攔截錯誤，沒有讓按鈕失效。';}
+  btn.textContent='重新計算必要條件'; btn.disabled=false;
+ }catch(err){$('result').innerHTML='<span class="bad">❌ 計算發生錯誤：'+(err&&err.message?err.message:'未知錯誤')+'</span>';$('tests').textContent='程式已攔截錯誤，沒有讓按鈕失效。'; btn.textContent='重新計算必要條件'; btn.disabled=false;}
 }
 function runTests(){const o=[];const T=(n,b,d='')=>o.push((b?'✅ ':'❌ ')+n+(d?'｜'+d:''));
- const n=new Date('2026-09-27T11:27');const s=nextScore(n);T('T1 9/27 11:27 → 9/28 10:00',s.getDate()===28&&s.getHours()===10);const e=systemEvents(n,s);T('T2 準備期只有 18:00、02:00',e.length===2&&e[0].getHours()===18&&e[1].getHours()===2);T('T3 本案例總處理量 33',30+16+20-(11+22)===33);T('T4 方案1總處理 33',30+16+20-33===33);T('T5 方案2總處理 33',30+16+20-33===33);T('T6 方案3總處理 33',30+16+20-33===33);T('T7 4★勞拉 +20 = 場上 +3、庫存 +17',20===3+17);T('T8 10:00 +8 不計入準備期處理量',e.every(v=>v<s));T('T9 9/29 為星期二',new Date('2026-09-29T10:00').getDay()===2);const s26=new Date('2026-09-26T11:27'),sc26=nextScore(s26),ev26=systemEvents(s26,sc26);T('T10 9/26 11:27 的下一個衝分日仍為 9/28',sc26.getDate()===28);T('T11 9/26 起會列出跨日 +8',ev26.length===4,'實際 '+ev26.length+' 次');const safe=applySystem({field:8,inventory:22,max:30});T('T12 8/22 +8 → 8/30、浪費0',safe.field===8&&safe.inventory===30&&safe.waste===0);const safe2=applySystem({field:5,inventory:0,max:30});T('T13 5/0 +8 → 8/5、浪費0',safe2.field===8&&safe2.inventory===5&&safe2.waste===0);T('T14 9/27 11:27 方案總處理量仍為33',30+16+20-33===33);$('tests').textContent=o.join('\n')+'\n\n本版只驗證「日期拆分＋必要條件＋時間窗口＋不浪費」；不搜尋最佳策略。'}
+ const n=new Date('2026-09-27T11:27');const s=nextScore(n);T('T1 9/27 11:27 → 9/28 10:00',s.getDate()===28&&s.getHours()===10);const e=systemEvents(n,s);T('T2 準備期只有 18:00、02:00',e.length===2&&e[0].getHours()===18&&e[1].getHours()===2);T('T3 本案例總處理量 33',30+16+20-(11+22)===33);T('T4 方案1總處理 33',30+16+20-33===33);T('T5 方案2總處理 33',30+16+20-33===33);T('T6 方案3總處理 33',30+16+20-33===33);T('T7 4★勞拉 +20 = 場上 +3、庫存 +17',20===3+17);T('T8 10:00 +8 不計入準備期處理量',e.every(v=>v<s));T('T9 9/29 為星期二',new Date('2026-09-29T10:00').getDay()===2);const s26=new Date('2026-09-26T11:27'),sc26=nextScore(s26),ev26=systemEvents(s26,sc26);T('T10 9/26 11:27 的下一個衝分日仍為 9/28',sc26.getDate()===28);T('T11 9/26 起會列出跨日 +8',ev26.length===5,'實際 '+ev26.length+' 次');const safe=applySystem({field:8,inventory:22,max:30});T('T12 8/22 +8 → 8/30、浪費0',safe.field===8&&safe.inventory===30&&safe.waste===0);const safe2=applySystem({field:5,inventory:0,max:30});T('T13 5/0 +8 → 8/5、浪費0',safe2.field===8&&safe2.inventory===5&&safe2.waste===0);T('T14 9/27 11:27 方案總處理量仍為33',30+16+20-33===33);$('tests').textContent=o.join('\n')+'\n\n本版只驗證「日期拆分＋必要條件＋時間窗口＋不浪費」；不搜尋最佳策略。'}
 $('calc').addEventListener('click',calc);
 </script></body></html>
