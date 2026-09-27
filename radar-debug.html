@@ -3,26 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>雷達規劃 v14 乾淨核心測試版</title>
+<title>雷達規劃 v17｜容量與最早時機測試版</title>
 <style>
 body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;background:#071321;color:#eee;margin:0;padding:16px}
-.card{max-width:700px;margin:auto;background:#102338;border:1px solid #8b6a2b;border-radius:14px;padding:16px}
-h1{font-size:20px;margin:0 0 8px}
-.note{font-size:14px;color:#c9d2dc;line-height:1.5}
+.card{max-width:720px;margin:auto;background:#102338;border:1px solid #8b6a2b;border-radius:14px;padding:16px}
+h1{font-size:20px;margin:0 0 8px}.note{font-size:14px;color:#c9d2dc;line-height:1.5}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 label{font-size:13px;color:#d8c38b;display:block;margin-bottom:4px}
 input,select,button{width:100%;box-sizing:border-box;padding:10px;border-radius:9px;border:1px solid #657487;background:#172d43;color:#fff;font-size:16px}
 button{margin-top:12px;background:#8b6a2b;border:0;font-weight:700}
 hr{border:0;border-top:1px solid #33485c;margin:16px 0}
-.row{padding:10px 12px;background:#172d43;border-radius:9px;margin:7px 0}
-.good{color:#8fe39a}.gold{color:#ffd66b}
-pre{white-space:pre-wrap;line-height:1.5;margin:0}
+.row{padding:10px 12px;background:#172d43;border-radius:9px;margin:7px 0;line-height:1.55}
+.good{color:#8fe39a}.warn{color:#ffd66b}.bad{color:#ff8f8f}
+pre{white-space:pre-wrap;line-height:1.55;margin:0}
 </style>
 </head>
 <body>
 <div class="card">
-<h1>🧭 雷達規劃 v16｜策略序列測試版</h1>
-<div class="note">這一版重新建立跨日規劃核心，不沿用舊版 crossDayPlan。先確認「完整跨日規劃」可以瞬間完成，再接回正式 UI。</div>
+<h1>🧭 雷達規劃 v17｜容量與最早時機測試版</h1>
+<div class="note">
+這一版加入三個新規則：① 勞拉在場上已有 8 個時，仍是「+3 進場上、其餘進庫存」；
+② 系統 +8 不可超過 MAX，若會浪費，必須提前提醒並計算要先完成/收割幾個；
+③ 能安全執行時，策略優先採用「最早可執行時間」。
+</div>
 
 <div class="grid">
 <div><label>庫存上限 MAX</label><input id="max" type="number" value="30"></div>
@@ -30,9 +33,7 @@ pre{white-space:pre-wrap;line-height:1.5;margin:0}
 <div><label>場上雷達</label><input id="field" type="number" value="8"></div>
 <div><label>已完成</label><input id="completed" type="number" value="0"></div>
 </div>
-
 <hr>
-
 <div class="grid">
 <div><label>勞拉</label><select id="laura"><option value="none">無</option><option value="yes" selected>有</option></select></div>
 <div><label>勞拉星級</label><select id="star"><option>0</option><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div>
@@ -43,146 +44,122 @@ pre{white-space:pre-wrap;line-height:1.5;margin:0}
 <div><label>黎明曙光目前進度</label><input id="p2" type="number" value="0"></div>
 <div><label>基準時間</label><input id="base" type="datetime-local" value="2026-09-27T11:27"></div>
 </div>
-
 <button id="plan">開始規劃</button>
 <div id="out" style="margin-top:14px"></div>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-const DAY=86400000, H=3600000;
+const H=3600000, DAY=86400000;
 
 function tw(ms){
   const d=new Date(ms+8*H);
   return {y:d.getUTCFullYear(),m:d.getUTCMonth(),d:d.getUTCDate(),h:d.getUTCHours(),min:d.getUTCMinutes()};
 }
-function twMs(y,m,d,h=0,min=0){
-  return Date.UTC(y,m,d,h,min)-8*H;
-}
+function twMs(y,m,d,h=0,min=0){return Date.UTC(y,m,d,h,min)-8*H}
 function fmt(ms){
   const p=tw(ms);
   return `${p.y}/${String(p.m+1).padStart(2,"0")}/${String(p.d).padStart(2,"0")} ${String(p.h).padStart(2,"0")}:${String(p.min).padStart(2,"0")}`;
 }
-function wd(ms){
-  const p=tw(ms);
-  return new Date(Date.UTC(p.y,p.m,p.d)).getUTCDay();
-}
+function wd(ms){const p=tw(ms);return new Date(Date.UTC(p.y,p.m,p.d)).getUTCDay()}
+function dayStart(ms){const p=tw(ms);return twMs(p.y,p.m,p.d,10)}
 function nextScore(ms){
-  const p=tw(ms), w=wd(ms);
-  if((w===1||w===5)&&p.h<10) return twMs(p.y,p.m,p.d,10);
-  const add={0:1,1:4,2:3,3:2,4:1,5:3,6:2}[w];
-  return twMs(p.y,p.m,p.d+add,10);
+  const p=tw(ms),w=wd(ms);
+  if((w===1||w===5)&&p.h<10)return twMs(p.y,p.m,p.d,10);
+  return twMs(p.y,p.m,p.d+({0:1,1:4,2:3,3:2,4:1,5:3,6:2}[w]),10);
 }
-function dayStart(ms){
-  const p=tw(ms);
-  return twMs(p.y,p.m,p.d,10);
-}
-function systemEvents(start,end){
-  const out=[];
-  const p0=tw(start);
-  // 直接建立「基準日」及其後數日的固定 +8 時間點。
-  // 事件包含衝分日 10:00 本身，因此使用 <= end。
+function eventsBetween(start,end){
+  const out=[],p=tw(start);
   for(let i=-1;i<=3;i++){
-    const y=p0.y, m=p0.m, d=p0.d+i;
-    const a=[
-      twMs(y,m,d,2),
-      twMs(y,m,d,10),
-      twMs(y,m,d,18)
-    ];
-    for(const t of a) if(t>start&&t<=end) out.push(t);
+    const d=p.d+i;
+    for(const h of [2,10,18]){
+      const t=twMs(p.y,p.m,d,h);
+      if(t>start&&t<=end)out.push(t);
+    }
   }
-  return out.sort((a,b)=>a-b);
+  return [...new Set(out)].sort((a,b)=>a-b);
 }
-function lauraAmount(star){
-  return [5,10,10,10,20,20][star]||0;
-}
+function lauraAmount(star){return [5,10,10,10,20,20][star]||0}
+function stateText(s){return `（場上${s.field}，庫存${s.inventory}）`}
+
 function completeOne(s){
-  // 若場上已有未完成雷達，先完成它。
-  if(s.unfinished>0){
-    s.unfinished--;
-    s.completed++;
-    if(s.task1.active)s.p1++;
-    if(s.task2.active)s.p2++;
-    return true;
-  }
-  return false;
-}
-function enterOneFromInventory(s){
-  if(s.inventory<=0)return false;
-  // 庫存雷達進場；場上未滿 8 時優先補到 8。
-  s.inventory--;
-  if(s.field<8){
-    s.field++;
-  }else{
-    s.field++;
-  }
-  s.unfinished++;
+  if(s.unfinished<=0)return false;
+  s.unfinished--;s.completed++;
+  if(s.task1.active)s.p1++;
+  if(s.task2.active)s.p2++;
   return true;
+}
+function enterFromInventory(s){
+  if(s.inventory<=0)return false;
+  s.inventory--;s.field++;s.unfinished++;return true;
 }
 function completeAndHarvestOne(s){
-  if(s.unfinished<=0){
-    if(!enterOneFromInventory(s)) return false;
-  }
-  if(!completeOne(s)) return false;
-  if(s.completed<=0)return false;
-  s.completed--;
-  s.field--;
-  // 收割後，庫存雷達可立即補回場上至 8。
-  if(s.field<8 && s.inventory>0){
-    const n=Math.min(8-s.field,s.inventory);
-    s.field+=n;
-    s.inventory-=n;
-    s.unfinished+=n;
-  }
-  if(s.star===5 && s.treasure<10)s.treasure++;
-  return true;
-}
-function completeAndHarvestN(s,n){
-  let done=0;
-  while(done<n && completeAndHarvestOne(s))done++;
-  return done;
-}
-function harvestOne(s){
+  if(s.unfinished<=0&&!enterFromInventory(s))return false;
+  if(!completeOne(s))return false;
   if(s.completed<=0)return false;
   s.completed--;s.field--;
-  if(s.field<8 && s.inventory>0){
+  if(s.field<8&&s.inventory>0){
     const n=Math.min(8-s.field,s.inventory);
     s.field+=n;s.inventory-=n;s.unfinished+=n;
   }
-  if(s.star===5 && s.treasure<10)s.treasure++;
+  if(s.star===5&&s.treasure<10)s.treasure++;
   return true;
 }
-function futureTaskReset(s){
-  s.p1=0;s.p2=0;s.treasure=0;s.lauraUsed=false;
+function completeOnlyAllCurrent(s){
+  let n=0;
+  const initial=s.unfinished;
+  while(n<initial&&completeOne(s))n++;
+  return n;
 }
-function applySystem8(s){
-  const before=s.field;
-  const fill=Math.min(8,Math.max(0,8-s.field));
+function completeHarvestN(s,n){
+  let done=0;
+  while(done<n&&completeAndHarvestOne(s))done++;
+  return done;
+}
+function system8(s){
+  const generated=8;
+  const fill=Math.min(generated,Math.max(0,8-s.field));
   s.field+=fill;
-  const remain=8-fill;
-  s.inventory+=Math.min(remain,Math.max(0,s.max-s.inventory));
-  s.unfinished+=8;
-  return {before,field:s.field,inventory:s.inventory};
+  const remain=generated-fill;
+  const room=Math.max(0,s.max-s.inventory);
+  const stored=Math.min(remain,room);
+  const lost=remain-stored;
+  s.inventory+=stored;
+  s.unfinished+=fill+stored+lost;
+  // lost means the radar was generated but could not be stored; it must NOT enter field/inventory.
+  s.unfinished-=lost;
+  return {lost};
 }
 function applyLaura(s){
   if(!s.lauraExists||s.lauraUsed)return 0;
   const n=lauraAmount(s.star);
   const fill=Math.min(n,Math.max(0,8-s.field));
   s.field+=fill;
-  const remain=n-fill;
-  s.inventory+=remain;
+  s.inventory+=n-fill;
   s.unfinished+=n;
   s.lauraUsed=true;
   return n;
 }
-function harvestAll(s){
-  let n=0;
-  while(s.completed>0){harvestOne(s);n++;}
-  return n;
+function safeHarvestBeforeSystem(s){
+  // Number of completed/harvested radars needed so the next +8 can fit.
+  const need=Math.max(0,s.inventory-(s.max-8));
+  if(need<=0)return 0;
+  return completeHarvestN(s,need);
 }
-function stateText(s){
-  return `（場上${s.field}，庫存${s.inventory}）`;
+function prepareLauraSafe(s,nextSystem){
+  if(!s.lauraExists||s.lauraUsed)return 0;
+  const amount=lauraAmount(s.star);
+  const fill=Math.min(amount,Math.max(0,8-s.field));
+  const addedInv=amount-fill;
+  const allowed=Math.max(0,s.max-8);
+  const need=Math.max(0,(s.inventory+addedInv)-allowed);
+  return completeHarvestN(s,need);
 }
+function futureReset(s){
+  s.p1=0;s.p2=0;s.treasure=0;s.lauraUsed=false;
+}
+function pushLine(lines,icon,time,text,s){lines.push(`${icon} ${time}：${text} ${stateText(s)}`)}
+
 function plan(){
   const t0=performance.now();
   const base=Date.parse($("base").value);
@@ -190,79 +167,105 @@ function plan(){
     max:+$("max").value,inventory:+$("inv").value,field:+$("field").value,
     completed:+$("completed").value,
     unfinished:Math.max(0,+$("field").value-+$("completed").value),
-    lauraExists:$("laura").value==="yes",
-    star:+$("star").value,lauraUsed:$("used").value==="yes",
-    treasure:0,p1:$("task1").value==="yes"?Math.max(0,+$("p1").value):0,
+    lauraExists:$("laura").value==="yes",star:+$("star").value,
+    lauraUsed:$("used").value==="yes",treasure:0,
+    p1:$("task1").value==="yes"?Math.max(0,+$("p1").value):0,
     p2:$("task2").value==="yes"?Math.max(0,+$("p2").value):0,
     task1:{active:$("task1").value==="yes"},
     task2:{active:$("task2").value==="yes"}
   };
 
   if(!Number.isFinite(base)||s.max<=0||s.inventory<0||s.field<0||s.completed<0||s.completed>s.field){
-    $("out").innerHTML='<div class="row" style="color:#ff8f8f">❌ 輸入資料無效</div>';return;
+    $("out").innerHTML='<div class="row bad">❌ 輸入資料無效</div>';return;
   }
 
-  const score=nextScore(base);
-  const events=systemEvents(base,score);
-  const lines=[];
+  const score=nextScore(base),events=eventsBetween(base,score),lines=[];
+  const futureSystemEvents=events.filter(t=>tw(t).h!==10);
 
-  // 目前：先把場上未完成雷達全部完成。
-  const nowCompleted=completeAndHarvestN(s,s.unfinished);
-  lines.push(`🟢 現在：完成並收割 ${nowCompleted} 個雷達 ${stateText(s)}`);
+  // 目前先完成場上未完成雷達，不先收割，保留場上資源。
+  const currentCompleted=completeOnlyAllCurrent(s);
+  pushLine(lines,"🟢","現在",`完成場上 ${currentCompleted} 個雷達`,s);
 
-  let prevDay=null;
+  // 若勞拉現在可以安全使用，依「最早可執行時間」原則先處理。
+  if(s.lauraExists&&!s.lauraUsed){
+    const nextSystem=events.find(t=>t>base);
+    const need=prepareLauraSafe(s,nextSystem);
+    if(need>0)pushLine(lines,"⚠️","現在",`為了讓勞拉提早使用，先完成並收割 ${need} 個雷達`,s);
+    const n=applyLaura(s);
+    if(n)pushLine(lines,"🧭","現在",`點擊勞拉 +${n}`,s);
+  }
+
   for(const t of events){
     const p=tw(t);
+
     if(p.h===10){
-      futureTaskReset(s);
-      // 衝分日 10:00 是目標點，不在此先執行未來日的 20 次任務。
-      applySystem8(s);
-      lines.push(`⚡ ${fmt(t)}：系統 +8 ${stateText(s)}`);
-      lines.push(`🏆 ${fmt(t)}：今天是衝分日，請完成並收割所有雷達 ${stateText(s)}`);
+      // 10:00 前先確保系統 +8 不浪費。
+      const before=s.inventory;
+      const need=Math.max(0,s.inventory-(s.max-8));
+      if(need>0){
+        const done=safeHarvestBeforeSystem(s);
+        if(done)pushLine(lines,"⚠️",fmt(t),`系統 +8 前需先完成並收割 ${done} 個雷達，避免庫存超過 MAX`,s);
+      }
+
+      futureReset(s);
+      const r=system8(s);
+      if(r.lost>0)pushLine(lines,"🚨",fmt(t),`系統 +8 仍有 ${r.lost} 個雷達無法進入庫存，已損失`,s);
+      else pushLine(lines,"⚡",fmt(t),"系統 +8",s);
+
+      pushLine(lines,"🏆",fmt(t),"今天是衝分日，請完成並收割所有雷達",s);
       continue;
     }
 
-    if(p.h===18){
-      applySystem8(s);
-      lines.push(`⚡ ${fmt(t)}：系統 +8 ${stateText(s)}`);
+    // 非 10:00 事件：先做「最早可執行」的容量整理，再觸發 +8。
+    const needBefore=Math.max(0,s.inventory-(s.max-8));
+    if(needBefore>0){
+      const done=safeHarvestBeforeSystem(s);
+      if(done)pushLine(lines,"⚠️",fmt(t),`+8 前先完成並收割 ${done} 個雷達，避免 ${needBefore} 個雷達因庫存上限消失`,s);
+    }
 
-      // 在下一個 10:00 前完成當日任務；這裡的測試策略先把可用雷達
-      // 全部完成並收割到預留狀態，再使用勞拉補回場上。
-      const before=s.field+s.inventory;
-      const target=Math.min(23,Math.max(0,before-15));
-      const done=completeAndHarvestN(s,target);
-      if(done) lines.push(`🔄 ${fmt(t)}：完成並收割 ${done} 個雷達 ${stateText(s)}`);
+    const r=system8(s);
+    if(r.lost>0)pushLine(lines,"🚨",fmt(t),`系統 +8，有 ${r.lost} 個雷達因庫存上限消失`,s);
+    else pushLine(lines,"⚡",fmt(t),"系統 +8",s);
 
-      if(s.lauraExists&&!s.lauraUsed){
-        const nL=applyLaura(s);
-        if(nL)lines.push(`🧭 ${fmt(t)}：點擊勞拉 +${nL} ${stateText(s)}`);
+    // 事件發生後，如果下一個 +8 仍會造成溢滿，立即安排最早可做的處理。
+    const next=events.find(x=>x>t);
+    if(next){
+      const nextNeed=Math.max(0,s.inventory-(s.max-8));
+      if(nextNeed>0){
+        const done=completeHarvestN(s,nextNeed);
+        if(done)pushLine(lines,"⚠️",fmt(t),`為避免 ${fmt(next)} 的 +8 浪費，現在先完成並收割 ${done} 個雷達`,s);
       }
-    }else if(p.h===2){
-      applySystem8(s);
-      lines.push(`⚡ ${fmt(t)}：系統 +8 ${stateText(s)}`);
+    }
+
+    // 若勞拉還沒用，這裡只在目前時間已經走到事件點時使用，且先處理容量。
+    if(s.lauraExists&&!s.lauraUsed){
+      const nextSystem=next;
+      const needLaura=prepareLauraSafe(s,nextSystem);
+      if(needLaura>0)pushLine(lines,"⚠️",fmt(t),`為了安全點擊勞拉，先完成並收割 ${needLaura} 個雷達`,s);
+      const n=applyLaura(s);
+      if(n)pushLine(lines,"🧭",fmt(t),`點擊勞拉 +${n}`,s);
     }
   }
 
-  // 若基準日不是衝分日，且沒有在前一段使用勞拉，避免遺漏今日可用狀態。
+  // 若還有勞拉可用，最後仍給出最晚之前的可用提示；但不會假裝已使用。
   if(s.lauraExists&&!s.lauraUsed){
-    const nL=applyLaura(s);
-    if(nL)lines.push(`🧭 今日：點擊勞拉 +${nL} ${stateText(s)}`);
+    const need=prepareLauraSafe(s,null);
+    if(need>0)pushLine(lines,"⚠️",fmt(score),`勞拉仍未使用；需先完成並收割 ${need} 個雷達`,s);
+    const n=applyLaura(s);
+    if(n)pushLine(lines,"🧭",fmt(score),"點擊勞拉",s);
   }
 
-  const finalResources=s.field+s.inventory;
-  const harvested=finalResources;
-  const ideal={field:11,inventory:s.max};
+  const finalTotal=s.field+s.inventory;
   const elapsed=performance.now()-t0;
-
   $("out").innerHTML=`
-    <div class="row"><span class="good">✅ 規劃完成</span>　耗時 ${elapsed.toFixed(3)} ms</div>
-    <div class="row"><b>🏆 目標：</b>${fmt(score)} 衝分</div>
-    <div class="row"><b>🎯 理想狀態：</b>場上 ${ideal.field} ／ 庫存 ${ideal.inventory}</div>
-    <div class="row"><b>📦 預計可達：</b>場上 ${s.field} ／ 庫存 ${s.inventory}</div>
-    <div class="row"><b>🏆 本次衝分日預計可收割：</b>${harvested} 個</div>
-    <div class="row"><b>📝 規劃摘要</b><pre>${lines.join("\n")}</pre></div>
-    <div class="row"><b>🔎 核心：</b>共處理 ${events.length} 個系統 +8 事件；每個策略節點均標示「場上／庫存」。</div>
-    <div class="row"><b>⚡ +8 事件：</b><pre>${events.map(fmt).join("\n")||"沒有符合條件的 +8 事件"}</pre></div>`;
+  <div class="row"><span class="good">✅ 規劃完成</span>　耗時 ${elapsed.toFixed(3)} ms</div>
+  <div class="row"><b>🏆 目標：</b>${fmt(score)} 衝分</div>
+  <div class="row"><b>🎯 理想狀態：</b>場上 11 ／ 庫存 ${s.max}</div>
+  <div class="row"><b>📦 預計可達：</b>場上 ${s.field} ／ 庫存 ${s.inventory}</div>
+  <div class="row"><b>🏆 本次衝分日預計可收割：</b>${finalTotal} 個</div>
+  <div class="row"><b>📝 規劃摘要</b><pre>${lines.join("\n")}</pre></div>
+  <div class="row"><b>🔎 核心：</b>共處理 ${events.length} 個系統 +8 事件；已加入「庫存上限預警、提前處理數量、勞拉 +3 進場上、最早可執行時間」。</div>
+  <div class="row"><b>⚡ +8 事件：</b><pre>${events.map(fmt).join("\n")}</pre></div>`;
 }
 $("plan").onclick=plan;
 </script>
