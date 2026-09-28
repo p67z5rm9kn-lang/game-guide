@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>雷達規劃核心｜每日處理量 v4</title>
+<title>雷達規劃核心｜每日處理量 v5</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#071522;color:#eef4fa;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;line-height:1.55}
 .wrap{max-width:720px;margin:0 auto;padding:22px 18px 50px}.title{color:#f5bd3c;font-size:25px;font-weight:900}.sub{font-weight:700;color:#cbd7e3;margin:10px 0 18px}
@@ -16,7 +16,7 @@ small{color:#aebdca}
 </head>
 <body>
 <div class="wrap">
-<div class="title">雷達規劃核心｜每日處理量 v4</div>
+<div class="title">雷達規劃核心｜每日處理量 v5</div>
 <div class="sub">以「遊戲時間 UTC−2」計算。台灣時間只負責顯示。這版先確認每日處理量公式，不加入勇士戰令、黎明曙光、勞拉寶箱或已完成雷達。</div>
 
 <div class="card">
@@ -115,10 +115,11 @@ function calc(){
   html+=events.map((e,i)=>`<div class="event"><b>+8 #${i+1}</b><br>遊戲時間：${fmtGame(e)}<br>台灣時間：${fmtTaiwan(e)}</div>`).join('');
   html+='</div>';
 
-  html+=`<div class="card" style="margin:14px 0 0"><div class="big">今天至少處理：${minimum} 個</div>
+  html+=`<div class="card" style="margin:14px 0 0"><div class="big"><span style="font-size:20px">今天最低處理量：${dailyNeed} 個</span></div>
   <p>每日最低線：目前場上 ${field} + 20 = <b>${dailyNeed}</b> 個。</p>
-  <p>資源線：(${field}+${inv}) + ${events.length}×8 + 勞拉 ${laura} − 最後目標 ${targetTotal} = <b>${resourceNeed}</b> 個。</p>
-  <p>所以取兩者較大值：<b>${minimum}</b>。</p>
+  <p>資源線（到下一個衝分日）：(${field}+${inv}) + ${events.length}×8 + 勞拉 ${laura} − 最後目標 ${targetTotal} = <b>${resourceNeed}</b> 個。</p>
+  <p>本次衝分日前，整段期間至少還需處理：<b>${resourceNeed}</b> 個。</p>
+  <p>這兩個數字用途不同，本版先分開顯示，不直接把資源線當成「今天」的處理量。</p>
   <p class="muted">最後目標採衝分日前：場上 ${targetField}、庫存 ${targetInv}（MAX−8）。</p></div>`;
 
   html+=`<div class="card" style="margin:14px 0 0"><h2>這版先確認的核心</h2>
