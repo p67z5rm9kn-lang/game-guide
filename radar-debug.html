@@ -3,26 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z｜雷達週計劃 v6.8</title>
+<title>Last Z｜雷達週計劃 v6.9</title>
 <style>
-:root{--bg:#071426;--card:#0d2038;--deep:#08192c;--line:#27415f;--gold:#e0bd6b;--text:#edf3fb;--muted:#9fb1c7;--good:#78d99a;--bad:#ff7777;--warn:#f0c674}
+:root{--bg:#071426;--card:#0d2038;--deep:#08192c;--line:#27415f;--gold:#e0bd6b;--text:#edf3fb;--muted:#9fb1c7;--good:#78d99a;--warn:#f0c674;--bad:#ff7777}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:16px 10px 36px}main{max-width:700px;margin:auto}
-h1{font-size:22px;margin:0 0 5px;color:var(--gold)}.sub{font-size:12px;line-height:1.55;color:var(--muted);margin-bottom:12px}
-.panel,.day{background:rgba(13,32,56,.96);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:11px}.day{background:#0a1b30}
-h2{font-size:16px;margin:0 0 8px;color:var(--gold)}h3{font-size:14px;margin:0 0 7px;color:var(--gold)}
+h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+.panel{background:rgba(13,32,56,.96);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:11px}h2{font-size:16px;margin:0 0 9px;color:var(--gold)}
 label{display:block;font-size:12px;color:var(--muted);margin:8px 0 5px}
 input,select{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:10px 11px;outline:none}select{appearance:none;-webkit-appearance:none}
 button{width:100%;margin-top:9px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:15px;padding:10px}
-.box{background:var(--deep);border-radius:10px;padding:9px 10px;margin-top:8px;font-size:12px;line-height:1.6}.note{font-size:11px;color:var(--muted)}
-.ok{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}.muted{color:var(--muted)}.big{font-size:17px;font-weight:700}
-.event{border-top:1px solid #203852;padding:7px 0;font-size:12px;line-height:1.5}.event:first-of-type{border-top:0}.event b{color:#f0d487}
-.badge{float:right;font-size:10px;padding:2px 6px;border-radius:7px;background:#132a43}
+.box{background:var(--deep);border-radius:10px;padding:10px;margin-top:8px;font-size:12px;line-height:1.65}.big{font-size:18px;font-weight:700}
+.ok{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}.muted{color:var(--muted)}
+.day{border:1px solid #213b58;background:#0a1b30;border-radius:12px;padding:10px;margin-top:10px}.day h3{font-size:14px;margin:0 0 7px;color:var(--gold)}
+.state{font-size:12px;color:#d8e3ef;margin-bottom:7px}.event{border-top:1px solid #203852;padding:8px 0;font-size:12px;line-height:1.55}.event:first-of-type{border-top:0}
+.row{display:flex;gap:8px;justify-content:space-between}.badge{font-size:11px;padding:2px 6px;border-radius:7px;background:#132a43}.note{font-size:11px;color:var(--muted);line-height:1.6}
+.hidden{display:none!important}
 </style>
 </head>
 <body>
 <main>
-<h1>Last Z｜雷達週計劃 v6.8</h1>
-<div class="sub">以 <b>radar-weekly-v4</b> 為唯一週計劃基準；這版只處理「時間顯示、玩家可操作時間、免費 +8、勞拉條件與事件後狀態」。</div>
+<h1>Last Z｜雷達週計劃 v6.9</h1>
+<div class="sub">以 radar-weekly-v4 為固定週計劃基準；本版只測試「玩家可操作時間＋事件順序＋容量」，不重新計算 v4 週計劃。</div>
 
 <div class="panel">
 <h2>設定</h2>
@@ -31,8 +32,8 @@ button{width:100%;margin-top:9px;border:1px solid #a68748;border-radius:10px;bac
 
 <label>時間顯示方式</label>
 <select id="basis">
-  <option value="tw">台灣時間（UTC+8）</option>
-  <option value="game">遊戲時間（UTC-2）</option>
+<option value="tw">台灣時間（UTC+8）</option>
+<option value="game">遊戲時間（UTC-2）</option>
 </select>
 
 <label>每日可操作開始時間</label>
@@ -41,203 +42,212 @@ button{width:100%;margin-top:9px;border:1px solid #a68748;border-radius:10px;bac
 <input id="end" type="time" value="22:00">
 
 <button id="run">開始模擬</button>
-<div class="box note" id="timeNote">你選的是台灣時間；下面所有事件時間只顯示台灣時間。</div>
+<div class="box note">請先選擇時間制式，再輸入玩家每天可操作的時間。按下「開始模擬」後才產生結果。</div>
 </div>
 
-<div id="summary"></div>
-<div id="days"></div>
-
-<div class="panel">
-<h2>本版規則</h2>
-<div class="box note">
-免費 +8 的固定時間是：<b>遊戲 00:00、08:00、16:00</b>。<br>
-時間顯示只依你上方的選擇顯示一種時間。<br>
-一般準備日：場上不到 8 才使用勞拉。<br>
-衝分日前一天：場上必須是 8 才使用勞拉；使用後不再完成／收割。<br>
-衝分日：必須完成／收割所有已出現的雷達；如果最後一次 +8 發生在玩家操作時間之外，就會保留未收割數量。
-</div>
-</div>
+<div id="results" class="hidden"></div>
 </main>
 
 <script>
-const $=s=>document.querySelector(s);
-const days=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
-const SCORE=new Set([0,4]), LAURA=20;
+const dayNames=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
+const scoreDays=new Set([0,4]);
+const preScoreDays=new Set([3,6]);
+
+// 固定採用 radar-weekly-v4 的週計劃數字
+const v4Process=[null,20,38,41,null,20,35];
+const v4Start=[[11,22],[0,0],[8,16],[8,22],[11,22],[0,0],[8,16]];
+const v4End=['0 / 0','8 / 16','8 / 22','11 / 22','0 / 0','8 / 16','11 / 22'];
 
 function minOf(s){const [h,m]=s.split(':').map(Number);return h*60+m}
-function fmt(m){m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
-function twFromGame(g){return (g+600)%1440}
-function shownTime(gameMin,basis){return basis==='game'?fmt(gameMin):fmt(twFromGame(gameMin))}
-function inputToGame(v,basis){const m=minOf(v);return basis==='game'?m:(m+840)%1440}
-function inWindow(t,s,e){
-  if(s===e)return true;
-  if(s<e)return t>=s&&t<=e;
-  return t>=s||t<=e;
-}
-function state(f,i){return `${f} / ${i}`}
+function fmtHM(m){m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
+function twToGame(m){return (m+840)%1440}
+function gameToTw(m){return (m+600)%1440}
+function display(m,basis){return basis==='tw'?fmtHM(gameToTw(m)):fmtHM(m)}
+function inWindow(t,s,e){if(s===e)return true;if(s<e)return t>=s&&t<=e;return t>=s||t<=e}
+
 function add8(f,i,max){
+  let remain=8,waste=0;
   const fieldRoom=Math.max(0,8-f);
-  const toF=Math.min(8,fieldRoom); f+=toF;
-  const rem=8-toF, toI=Math.min(rem,Math.max(0,max-i));
-  i+=toI;
-  return {f,i,waste:rem-toI};
-}
-/* 完成/收割 n：場上不足 8 且有庫存時，庫存會立即補回場上。 */
-function harvest(f,i,n){
-  let left=n;
-  while(left>0 && (f>0||i>0)){
-    if(f>0){f--;left--;}
-    if(f<8&&i>0){const x=Math.min(8-f,i);f+=x;i-=x;}
-  }
-  return {f,i,left};
+  const toField=Math.min(remain,fieldRoom); f+=toField;remain-=toField;
+  const invRoom=Math.max(0,max-i);
+  const toInv=Math.min(remain,invRoom);i+=toInv;remain-=toInv;
+  waste=remain;
+  return {f,i,waste};
 }
 
-/* radar-weekly-v4 的固定週計劃：只讀取，不在時間模擬中重新推導。 */
-function v4Rows(MAX){
-  const process=[null,20,38,41,null,20,35];
-  const start=[[11,MAX-8],[0,0],[8,16],[8,22],[11,22],[0,0],[8,16]];
-  const end=[[0,0],[8,16],[8,22],[11,22],[0,0],[8,16],[11,22]];
-  const total=[77,null,null,null,77,null,null];
-  return days.map((_,d)=>({
-    d,score:SCORE.has(d),isBefore:SCORE.has(d+1)||d===6,
-    startF:start[d][0],startI:start[d][1],
-    endF:end[d][0],endI:end[d][1],
-    process:process[d],total:total[d]
-  }));
+// 取得/收割：每完成 1 個，若場上低於 8，庫存立即補回場上。
+// 這裡只做「處理數量」模型，不逐顆拆成畫面事件。
+function processN(f,i,n){
+  let done=0;
+  while(done<n && (f>0||i>0)){
+    if(f>0){f--;done++;}
+    else {const move=Math.min(8,i);f+=move;i-=move;continue;}
+    if(f<8&&i>0){const move=Math.min(8-f,i);f+=move;i-=move;}
+  }
+  return {f,i,done};
 }
 
-/*
-事件策略：
-1. 每個系統 +8 先發生，再判斷玩家能否操作。
-2. 玩家在操作時間內「能做就做」。
-3. 一般準備日：先確保勞拉使用條件（場上 <8），再處理剩餘處理量。
-4. 衝分日前一天：先處理到場上 8，再按勞拉；按後停止完成/收割。
-5. 衝分日：每次可操作時收割全部目前已出現雷達；不能操作的 +8 留到之後。
-*/
-function simulate(row,MAX,basis,s,e){
-  let f=row.startF,i=row.startI,processed=0,lauraUsed=false,totalWaste=0;
-  const events=[],issues=[];
-  const times=[0,480,960]; // game 00,08,16
-
-  function logSystem(t,text,cls){events.push({kind:'sys',time:t,text,cls,state:state(f,i)})}
-  function logPlayer(t,text,cls='ok'){events.push({kind:'player',time:t,text,cls,state:state(f,i)})}
-
-  function doHarvest(n,t,prefix='處理'){
-    const h=harvest(f,i,n); const done=n-h.left; f=h.f;i=h.i;processed+=done;
-    if(done)logPlayer(t,`${prefix} ${done} 個`,'ok');
-    return done;
+function lauraAllowed(d,f){
+  if(scoreDays.has(d)) return false;
+  if(preScoreDays.has(d)) return f>=8;
+  return f<8;
+}
+function useLaura(f,i){
+  if(f<8){
+    const toField=Math.min(20,8-f);
+    return {f:f+toField,i:i+(20-toField)};
   }
-
-  function useLauraOrdinary(t){
-    if(lauraUsed||f>=8)return false;
-    const need=8-f; f+=need; i+=LAURA-need; lauraUsed=true;
-    logPlayer(t,`使用勞拉 +20`,'ok'); return true;
-  }
-
-  function operateOrdinary(t){
-    if(lauraUsed && processed>=row.process)return;
-    if(!lauraUsed){
-      // 場上若 >=8，先處理 1 個，讓場上低於 8，再按勞拉。
-      if(f>=8 && row.process>processed) doHarvest(1,t,'處理');
-      useLauraOrdinary(t);
-    }
-    const rem=Math.max(0,row.process-processed);
-    if(rem>0)doHarvest(rem,t,'處理');
-  }
-
-  function operateBeforeScore(t){
-    if(lauraUsed)return;
-    // 必須讓場上剛好 8 才能按勞拉；因此處理到 8，不超過。
-    if(f>8){
-      const n=f-8;
-      doHarvest(n,t,'處理');
-    }
-    if(f===8){
-      i+=LAURA; f+=3; lauraUsed=true;
-      logPlayer(t,'場上 8 → 使用勞拉 +20；之後不再完成／收割','ok');
-    }
-  }
-
-  function operateScore(t){
-    if(f+i<=0)return;
-    const before=f+i;
-    const h=harvest(f,i,9999); f=h.f;i=h.i;
-    logPlayer(t,`完成／收割目前全部 ${before} 個雷達`,'ok');
-  }
-
-  for(const t of times){
-    const r=add8(f,i,MAX); f=r.f;i=r.i;totalWaste+=r.waste;
-    logSystem(t,r.waste?`免費 +8　🔴 浪費 ${r.waste}`:'免費 +8　🟢 無浪費',r.waste?'bad':'ok');
-
-    if(inWindow(t,s,e)){
-      if(row.score)operateScore(t);
-      else if(row.isBefore)operateBeforeScore(t);
-      else operateOrdinary(t);
-    }
-  }
-
-  // 若玩家窗口內沒有任何免費 +8，也仍可在窗口開始時操作一次。
-  const hasEventInWindow=times.some(t=>inWindow(t,s,e));
-  if(!hasEventInWindow){
-    const t=s;
-    if(row.score)operateScore(t);
-    else if(row.isBefore)operateBeforeScore(t);
-    else operateOrdinary(t);
-  }
-
-  if(row.score){
-    if(f+i>0)issues.push(`最後仍有 ${f+i} 個雷達未完成／收割`);
-  }else{
-    if(processed<row.process)issues.push(`處理量尚缺 ${row.process-processed} 個`);
-    if(row.isBefore && !(f===11&&i===MAX-8))
-      issues.push(`未達衝分日前一天目標 ${11} / ${MAX-8}`);
-  }
-  return {f,i,processed,lauraUsed,totalWaste,events,issues};
+  return {f:f+3,i:i+17};
 }
 
-function render(){
-  const MAX=Math.max(8,Math.floor(Number($('#max').value)||30));
-  const basis=$('#basis').value;
-  const s=inputToGame($('#start').value,basis), e=inputToGame($('#end').value,basis);
-  const rows=v4Rows(MAX);
-  let totalWaste=0,fail=0,html='';
+function makeEvent(label,type,before,after,action,status){
+  return {label,type,before,after,action,status};
+}
 
-  for(const row of rows){
-    const r=simulate(row,MAX,basis,s,e); totalWaste+=r.totalWaste; if(r.issues.length)fail++;
-    if(row.score){
-      const sys=r.events.filter(x=>x.kind==='sys');
-      html+=`<div class="day">
-        <h3>${days[row.d]} 🏆 衝分日</h3>
-        <div class="box">開始：場上 ${row.startF} / 庫存 ${row.startI}<br>本日基準：<b>${row.total} 個</b></div>
-        <div class="box">${sys.map(x=>`${shownTime(x.time,basis)}｜${x.text}`).join('<br>')}</div>
-        <div class="box ${r.issues.length?'bad':'ok'}">${r.issues.length?'🔴 '+r.issues[0]:'🟢 所有已出現雷達皆完成／收割'}</div>
+function simulate(){
+  const max=Math.max(8,Math.floor(Number(document.querySelector('#max').value)||30));
+  const basis=document.querySelector('#basis').value;
+  const inputS=minOf(document.querySelector('#start').value);
+  const inputE=minOf(document.querySelector('#end').value);
+  const s=basis==='tw'?twToGame(inputS):inputS;
+  const e=basis==='tw'?twToGame(inputE):inputE;
+
+  let f=v4Start[0][0],i=v4Start[0][1];
+  let totalWaste=0, scoreFail=0;
+  let out='';
+
+  for(let d=0;d<7;d++){
+    if(d>0){f=v4Start[d][0];i=v4Start[d][1];}
+    const startState=[f,i];
+    const score=scoreDays.has(d);
+    const pre=preScoreDays.has(d);
+    const processTarget=v4Process[d];
+    let events=[];
+    let lauraUsed=false;
+    let processed=0;
+
+    // 同一時間點：先玩家操作，再發生系統 +8；18:00 等也遵循這個順序。
+    // 02:00 屬於遊戲日事件；顯示時間依玩家選擇。
+    const sys=[
+      {m:600},   // 遊戲 10:00 = 台灣 20:00
+      {m:1080},  // 遊戲 18:00 = 台灣 02:00
+      {m:120}    // 遊戲 02:00 = 台灣 12:00（下一遊戲日）
+    ];
+
+    // v4 的「處理量」在準備日只需要在可操作時段合併完成。
+    // 先找本遊戲日第一個可操作事件。
+    let operatedThisDay=false;
+
+    function playerAction(at){
+      if(operatedThisDay)return;
+      operatedThisDay=true;
+
+      // 勞拉條件
+      if(lauraAllowed(d,f)){
+        const before=`${f} / ${i}`;
+        const x=useLaura(f,i);
+        f=x.f;i=x.i;lauraUsed=true;
+        events.push(makeEvent(at,'player',before,`${f} / ${i}`,'使用勞拉','🟢 勞拉已使用'));
+      }
+
+      // 準備日：一次合併處理全部當日目標，不拆成多筆。
+      if(!score && processTarget>0){
+        const before=`${f} / ${i}`;
+        const x=processN(f,i,processTarget);
+        f=x.f;i=x.i;processed+=x.done;
+        events.push(makeEvent(at,'player',before,`${f} / ${i}`,`處理 ${x.done} 個`,
+          x.done===processTarget?'🟢 當日處理量完成':`🔴 處理量尚缺 ${processTarget-x.done} 個`));
+      }
+
+      // 衝分日：玩家操作時，收割當下所有可取得雷達。
+      if(score){
+        const before=`${f} / ${i}`;
+        const x=processN(f,i,9999);
+        f=x.f;i=x.i;
+        events.push(makeEvent(at,'player',before,`${f} / ${i}`,'完成／收割目前所有雷達',
+          x.done>0?'🟢 已完成／收割':'🟡 當下沒有可收割雷達'));
+      }
+    }
+
+    // 模擬事件。若玩家窗口跨越事件，就在事件前先操作一次。
+    for(const ev of sys){
+      const can=inWindow(ev.m,s,e);
+      if(can) playerAction(display(ev.m,basis));
+
+      const before=`${f} / ${i}`;
+      const x=add8(f,i,max);
+      f=x.f;i=x.i;totalWaste+=x.waste;
+      const status=x.waste?`🔴 真正浪費 ${x.waste} 個`:'🟢 +8 全部取得';
+      events.push(makeEvent(display(ev.m,basis),'system',before,`${f} / ${i}`,'免費 +8',status));
+
+      // 若玩家仍在可操作窗口，+8 後可以再處理／收割一次。
+      if(can) playerAction(display(ev.m,basis));
+    }
+
+    // 若窗口內沒有系統事件，玩家仍可在窗口內主動操作一次。
+    if(!operatedThisDay){
+      playerAction(display(s,basis));
+    }
+
+    // 衝分日的「全部完成」只看玩家最後一次可操作後是否清空。
+    // 若最後一個 +8 發生在不可操作時間，會是「已取得但未收割」，不是浪費。
+    if(score){
+      const remain=f+i;
+      if(remain>0)scoreFail++;
+      events=[];
+      out+=`<div class="day">
+        <h3>${dayNames[d]} 🏆 衝分日</h3>
+        <div class="state">開始：<b>${startState[0]} / ${startState[1]}</b>　｜　當日目標：<b>全部完成／收割（77 個）</b></div>
+        <div class="box ${remain===0?'ok':'warn'}">
+          ${remain===0?'🟢 本日全部完成／收割':'🔴 尚有 '+remain+' 個已取得但未能完成／收割'}<br>
+          ${remain>0?'原因：最後可操作時間後仍有雷達產生或尚未收割。':''}
+        </div>
       </div>`;
     }else{
-      html+=`<div class="day">
-        <h3>${days[row.d]}｜${row.isBefore?'衝分日前一天':'準備日'}</h3>
-        <div class="box">開始：${row.startF} / ${row.startI}<br>目標處理：<b>${row.process} 個</b><br>週計劃預期結束：<b>${row.endF} / ${row.endI}</b></div>
-        ${r.events.map(x=>`<div class="event"><span class="badge">${x.kind==='sys'?'系統':'玩家'}</span><b>${shownTime(x.time,basis)}｜${x.text}</b><br>狀態：${x.state}</div>`).join('')}
-        <div class="box ${r.issues.length?'bad':'ok'}">${r.issues.length?'🔴 '+r.issues[0]:'🟢 達成週計劃目標'}</div>
+      const expected=v4End[d];
+      const actual=`${f} / ${i}`;
+      out+=`<div class="day">
+        <h3>${dayNames[d]}｜準備日</h3>
+        <div class="state">開始：<b>${startState[0]} / ${startState[1]}</b>　｜　當日處理：<b>${processTarget} 個</b>　｜　週計劃預期：<b>${expected}</b></div>
+        ${events.map(x=>`
+          <div class="event">
+            <div class="row"><b>${x.label}｜${x.action}</b><span class="badge">${x.type==='system'?'系統':'玩家'}</span></div>
+            <div>狀態：<b>${x.after}</b></div>
+            <div class="${x.status.includes('🔴')?'bad':x.status.includes('🟢')?'ok':'warn'}">${x.status}</div>
+          </div>`).join('')}
+        <div class="box ${actual===expected?'ok':'warn'}">
+          日末：<b>${actual}</b><br>
+          ${actual===expected?'🟢 與週計劃預期一致':'🟡 與週計劃預期不同；不修改週計劃基準。'}
+        </div>
       </div>`;
     }
   }
 
-  $('#summary').innerHTML=`<div class="panel"><h2>模擬結果</h2><div class="box">
-    玩家可操作：<b>${$('#start').value}～${$('#end').value}</b><br>
-    顯示時間：<b>${basis==='tw'?'台灣時間（UTC+8）':'遊戲時間（UTC-2）'}</b><br>
-    免費 +8：固定為遊戲 00:00／08:00／16:00<br>
-    全週容量浪費：<b class="${totalWaste?'bad':'ok'}">${totalWaste} 個</b><br>
-    未達週計劃目標：<b class="${fail?'bad':'ok'}">${fail} 天</b>
-  </div></div>`;
-  $('#days').innerHTML=html;
+  document.querySelector('#results').classList.remove('hidden');
+  document.querySelector('#results').innerHTML=`
+    <div class="panel">
+      <h2>模擬結果</h2>
+      <div class="box">
+        玩家可操作：<b>${document.querySelector('#start').value}～${document.querySelector('#end').value}</b><br>
+        顯示時間：<b>${basis==='tw'?'台灣時間':'遊戲時間'}</b><br>
+        免費 +8：遊戲時間 00:00／08:00／16:00<br>
+        真正因 MAX 不足造成的浪費：<b class="${totalWaste?'bad':'ok'}">${totalWaste} 個</b><br>
+        衝分日未能全部完成／收割：<b class="${scoreFail?'bad':'ok'}">${scoreFail} 天</b>
+      </div>
+    </div>
+    ${out}
+    <div class="panel">
+      <h2>本版判讀方式</h2>
+      <div class="box note">
+        🟢 已完成／收割<br>
+        🟡 已取得，但玩家當時無法操作<br>
+        🔴 只有真的因庫存 MAX 滿了而拿不到，才算「浪費」。<br>
+        同一可操作時段可以完成的處理量會合併成一次，不再拆成 1、15 等多筆。
+      </div>
+    </div>`;
 }
-$('#basis').addEventListener('change',()=>{
-  $('#timeNote').textContent=$('#basis').value==='tw'
-    ? '你選的是台灣時間；下面所有事件時間只顯示台灣時間。'
-    : '你選的是遊戲時間；下面所有事件時間只顯示遊戲時間。';
-});
-$('#run').addEventListener('click',render);
-render();
+
+document.querySelector('#run').addEventListener('click',simulate);
 </script>
 </body>
 </html>
