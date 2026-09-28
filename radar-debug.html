@@ -8,11 +8,11 @@
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:17px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:13px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:13px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v3</h1>
+<h1>Last Z｜雷達週計劃 v4</h1>
 <div class="sub">只需輸入「庫存上限」。本版先建立不考慮玩家可操作時間的基礎週計劃。</div>
 <div class="panel">
 <label for="max">庫存上限 MAX</label><input id="max" type="number" min="1" step="1" placeholder="例如 30"><button id="plan">開始規劃</button>
-<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。衝分日開始前的理想狀態為「場上 11、庫存 MAX」。</div>
+<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。衝分日計算起點為「場上 11、庫存 MAX−8」；當日 3 次系統 +8 會計入可完成雷達數。</div>
 </div>
 <div id="out"><div class="panel empty">輸入庫存上限後開始規劃</div></div>
 </main>
@@ -63,12 +63,14 @@ function prepDay(startF,startI,MAX,isDayBeforeScore){
 
 function makePlan(MAX){
   const rows=[];
-  // 每個完整週期以衝分日開始：衝分日開始時的理想狀態固定為場上 11、庫存 MAX。
-  let field=11,inv=MAX;
+  // 每個完整週期以衝分日開始：系統第一次 +8 尚未計入前，場上 11、庫存 MAX-8。
+  // 這樣衝分日公式中的 3 次系統 +8 不會與起始庫存重複計算。
+  let field=11,inv=MAX-8;
   for(let d=0;d<7;d++){
     const scoring=(d===0||d===4);
     const startF=field,startI=inv;
     if(scoring){
+      // 起始庫存為 MAX-8；當日 3 次系統 +8 另行計入，避免第一次 +8 重複計算。
       const total=startF+startI+24+LAURA;
       rows.push({d,scoring,startF,startI,total});
       field=0;inv=0;
@@ -83,12 +85,12 @@ function makePlan(MAX){
 
 function render(){
  const MAX=Number($('#max').value);
- if(!Number.isInteger(MAX)||MAX<=0){$('#out').innerHTML='<div class="panel empty">請輸入大於 0 的整數庫存上限。</div>';return}
+ if(!Number.isInteger(MAX)||MAX<8){$('#out').innerHTML='<div class="panel empty">請輸入至少 8 的整數庫存上限。</div>';return}
  const rows=makePlan(MAX);
- let html=`<div class="panel result"><b>本週規劃</b><br>庫存上限：<b>${MAX}</b><br><span class="muted">週期起點：星期一衝分開始 → 場上 11、庫存 ${MAX}</span><br><span class="warn">本版假設每天都會使用勞拉 +20；玩家可操作時間下一版再加入。</span></div>`;
+ let html=`<div class="panel result"><b>本週規劃</b><br>庫存上限：<b>${MAX}</b><br><span class="muted">週期起點：星期一衝分計算起點 → 場上 11、庫存 ${MAX-8}（MAX−8）</span><br><span class="warn">本版假設每天都會使用勞拉 +20；玩家可操作時間下一版再加入。</span></div>`;
  for(const r of rows){
    if(r.scoring){
-     html+=`<section class="day score"><h2>${days[r.d]} <span class="tag">🏆 衝分日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><div class="formula"><b>可完成雷達數：${r.startF} + ${r.startI} + 24 + 20 = ${r.total}</b><br><span class="muted">場上 11 + 庫存 MAX + 系統 3 次 × +8 + 勞拉 +20</span></div><div class="action">🏆 衝分日：完成並收割所有雷達（共 ${r.total} 個）</div><div class="state ok">結束：場上 0，庫存 0</div></section>`;
+     html+=`<section class="day score"><h2>${days[r.d]} <span class="tag">🏆 衝分日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><div class="formula"><b>可完成雷達數：${r.startF} + ${r.startI} + 24 + 20 = ${r.total}</b><br><span class="muted">場上 11 + 庫存（MAX−8）+ 系統 3 次 × +8 + 勞拉 +20</span></div><div class="action">🏆 衝分日：完成並收割所有雷達（共 ${r.total} 個）</div><div class="state ok">結束：場上 0，庫存 0</div></section>`;
    }else{
      html+=`<section class="day"><h2>${days[r.d]} <span class="tag">準備日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><table><tr><th>項目</th><th>規劃</th></tr><tr><td>每日最低處理量</td><td>${r.minProcess}</td></tr><tr><td>系統雷達</td><td>+24（每日 3 次 × +8）</td></tr><tr><td>勞拉</td><td>+20｜${r.lauraNote}</td></tr><tr><td>安全線所需處理量</td><td>${r.safetyProcess}</td></tr><tr><td>本日實際處理量</td><td><b>${r.process}</b>（取以上兩者較大值）</td></tr></table><div class="action">操作後：<b>（場上 ${r.endF}，庫存 ${r.endI}）</b></div><div class="meta">日末庫存安全線：MAX−8 = ${MAX-8}，確保下一次系統 +8 不會超過上限。</div></section>`;
    }
