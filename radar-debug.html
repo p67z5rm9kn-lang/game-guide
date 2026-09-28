@@ -233,16 +233,13 @@ function availabilitySummary(av){
 }
 function gameMomentToDisplay(gameDay,gameMinute,av){
   if(av.mode==='game') return {day:gameDay,time:fmtMin(gameMinute),dateLabel:''};
+  // gameMinute is on the game's UTC−2 clock. Convert the exact game instant
+  // to UTC, then format it in the player's device timezone.
   const gd=addDaysUTC(av.mon,gameDay);
-  // Date object stores UTC; adding 2h maps the game UTC−2 clock to UTC.
   const utcMs=Date.UTC(gd.getUTCFullYear(),gd.getUTCMonth(),gd.getUTCDate(),0,0)+gameMinute*60000+2*3600000;
   const parts=localParts(new Date(utcMs),av.tz);
   const wi=weekdayShortToIndex(parts.weekday);
-  return {
-    day:wi,
-    time:`${parts.hour}:${parts.minute}`,
-    dateLabel:`${parts.year}/${parts.month}/${parts.day}`
-  };
+  return {day:wi,time:`${parts.hour}:${parts.minute}`,dateLabel:`${parts.year}/${parts.month}/${parts.day}`};
 }
 function operationDisplay(op,av){
   if(!op)return '無';
@@ -274,7 +271,7 @@ function scheduleWeek(MAX,av){
       else {op=p;note=`玩家可於 ${operationDisplay(p,av)} 開始執行「先完成／收割當日全部處理量 → 場上=8 → 使用勞拉」；使用後不再收割。`;}
     }else{
       if(!op){feasible=false;note='當日沒有可操作時間；依規則只能等待下一個可操作時段。';}
-      else note=`玩家可於 ${operationDisplay(op,av)} 開始處理當日規劃；勞拉前後均可完成／收割。`;
+      else note=`玩家可於 ${operationDisplay(op,av)}（依玩家選擇的時間模式）開始處理當日規劃；勞拉前後均可完成／收割。`;
     }
     rows.push({...r,d,scoring:false,windows,operation:op,feasible,note});field=r.endF;inv=r.endI;
   }
