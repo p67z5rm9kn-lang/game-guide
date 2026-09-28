@@ -112,19 +112,19 @@ function render(){
 $('#plan').addEventListener('click',render);$('#max').addEventListener('input',()=>{$('#out').innerHTML='<div class="panel empty">輸入完成後按「開始規劃」。</div>'});
 </script>
 <style>
-.modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.modes label{display:flex;align-items:center;gap:5px;border:1px solid #365574;background:#102842;color:#dce8f5;border-radius:10px;padding:9px 10px;margin:0}.modes input{width:auto}.time-row{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;align-items:end;margin:8px 0}.time-row input,.time-row select{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:16px;padding:10px}.smallbtn{width:auto;margin:0;padding:10px 12px;font-size:13px}.day-title{font-size:13px;color:#dce8f5;margin-top:12px}
+.modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.modes label{display:flex;align-items:center;gap:5px;border:1px solid #365574;background:#102842;color:#dce8f5;border-radius:10px;padding:9px 10px;margin:0}.modes input{width:auto}.time-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:7px;align-items:center;margin:8px 0}.time-row input,.time-row select{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:16px;padding:10px}.time-sep{color:var(--gold);font-weight:700;text-align:center;font-size:18px}.smallbtn{width:auto;margin:0;padding:10px 12px;font-size:13px}.day-title{font-size:13px;color:#dce8f5;margin-top:12px}
 </style>
 <script>
 const timeStoreKey='lastz_radar_v6_availability';
 const weekNames=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
-function timeRow(h='',end=''){return `<div class="time-row"><div><label>開始</label><input type="time" value="${h}"></div><div><label>結束</label><input type="time" value="${end}"></div><button type="button" class="smallbtn delTime">刪除</button></div>`}
+function timeRow(h='',end=''){return `<div class="time-row"><input type="time" aria-label="開始時間" value="${h}"><span class="time-sep">－</span><input type="time" aria-label="結束時間" value="${end}"><button type="button" class="smallbtn delTime">刪除</button></div>`}
 function bindDelete(){document.querySelectorAll('.delTime').forEach(b=>{if(b.dataset.bound)return;b.dataset.bound='1';b.onclick=()=>{const row=b.closest('.time-row');const parent=row.parentElement;if(parent.querySelectorAll('.time-row').length>1)row.remove();else row.querySelectorAll('input').forEach(x=>x.value='');autoSaveAvailability();};});}
 function bindTimeInputs(){document.querySelectorAll('.time-row input').forEach(x=>{if(x.dataset.bound)return;x.dataset.bound='1';x.addEventListener('input',autoSaveAvailability);x.addEventListener('change',autoSaveAvailability);});}
 function addTimeRow(container,h='',end=''){container.insertAdjacentHTML('beforeend',timeRow(h,end));bindDelete();bindTimeInputs();autoSaveAvailability();}
 function renderTimes(){
  const same=document.querySelector('#sameTimes'), custom=document.querySelector('#customTimes');
- same.innerHTML='<div class="day-title">每天固定時段</div><div id="sameDayTimes">'+timeRow()+'</div><button type="button" class="smallbtn addSameTime">＋新增時段</button>';
- custom.innerHTML=weekNames.map((d,i)=>`<div class="day-title">${d}</div><div class="dayTimes" data-day="${i}">${timeRow()}</div><button type="button" class="smallbtn addTime" data-day="${i}">＋新增時段</button>`).join('');
+ same.innerHTML='<div class="day-title">玩家可操作時間</div><div id="sameDayTimes">'+timeRow()+'</div><button type="button" class="smallbtn addSameTime">＋新增時段</button>';
+ custom.innerHTML='<div class="day-title">玩家可操作時間</div>'+weekNames.map((d,i)=>`<div class="day-title">${d}</div><div class="dayTimes" data-day="${i}">${timeRow()}</div><button type="button" class="smallbtn addTime" data-day="${i}">＋新增時段</button>`).join('');
  document.querySelector('.addSameTime').onclick=()=>addTimeRow(document.querySelector('#sameDayTimes'));
  document.querySelectorAll('.addTime').forEach(b=>b.onclick=()=>addTimeRow(document.querySelector(`.dayTimes[data-day="${b.dataset.day}"]`)));
  bindDelete();bindTimeInputs();
