@@ -92,7 +92,7 @@ function makePlan(MAX){
     }
     const r=prepDay(field,inv,MAX,d===3||d===6);
     rows.push({...r,d,scoring:false});
-    field=r.endF;inv=r.endI;
+    if(r.scoring){field=0;inv=0;}else{field=r.endF;inv=r.endI;}
   }
   return rows;
 }
@@ -239,7 +239,7 @@ function gameMomentToDisplay(gameDay,gameMinute,av){
   const utcMs=Date.UTC(gd.getUTCFullYear(),gd.getUTCMonth(),gd.getUTCDate(),0,0)+gameMinute*60000+2*3600000;
   const parts=localParts(new Date(utcMs),av.tz);
   const wi=weekdayShortToIndex(parts.weekday);
-  return {day:wi,time:`${parts.hour}:${parts.minute}`,dateLabel:`${parts.year}/${parts.month}/${parts.day}`};
+  return {day:wi,time:`${parts.hour}:${parts.minute}`,dateLabel:`${parts.month}/${parts.day}`};
 }
 function operationDisplay(op,av){
   if(!op)return '無';
@@ -288,74 +288,51 @@ function addLauraEvent(events,d,minute,field,inv){
 function simulateDay(d,startF,startI,r,av){
   const events=[]; const score=(d===0||d===4), dayBefore=(d===3||d===6);
   let remaining=score?r.total:r.process;
-  let sf=startF, si=startI;
-  const stateForHarvest=(qty)=>{let q=Math.max(0,Math.min(qty,sf+si)); let take=Math.min(sf,q);sf-=take;q-=take;si=Math.max(0,si-q);if(sf<8&&si>0){const fill=Math.min(8-sf,si);sf+=fill;si-=fill;}return {f:sf,i:si};};
-  const stateForRefresh=()=>{let add=8;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}si+=add;return {f:sf,i:si};};
+  let sf=startF, si=startI, processed=0, lauraUsed=false;
+  const stateForHarvest=(qty)=>{let q=Math.max(0,Math.min(qty,sf+si));let take=Math.min(sf,q);sf-=take;q-=take;si=Math.max(0,si-q);if(sf<8&&si>0){const fill=Math.min(8-sf,si);sf+=fill;si-=fill;}return {f:sf,i:si};};
+  const stateForRefresh=()=>{let add=8;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}if(si+add<=r.max)si+=add;else si=r.max;return {f:sf,i:si};};
   const stateForLaura=()=>{let add=20;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}si+=add;return {f:sf,i:si};};
-  let processed=0, lauraUsed=false;
-  // 這裡只負責「把 v5 核准的數量拆成玩家看得懂的事件」；v5 的每日數量與日末狀態仍是唯一資源基準。
   const opTimes=[];
-  for(const w of dayWindows(av,d)){
-    opTimes.push(w.start);
-    if(w.end>w.start){for(const m of [0,480,960])if(m>w.start&&m<w.end)opTimes.push(m);}
-  }
+  for(const w of dayWindows(av,d)){opTimes.push(w.start);if(w.end>w.start){for(const m of [0,480,960])if(m>w.start&&m<w.end)opTimes.push(m);}}
   const ops=[...new Set(opTimes)].sort((a,b)=>a-b);
   const refreshes=[0,480,960];
-  // 先產生所有系統刷新事件；同一時間一定排在玩家操作之前。
-  for(const m of refreshes){const z=stateForRefresh();events.push({type:'refresh',day:d,minute:m,delta:8,afterF:z.f,afterI:z.i});}
-
-  if(dayBefore){
-    // 衝分日前一天：玩家操作必須呈現為「先完成本日處理量 → 場上=8 → 勞拉」，且勞拉後不再收割。
-    const op=ops.find(m=>m>=0);
-    if(op!=null){
-      const q=remaining;
-      const z=stateForHarvest(q);events.push({type:'harvest',day:d,minute:op,qty:q,reason:'完成／收割本日應處理量',afterF:z.f,afterI:z.i});processed=q;remaining=0;
-      const zL=stateForLaura();events.push({type:'laura',day:d,minute:op,delta:LAURA,afterF:zL.f,afterI:zL.i});lauraUsed=true;
+  const points=[...new Set([...refreshes,...ops])].sort((a,b)=>a-b);
+  for(const m of points){
+    if(refreshes.includes(m)){const z=stateForRefresh();events.push({type:'refresh',day:d,minute:m,delta:8,afterF:z.f,afterI:z.i});}
+    if(!ops.includes(m)||remaining<=0)continue;
+    if(dayBefore){
+      const q=remaining;const z=stateForHarvest(q);events.push({type:'harvest',day:d,minute:m,qty:q,reason:'完成／收割本日應處理量',afterF:z.f,afterI:z.i});processed+=q;remaining=0;
+      if(sf===8&&!lauraUsed){const zL=stateForLaura();events.push({type:'laura',day:d,minute:m,delta:LAURA,afterF:zL.f,afterI:zL.i});lauraUsed=true;}
+      continue;
     }
-  }else if(score){
-    // 衝分日：不再只給一個「建議起點」，而是依玩家可操作時間把 3 次刷新與實際收割全部列出。
-    // 勞拉安排在第一個「使用後儲存不超過 MAX」的操作點；其餘雷達依事件順序分段收割。
-    for(const m of ops){
-      if(remaining<=0)break;
-      const hasRefresh=refreshes.includes(m);
-      if(!lauraUsed && (r.startI + (m>=480?8:0) + (m>=960?8:0)) <= r.max-20){
-        const zL=stateForLaura();events.push({type:'laura',day:d,minute:m,delta:LAURA,afterF:zL.f,afterI:zL.i});lauraUsed=true;
+    if(score){
+      // 衝分日不再平均切割總量；每次玩家可操作時，先處理目前實際可用的雷達，再使用勞拉並處理勞拉帶來的雷達。
+      if(sf+si>0){const q=Math.min(remaining,sf+si);const z=stateForHarvest(q);events.push({type:'harvest',day:d,minute:m,qty:q,reason:'完成／收割目前可用雷達',afterF:z.f,afterI:z.i});processed+=q;remaining-=q;}
+      if(!lauraUsed&&remaining>0){
+        const beforeF=sf,beforeI=si;const preview=stateForLaura();
+        if(preview.i<=r.max){events.push({type:'laura',day:d,minute:m,delta:LAURA,afterF:preview.f,afterI:preview.i});lauraUsed=true;const q=Math.min(remaining,sf+si);if(q>0){const z=stateForHarvest(q);events.push({type:'harvest',day:d,minute:m,qty:q,reason:'完成勞拉帶來的雷達需求',afterF:z.f,afterI:z.i});processed+=q;remaining-=q;}}
+        else{sf=beforeF;si=beforeI;}
       }
-      // 每次可操作時，先把「截至目前新增」的資源拿來處理；數量以剩餘總量與事件節點平均分配，不改動 v5 總量。
-      const futureOps=ops.filter(x=>x>m).length;
-      let q;
-      if(futureOps===0)q=remaining;
-      else q=Math.min(remaining,Math.max(0,Math.floor(remaining/(futureOps+1))));
-      if(q>0){const z=stateForHarvest(q);events.push({type:'harvest',day:d,minute:m,qty:q,reason:'衝分日完成／收割',afterF:z.f,afterI:z.i});processed+=q;remaining-=q;}
-    }
-    if(remaining>0 && ops.length){const m=ops[ops.length-1];const z=stateForHarvest(remaining);events.push({type:'harvest',day:d,minute:m,qty:remaining,reason:'衝分日完成／收割剩餘雷達',afterF:z.f,afterI:z.i});processed+=remaining;remaining=0;}
-  }else{
-    // 準備日：依 v5 的「本日實際處理量」拆解。第一次操作先處理當下可用雷達；若場上 <8，再使用勞拉；再處理勞拉帶來的需求。
-    const first=ops[0];
-    if(first!=null && remaining>0){
-      const firstQty=Math.min(remaining, d===1?8:Math.min(remaining,Math.max(0,r.startF+r.startI+8)));
-      if(firstQty>0){const z=stateForHarvest(firstQty);events.push({type:'harvest',day:d,minute:first,qty:firstQty,reason:'先完成／收割目前可用雷達',afterF:z.f,afterI:z.i});processed+=firstQty;remaining-=firstQty;}
-      if(!lauraUsed){const zL=stateForLaura();events.push({type:'laura',day:d,minute:first,delta:LAURA,afterF:zL.f,afterI:zL.i});lauraUsed=true;}
-      const afterLaura=Math.min(remaining,Math.max(0,r.process-processed));
-      if(afterLaura>0){const z=stateForHarvest(afterLaura);events.push({type:'harvest',day:d,minute:first,qty:afterLaura,reason:'完成勞拉帶來的雷達需求',afterF:z.f,afterI:z.i});processed+=afterLaura;remaining-=afterLaura;}
-    }
-    if(remaining>0){
-      const later=ops.filter(m=>m>first);
-      for(const m of later){if(remaining<=0)break;const q=remaining;const z=stateForHarvest(q);events.push({type:'harvest',day:d,minute:m,qty:q,reason:'完成／收割本日剩餘應處理量',afterF:z.f,afterI:z.i});processed+=q;remaining=0;}
+    }else{
+      // 準備日維持目前 v5 拆解基準；星期二等「8 → 勞拉 → 12」可直接呈現為連續步驟。
+      const first=m;
+      const firstQty=Math.min(remaining,d===1?8:Math.min(remaining,Math.max(0,sf+si)));
+      if(firstQty>0){const z=stateForHarvest(firstQty);events.push({type:'harvest',day:d,minute:first,qty:firstQty,reason:'完成／收割目前可用雷達',afterF:z.f,afterI:z.i});processed+=firstQty;remaining-=firstQty;}
+      if(!lauraUsed&&remaining>0){const zL=stateForLaura();events.push({type:'laura',day:d,minute:first,delta:LAURA,afterF:zL.f,afterI:zL.i});lauraUsed=true;const q=Math.min(remaining,sf+si);if(q>0){const z=stateForHarvest(q);events.push({type:'harvest',day:d,minute:first,qty:q,reason:'完成勞拉帶來的雷達需求',afterF:z.f,afterI:z.i});processed+=q;remaining-=q;}}
     }
   }
-  // 重新排序：同一時間一定先刷新，再玩家操作。然後依真正事件順序重算畫面上的場上／儲存狀態。
-  events.sort((a,b)=>a.minute-b.minute||(a.type==='refresh'?-1:1));
+  const feasible=processed>= (score?r.total:r.process) && (!score||ops.some(m=>m>=960));
+  events.sort((a,b)=>a.minute-b.minute||((a.type==='refresh'?0:1)-(b.type==='refresh'?0:1)));
   let vf=startF,vi=startI;
   for(const e of events){
-    if(e.type==='refresh'){let add=8;if(vf<8){const fill=Math.min(8-vf,add);vf+=fill;add-=fill;}vi+=add;}
+    if(e.type==='refresh'){let add=8;if(vf<8){const fill=Math.min(8-vf,add);vf+=fill;add-=fill;}vi=Math.min(r.max,vi+add);}
     else if(e.type==='laura'){let add=20;if(vf<8){const fill=Math.min(8-vf,add);vf+=fill;add-=fill;}vi+=add;}
-    else {let q=Math.min(e.qty,vf+vi);const take=Math.min(vf,q);vf-=take;q-=take;vi=Math.max(0,vi-q);if(vf<8&&vi>0){const fill=Math.min(8-vf,vi);vf+=fill;vi-=fill;}}
+    else{let q=Math.min(e.qty,vf+vi);const take=Math.min(vf,q);vf-=take;q-=take;vi=Math.max(0,vi-q);if(vf<8&&vi>0){const fill=Math.min(8-vf,vi);vf+=fill;vi-=fill;}}
     e.afterF=vf;e.afterI=vi;
   }
-  const scoringHasLateWindow=ops.some(m=>m>=960);
-  return {events,processed,lauraUsed,feasible:processed>=(score?r.total:r.process) && (!score||scoringHasLateWindow)};
+  return {events,processed,lauraUsed,field:vf,inv:vi,feasible};
 }
+
 function scheduleWeek(MAX,av){
   const base=makePlan(MAX),rows=[],impossible=[];
   let field=11,inv=MAX-8;
@@ -366,7 +343,7 @@ function scheduleWeek(MAX,av){
     x.events=sim.events;x.simProcessed=sim.processed;x.simFeasible=sim.feasible;
     x.endSimF=sim.field;x.endSimI=sim.inv;
     // v5 資源結果是本週的核准基準；模擬只負責把操作與刷新時間完整攤開。
-    field=r.endF;inv=r.endI;
+    if(r.scoring){field=0;inv=0;}else{field=r.endF;inv=r.endI;}
     if(!sim.feasible)impossible.push(`${weekNames[d]}：目前可操作時間不足，無法在當日完成 v5 規劃的本日實際處理量。`);
     rows.push(x);
   }
@@ -389,9 +366,19 @@ function formatGameRange(day,start,end,av){
 }
 function formatOperationRange(e,av){
   const w=operationWindowForEvent(e,av);
-  if(!w)return `${eventDisplay(e,av).dateLabel} ${eventDisplay(e,av).time}`;
-  return formatGameRange(e.day,w.start,w.end,av);
+  const x=eventDisplay(e,av);
+  if(!w)return `${x.dateLabel} ${x.time}`;
+  // 可操作區間遇到 00:00／08:00／16:00 刷新時，要在刷新點切開，避免讓玩家誤以為整段期間都可以視為同一批資源。
+  let start=w.start,end=w.end;
+  for(const m of [0,480,960]){
+    if(m<=e.minute) start=Math.max(start,m);
+    if(m>e.minute) end=Math.min(end,m);
+  }
+  if(end<=start) end=w.end;
+  const a=gameMomentToDisplay(e.day,start,av), b=gameMomentToDisplay(e.day,end,av);
+  return a.dateLabel===b.dateLabel?`${a.dateLabel} ${a.time}–${b.time}`:`${a.dateLabel} ${a.time}–${b.dateLabel} ${b.time}`;
 }
+
 function operationStepText(e,av,index,total){
   const prefix=index===0?'':(index===total-1?'最後，':'接著，');
   if(e.type==='laura') return `${prefix}使用勞拉 +20`;
@@ -423,8 +410,7 @@ function render(){
  const MAX=Number($('#max').value);
  if(!Number.isInteger(MAX)||MAX<8){$('#out').innerHTML='<div class="panel empty">請輸入至少 8 的整數儲存上限。</div>';return}
  const av=buildGameAvailability(),plan=scheduleWeek(MAX,av);
- let html=`<div class="panel result"><b>本週規劃</b><br>儲存上限：<b>${MAX}</b><br><span class="muted">內部時間軸：遊戲時間 UTC−2｜遊戲日 00:00 開始｜每 8h 刷新 8 個雷達：00:00／08:00／16:00</span><br><span class="muted">${av.mode==='local'?`當地時間模式：裝置時區 ${av.tz}；玩家看到的日期與時間皆為當地時間，內部計算仍使用同一個遊戲事件。`:'遊戲時間模式：玩家看到的時間即為遊戲時間 UTC−2。'}</span></div>`;
- html+=`<div class="panel result"><b>玩家可操作時間（${av.mode==='game'?'遊戲時間':'當地時間'}）</b><div class="meta">${availabilitySummary(av)}</div></div>`;
+ let html='';
  if(plan.impossible.length) html+=`<div class="panel result"><b class="warn">⚠️ 時間限制</b><div class="meta">${plan.impossible.join('<br>')}</div></div>`;
  for(const r of plan.rows){
    const ev=r.events||[];
