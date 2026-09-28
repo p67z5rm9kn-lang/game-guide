@@ -1,161 +1,140 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z 雷達週計劃 v6.1</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Last Z｜星期二時間測試 v6.2</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:17px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:13px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:13px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}
-</style>
-<style>
-.timeline{margin-top:10px}
-.tday{border:1px solid #27415f;border-radius:12px;padding:10px;margin-top:9px;background:#09192c}
-.tday h3{font-size:15px;margin:0 0 7px;color:#f2d486}
-.event{display:flex;gap:8px;align-items:flex-start;border-top:1px solid #203852;padding:7px 0;font-size:12px;line-height:1.55}
-.event:first-of-type{border-top:0}
-.time{min-width:48px;color:#f2d486;font-weight:700}
-.in{color:#8fd3a7}.out{color:#f0c674}
-.v6note{font-size:12px;color:#9fb1c7;line-height:1.6;margin-top:8px}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}
+main{max-width:680px;margin:auto}
+h1{font-size:22px;margin:0 0 7px;color:var(--gold)}
+.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:14px}
+.panel{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
+input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}
+button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}
+.box{background:#09192c;border-radius:10px;padding:11px;margin-top:9px;font-size:13px;line-height:1.7}
+.big{font-size:19px;font-weight:700}
+.ok{color:var(--good)}
+.warn{color:var(--warn)}
+.muted{color:var(--muted)}
+.event{display:flex;gap:9px;border-top:1px solid #203852;padding:9px 0;font-size:13px;line-height:1.55}
+.event:first-child{border-top:0}
+.time{min-width:55px;color:#f2d486;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+td,th{border-bottom:1px solid #203852;padding:8px 4px;text-align:left}
+th{color:var(--muted);font-weight:500}
 </style>
 </head>
-<body><main>
-<h1>Last Z｜雷達週計劃 v6.1</h1>
-<div class="sub">基準完全沿用 radar-weekly-v4；這版只做「v4 驗證＋玩家可操作時間」兩件事。</div>
-<div class="panel">
-<label for="max">庫存上限 MAX</label><input id="max" type="number" min="1" step="1" placeholder="例如 30"><button id="plan">開始規劃</button>
-<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。衝分日計算起點為「場上 11、庫存 MAX−8」；當日 3 次系統 +8 會計入可完成雷達數。</div>
-</div>
+<body>
+<main>
+<h1>Last Z｜星期二時間測試 v6.2</h1>
+<div class="sub">只測一件事：v4 的「星期二需要處理 20 個」，在玩家可操作時間內能不能完成。</div>
 
 <div class="panel">
-  <b>v6 新增：玩家可操作時間（只做時間軸測試）</b>
-  <div class="meta">這一區不會改動 v4 的週計劃計算，只標記每天的 +8 發生時間，以及玩家當時是否能操作。</div>
-  <label for="opStart">每日可操作開始時間</label>
-  <input id="opStart" type="time" value="18:00">
-  <label for="opEnd" style="margin-top:10px">每日可操作結束時間</label>
-  <input id="opEnd" type="time" value="22:00">
-  <button id="timeTest" type="button">產生時間軸</button>
-  <div id="timelineOut"></div>
+<b>測試條件</b>
+<div class="box">
+MAX：<b>30</b><br>
+星期二 v4 開始：<b>場上 0／庫存 0</b><br>
+星期二 v4 需要處理：<b>20 個</b><br>
+星期二 v4 結束：<b>場上 8／庫存 16</b>
 </div>
 
-<div id="out"></div>
+<label>每日可操作開始時間</label>
+<input id="start" type="time" value="18:00">
+
+<label>每日可操作結束時間</label>
+<input id="end" type="time" value="22:00">
+
+<button id="run">開始測試</button>
+</div>
+
+<div id="result"></div>
 </main>
 
 <script>
-(function(){
-  const $=s=>document.querySelector(s);
-  const days=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
+const $=s=>document.querySelector(s);
 
-  function toMin(s){
-    const [h,m]=s.split(':').map(Number);
-    return h*60+m;
-  }
+function minOf(s){
+  const [h,m]=s.split(':').map(Number);
+  return h*60+m;
+}
 
-  function insideWindow(eventMin,startMin,endMin){
-    if(startMin===endMin) return true;
-    if(startMin<endMin) return eventMin>=startMin && eventMin<=endMin;
-    return eventMin>=startMin || eventMin<=endMin;
-  }
+function inWindow(t,start,end){
+  if(start===end) return true;
+  if(start<end) return t>=start && t<=end;
+  return t>=start || t<=end;
+}
 
-  function renderVerification(){
-    const MAX=Number($('#max').value);
-    const start=$('#opStart').value;
-    const end=$('#opEnd').value;
+function run(){
+  const start=$('#start').value;
+  const end=$('#end').value;
+  const sm=minOf(start), em=minOf(end);
 
-    if(!Number.isInteger(MAX) || MAX<8){
-      $('#out').innerHTML='<div class="panel empty">請輸入至少 8 的整數庫存上限。</div>';
-      return;
-    }
+  // 只測星期二。
+  // v4 的「處理 20」是既定需求，本版不重新計算它。
+  const required=20;
 
-    // 這裡只呈現已確認的 v4 基準結果。
-    // 不重新推導、不使用時間限制去改動 v4。
-    const rows=[
-      ['星期一','🏆',11,MAX-8,'—','0 / 0',11+(MAX-8)+24+20],
-      ['星期二','',0,0,20,'8 / 16',''],
-      ['星期三','',8,16,38,'8 / 22',''],
-      ['星期四','',8,22,41,'11 / 22',''],
-      ['星期五','🏆',11,MAX-8,'—','0 / 0',11+(MAX-8)+24+20],
-      ['星期六','',0,0,20,'8 / 16',''],
-      ['星期日','',8,16,35,'11 / 22','']
-    ];
+  // 事件：10:00 +8、18:00 +8、02:00 +8。
+  // 這一版先只建立時間位置，不假設每分鐘能處理幾個。
+  const events=[
+    {time:'10:00',min:600,label:'系統 +8'},
+    {time:'18:00',min:1080,label:'系統 +8'},
+    {time:'02:00',min:120,label:'系統 +8（隔日）'}
+  ];
 
-    const expectedMonday=11+(MAX-8)+24+20;
-    const expectedFriday=expectedMonday;
-    const v4Pass = MAX===30
-      ? expectedMonday===77 && expectedFriday===77 &&
-        rows[1][5]==='8 / 16' && rows[2][4]===38 &&
-        rows[3][4]===41 && rows[3][5]==='11 / 22' &&
-        rows[5][4]===20 && rows[6][4]===35 && rows[6][5]==='11 / 22'
-      : true;
+  const rows=events.map(e=>({
+    ...e,
+    can:inWindow(e.min,sm,em)
+  }));
 
-    let h=`<div class="panel result">
-      <b>① v4 基準檢查</b>
-      <div class="${v4Pass?'ok':'warn'}" style="font-size:18px;margin-top:8px">
-        ${v4Pass?'✅ 通過':'⚠️ 請檢查'}
+  const hasWindow=sm!==em;
+  const daytimeOverlap=hasWindow && (sm<em ? !(em<=600 || sm>=1320) : true);
+
+  let h=`<div class="panel">
+    <b>① v4 星期二基準</b>
+    <div class="box">
+      開始：<b>0／0</b><br>
+      今日需要處理：<b>20 個</b><br>
+      預期結束：<b>8／16</b>
+    </div>
+    <div class="box ok"><b>✅ v4 基準不變</b><br>
+      這 20 個不是由時間模組重新計算，而是直接沿用 v4。
+    </div>
+  </div>`;
+
+  h+=`<div class="panel">
+    <b>② 星期二時間軸</b>
+    <div class="box">玩家可操作：<span class="big">${start}～${end}</span></div>
+    ${rows.map(e=>`<div class="event">
+      <span class="time">${e.time}</span>
+      <span><b>${e.label}</b><br>
+      <span class="${e.can?'ok':'warn'}">${e.can?'🟢 玩家可操作':'🔴 玩家不可操作'}</span></span>
+    </div>`).join('')}
+  </div>`;
+
+  h+=`<div class="panel">
+    <b>③ 目前測試結論</b>
+    <div class="box">
+      <div class="big">還不判定「20 個能不能完成」</div>
+      <div class="muted" style="margin-top:7px">
+        原因：我們現在還沒有定義「玩家在操作時間內，每次可以處理多少雷達」。
+        如果現在直接說可以或不可以，就是自行猜規則。
       </div>
-      <div class="meta">這裡只檢查 v4；玩家可操作時間不會改動下面任何數字。</div>
-    </div>`;
+    </div>
+    <div class="box">
+      <b>下一個需要確認的規則：</b><br>
+      玩家在一次可操作期間，可以處理多少個已完成雷達／收割多少個雷達？
+    </div>
+  </div>`;
 
-    h+=`<div class="panel">
-      <b>MAX ${MAX}｜v4 週計劃</b>
-      <table>
-        <tr><th>星期</th><th>開始</th><th>處理量</th><th>結束</th></tr>
-        ${rows.map(r=>`<tr>
-          <td>${r[0]} ${r[1]}</td>
-          <td>${r[2]} / ${r[3]}</td>
-          <td>${r[4]}</td>
-          <td>${r[5]} ${r[6]!==''?`｜${r[6]} 個`:''}</td>
-        </tr>`).join('')}
-      </table>
-      <div class="formula">
-        星期一可完成：<b>${expectedMonday}</b><br>
-        星期五可完成：<b>${expectedFriday}</b>
-      </div>
-    </div>`;
+  $('#result').innerHTML=h;
+}
 
-    $('#out').innerHTML=h;
-    renderTimeline();
-  }
-
-  function renderTimeline(){
-    const start=$('#opStart').value;
-    const end=$('#opEnd').value;
-    if(!start || !end){
-      $('#timelineOut').innerHTML='<div class="v6note">請選擇開始與結束時間。</div>';
-      return;
-    }
-
-    const sm=toMin(start), em=toMin(end);
-    const events=[
-      {t:'10:00',m:600,label:'系統 +8'},
-      {t:'18:00',m:1080,label:'系統 +8'},
-      {t:'02:00',m:120,label:'系統 +8（隔日）'}
-    ];
-
-    let h=`<div class="panel">
-      <b>② 玩家可操作時間</b>
-      <div style="font-size:18px;margin-top:8px"><b>${start}～${end}</b></div>
-      <div class="meta">只判斷事件當下能否操作，不計算處理量。</div>
-      <table>
-        <tr><th>時間</th><th>事件</th><th>玩家</th></tr>
-        ${events.map(e=>{
-          const can=insideWindow(e.m,sm,em);
-          return `<tr>
-            <td>${e.t}</td><td>${e.label}</td>
-            <td class="${can?'ok':'warn'}">${can?'✅ 可操作':'❌ 不可操作'}</td>
-          </tr>`;
-        }).join('')}
-      </table>
-    </div>`;
-
-    $('#timelineOut').innerHTML=h;
-  }
-
-  $('#timeTest').addEventListener('click',renderVerification);
-  $('#plan').addEventListener('click',renderVerification);
-  $('#max').addEventListener('input',()=>$('#out').innerHTML='<div class="panel empty">按「開始規劃」檢查 v4 基準。</div>');
-  renderVerification();
-})();
+$('#run').addEventListener('click',run);
+run();
 </script>
-
-
-</body></html>
+</body>
+</html>
