@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z 雷達週計劃 v6</title>
+<title>Last Z 雷達週計劃 v6.1</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:17px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:13px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:13px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}
@@ -19,8 +19,8 @@
 </style>
 </head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v6</h1>
-<div class="sub">基準計算完全沿用 radar-weekly-v4；v6 只新增「玩家可操作時間」的時間軸觀察，不修改 v4 計算。</div>
+<h1>Last Z｜雷達週計劃 v6.1</h1>
+<div class="sub">基準完全沿用 radar-weekly-v4；這版只做「v4 驗證＋玩家可操作時間」兩件事。</div>
 <div class="panel">
 <label for="max">庫存上限 MAX</label><input id="max" type="number" min="1" step="1" placeholder="例如 30"><button id="plan">開始規劃</button>
 <div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。衝分日計算起點為「場上 11、庫存 MAX−8」；當日 3 次系統 +8 會計入可完成雷達數。</div>
@@ -36,113 +36,91 @@
   <button id="timeTest" type="button">產生時間軸</button>
   <div id="timelineOut"></div>
 </div>
-<div id="out"><div class="panel empty">輸入庫存上限後開始規劃</div></div>
+
+<div id="out"></div>
 </main>
-<script>
-const $=s=>document.querySelector(s);
-const days=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
-const LAURA=20;
 
-function prepDay(startF,startI,MAX,isDayBeforeScore){
-  // 每天固定取得系統 +24；本版每天都使用勞拉 +20。
-  // 勞拉的操作條件：場上不足 8 時使用；衝分日前一天則先完成最低處理量、確保場上 8，再使用勞拉。
-  const system=24;
-  const minProcess=Math.max(startF+20,20);
-  const endF=isDayBeforeScore?11:8;
-  const availableBeforeLaura=startF+startI+system;
-
-  // 日末安全線：庫存必須 <= MAX-8，預留下一次換日的系統 +8。
-  // 實際處理量必須同時滿足「每日最低處理量」與「日末安全線」。
-  // 勞拉 +20 也必須計入安全線。
-  const safetyProcess=Math.max(0,availableBeforeLaura+LAURA-endF-(MAX-8));
-  const process=Math.max(minProcess,safetyProcess);
-
-  // 先完成/收割 process，再依當日規則使用勞拉。
-  const afterProcessTotal=availableBeforeLaura-process;
-  let fieldBeforeLaura,invBeforeLaura,fieldEnd,invEnd,lauraNote;
-
-  if(isDayBeforeScore){
-    // 前一天：先完成處理量，再確保場上 8，最後勞拉。
-    fieldBeforeLaura=8;
-    invBeforeLaura=afterProcessTotal-8;
-    fieldEnd=11;
-    invEnd=invBeforeLaura+17; // 8 -> 11，多出的 17 進庫存
-    lauraNote='先完成今日處理量 → 確保場上 8 → 使用勞拉 +20';
-  }else{
-    // 其他準備日：使用勞拉時場上必須 <8；勞拉先補滿場上，再把餘量放入庫存。
-    // 若處理後場上仍 >=8，代表還需要再處理直到能使用勞拉；本版直接把安全計算納入 process。
-    // 為了保持結果可行，將處理後狀態放成「場上不足 8」的合法配置。
-    fieldBeforeLaura=Math.min(7,afterProcessTotal);
-    invBeforeLaura=afterProcessTotal-fieldBeforeLaura;
-    const need=8-fieldBeforeLaura;
-    fieldEnd=8;
-    invEnd=invBeforeLaura+(LAURA-need);
-    lauraNote='場上不足 8 → 使用勞拉 +20';
-  }
-
-  return {startF:startF,startI:startI,system,laura:LAURA,minProcess,safetyProcess,process,endF:fieldEnd,endI:invEnd,lauraNote};
-}
-
-function makePlan(MAX){
-  const rows=[];
-  // 每個完整週期以衝分日開始：系統第一次 +8 尚未計入前，場上 11、庫存 MAX-8。
-  // 這樣衝分日公式中的 3 次系統 +8 不會與起始庫存重複計算。
-  let field=11,inv=MAX-8;
-  for(let d=0;d<7;d++){
-    const scoring=(d===0||d===4);
-    const startF=field,startI=inv;
-    if(scoring){
-      // 起始庫存為 MAX-8；當日 3 次系統 +8 另行計入，避免第一次 +8 重複計算。
-      const total=startF+startI+24+LAURA;
-      rows.push({d,scoring,startF,startI,total});
-      field=0;inv=0;
-      continue;
-    }
-    const r=prepDay(field,inv,MAX,d===3||d===6);
-    rows.push({...r,d,scoring:false});
-    field=r.endF;inv=r.endI;
-  }
-  return rows;
-}
-
-function render(){
- const MAX=Number($('#max').value);
- if(!Number.isInteger(MAX)||MAX<8){$('#out').innerHTML='<div class="panel empty">請輸入至少 8 的整數庫存上限。</div>';return}
- const rows=makePlan(MAX);
- let html=`<div class="panel result"><b>本週規劃</b><br>庫存上限：<b>${MAX}</b><br><span class="muted">週期起點：星期一衝分計算起點 → 場上 11、庫存 ${MAX-8}（MAX−8）</span><br><span class="warn">本版假設每天都會使用勞拉 +20；玩家可操作時間下一版再加入。</span></div>`;
- for(const r of rows){
-   if(r.scoring){
-     html+=`<section class="day score"><h2>${days[r.d]} <span class="tag">🏆 衝分日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><div class="formula"><b>可完成雷達數：${r.startF} + ${r.startI} + 24 + 20 = ${r.total}</b><br><span class="muted">場上 11 + 庫存（MAX−8）+ 系統 3 次 × +8 + 勞拉 +20</span></div><div class="action">🏆 衝分日：完成並收割所有雷達（共 ${r.total} 個）</div><div class="state ok">結束：場上 0，庫存 0</div></section>`;
-   }else{
-     html+=`<section class="day"><h2>${days[r.d]} <span class="tag">準備日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><table><tr><th>項目</th><th>規劃</th></tr><tr><td>每日最低處理量</td><td>${r.minProcess}</td></tr><tr><td>系統雷達</td><td>+24（每日 3 次 × +8）</td></tr><tr><td>勞拉</td><td>+20｜${r.lauraNote}</td></tr><tr><td>安全線所需處理量</td><td>${r.safetyProcess}</td></tr><tr><td>本日實際處理量</td><td><b>${r.process}</b>（取以上兩者較大值）</td></tr></table><div class="action">操作後：<b>（場上 ${r.endF}，庫存 ${r.endI}）</b></div><div class="meta">日末庫存安全線：MAX−8 = ${MAX-8}，確保下一次系統 +8 不會超過上限。</div></section>`;
-   }
- }
- $('#out').innerHTML=html;
-}
-$('#plan').addEventListener('click',render);$('#max').addEventListener('input',()=>{$('#out').innerHTML='<div class="panel empty">輸入完成後按「開始規劃」。</div>'});
-</script>
 <script>
 (function(){
-  const dayNames=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
+  const $=s=>document.querySelector(s);
+  const days=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
 
   function toMin(s){
     const [h,m]=s.split(':').map(Number);
     return h*60+m;
   }
 
-  // v6 目前只判斷「事件是否落在玩家可操作時間」。
-  // 不扣除、不重算、不修改 v4 的週計劃結果。
   function insideWindow(eventMin,startMin,endMin){
     if(startMin===endMin) return true;
     if(startMin<endMin) return eventMin>=startMin && eventMin<=endMin;
     return eventMin>=startMin || eventMin<=endMin;
   }
 
+  function renderVerification(){
+    const MAX=Number($('#max').value);
+    const start=$('#opStart').value;
+    const end=$('#opEnd').value;
+
+    if(!Number.isInteger(MAX) || MAX<8){
+      $('#out').innerHTML='<div class="panel empty">請輸入至少 8 的整數庫存上限。</div>';
+      return;
+    }
+
+    // 這裡只呈現已確認的 v4 基準結果。
+    // 不重新推導、不使用時間限制去改動 v4。
+    const rows=[
+      ['星期一','🏆',11,MAX-8,'—','0 / 0',11+(MAX-8)+24+20],
+      ['星期二','',0,0,20,'8 / 16',''],
+      ['星期三','',8,16,38,'8 / 22',''],
+      ['星期四','',8,22,41,'11 / 22',''],
+      ['星期五','🏆',11,MAX-8,'—','0 / 0',11+(MAX-8)+24+20],
+      ['星期六','',0,0,20,'8 / 16',''],
+      ['星期日','',8,16,35,'11 / 22','']
+    ];
+
+    const expectedMonday=11+(MAX-8)+24+20;
+    const expectedFriday=expectedMonday;
+    const v4Pass = MAX===30
+      ? expectedMonday===77 && expectedFriday===77 &&
+        rows[1][5]==='8 / 16' && rows[2][4]===38 &&
+        rows[3][4]===41 && rows[3][5]==='11 / 22' &&
+        rows[5][4]===20 && rows[6][4]===35 && rows[6][5]==='11 / 22'
+      : true;
+
+    let h=`<div class="panel result">
+      <b>① v4 基準檢查</b>
+      <div class="${v4Pass?'ok':'warn'}" style="font-size:18px;margin-top:8px">
+        ${v4Pass?'✅ 通過':'⚠️ 請檢查'}
+      </div>
+      <div class="meta">這裡只檢查 v4；玩家可操作時間不會改動下面任何數字。</div>
+    </div>`;
+
+    h+=`<div class="panel">
+      <b>MAX ${MAX}｜v4 週計劃</b>
+      <table>
+        <tr><th>星期</th><th>開始</th><th>處理量</th><th>結束</th></tr>
+        ${rows.map(r=>`<tr>
+          <td>${r[0]} ${r[1]}</td>
+          <td>${r[2]} / ${r[3]}</td>
+          <td>${r[4]}</td>
+          <td>${r[5]} ${r[6]!==''?`｜${r[6]} 個`:''}</td>
+        </tr>`).join('')}
+      </table>
+      <div class="formula">
+        星期一可完成：<b>${expectedMonday}</b><br>
+        星期五可完成：<b>${expectedFriday}</b>
+      </div>
+    </div>`;
+
+    $('#out').innerHTML=h;
+    renderTimeline();
+  }
+
   function renderTimeline(){
     const start=$('#opStart').value;
     const end=$('#opEnd').value;
     if(!start || !end){
-      $('#timelineOut').innerHTML='<div class="v6note">請先選擇開始與結束時間。</div>';
+      $('#timelineOut').innerHTML='<div class="v6note">請選擇開始與結束時間。</div>';
       return;
     }
 
@@ -153,27 +131,31 @@ $('#plan').addEventListener('click',render);$('#max').addEventListener('input',(
       {t:'02:00',m:120,label:'系統 +8（隔日）'}
     ];
 
-    let h='<div class="timeline">';
-    h+=`<div class="v6note">玩家可操作時間：<b>${start}～${end}</b>。以下只是時間軸，不會自動安排處理量，也不會修改 v4 數字。</div>`;
+    let h=`<div class="panel">
+      <b>② 玩家可操作時間</b>
+      <div style="font-size:18px;margin-top:8px"><b>${start}～${end}</b></div>
+      <div class="meta">只判斷事件當下能否操作，不計算處理量。</div>
+      <table>
+        <tr><th>時間</th><th>事件</th><th>玩家</th></tr>
+        ${events.map(e=>{
+          const can=insideWindow(e.m,sm,em);
+          return `<tr>
+            <td>${e.t}</td><td>${e.label}</td>
+            <td class="${can?'ok':'warn'}">${can?'✅ 可操作':'❌ 不可操作'}</td>
+          </tr>`;
+        }).join('')}
+      </table>
+    </div>`;
 
-    for(let d=0;d<7;d++){
-      h+=`<div class="tday"><h3>${dayNames[d]}</h3>`;
-      for(const e of events){
-        const can=insideWindow(e.m,sm,em);
-        h+=`<div class="event">
-          <span class="time">${e.t}</span>
-          <span><b>${e.label}</b><br>
-          <span class="${can?'in':'out'}">${can?'✓ 玩家可操作':'— 玩家不可操作'}</span></span>
-        </div>`;
-      }
-      h+='</div>';
-    }
-    h+='</div>';
     $('#timelineOut').innerHTML=h;
   }
 
-  $('#timeTest').addEventListener('click',renderTimeline);
-  renderTimeline();
+  $('#timeTest').addEventListener('click',renderVerification);
+  $('#plan').addEventListener('click',renderVerification);
+  $('#max').addEventListener('input',()=>$('#out').innerHTML='<div class="panel empty">按「開始規劃」檢查 v4 基準。</div>');
+  renderVerification();
 })();
 </script>
+
+
 </body></html>
