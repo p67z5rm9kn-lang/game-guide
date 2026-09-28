@@ -3,32 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>雷達規劃核心｜每日處理量 v1</title>
+<title>雷達規劃核心｜完整 +8 時間軸 v2</title>
 <style>
 :root{color-scheme:dark}
+*{box-sizing:border-box}
 body{margin:0;background:#071421;color:#e8eef5;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;line-height:1.55}
 .wrap{max-width:720px;margin:auto;padding:18px}
 h1{color:#e0ad3b;font-size:24px;margin:0 0 8px}
 .lead{font-size:16px;color:#cbd5df;margin-bottom:18px}
 .card{background:#0a1c2a;border:1px solid #30465e;border-radius:16px;padding:16px;margin-bottom:14px}
 label{display:block;font-weight:700;margin:12px 0 6px}
-input{width:100%;box-sizing:border-box;background:#102437;border:1px solid #647991;color:#fff;border-radius:10px;padding:12px;font-size:17px}
+input{width:100%;background:#102437;border:1px solid #647991;color:#fff;border-radius:10px;padding:12px;font-size:17px}
 button{width:100%;margin-top:14px;border:0;border-radius:10px;padding:13px;background:#a77b28;color:#fff;font-weight:800;font-size:17px}
-.result{font-size:18px}
 .big{font-size:25px;font-weight:900;color:#7ee2a8}
-.blue{color:#7db8ff}.gold{color:#e0ad3b}.muted{color:#aab7c5}
-.ok{color:#7ee2a8}.warn{color:#ffd166}.bad{color:#ff8b8b}
-.row{padding:10px 0;border-bottom:1px solid #26394d}
-.row:last-child{border-bottom:0}
-.small{font-size:14px}
+.gold{color:#e0ad3b}.blue{color:#7db8ff}.muted{color:#aab7c5}.ok{color:#7ee2a8}.warn{color:#ffd166}.bad{color:#ff8b8b}
+.row{padding:11px 0;border-bottom:1px solid #26394d}.row:last-child{border-bottom:0}
+.event{padding:12px;border:1px solid #26394d;border-radius:12px;margin-top:9px;background:#081724}
+.event b{color:#e0ad3b}
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1>雷達規劃核心｜每日處理量 v1</h1>
+<h1>雷達規劃核心｜完整 +8 時間軸 v2</h1>
 <div class="lead">
-這一版只回答兩件事：<b>今天至少要處理幾個雷達？</b>、<b>今天什麼時候處理？</b>。<br>
-規則：每日最低處理量＝當天開始時場上雷達＋20；另外檢查後續系統 +8 是否會造成庫存浪費。
+這一版只做一件事：<b>從現在一路模擬到下一個衝分日，所有 +8 都一起檢查。</b><br>
+每日最低處理量＝當天開始計算時的場上雷達＋20；處理量如果不足以避免後續 +8 浪費，才增加處理量。
 </div>
 
 <div class="card">
@@ -38,45 +37,53 @@ button{width:100%;margin-top:14px;border:0;border-radius:10px;padding:13px;backg
 <label>目前時間</label><input id="now" type="datetime-local" value="2026-09-27T11:27">
 <label>每天可操作開始</label><input id="start" type="time" value="08:00">
 <label>每天可操作結束</label><input id="end" type="time" value="23:59">
-<button id="plan">開始規劃</button>
+<button id="plan">完整計算</button>
 </div>
 
-<div id="out" class="card result">尚未規劃。</div>
-<div id="tests" class="card small">固定檢查尚未執行。</div>
+<div id="out" class="card">尚未計算。</div>
+<div id="tests" class="card">固定檢查尚未執行。</div>
 </div>
 
 <script>
+const DAY=86400000;
 function pad(n){return String(n).padStart(2,'0')}
-function localDT(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`}
-function parseTime(s){const [h,m]=s.split(':').map(Number);return h*60+m}
-function weekdayZh(d){return ['日','一','二','三','四','五','六'][d.getDay()]}
+function fmt(d){return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`}
+function dateOnly(d){return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}（${['日','一','二','三','四','五','六'][d.getDay()]}）`}
+function parseHM(s){const [h,m]=s.split(':').map(Number);return h*60+m}
 
-function nextSystemEvent(d){
-  const x=new Date(d);
-  const candidates=[];
-  for(let k=0;k<3;k++){
-    const q=new Date(x);
-    q.setHours(10+k*8,0,0,0);
-    if(q>x) candidates.push(q);
+function nextScoringDay(now){
+  const d=new Date(now);
+  for(let i=0;i<8;i++){
+    const x=new Date(d); x.setDate(x.getDate()+i); x.setHours(10,0,0,0);
+    const wd=x.getDay();
+    if((wd===1||wd===5) && x>now) return x;
   }
-  const nextDay=new Date(x); nextDay.setDate(nextDay.getDate()+1); nextDay.setHours(2,0,0,0);
-  if(nextDay>x) candidates.push(nextDay);
-  candidates.sort((a,b)=>a-b);
-  return candidates[0] || null;
+  return null;
 }
-
-// 處理一個雷達：收割後若場上 < 8，庫存會自動補回場上。
+function allSystemEvents(now,score){
+  const out=[];
+  const d=new Date(now); d.setHours(0,0,0,0);
+  for(let i=0;i<=3;i++){
+    const day=new Date(d); day.setDate(day.getDate()+i);
+    for(const h of [10,18,2]){
+      const x=new Date(day);
+      if(h===2) x.setDate(x.getDate()+1);
+      x.setHours(h,0,0,0);
+      if(x>now && x<=score) out.push(x);
+    }
+  }
+  out.sort((a,b)=>a-b);
+  // 同一時間只保留一次；衝分日 10:00 仍算 +8
+  return out.filter((x,i)=>i===0 || x.getTime()!==out[i-1].getTime());
+}
 function processOne(s){
   if(s.field<8 && s.inv>0){
-    const move=Math.min(8-s.field,s.inv);
-    s.field+=move; s.inv-=move;
+    const m=Math.min(8-s.field,s.inv); s.field+=m; s.inv-=m;
   }
-  if(s.field<=0) return false;
-  s.field--;
-  s.processed++;
+  if(s.field<=0)return false;
+  s.field--; s.processed++;
   if(s.field<8 && s.inv>0){
-    const move=Math.min(8-s.field,s.inv);
-    s.field+=move; s.inv-=move;
+    const m=Math.min(8-s.field,s.inv); s.field+=m; s.inv-=m;
   }
   return true;
 }
@@ -84,122 +91,111 @@ function processN(s,n){
   for(let i=0;i<n;i++) if(!processOne(s)) return false;
   return true;
 }
-
-function system8(s){
+function plus8(s){
   let gen=8;
   if(s.field<8){
-    const add=Math.min(8-s.field,gen);
-    s.field+=add; gen-=add;
+    const m=Math.min(8-s.field,gen); s.field+=m; gen-=m;
   }
   const room=Math.max(0,s.max-s.inv);
-  const add=Math.min(gen,room);
-  s.inv+=add;
-  s.waste+=gen-add;
-  return gen-add;
+  const add=Math.min(gen,room); s.inv+=add;
+  const waste=gen-add; s.waste+=waste;
+  return waste;
 }
-
-// 檢查「處理 n 後，下一次 +8」是否浪費。
-// 這裡直接模擬，不用猜公式。
-function wasteAfterNext(s,n){
-  const x={...s,processed:0,waste:0};
-  if(!processN(x,n)) return {valid:false,waste:Infinity,state:x};
-  const w=system8(x);
-  return {valid:true,waste:w,state:x};
-}
-
-function isInWindow(d,startMin,endMin){
+function inWindow(d,st,en){
   const m=d.getHours()*60+d.getMinutes();
-  return startMin<=endMin ? m>=startMin && m<=endMin : (m>=startMin || m<=endMin);
+  return st<=en ? m>=st&&m<=en : m>=st||m<=en;
 }
-function nextWindowStart(from,startMin,endMin){
-  const d=new Date(from);
-  if(isInWindow(d,startMin,endMin)) return d;
-  for(let i=0;i<3;i++){
+function firstWindowAtOrAfter(d,st,en){
+  if(inWindow(d,st,en)) return new Date(d);
+  for(let i=1;i<=370;i++){
     const x=new Date(d); x.setDate(x.getDate()+i);
-    x.setHours(Math.floor(startMin/60),startMin%60,0,0);
-    if(x>=from) return x;
+    x.setHours(Math.floor(st/60),st%60,0,0);
+    if(inWindow(x,st,en)) return x;
   }
   return null;
 }
 
-function plan(){
-  const max=Number(document.getElementById('max').value);
-  const inv=Number(document.getElementById('inv').value);
-  const field=Number(document.getElementById('field').value);
-  const now=new Date(document.getElementById('now').value);
-  const startMin=parseTime(document.getElementById('start').value);
-  const endMin=parseTime(document.getElementById('end').value);
-
-  const out=document.getElementById('out');
-  const tests=document.getElementById('tests');
-
-  if(!Number.isFinite(max)||max<=0||!Number.isFinite(inv)||inv<0||!Number.isFinite(field)||field<0||
-     inv>max && field>=8){
-    out.innerHTML='<span class="bad">輸入資料有誤，請檢查 MAX／庫存／場上。</span>';
-    return;
+function simulateCandidate(base,nToday,events){
+  const s={max:base.max,inv:base.inv,field:base.field,processed:0,waste:0};
+  if(!processN(s,nToday)) return null;
+  const timeline=[];
+  for(const e of events){
+    const before={field:s.field,inv:s.inv};
+    const w=plus8(s);
+    timeline.push({time:new Date(e),before,after:{field:s.field,inv:s.inv},waste:w});
   }
+  return {s,timeline};
+}
 
-  const minProcess=field+20;
+function plan(){
+  const max=Number(maxEl.value), inv=Number(invEl.value), field=Number(fieldEl.value);
+  const now=new Date(nowEl.value);
+  const st=parseHM(startEl.value), en=parseHM(endEl.value);
+  if(!Number.isFinite(max)||max<=0||!Number.isFinite(inv)||inv<0||inv>max||!Number.isFinite(field)||field<0){
+    out.innerHTML='<span class="bad">輸入資料有誤。MAX 必須大於 0，庫存不可超過 MAX，場上不可小於 0。</span>'; return;
+  }
+  const score=nextScoringDay(now);
+  if(!score){out.innerHTML='<span class="bad">找不到下一個衝分日。</span>';return}
+  const events=allSystemEvents(now,score);
+  const dailyMin=field+20;
   const total=field+inv;
 
-  // 找「至少」需要處理多少，讓下一個 +8 不浪費。
-  // 從最低量往上找；若最低量本身已不浪費，就不多處理。
-  let required=minProcess;
-  let found=null;
-  for(let n=minProcess;n<=total;n++){
-    const r=wasteAfterNext({max,inv,field},n);
-    if(r.valid && r.waste===0){found=r;required=n;break;}
+  // 這一版只決定「今天」至少要處理多少。
+  // 但候選量會完整跑過「現在→所有 +8→衝分日 +8」。
+  let chosen=null;
+  for(let n=dailyMin;n<=total;n++){
+    const sim=simulateCandidate({max,inv,field},n,events);
+    if(sim && sim.timeline.every(x=>x.waste===0)){
+      chosen=sim; chosen.n=n; break;
+    }
   }
 
-  const next=nextSystemEvent(now);
-  const op=nextWindowStart(now,startMin,endMin);
+  let html=`<div class="gold"><b>下一個衝分日：${fmt(score)}</b></div>`;
+  html+=`<div class="row">衝分日前目標：場上 <b>11</b>｜庫存 <b>${max-8}</b></div>`;
+  html+=`<div class="row"><span class="big">今天最低處理 ${dailyMin} 個</span></div>`;
 
-  if(!found){
-    out.innerHTML=`<div class="bad">目前資源不足以同時滿足每日最低處理量 ${minProcess} 個。</div>`;
-    return;
+  if(!chosen){
+    html+=`<div class="row bad">目前資源不足，無法在不浪費任何 +8 的前提下完成今天最低處理量。</div>`;
+    out.innerHTML=html; tests.innerHTML='固定檢查未完成。'; return;
   }
 
-  const after={max,inv,field,processed:0,waste:0};
-  processN(after,required);
-
-  let html='';
-  html += `<div class="gold"><b>${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}（${weekdayZh(now)}）</b></div>`;
-  html += `<div class="big">今天至少處理 ${required} 個雷達</div>`;
-  html += `<div class="row">每日最低要求：<b>${field} + 20 = ${minProcess}</b></div>`;
-  html += `<div class="row">為避免下一次 +8 浪費，需要處理：<b>${required}</b></div>`;
-
-  if(required===minProcess){
-    html += `<div class="row ok">✅ ${minProcess} 個已經足夠，不需要為了「不浪費」額外多處理。</div>`;
+  if(chosen.n>dailyMin){
+    html+=`<div class="row warn">⚠️ 為了讓後續所有 +8 都不浪費，今天需要提高到 <b>${chosen.n}</b> 個。</div>`;
   }else{
-    html += `<div class="row warn">⚠️ 最低要求不足，需多處理 ${required-minProcess} 個，才可避免下一次 +8 浪費。</div>`;
+    html+=`<div class="row ok">🟢 ${chosen.n} 個已同時滿足「場上＋20」與整條 +8 時間軸的不浪費條件。</div>`;
   }
 
-  if(op){
-    html += `<div class="row"><span class="blue">🕐 建議上線時間：</span><b>${localDT(op)}</b><br><span class="muted">在這個可操作時段內一次處理 ${required} 個即可。</span></div>`;
+  const op=firstWindowAtOrAfter(now,st,en);
+  html+=`<div class="row">🕐 <b>今天可操作時間：</b>${op?fmt(op):'找不到' }<br><span class="muted">在今天的可操作時段內完成 ${chosen.n} 個即可；系統 +8 不需要你手動操作。</span></div>`;
+
+  html+=`<div class="row"><b>處理 ${chosen.n} 個後：</b>場上 ${chosen.s.field}｜庫存 ${chosen.s.inv}</div>`;
+
+  html+=`<div class="row"><b>完整 +8 時間軸：</b>`;
+  for(const x of chosen.timeline){
+    html+=`<div class="event">${fmt(x.time)}<br>+8 前：場上 ${x.before.field}｜庫存 ${x.before.inv}<br>+8 後：場上 <b>${x.after.field}</b>｜庫存 <b>${x.after.inv}</b>${x.waste?`<br><span class="bad">浪費 ${x.waste}</span>`:'<br><span class="ok">不浪費</span>'}</div>`;
   }
+  html+=`</div>`;
 
-  html += `<div class="row">處理後：場上 <b>${after.field}</b>｜庫存 <b>${after.inv}</b></div>`;
-
-  if(next){
-    const ns={...after,processed:0,waste:0};
-    const waste=system8(ns);
-    html += `<div class="row">下一次系統 +8：<b>${localDT(next)}</b><br>+8 後：場上 <b>${ns.field}</b>｜庫存 <b>${ns.inv}</b>${waste?'｜浪費 '+waste+' 個':''}</div>`;
-  }
-
-  html += `<div class="row small muted">注意：這一版不再計算勞拉、任務、寶箱或已完成雷達；只驗證「每日最低處理量＋不浪費 +8」。</div>`;
+  html+=`<div class="row muted small">這一版先不加入勞拉、寶箱、任務、已完成雷達等功能；也不假設你一定要在某個固定時間操作。下一步才把你的每日可操作時段套到這條完整時間軸。</div>`;
   out.innerHTML=html;
 
-  // 固定檢查：使用者提出的 MAX30 / 庫存22 / 場上8。
-  const a=wasteAfterNext({max:30,inv:22,field:8},28);
-  const b=wasteAfterNext({max:30,inv:22,field:8},30);
-  const checks=[
-    [a.waste===0,'MAX30／庫存22／場上8：處理28後下一次+8不浪費'],
-    [b.waste===0,'同案例：處理30後下一次+8不浪費'],
-    [required>=minProcess,'今日處理量不低於場上+20'],
-    [!!op,'能找到可操作時間']
-  ];
-  tests.innerHTML='<b>固定檢查</b><br>'+checks.map((x,i)=>`${x[0]?'🟢':'🔴'} T${i+1} ${x[1]}`).join('<br>');
+  const t1=events.length===3 && events[0].getHours()===18 && events[1].getHours()===2 && events[2].getHours()===10;
+  const t2=chosen.timeline.length===events.length;
+  const t3=chosen.timeline.every(x=>x.waste===0);
+  const ex28=simulateCandidate({max:30,inv:22,field:8},28,events);
+  const ex30=simulateCandidate({max:30,inv:22,field:8},30,events);
+  const t4=!!ex28 && ex28.timeline.every(x=>x.waste===0);
+  const t5=!!ex30 && ex30.timeline.every(x=>x.waste===0);
+  const t6=chosen.n>=dailyMin;
+  tests.innerHTML='<b>固定檢查</b><br>'+
+    `${t1?'🟢':'🔴'} T1 9/27 11:27 → 9/28 10:00 共有 3 次 +8（18:00／02:00／10:00）<br>`+
+    `${t2?'🟢':'🔴'} T2 完整時間軸逐次模擬所有 +8<br>`+
+    `${t3?'🟢':'🔴'} T3 所選今天處理量不造成任何 +8 浪費<br>`+
+    `${t4?'🟢':'🔴'} T4 MAX30／庫存22／場上8：處理28後，3次 +8 都不浪費<br>`+
+    `${t5?'🟢':'🔴'} T5 同案例：處理30後，3次 +8 都不浪費<br>`+
+    `${t6?'🟢':'🔴'} T6 今天處理量不低於「場上＋20」`;
 }
+const maxEl=document.getElementById('max'),invEl=document.getElementById('inv'),fieldEl=document.getElementById('field'),nowEl=document.getElementById('now'),startEl=document.getElementById('start'),endEl=document.getElementById('end'),out=document.getElementById('out'),tests=document.getElementById('tests');
 document.getElementById('plan').addEventListener('click',plan);
 </script>
 </body>
