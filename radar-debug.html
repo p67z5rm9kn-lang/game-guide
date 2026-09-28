@@ -223,7 +223,31 @@ function hasOpAfter(day,minute,av){
   const n=nextOpTime(day,minute,av);return n&&((n.day!==day)||n.minute>=minute);
 }
 function availabilitySummary(av){
-  return weekNames.map((d,i)=>{const rs=dayWindows(av,i);return `${d}：${rs.length?rs.map(r=>`${fmtMin(r.start)}－${fmtMin(r.end)}`).join('、'):'無可操作時間'}`}).join('<br>');
+  // 玩家看到的時段永遠使用自己選擇的時間模式；內部轉換後的遊戲時段不直接暴露在這裡。
+  const cfg=getAvailability();
+  const formatRows=rows=>rows&&rows.length?rows.map(x=>`${x.start}－${x.end}`).join('、'):'無可操作時間';
+  return weekNames.map((d,i)=>{
+    const rows=cfg.apply==='same'?cfg.same:cfg.custom[i];
+    return `${d}：${formatRows(rows)}`;
+  }).join('<br>');
+}
+function gameMomentToDisplay(gameDay,gameMinute,av){
+  if(av.mode==='game') return {day:gameDay,time:fmtMin(gameMinute),dateLabel:''};
+  const gd=addDaysUTC(av.mon,gameDay);
+  // Date object stores UTC; adding 2h maps the game UTC−2 clock to UTC.
+  const utcMs=Date.UTC(gd.getUTCFullYear(),gd.getUTCMonth(),gd.getUTCDate(),0,0)+gameMinute*60000+2*3600000;
+  const parts=localParts(new Date(utcMs),av.tz);
+  const wi=weekdayShortToIndex(parts.weekday);
+  return {
+    day:wi,
+    time:`${parts.hour}:${parts.minute}`,
+    dateLabel:`${parts.year}/${parts.month}/${parts.day}`
+  };
+}
+function operationDisplay(op,av){
+  if(!op)return '無';
+  const x=gameMomentToDisplay(op.day,op.minute,av);
+  return av.mode==='game'?`${weekNames[x.day]} ${x.time}`:`${weekNames[x.day]} ${x.dateLabel} ${x.time}`;
 }
 function scheduleWeek(MAX,av){
   const rows=[];let field=11,inv=MAX-8;let impossible=[];
@@ -247,10 +271,10 @@ function scheduleWeek(MAX,av){
       // 前一天：必須先處理全部 process，再在場上=8 時使用 Laura，且使用後不能再收割。
       const p=nextOpTime(d,0,av); const later=nextOpTime(d,0,av);
       if(!p){feasible=false;note='當日沒有可操作時間，無法完成處理量與勞拉操作。';}
-      else {op=p;note=`玩家可於 ${fmtMin(p.minute)} 開始執行「先完成／收割當日全部處理量 → 場上=8 → 使用勞拉」；使用後不再收割。`;}
+      else {op=p;note=`玩家可於 ${operationDisplay(p,av)} 開始執行「先完成／收割當日全部處理量 → 場上=8 → 使用勞拉」；使用後不再收割。`;}
     }else{
       if(!op){feasible=false;note='當日沒有可操作時間；依規則只能等待下一個可操作時段。';}
-      else note=`玩家可於 ${fmtMin(op.minute)} 開始處理當日規劃；勞拉前後均可完成／收割。`;
+      else note=`玩家可於 ${operationDisplay(op,av)} 開始處理當日規劃；勞拉前後均可完成／收割。`;
     }
     rows.push({...r,d,scoring:false,windows,operation:op,feasible,note});field=r.endF;inv=r.endI;
   }
@@ -261,15 +285,15 @@ function render(){
  if(!Number.isInteger(MAX)||MAX<8){$('#out').innerHTML='<div class="panel empty">請輸入至少 8 的整數庫存上限。</div>';return}
  const av=buildGameAvailability();
  const plan=scheduleWeek(MAX,av);
- let html=`<div class="panel result"><b>本週規劃</b><br>庫存上限：<b>${MAX}</b><br><span class="muted">內部時間軸：遊戲時間 UTC−2｜遊戲日 00:00 開始｜系統 +8：00:00／08:00／16:00</span><br><span class="muted">當地時間模式：裝置時區 ${av.tz} → 先轉換成遊戲時間，再依遊戲日期判斷星期。</span></div>`;
- html+=`<div class="panel result"><b>玩家可操作時間（轉換後的遊戲時間）</b><div class="meta">${availabilitySummary(av)}</div></div>`;
+ let html=`<div class="panel result"><b>本週規劃</b><br>庫存上限：<b>${MAX}</b><br><span class="muted">內部時間軸：遊戲時間 UTC−2｜遊戲日 00:00 開始｜系統 +8：00:00／08:00／16:00</span><br><span class="muted">${av.mode==='local'?`當地時間模式：使用裝置時區 ${av.tz}；玩家看到的時間維持當地時間，程式內部才轉換成遊戲時間計算。`:'遊戲時間模式：玩家看到的時間即為遊戲時間 UTC−2。'}</span></div>`;
+ html+=`<div class="panel result"><b>玩家可操作時間（${av.mode==='game'?'遊戲時間':'當地時間'}）</b><div class="meta">${availabilitySummary(av)}</div></div>`;
  if(plan.impossible.length) html+=`<div class="panel result"><b class="warn">⚠️ 時間限制</b><div class="meta">${plan.impossible.join('<br>')}</div></div>`;
  for(const r of plan.rows){
    if(r.scoring){
-     const opText=r.scoreOp?`${weekNames[r.scoreOp.day]} ${fmtMin(r.scoreOp.minute)}`:'無';
+     const opText=r.scoreOp?operationDisplay(r.scoreOp,av):'無';
      html+=`<section class="day score"><h2>${weekNames[r.d]} <span class="tag">🏆 衝分日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><div class="formula"><b>可完成雷達數：${r.startF} + ${r.startI} + 24 + 20 = ${r.total}</b><br><span class="muted">場上 11 + 庫存（MAX−8）+ 系統 3 次 × +8 + 勞拉 +20</span></div><div class="action">🏆 衝分日：完成並收割所有雷達。建議可操作起點：<b>${opText}</b></div><div class="meta">系統 +8 會先於玩家操作結算；若最後一次 +8 後當日沒有可操作時間，系統會標示時間不足。</div><div class="state ok">結束：場上 0，庫存 0</div></section>`;
    }else{
-     html+=`<section class="day"><h2>${weekNames[r.d]} <span class="tag">準備日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><table><tr><th>項目</th><th>規劃</th></tr><tr><td>每日最低處理量</td><td>${r.minProcess}</td></tr><tr><td>系統雷達</td><td>+24（00:00／08:00／16:00）</td></tr><tr><td>勞拉</td><td>+20｜${r.lauraNote}</td></tr><tr><td>安全線所需處理量</td><td>${r.safetyProcess}</td></tr><tr><td>本日實際處理量</td><td><b>${r.process}</b>（取以上兩者較大值）</td></tr></table><div class="action">玩家操作：<b>${r.operation?fmtMin(r.operation.minute):'無可操作時間'}</b><br>${r.note}</div><div class="meta">日末庫存安全線：MAX−8 = ${MAX-8}。v7 不改動 v5 資源結果，只把玩家操作放進可操作時間。</div></section>`;
+     html+=`<section class="day"><h2>${weekNames[r.d]} <span class="tag">準備日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><table><tr><th>項目</th><th>規劃</th></tr><tr><td>每日最低處理量</td><td>${r.minProcess}</td></tr><tr><td>系統雷達</td><td>+24（00:00／08:00／16:00）</td></tr><tr><td>勞拉</td><td>+20｜${r.lauraNote}</td></tr><tr><td>安全線所需處理量</td><td>${r.safetyProcess}</td></tr><tr><td>本日實際處理量</td><td><b>${r.process}</b>（取以上兩者較大值）</td></tr></table><div class="action">玩家操作：<b>${r.operation?operationDisplay(r.operation,av):'無可操作時間'}</b><br>${r.note.replace(/於 \d{2}:\d{2}/, m=>`於 ${r.operation?operationDisplay(r.operation,av):m.slice(3)}`)}</div><div class="meta">日末庫存安全線：MAX−8 = ${MAX-8}。v7 不改動 v5 資源結果，只把玩家操作放進可操作時間。</div></section>`;
    }
  }
  $('#out').innerHTML=html;
