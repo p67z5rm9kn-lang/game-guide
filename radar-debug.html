@@ -14,7 +14,8 @@ h1{font-size:22px;margin:0 0 6px;color:var(--gold)}
 .panel{background:rgba(13,32,56,.96);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:11px}
 h2{font-size:16px;margin:0 0 9px;color:var(--gold)}
 label{display:block;font-size:12px;color:var(--muted);margin:8px 0 5px}
-input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:10px 11px;outline:none}
+input,select{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:10px 11px;outline:none}
+select{appearance:none;-webkit-appearance:none}
 button{width:100%;margin-top:9px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:15px;padding:10px}
 .box{background:var(--deep);border-radius:10px;padding:10px;margin-top:8px;font-size:12px;line-height:1.65}
 .big{font-size:18px;font-weight:700}
@@ -38,20 +39,26 @@ th{color:var(--muted);font-weight:500}
 <h1>Last Z｜雷達週計劃 v6.5</h1>
 <div class="sub">
 以 radar-weekly-v4 為固定基準；這版只新增「真實事件順序＋MAX 容量＋玩家可操作時間」。
-v4 原始週計劃數字不重新計算。
+原始週計劃數字不重新計算。
 </div>
 
 <div class="panel">
 <h2>設定</h2>
 <label>庫存上限 MAX</label>
 <input id="max" type="number" min="8" step="1" value="30">
+<label>玩家時間制式</label>
+<select id="timeBasis">
+  <option value="tw">台灣時間</option>
+  <option value="game">遊戲時間</option>
+</select>
 <label>每日可操作開始時間</label>
 <input id="start" type="time" value="18:00">
 <label>每日可操作結束時間</label>
 <input id="end" type="time" value="22:00">
+<div class="box note" id="timeHint">目前輸入：台灣時間。系統事件會同時顯示台灣時間／遊戲時間。</div>
 <button id="run">開始模擬</button>
 <div class="box note">
-本版的測試策略：玩家在「當天第一次可以操作的時機」執行一次操作；先使用當天的 Laura，再執行 v4 該日處理量。<br>
+本版的測試策略：玩家在「當天第一次可以操作的時機」執行一次操作；先使用當天的勞拉，再執行當日處理量。<br>
 這是為了驗證事件與容量，不是最終最佳化策略。
 </div>
 </div>
@@ -64,7 +71,7 @@ v4 原始週計劃數字不重新計算。
 <div class="box">
 ① 系統 +8：10:00、18:00、02:00（02:00 為隔日時間，但仍屬前一個遊戲日）。<br>
 ② +8 先補場上到 8，剩餘進庫存；庫存最多 MAX，超過部分記為浪費。<br>
-③ Laura：場上低於 8 時先補到 8；場上已達 8 時，+3 場上、+17 庫存；Laura 可讓庫存超過 MAX。<br>
+③ 勞拉：場上低於 8 時先補到 8；場上已達 8 時，+3 場上、+17 庫存；勞拉 可讓庫存超過 MAX。<br>
 ④ 玩家處理／收割立即完成；場上低於 8 時，庫存會自動補場上。<br>
 ⑤ 星期一、五為衝分日；v4 的 77 只是基準值。若 02:00 後玩家沒有可操作時間，系統會明確標示衝分日可能無法收完。
 </div>
@@ -132,9 +139,28 @@ function harvest(f,i,n){
 }
 function fmt(f,i){return `${f} / ${i}`}
 
+
+function gameMinToTaiwan(min){
+  return (min + 600) % 1440;
+}
+function fmtHM(min){
+  const m=((min%1440)+1440)%1440;
+  return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+}
+function displayTime(min,basis){
+  const game=fmtHM(min);
+  const tw=fmtHM(gameMinToTaiwan(min));
+  return basis==='game' ? `遊戲 ${game}／台灣 ${tw}` : `台灣 ${tw}／遊戲 ${game}`;
+}
+function inputToGameMin(v,basis){
+  const m=minOf(v);
+  return basis==='game' ? m : (m+840)%1440;
+}
+
 function simulate(){
   const max=Math.max(8,Math.floor(Number($('#max').value)||30));
-  const s=minOf($('#start').value), e=minOf($('#end').value);
+  const basis=$('#timeBasis').value;
+  const s=inputToGameMin($('#start').value,basis), e=inputToGameMin($('#end').value,basis);
 
   // v4 baseline reference is intentionally fixed.
   const v4End=['—','8 / 16','8 / 22','11 / 22','—','8 / 16','11 / 22'];
@@ -151,14 +177,14 @@ function simulate(){
     const proc=v4Process[d];
     const startState=[f,i];
     let events=[];
-    let usedLaura=false;
+    let used勞拉=false;
     let didOperation=false;
 
     // Events in game-day order: 10:00, 18:00, 02:00 next calendar day.
     const evs=[
-      {label:'10:00',min:600,type:'system'},
-      {label:'18:00',min:1080,type:'system'},
-      {label:'02:00',min:120,type:'system'}
+      {label:displayTime(600,basis),min:600,type:'system'},
+      {label:displayTime(1080,basis),min:1080,type:'system'},
+      {label:displayTime(120,basis),min:120,type:'system'}
     ];
 
     // Determine the first event time at which the player can act.
@@ -175,16 +201,16 @@ function simulate(){
 
       if(!score){
         const beforeL=fmt(f,i);
-        const L=laura(f,i); f=L.f;i=L.i;usedLaura=true;
-        events.push({kind:'op',time:reason,label:'玩家操作：Laura',before:beforeL,after:fmt(f,i),extra:'+'+(L.f+L.i-(Number(beforeL.split(' / ')[0])+Number(beforeL.split(' / ')[1])))});
+        const L=laura(f,i); f=L.f;i=L.i;used勞拉=true;
+        events.push({kind:'op',time:reason,label:'玩家操作：勞拉',before:beforeL,after:fmt(f,i),extra:'+'+(L.f+L.i-(Number(beforeL.split(' / ')[0])+Number(beforeL.split(' / ')[1])))});
         const beforeP=fmt(f,i);
         const H=harvest(f,i,proc);
         f=H.f;i=H.i;
-        events.push({kind:'op',time:reason,label:`玩家處理 v4 ${proc} 個`,before:beforeP,after:fmt(f,i),extra:H.unprocessed?`⚠️ 尚有 ${H.unprocessed} 個未處理`:'已完成'});
+        events.push({kind:'op',time:reason,label:`玩家處理 ${proc} 個`,before:beforeP,after:fmt(f,i),extra:H.unprocessed?`⚠️ 尚有 ${H.unprocessed} 個未處理`:'已完成'});
       }else{
         const beforeL=fmt(f,i);
-        const L=laura(f,i); f=L.f;i=L.i;usedLaura=true;
-        events.push({kind:'op',time:reason,label:'玩家操作：Laura',before:beforeL,after:fmt(f,i),extra:'衝分日'});
+        const L=laura(f,i); f=L.f;i=L.i;used勞拉=true;
+        events.push({kind:'op',time:reason,label:'玩家操作：勞拉',before:beforeL,after:fmt(f,i),extra:'衝分日'});
         const beforeP=fmt(f,i);
         const H=harvest(f,i,9999);
         f=H.f;i=H.i;
@@ -238,35 +264,50 @@ function simulate(){
     const expected=score?'0 / 0':v4End[d];
     const matches=actualEnd===expected;
 
-    html+=`<div class="day">
-      <h3>${dayNames[d]} ${score?'🏆 衝分日':`｜v4 處理 ${proc} 個`}</h3>
-      <div class="state">開始：<b>${fmt(startState[0],startState[1])}</b>　｜　v4 預期結束：<b>${expected}</b></div>
-      ${events.map(x=>`
+    const normalEvents = events.map(x=>`
         <div class="event">
           <div class="row"><b>${x.time}｜${x.label}</b><span class="badge">${x.kind==='system'?'系統':'玩家'}</span></div>
           <div>操作前：${x.before}</div>
           <div>操作後：<b>${x.after}</b></div>
           <div class="${x.extra.includes('🔴')?'bad':x.extra.includes('🟢')?'ok':'muted'}">${x.extra}</div>
-        </div>`).join('')}
-      <div class="box ${matches?'ok':'warn'}">
-        <b>實際日末：${actualEnd}</b><br>
-        ${matches?'🟢 與 v4 預期結束一致':'🟡 與 v4 預期不同；這是時間／容量事件模擬的結果，先不要修改 v4。'}
-      </div>
-    </div>`;
+        </div>`).join('');
+
+    if(score){
+      html+=`<div class="day">
+        <h3>${dayNames[d]} 🏆 衝分日</h3>
+        <div class="state">開始：<b>${fmt(startState[0],startState[1])}</b>　｜　當日可完成：<b>77 個</b></div>
+        <div class="box">🏆 衝分日只確認：是否能在玩家可操作時間內完成／收割全部雷達。</div>
+        <div class="box ${matches?'ok':'warn'}">
+          <b>${actualEnd}</b><br>
+          ${matches?'🟢 本日完成／收割後已清空':'🔴 仍有雷達未完成／收割'}
+        </div>
+      </div>`;
+    }else{
+      html+=`<div class="day">
+        <h3>${dayNames[d]}｜當日處理 ${proc} 個</h3>
+        <div class="state">開始：<b>${fmt(startState[0],startState[1])}</b>　｜　週計劃預期結束：<b>${expected}</b></div>
+        ${normalEvents}
+        <div class="box ${matches?'ok':'warn'}">
+          <b>實際日末：${actualEnd}</b><br>
+          ${matches?'🟢 與週計劃預期結束一致':'🟡 與週計劃預期不同；先保留事件結果，不修改週計劃基準。'}
+        </div>
+      </div>`;
+    }
   }
 
   $('#summary').innerHTML=`
     <div class="panel">
       <h2>v4 基準</h2>
       <div class="box ok">
-        ✅ v4 週計劃固定保留：星期一 77、星期二 20、星期三 38、星期四 41、星期五 77、星期六 20、星期日 35。
+        ✅ 週計劃固定保留：星期一 77、星期二 20、星期三 38、星期四 41、星期五 77、星期六 20、星期日 35。
       </div>
     </div>
     <div class="panel">
       <h2>本次事件模擬</h2>
       <div class="box">
         玩家可操作：<span class="big">${$('#start').value}～${$('#end').value}</span><br>
-        系統 +8：10:00／18:00／02:00<br>
+        時間制式：<b>${basis==='tw'?'台灣時間':'遊戲時間'}</b><br>
+        系統 +8：台灣 10:00／18:00／02:00（遊戲 00:00／08:00／16:00）<br>
         全週系統 +8 因容量造成的浪費：<b class="${totalWaste?'bad':'ok'}">${totalWaste} 個</b><br>
         衝分日未能清空次數：<b class="${scoreWarnings?'bad':'ok'}">${scoreWarnings} 天</b>
       </div>
@@ -274,6 +315,11 @@ function simulate(){
 
   $('#days').innerHTML=html;
 }
+$('#timeBasis').addEventListener('change',()=>{
+  $('#timeHint').textContent=$('#timeBasis').value==='tw'
+    ? '目前輸入：台灣時間。系統事件會同時顯示台灣時間／遊戲時間。'
+    : '目前輸入：遊戲時間。系統事件會同時顯示遊戲時間／台灣時間。';
+});
 $('#run').addEventListener('click',simulate);
 simulate();
 </script>
