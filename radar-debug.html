@@ -8,11 +8,21 @@
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:17px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:13px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:13px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v5</h1>
-<div class="sub">只需輸入「庫存上限」。本版已整合勞拉實際操作規則；尚不加入玩家可操作時間。</div>
+<h1>Last Z｜雷達週計劃 v6</h1>
+<div class="sub">先設定「玩家可操作時間」，本版保留 v5 已驗證的雷達資源與勞拉規則；尚不加入實際排程演算。</div>
+<div class="panel">
+<label>時間模式</label>
+<div class="modes"><label><input type="radio" name="timeMode" value="game" checked> 🎮 遊戲時間</label><label><input type="radio" name="timeMode" value="local"> 🌍 當地時間</label></div>
+<label>套用方式</label>
+<div class="modes"><label><input type="radio" name="applyMode" value="same" checked> 每天相同</label><label><input type="radio" name="applyMode" value="custom"> 每天個別設定</label></div>
+<div id="sameTimes"></div>
+<div id="customTimes" hidden></div>
+<button id="saveTimes">儲存可操作時間</button>
+<div id="saveMsg" class="meta"></div>
+</div>
 <div class="panel">
 <label for="max">庫存上限 MAX</label><input id="max" type="number" min="1" step="1" placeholder="例如 30"><button id="plan">開始規劃</button>
-<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。衝分日計算起點為「場上 11、庫存 MAX−8」；當日 3 次系統 +8 會計入可完成雷達數。</div>
+<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。衝分日計算起點為「場上 11、庫存 MAX−8」；當日 3 次系統 +8 會計入可完成雷達數。v6 的可操作時間目前只儲存設定，不改變 v5 資源計算。</div>
 </div>
 <div id="out"><div class="panel empty">輸入庫存上限後開始規劃</div></div>
 </main>
@@ -101,4 +111,30 @@ function render(){
  $('#out').innerHTML=html;
 }
 $('#plan').addEventListener('click',render);$('#max').addEventListener('input',()=>{$('#out').innerHTML='<div class="panel empty">輸入完成後按「開始規劃」。</div>'});
-</script></body></html>
+</script>
+<style>
+.modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.modes label{display:flex;align-items:center;gap:5px;border:1px solid #365574;background:#102842;color:#dce8f5;border-radius:10px;padding:9px 10px;margin:0}.modes input{width:auto}.time-row{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;align-items:end;margin:8px 0}.time-row input,.time-row select{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:16px;padding:10px}.smallbtn{width:auto;margin:0;padding:10px 12px;font-size:13px}.day-title{font-size:13px;color:#dce8f5;margin-top:12px}
+</style>
+<script>
+const timeStoreKey='lastz_radar_v6_availability';
+const weekNames=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
+function timeRow(h='07:00',end='08:00'){return `<div class="time-row"><div><label>開始</label><input type="time" value="${h}"></div><div><label>結束</label><input type="time" value="${end}"></div><button type="button" class="smallbtn delTime">刪除</button></div>`}
+function renderTimes(){
+ const same=document.querySelector('#sameTimes'), custom=document.querySelector('#customTimes');
+ same.innerHTML='<div class="day-title">每天固定時段</div>'+timeRow();
+ custom.innerHTML=weekNames.map((d,i)=>`<div class="day-title">${d}</div><div class="dayTimes" data-day="${i}">${timeRow()}</div><button type="button" class="smallbtn addTime" data-day="${i}">＋新增時段</button>`).join('');
+ document.querySelectorAll('.delTime').forEach(b=>b.onclick=()=>{const row=b.closest('.time-row');const parent=row.parentElement;if(parent.querySelectorAll('.time-row').length>1)row.remove();else row.querySelectorAll('input').forEach(x=>x.value='');});
+ document.querySelectorAll('.addTime').forEach(b=>b.onclick=()=>{document.querySelector(`.dayTimes[data-day="${b.dataset.day}"]`).insertAdjacentHTML('beforeend',timeRow());bindDelete();});
+}
+function bindDelete(){document.querySelectorAll('.delTime').forEach(b=>{if(!b.onclick)b.onclick=()=>{const row=b.closest('.time-row');const parent=row.parentElement;if(parent.querySelectorAll('.time-row').length>1)row.remove();else row.querySelectorAll('input').forEach(x=>x.value='');};});}
+function readTimes(container){return [...container.querySelectorAll('.time-row')].map(r=>{const v=r.querySelectorAll('input');return {start:v[0].value,end:v[1].value}}).filter(x=>x.start&&x.end);}
+function saveAvailability(){
+ const mode=document.querySelector('input[name=timeMode]:checked').value;const apply=document.querySelector('input[name=applyMode]:checked').value;
+ const data={timeMode:mode,applyMode:apply,same:readTimes(document.querySelector('#sameTimes')),custom:[...document.querySelectorAll('.dayTimes')].map(x=>readTimes(x))};
+ localStorage.setItem(timeStoreKey,JSON.stringify(data));document.querySelector('#saveMsg').textContent='已儲存。v6 目前只記錄你的可操作時間，尚未用於雷達排程。';
+}
+function loadAvailability(){try{const d=JSON.parse(localStorage.getItem(timeStoreKey));if(!d)return;document.querySelector(`input[name=timeMode][value="${d.timeMode}"]`).checked=true;document.querySelector(`input[name=applyMode][value="${d.applyMode}"]`).checked=true;}catch(e){}}
+function toggleApply(){const m=document.querySelector('input[name=applyMode]:checked').value;document.querySelector('#sameTimes').hidden=m!=='same';document.querySelector('#customTimes').hidden=m!=='custom';}
+renderTimes();loadAvailability();toggleApply();document.querySelectorAll('input[name=applyMode]').forEach(x=>x.onchange=toggleApply);document.querySelector('#saveTimes').onclick=saveAvailability;
+</script>
+</body></html>
