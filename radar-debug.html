@@ -2,14 +2,14 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z 雷達週計劃 v6</title>
+<title>Last Z 雷達週計劃 v7</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:17px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:13px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:13px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v6</h1>
-<div class="sub">先設定「玩家可操作時間」，本版保留 v5 已驗證的雷達資源與勞拉規則；尚不加入實際排程演算。</div>
+<h1>Last Z｜雷達週計劃 v7</h1>
+<div class="sub">先設定「玩家可操作時間」。本版開始將可操作時間納入排程；v5 已驗證的雷達資源與勞拉規則維持不變。</div>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
 <label>時間模式</label>
@@ -22,7 +22,7 @@
 <div class="setup-divider"></div>
 <label for="max">庫存上限</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
 <button id="plan">開始規劃</button>
-<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。衝分日計算起點為「場上 11、庫存 MAX−8」；當日 3 次系統 +8 會計入可完成雷達數。v6 的可操作時間會隨設定即時更新，目前只記錄設定，不改變 v5 資源計算。</div>
+<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。衝分日計算起點為「場上 11、庫存 MAX−8」；當日 3 次系統 +8 會計入可完成雷達數。v7 以遊戲時間 UTC−2 作為內部時間軸；當地時間會依裝置時區轉換後再排程。系統 +8 優先於玩家操作。</div>
 </div>
 <div class="result-heading">📊 規劃結果</div>
 <div id="out"><div class="panel empty">輸入庫存上限後開始規劃</div></div>
@@ -97,16 +97,179 @@ function makePlan(MAX){
   return rows;
 }
 
+function pad2(n){return String(n).padStart(2,'0');}
+function mins(hm){const [h,m]=hm.split(':').map(Number);return h*60+m;}
+function fmtMin(m){m=((m%1440)+1440)%1440;return `${pad2(Math.floor(m/60))}:${pad2(m%60)}`;}
+function gameDateKey(d){return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth()+1)}-${pad2(d.getUTCDate())}`;}
+function addDaysUTC(d,n){const x=new Date(d);x.setUTCDate(x.getUTCDate()+n);return x;}
+function gameWeekMonday(){
+  // 內部以 UTC−2 的「遊戲時間」決定本週星期；以目前時間取得對應遊戲日期。
+  const now=new Date();
+  const gameMs=now.getTime()-2*3600000;
+  const g=new Date(gameMs);
+  const dow=g.getUTCDay(); // Sun=0
+  const monOffset=dow===0?-6:1-dow;
+  const mon=new Date(Date.UTC(g.getUTCFullYear(),g.getUTCMonth(),g.getUTCDate()));
+  mon.setUTCDate(mon.getUTCDate()+monOffset);
+  return mon;
+}
+function weekdayIndexUTC(d){const x=d.getUTCDay();return x===0?6:x-1;}
+function getAvailability(){
+  const mode=document.querySelector('input[name=timeMode]:checked')?.value||'game';
+  const apply=document.querySelector('input[name=applyMode]:checked')?.value||'same';
+  const same=readTimes(document.querySelector('#sameDayTimes'));
+  const custom=[...document.querySelectorAll('.dayTimes')].map(x=>readTimes(x));
+  return {mode,apply,same,custom};
+}
+function localParts(date,tz){
+  const f=new Intl.DateTimeFormat('en-US',{timeZone:tz,weekday:'short',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+  const parts=Object.fromEntries(f.formatToParts(date).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));
+  return parts;
+}
+function weekdayShortToIndex(s){return {Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[s];}
+function localDateTimeToGameDate(localDateISO,hm,tz){
+  // 由指定時區的日期+時間反推出 UTC，再轉成遊戲 UTC−2。
+  const [Y,M,D]=localDateISO.split('-').map(Number),[h,m]=hm.split(':').map(Number);
+  let guess=Date.UTC(Y,M-1,D,h,m);
+  for(let i=0;i<3;i++){
+    const p=localParts(new Date(guess),tz);
+    const asUTC=Date.UTC(Number(p.year),Number(p.month)-1,Number(p.day),Number(p.hour),Number(p.minute));
+    const target=Date.UTC(Y,M-1,D,h,m);
+    guess += target-asUTC;
+  }
+  const gameMs=guess-2*3600000;
+  const gd=new Date(gameMs);
+  return {date:gameDateKey(gd),minutes:gd.getUTCHours()*60+gd.getUTCMinutes(),utc:new Date(guess)};
+}
+function localDateISO(y,m,d){return `${y}-${pad2(m)}-${pad2(d)}`;}
+function getLocalWeekdayDatesAroundGameWeek(tz,gameMon){
+  const map=new Map();
+  for(let off=-3;off<=10;off++){
+    const gd=addDaysUTC(gameMon,off);
+    // 取遊戲日的中午附近 UTC，僅用於取得相鄰日期範圍；真正轉換仍逐一以當地日期時間處理。
+    const base=new Date(Date.UTC(gd.getUTCFullYear(),gd.getUTCMonth(),gd.getUTCDate(),12,0));
+    const p=localParts(base,tz);
+    const iso=localDateISO(Number(p.year),Number(p.month),Number(p.day));
+    map.set(iso,weekdayShortToIndex(p.weekday));
+    const prev=addDaysUTC(base,-1), pp=localParts(prev,tz); const iso2=localDateISO(Number(pp.year),Number(pp.month),Number(pp.day)); map.set(iso2,weekdayShortToIndex(pp.weekday));
+    const next=addDaysUTC(base,1), pn=localParts(next,tz); const iso3=localDateISO(Number(pn.year),Number(pn.month),Number(pn.day)); map.set(iso3,weekdayShortToIndex(pn.weekday));
+  }
+  return map;
+}
+function buildGameAvailability(){
+  const cfg=getAvailability();
+  const mon=gameWeekMonday();
+  const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+  const result=Array.from({length:7},()=>[]);
+  if(cfg.mode==='game'){
+    for(let i=0;i<7;i++){
+      const rows=cfg.apply==='same'?cfg.same:cfg.custom[i];
+      result[i]=rows.map(x=>({start:mins(x.start),end:(x.end==='00:00'?1440:mins(x.end)),source:x}));
+    }
+    return {result,tz,mon,mode:'game'};
+  }
+  // 當地時間：先建立涵蓋遊戲週前後幾天的當地日期，再轉成遊戲時間並依遊戲日期分桶。
+  for(let delta=-3;delta<=10;delta++){
+    const gd=addDaysUTC(mon,delta);
+    const base=new Date(Date.UTC(gd.getUTCFullYear(),gd.getUTCMonth(),gd.getUTCDate(),12,0));
+    const p=localParts(base,tz);
+    const Y=Number(p.year),M=Number(p.month),D=Number(p.day);
+    const baseLocal=new Date(Date.UTC(Y,M-1,D));
+    for(let localOff=-1;localOff<=1;localOff++){
+      const ld=addDaysUTC(baseLocal,localOff);
+      const iso=localDateISO(ld.getUTCFullYear(),ld.getUTCMonth()+1,ld.getUTCDate());
+      const temp=new Date(Date.UTC(ld.getUTCFullYear(),ld.getUTCMonth(),ld.getUTCDate(),12));
+      const lp=localParts(temp,tz); const wi=weekdayShortToIndex(lp.weekday);
+      const rows=cfg.apply==='same'?cfg.same:cfg.custom[wi];
+      for(const x of rows){
+        if(!x.start||!x.end)continue;
+        const s=localDateTimeToGameDate(iso,x.start,tz);
+        let e;
+        if(x.end==='00:00' || mins(x.end)<=mins(x.start)){
+          const nd=addDaysUTC(ld,1); const niso=localDateISO(nd.getUTCFullYear(),nd.getUTCMonth()+1,nd.getUTCDate()); e=localDateTimeToGameDate(niso,x.end,tz);
+        }else e=localDateTimeToGameDate(iso,x.end,tz);
+        // 將跨日區間拆成最多兩個遊戲日區段。
+        const sAbs=s.utc.getTime(),eAbs=e.utc.getTime();
+        if(eAbs<=sAbs)continue;
+        const startG=new Date(sAbs-2*3600000), endG=new Date(eAbs-2*3600000);
+        let curDate=new Date(Date.UTC(startG.getUTCFullYear(),startG.getUTCMonth(),startG.getUTCDate()));
+        const lastDate=new Date(Date.UTC(endG.getUTCFullYear(),endG.getUTCMonth(),endG.getUTCDate()));
+        while(curDate<=lastDate){
+          const idx=weekdayIndexUTC(curDate); let a=0,b=1440;
+          if(gameDateKey(curDate)===gameDateKey(startG))a=startG.getUTCHours()*60+startG.getUTCMinutes();
+          if(gameDateKey(curDate)===gameDateKey(endG))b=endG.getUTCHours()*60+endG.getUTCMinutes();
+          if(a<b)result[idx].push({start:a,end:b,source:x,local:true});
+          curDate=addDaysUTC(curDate,1);
+        }
+      }
+    }
+  }
+  for(let i=0;i<7;i++){
+    result[i].sort((a,b)=>a.start-b.start);
+    const merged=[]; for(const r of result[i]){const last=merged[merged.length-1]; if(last&&r.start<=last.end)last.end=Math.max(last.end,r.end); else merged.push({...r});} result[i]=merged;
+  }
+  return {result,tz,mon,mode:'local'};
+}
+function dayWindows(av,d){return av.result[d]||[];}
+function nextOpTime(day,minute,av){
+  // day = game-week day index; return {day,minute}；若本日無，向後找 7 日內。
+  for(let k=0;k<8;k++){
+    const idx=(day+k)%7, rows=dayWindows(av,idx);
+    for(const r of rows){if(k===0 && minute<=r.end){return {day:idx,minute:Math.max(minute,r.start)};} if(k>0)return {day:idx,minute:r.start};}
+  }
+  return null;
+}
+function hasOpAfter(day,minute,av){
+  const n=nextOpTime(day,minute,av);return n&&((n.day!==day)||n.minute>=minute);
+}
+function availabilitySummary(av){
+  return weekNames.map((d,i)=>{const rs=dayWindows(av,i);return `${d}：${rs.length?rs.map(r=>`${fmtMin(r.start)}－${fmtMin(r.end)}`).join('、'):'無可操作時間'}`}).join('<br>');
+}
+function scheduleWeek(MAX,av){
+  const rows=[];let field=11,inv=MAX-8;let impossible=[];
+  for(let d=0;d<7;d++){
+    const scoring=(d===0||d===4),startF=field,startI=inv;
+    const windows=dayWindows(av,d);
+    if(scoring){
+      const total=startF+startI+24+LAURA;
+      // 衝分日需要至少有一個可操作時段，且最後一次 +8 後仍能操作，才能保證理論總量可在當日收割。
+      const lastPlus=16*60;
+      const op=nextOpTime(d,lastPlus,av);
+      const ok=!!op&&op.day===d;
+      if(!ok)impossible.push(`${weekNames[d]}：衝分日最後一次系統 +8 後沒有當日可操作時間，無法保證當日完成全部收割。`);
+      rows.push({d,scoring,startF,startI,total,windows,scoreOp:op,scoreFeasible:ok}); field=0;inv=0;continue;
+    }
+    const r=prepDay(field,inv,MAX,d===3||d===6);
+    // v5 的 process/Laura 結果不改；v7 只安排玩家操作時間。
+    let op=nextOpTime(d,0,av);
+    let note='';let feasible=true;
+    if(d===3||d===6){
+      // 前一天：必須先處理全部 process，再在場上=8 時使用 Laura，且使用後不能再收割。
+      const p=nextOpTime(d,0,av); const later=nextOpTime(d,0,av);
+      if(!p){feasible=false;note='當日沒有可操作時間，無法完成處理量與勞拉操作。';}
+      else {op=p;note=`玩家可於 ${fmtMin(p.minute)} 開始執行「先完成／收割當日全部處理量 → 場上=8 → 使用勞拉」；使用後不再收割。`;}
+    }else{
+      if(!op){feasible=false;note='當日沒有可操作時間；依規則只能等待下一個可操作時段。';}
+      else note=`玩家可於 ${fmtMin(op.minute)} 開始處理當日規劃；勞拉前後均可完成／收割。`;
+    }
+    rows.push({...r,d,scoring:false,windows,operation:op,feasible,note});field=r.endF;inv=r.endI;
+  }
+  return {rows,impossible};
+}
 function render(){
  const MAX=Number($('#max').value);
  if(!Number.isInteger(MAX)||MAX<8){$('#out').innerHTML='<div class="panel empty">請輸入至少 8 的整數庫存上限。</div>';return}
- const rows=makePlan(MAX);
- let html=`<div class="panel result"><b>本週規劃</b><br>庫存上限：<b>${MAX}</b><br><span class="muted">週期起點：星期一衝分計算起點 → 場上 11、庫存 ${MAX-8}（MAX−8）</span><br><span class="warn">本版已保留 v5 已驗證的雷達資源與勞拉規則；玩家可操作時間目前僅作設定，尚未參與排程演算。</span></div>`;
- for(const r of rows){
+ const av=buildGameAvailability();
+ const plan=scheduleWeek(MAX,av);
+ let html=`<div class="panel result"><b>本週規劃</b><br>庫存上限：<b>${MAX}</b><br><span class="muted">內部時間軸：遊戲時間 UTC−2｜遊戲日 00:00 開始｜系統 +8：00:00／08:00／16:00</span><br><span class="muted">當地時間模式：裝置時區 ${av.tz} → 先轉換成遊戲時間，再依遊戲日期判斷星期。</span></div>`;
+ html+=`<div class="panel result"><b>玩家可操作時間（轉換後的遊戲時間）</b><div class="meta">${availabilitySummary(av)}</div></div>`;
+ if(plan.impossible.length) html+=`<div class="panel result"><b class="warn">⚠️ 時間限制</b><div class="meta">${plan.impossible.join('<br>')}</div></div>`;
+ for(const r of plan.rows){
    if(r.scoring){
-     html+=`<section class="day score"><h2>${days[r.d]} <span class="tag">🏆 衝分日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><div class="formula"><b>可完成雷達數：${r.startF} + ${r.startI} + 24 + 20 = ${r.total}</b><br><span class="muted">場上 11 + 庫存（MAX−8）+ 系統 3 次 × +8 + 勞拉 +20</span></div><div class="action">🏆 衝分日：完成並收割所有雷達（共 ${r.total} 個）</div><div class="meta">勞拉：可在衝分日任意時機使用，但使用後庫存不得超過 MAX；點擊前後都可完成／收割雷達。</div><div class="state ok">結束：場上 0，庫存 0</div></section>`;
+     const opText=r.scoreOp?`${weekNames[r.scoreOp.day]} ${fmtMin(r.scoreOp.minute)}`:'無';
+     html+=`<section class="day score"><h2>${weekNames[r.d]} <span class="tag">🏆 衝分日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><div class="formula"><b>可完成雷達數：${r.startF} + ${r.startI} + 24 + 20 = ${r.total}</b><br><span class="muted">場上 11 + 庫存（MAX−8）+ 系統 3 次 × +8 + 勞拉 +20</span></div><div class="action">🏆 衝分日：完成並收割所有雷達。建議可操作起點：<b>${opText}</b></div><div class="meta">系統 +8 會先於玩家操作結算；若最後一次 +8 後當日沒有可操作時間，系統會標示時間不足。</div><div class="state ok">結束：場上 0，庫存 0</div></section>`;
    }else{
-     html+=`<section class="day"><h2>${days[r.d]} <span class="tag">準備日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><table><tr><th>項目</th><th>規劃</th></tr><tr><td>每日最低處理量</td><td>${r.minProcess}</td></tr><tr><td>系統雷達</td><td>+24（每日 3 次 × +8）</td></tr><tr><td>勞拉</td><td>+20｜${r.lauraNote}</td></tr><tr><td>安全線所需處理量</td><td>${r.safetyProcess}</td></tr><tr><td>本日實際處理量</td><td><b>${r.process}</b>（取以上兩者較大值）</td></tr></table><div class="action">操作後：<b>（場上 ${r.endF}，庫存 ${r.endI}）</b></div><div class="meta">日末庫存安全線：MAX−8 = ${MAX-8}，確保下一次系統 +8 不會超過上限。</div></section>`;
+     html+=`<section class="day"><h2>${weekNames[r.d]} <span class="tag">準備日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><table><tr><th>項目</th><th>規劃</th></tr><tr><td>每日最低處理量</td><td>${r.minProcess}</td></tr><tr><td>系統雷達</td><td>+24（00:00／08:00／16:00）</td></tr><tr><td>勞拉</td><td>+20｜${r.lauraNote}</td></tr><tr><td>安全線所需處理量</td><td>${r.safetyProcess}</td></tr><tr><td>本日實際處理量</td><td><b>${r.process}</b>（取以上兩者較大值）</td></tr></table><div class="action">玩家操作：<b>${r.operation?fmtMin(r.operation.minute):'無可操作時間'}</b><br>${r.note}</div><div class="meta">日末庫存安全線：MAX−8 = ${MAX-8}。v7 不改動 v5 資源結果，只把玩家操作放進可操作時間。</div></section>`;
    }
  }
  $('#out').innerHTML=html;
@@ -118,7 +281,7 @@ $('#plan').addEventListener('click',render);$('#max').addEventListener('input',(
 .setup-panel{padding-bottom:16px}.section-title{font-size:18px;margin:0 0 14px;color:var(--gold)}.setup-divider{height:1px;background:#27415f;margin:16px 0}.result-heading{font-size:18px;font-weight:700;color:var(--gold);margin:18px 2px 10px}.setup-panel .day-title{font-weight:600}.setup-panel .meta{margin-top:12px}
 </style>
 <script>
-const timeStoreKey='lastz_radar_v6_availability';
+const timeStoreKey='lastz_radar_v7_availability';
 const weekNames=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
 function timeRow(h='',end=''){return `<div class="time-row"><input type="time" aria-label="開始時間" value="${h}"><span class="time-sep">－</span><input type="time" aria-label="結束時間" value="${end}"><button type="button" class="smallbtn delTime">刪除</button></div>`}
 function bindDelete(){document.querySelectorAll('.delTime').forEach(b=>{if(b.dataset.bound)return;b.dataset.bound='1';b.onclick=()=>{const row=b.closest('.time-row');const parent=row.parentElement;if(parent.querySelectorAll('.time-row').length>1)row.remove();else row.querySelectorAll('input').forEach(x=>x.value='');autoSaveAvailability();};});}
