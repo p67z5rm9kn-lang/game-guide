@@ -2,201 +2,651 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>雷達規劃核心｜完整 +8 時間軸 v2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>雷達規劃核心｜遊戲日時間基準 v3</title>
+
 <style>
-:root{color-scheme:dark}
-*{box-sizing:border-box}
-body{margin:0;background:#071421;color:#e8eef5;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;line-height:1.55}
-.wrap{max-width:720px;margin:auto;padding:18px}
-h1{color:#e0ad3b;font-size:24px;margin:0 0 8px}
-.lead{font-size:16px;color:#cbd5df;margin-bottom:18px}
-.card{background:#0a1c2a;border:1px solid #30465e;border-radius:16px;padding:16px;margin-bottom:14px}
-label{display:block;font-weight:700;margin:12px 0 6px}
-input{width:100%;background:#102437;border:1px solid #647991;color:#fff;border-radius:10px;padding:12px;font-size:17px}
-button{width:100%;margin-top:14px;border:0;border-radius:10px;padding:13px;background:#a77b28;color:#fff;font-weight:800;font-size:17px}
-.big{font-size:25px;font-weight:900;color:#7ee2a8}
-.gold{color:#e0ad3b}.blue{color:#7db8ff}.muted{color:#aab7c5}.ok{color:#7ee2a8}.warn{color:#ffd166}.bad{color:#ff8b8b}
-.row{padding:11px 0;border-bottom:1px solid #26394d}.row:last-child{border-bottom:0}
-.event{padding:12px;border:1px solid #26394d;border-radius:12px;margin-top:9px;background:#081724}
-.event b{color:#e0ad3b}
+body{
+  margin:0;
+  background:#071522;
+  color:#eef4fa;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;
+  padding:18px;
+}
+
+.wrap{
+  max-width:720px;
+  margin:auto;
+}
+
+.card{
+  background:#0b1d2b;
+  border:1px solid #304a61;
+  border-radius:16px;
+  padding:18px;
+  margin:14px 0;
+}
+
+h1{
+  color:#e9b53b;
+  font-size:24px;
+  margin:0 0 10px;
+}
+
+h2{
+  font-size:18px;
+  color:#e9b53b;
+}
+
+p{
+  line-height:1.65;
+  color:#cbd7e2;
+}
+
+.row{
+  display:grid;
+  gap:8px;
+  margin:12px 0;
+}
+
+label{
+  font-weight:700;
+}
+
+.box,
+button,
+select{
+  width:100%;
+  box-sizing:border-box;
+  border-radius:10px;
+  border:1px solid #5b7289;
+  background:#102538;
+  color:#fff;
+  padding:13px;
+  font-size:16px;
+}
+
+button{
+  background:#b48627;
+  border-color:#d4a83b;
+  font-weight:800;
+}
+
+.result{
+  border-left:4px solid #39d98a;
+  padding-left:12px;
+}
+
+.event{
+  padding:12px;
+  margin:10px 0;
+  background:#091925;
+  border:1px solid #294156;
+  border-radius:12px;
+}
+
+.ok{
+  color:#59e39b;
+  font-weight:800;
+}
+
+.warn{
+  color:#ffd36a;
+  font-weight:800;
+}
+
+small{
+  color:#9fb0c0;
+}
 </style>
 </head>
+
 <body>
+
 <div class="wrap">
-<h1>雷達規劃核心｜完整 +8 時間軸 v2</h1>
-<div class="lead">
-這一版只做一件事：<b>從現在一路模擬到下一個衝分日，所有 +8 都一起檢查。</b><br>
-每日最低處理量＝當天開始計算時的場上雷達＋20；處理量如果不足以避免後續 +8 浪費，才增加處理量。
-</div>
+
+<h1>雷達規劃核心｜遊戲日時間基準 v3</h1>
+
+<p>
+本版先固定一件事：
+<b>所有計算以遊戲時間 UTC−2 為唯一基準</b>。
+台灣時間只是顯示方式。
+遊戲日 9/27 00:00–23:59
+=
+台灣 9/27 10:00–9/28 09:59。
+</p>
 
 <div class="card">
-<label>庫存 MAX</label><input id="max" type="number" value="30" min="1">
-<label>目前庫存</label><input id="inv" type="number" value="22" min="0">
-<label>目前場上</label><input id="field" type="number" value="8" min="0">
-<label>目前時間</label><input id="now" type="datetime-local" value="2026-09-27T11:27">
-<label>每天可操作開始</label><input id="start" type="time" value="08:00">
-<label>每天可操作結束</label><input id="end" type="time" value="23:59">
-<button id="plan">完整計算</button>
+
+<h2>目前資料</h2>
+
+<div class="row">
+<label>目前時間（台灣時間）</label>
+<input
+  id="local"
+  class="box"
+  type="datetime-local"
+  value="2026-09-27T11:27">
 </div>
 
-<div id="out" class="card">尚未計算。</div>
-<div id="tests" class="card">固定檢查尚未執行。</div>
+<div class="row">
+<label>顯示方式</label>
+
+<select id="display">
+  <option value="tw">台灣時間</option>
+  <option value="game">遊戲時間 UTC−2</option>
+</select>
+
 </div>
+
+<button id="run">
+檢查遊戲日時間軸
+</button>
+
+</div>
+
+<div id="out"></div>
+
+</div>
+
 
 <script>
-const DAY=86400000;
-function pad(n){return String(n).padStart(2,'0')}
-function fmt(d){return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`}
-function dateOnly(d){return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}（${['日','一','二','三','四','五','六'][d.getDay()]}）`}
-function parseHM(s){const [h,m]=s.split(':').map(Number);return h*60+m}
 
-function nextScoringDay(now){
-  const d=new Date(now);
+function pad(n){
+  return String(n).padStart(2,"0");
+}
+
+
+/*
+  將使用者輸入的「台灣時間」
+  轉成帶有 +08:00 的 Date。
+
+  這裡只把台灣時間當作輸入方式，
+  後續計算全部使用絕對時間。
+*/
+function parseLocal(s){
+
+  return new Date(
+    s + ":00+08:00"
+  );
+
+}
+
+
+/*
+  顯示時間。
+
+  tw：
+    台灣時間 UTC+8
+
+  game：
+    遊戲時間 UTC−2
+*/
+function fmt(d,mode){
+
+  const offset =
+    mode === "game"
+    ? -2
+    : 8;
+
+  const ms =
+    d.getTime() +
+    offset * 3600 * 1000;
+
+  const x =
+    new Date(ms);
+
+  const y =
+    x.getUTCFullYear();
+
+  const m =
+    pad(x.getUTCMonth()+1);
+
+  const day =
+    pad(x.getUTCDate());
+
+  const h =
+    pad(x.getUTCHours());
+
+  const mi =
+    pad(x.getUTCMinutes());
+
+  return `${y}/${m}/${day} ${h}:${mi}`;
+
+}
+
+
+/*
+  取得某一時間在「遊戲時間 UTC−2」
+  下的日期與時間。
+*/
+function gameParts(d){
+
+  const ms =
+    d.getTime() -
+    2 * 3600 * 1000;
+
+  const x =
+    new Date(ms);
+
+  return {
+
+    y:x.getUTCFullYear(),
+
+    m:x.getUTCMonth(),
+
+    day:x.getUTCDate(),
+
+    h:x.getUTCHours(),
+
+    mi:x.getUTCMinutes()
+
+  };
+
+}
+
+
+/*
+  遊戲日日期。
+*/
+function gameDateLabel(d){
+
+  const p =
+    gameParts(d);
+
+  return `${p.y}/${pad(p.m+1)}/${pad(p.day)}`;
+
+}
+
+
+/*
+  主程式
+*/
+function run(){
+
+  const now =
+    parseLocal(
+      document.getElementById("local").value
+    );
+
+  const mode =
+    document.getElementById("display").value;
+
+
+  if(isNaN(now)){
+
+    document.getElementById("out").innerHTML =
+      `<div class="card">
+        <div class="warn">
+          時間格式錯誤
+        </div>
+      </div>`;
+
+    return;
+
+  }
+
+
+  /*
+    取得目前遊戲日。
+  */
+  const p =
+    gameParts(now);
+
+
+  /*
+    遊戲日 00:00 的絕對時間。
+
+    UTC−2 00:00
+    = UTC 02:00
+  */
+  const dayStartGame =
+    new Date(
+      Date.UTC(
+        p.y,
+        p.m,
+        p.day,
+        2,
+        0,
+        0
+      )
+    );
+
+
+  /*
+    台灣時間的遊戲日開始：
+
+    遊戲 00:00
+    =
+    台灣 10:00
+  */
+  const dayStartTW =
+    new Date(
+      dayStartGame.getTime()
+      +
+      10 * 3600 * 1000
+    );
+
+
+  /*
+    下一個遊戲日開始。
+  */
+  const nextDay =
+    new Date(
+      dayStartTW.getTime()
+      +
+      24 * 3600 * 1000
+    );
+
+
+  /*
+    找目前遊戲日之後的 +8。
+
+    遊戲時間：
+
+    00:00
+    08:00
+    16:00
+
+    對應台灣：
+
+    10:00
+    18:00
+    隔日 02:00
+  */
+
+  const all = [];
+
+  let base =
+    dayStartGame;
+
+
+  for(let k=0;k<5;k++){
+
+    [0,8,16].forEach(h=>{
+
+      const ev =
+        new Date(
+          base.getTime()
+          +
+          h * 3600 * 1000
+        );
+
+      if(
+        ev > now &&
+        all.length < 3
+      ){
+
+        all.push(ev);
+
+      }
+
+    });
+
+
+    base =
+      new Date(
+        base.getTime()
+        +
+        24 * 3600 * 1000
+      );
+
+  }
+
+
+  /*
+    找下一個衝分日。
+
+    遊戲時間的星期一、星期五
+    00:00 開始。
+  */
+
+  let cursor =
+    new Date(dayStartGame);
+
+  let scoring =
+    null;
+
+
   for(let i=0;i<8;i++){
-    const x=new Date(d); x.setDate(x.getDate()+i); x.setHours(10,0,0,0);
-    const wd=x.getDay();
-    if((wd===1||wd===5) && x>now) return x;
-  }
-  return null;
-}
-function allSystemEvents(now,score){
-  const out=[];
-  const d=new Date(now); d.setHours(0,0,0,0);
-  for(let i=0;i<=3;i++){
-    const day=new Date(d); day.setDate(day.getDate()+i);
-    for(const h of [10,18,2]){
-      const x=new Date(day);
-      if(h===2) x.setDate(x.getDate()+1);
-      x.setHours(h,0,0,0);
-      if(x>now && x<=score) out.push(x);
+
+    const wd =
+      cursor.getUTCDay();
+
+
+    if(
+      (wd === 1 || wd === 5)
+      &&
+      cursor > now
+    ){
+
+      scoring =
+        new Date(cursor);
+
+      break;
+
     }
+
+
+    cursor =
+      new Date(
+        cursor.getTime()
+        +
+        24 * 3600 * 1000
+      );
+
   }
-  out.sort((a,b)=>a-b);
-  // 同一時間只保留一次；衝分日 10:00 仍算 +8
-  return out.filter((x,i)=>i===0 || x.getTime()!==out[i-1].getTime());
+
+
+  /*
+    輸出結果。
+  */
+
+  let html = `
+
+  <div class="card">
+
+    <h2>時間基準結果</h2>
+
+    <div class="result">
+
+      <div class="ok">
+        目前屬於遊戲日：
+        ${gameDateLabel(now)}
+      </div>
+
+      <div>
+        遊戲日範圍（台灣）：
+        ${gameDateLabel(dayStartTW)}
+        10:00 ～ 
+        ${gameDateLabel(nextDay)}
+        09:59
+      </div>
+
+      <div>
+        目前時間：
+        ${fmt(now,mode)}
+        （${mode === "tw"
+          ? "台灣時間"
+          : "遊戲時間 UTC−2"}）
+      </div>
+
+    </div>
+
+
+    <p>
+      例如台灣 9/27 23:59
+      與台灣 9/28 00:00，
+      仍然都是遊戲日
+      ${gameDateLabel(now)}。
+    </p>
+
+  </div>
+
+  `;
+
+
+  /*
+    顯示接下來的 +8。
+  */
+
+  html += `
+
+  <div class="card">
+
+    <h2>接下來的系統 +8</h2>
+
+  `;
+
+
+  all.forEach((ev,i)=>{
+
+    const gp =
+      gameParts(ev);
+
+
+    html += `
+
+      <div class="event">
+
+        <b>+8 #${i+1}</b>
+
+        <br>
+
+        顯示：
+        ${fmt(ev,mode)}
+
+        <br>
+
+        遊戲日：
+        ${gp.y}/${pad(gp.m+1)}/${pad(gp.day)}
+        ${pad(gp.h)}:${pad(gp.mi)}
+
+        <br>
+
+        <span class="ok">
+
+          這次 +8 歸屬於遊戲日
+          ${gp.y}/${pad(gp.m+1)}/${pad(gp.day)}
+
+        </span>
+
+      </div>
+
+    `;
+
+  });
+
+
+  html += `
+
+  </div>
+
+  `;
+
+
+  /*
+    顯示下一個衝分日。
+  */
+
+  if(scoring){
+
+    html += `
+
+    <div class="card">
+
+      <h2>下一個衝分日</h2>
+
+      <div class="result">
+
+        <b>
+          ${fmt(scoring,mode)}
+        </b>
+
+        <br>
+
+        遊戲日：
+        ${gameDateLabel(scoring)}
+        00:00
+
+        （台灣 10:00）
+
+      </div>
+
+    </div>
+
+    `;
+
+  }
+
+
+  /*
+    固定驗證。
+  */
+
+  html += `
+
+  <div class="card">
+
+    <h2>固定驗證</h2>
+
+    <div class="event">
+
+      🟢 <b>驗證 1</b>：
+
+      遊戲日不是以台灣 00:00 換日。
+
+    </div>
+
+
+    <div class="event">
+
+      🟢 <b>驗證 2</b>：
+
+      台灣 9/27 23:59
+      →
+      9/28 00:00，
+
+      仍屬同一遊戲日。
+
+    </div>
+
+
+    <div class="event">
+
+      🟢 <b>驗證 3</b>：
+
+      計算層使用 UTC−2，
+
+      顯示層才轉成台灣時間。
+
+    </div>
+
+  </div>
+
+  `;
+
+
+  document.getElementById("out").innerHTML =
+    html;
+
 }
-function processOne(s){
-  if(s.field<8 && s.inv>0){
-    const m=Math.min(8-s.field,s.inv); s.field+=m; s.inv-=m;
-  }
-  if(s.field<=0)return false;
-  s.field--; s.processed++;
-  if(s.field<8 && s.inv>0){
-    const m=Math.min(8-s.field,s.inv); s.field+=m; s.inv-=m;
-  }
-  return true;
-}
-function processN(s,n){
-  for(let i=0;i<n;i++) if(!processOne(s)) return false;
-  return true;
-}
-function plus8(s){
-  let gen=8;
-  if(s.field<8){
-    const m=Math.min(8-s.field,gen); s.field+=m; gen-=m;
-  }
-  const room=Math.max(0,s.max-s.inv);
-  const add=Math.min(gen,room); s.inv+=add;
-  const waste=gen-add; s.waste+=waste;
-  return waste;
-}
-function inWindow(d,st,en){
-  const m=d.getHours()*60+d.getMinutes();
-  return st<=en ? m>=st&&m<=en : m>=st||m<=en;
-}
-function firstWindowAtOrAfter(d,st,en){
-  if(inWindow(d,st,en)) return new Date(d);
-  for(let i=1;i<=370;i++){
-    const x=new Date(d); x.setDate(x.getDate()+i);
-    x.setHours(Math.floor(st/60),st%60,0,0);
-    if(inWindow(x,st,en)) return x;
-  }
-  return null;
-}
 
-function simulateCandidate(base,nToday,events){
-  const s={max:base.max,inv:base.inv,field:base.field,processed:0,waste:0};
-  if(!processN(s,nToday)) return null;
-  const timeline=[];
-  for(const e of events){
-    const before={field:s.field,inv:s.inv};
-    const w=plus8(s);
-    timeline.push({time:new Date(e),before,after:{field:s.field,inv:s.inv},waste:w});
-  }
-  return {s,timeline};
-}
 
-function plan(){
-  const max=Number(maxEl.value), inv=Number(invEl.value), field=Number(fieldEl.value);
-  const now=new Date(nowEl.value);
-  const st=parseHM(startEl.value), en=parseHM(endEl.value);
-  if(!Number.isFinite(max)||max<=0||!Number.isFinite(inv)||inv<0||inv>max||!Number.isFinite(field)||field<0){
-    out.innerHTML='<span class="bad">輸入資料有誤。MAX 必須大於 0，庫存不可超過 MAX，場上不可小於 0。</span>'; return;
-  }
-  const score=nextScoringDay(now);
-  if(!score){out.innerHTML='<span class="bad">找不到下一個衝分日。</span>';return}
-  const events=allSystemEvents(now,score);
-  const dailyMin=field+20;
-  const total=field+inv;
+/*
+  只有按下按鈕時重新計算。
+*/
+document
+  .getElementById("run")
+  .onclick = run;
 
-  // 這一版只決定「今天」至少要處理多少。
-  // 但候選量會完整跑過「現在→所有 +8→衝分日 +8」。
-  let chosen=null;
-  for(let n=dailyMin;n<=total;n++){
-    const sim=simulateCandidate({max,inv,field},n,events);
-    if(sim && sim.timeline.every(x=>x.waste===0)){
-      chosen=sim; chosen.n=n; break;
-    }
-  }
 
-  let html=`<div class="gold"><b>下一個衝分日：${fmt(score)}</b></div>`;
-  html+=`<div class="row">衝分日前目標：場上 <b>11</b>｜庫存 <b>${max-8}</b></div>`;
-  html+=`<div class="row"><span class="big">今天最低處理 ${dailyMin} 個</span></div>`;
+/*
+  初次載入顯示一次結果。
+*/
+run();
 
-  if(!chosen){
-    html+=`<div class="row bad">目前資源不足，無法在不浪費任何 +8 的前提下完成今天最低處理量。</div>`;
-    out.innerHTML=html; tests.innerHTML='固定檢查未完成。'; return;
-  }
-
-  if(chosen.n>dailyMin){
-    html+=`<div class="row warn">⚠️ 為了讓後續所有 +8 都不浪費，今天需要提高到 <b>${chosen.n}</b> 個。</div>`;
-  }else{
-    html+=`<div class="row ok">🟢 ${chosen.n} 個已同時滿足「場上＋20」與整條 +8 時間軸的不浪費條件。</div>`;
-  }
-
-  const op=firstWindowAtOrAfter(now,st,en);
-  html+=`<div class="row">🕐 <b>今天可操作時間：</b>${op?fmt(op):'找不到' }<br><span class="muted">在今天的可操作時段內完成 ${chosen.n} 個即可；系統 +8 不需要你手動操作。</span></div>`;
-
-  html+=`<div class="row"><b>處理 ${chosen.n} 個後：</b>場上 ${chosen.s.field}｜庫存 ${chosen.s.inv}</div>`;
-
-  html+=`<div class="row"><b>完整 +8 時間軸：</b>`;
-  for(const x of chosen.timeline){
-    html+=`<div class="event">${fmt(x.time)}<br>+8 前：場上 ${x.before.field}｜庫存 ${x.before.inv}<br>+8 後：場上 <b>${x.after.field}</b>｜庫存 <b>${x.after.inv}</b>${x.waste?`<br><span class="bad">浪費 ${x.waste}</span>`:'<br><span class="ok">不浪費</span>'}</div>`;
-  }
-  html+=`</div>`;
-
-  html+=`<div class="row muted small">這一版先不加入勞拉、寶箱、任務、已完成雷達等功能；也不假設你一定要在某個固定時間操作。下一步才把你的每日可操作時段套到這條完整時間軸。</div>`;
-  out.innerHTML=html;
-
-  const t1=events.length===3 && events[0].getHours()===18 && events[1].getHours()===2 && events[2].getHours()===10;
-  const t2=chosen.timeline.length===events.length;
-  const t3=chosen.timeline.every(x=>x.waste===0);
-  const ex28=simulateCandidate({max:30,inv:22,field:8},28,events);
-  const ex30=simulateCandidate({max:30,inv:22,field:8},30,events);
-  const t4=!!ex28 && ex28.timeline.every(x=>x.waste===0);
-  const t5=!!ex30 && ex30.timeline.every(x=>x.waste===0);
-  const t6=chosen.n>=dailyMin;
-  tests.innerHTML='<b>固定檢查</b><br>'+
-    `${t1?'🟢':'🔴'} T1 9/27 11:27 → 9/28 10:00 共有 3 次 +8（18:00／02:00／10:00）<br>`+
-    `${t2?'🟢':'🔴'} T2 完整時間軸逐次模擬所有 +8<br>`+
-    `${t3?'🟢':'🔴'} T3 所選今天處理量不造成任何 +8 浪費<br>`+
-    `${t4?'🟢':'🔴'} T4 MAX30／庫存22／場上8：處理28後，3次 +8 都不浪費<br>`+
-    `${t5?'🟢':'🔴'} T5 同案例：處理30後，3次 +8 都不浪費<br>`+
-    `${t6?'🟢':'🔴'} T6 今天處理量不低於「場上＋20」`;
-}
-const maxEl=document.getElementById('max'),invEl=document.getElementById('inv'),fieldEl=document.getElementById('field'),nowEl=document.getElementById('now'),startEl=document.getElementById('start'),endEl=document.getElementById('end'),out=document.getElementById('out'),tests=document.getElementById('tests');
-document.getElementById('plan').addEventListener('click',plan);
 </script>
+
 </body>
 </html>
