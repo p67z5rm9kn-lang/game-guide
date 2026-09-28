@@ -10,7 +10,8 @@
 <body><main>
 <h1>Last Z｜雷達週計劃 v6</h1>
 <div class="sub">先設定「玩家可操作時間」，本版保留 v5 已驗證的雷達資源與勞拉規則；尚不加入實際排程演算。</div>
-<div class="panel">
+<div class="panel setup-panel">
+<h2 class="section-title">⚙️ 規劃設定</h2>
 <label>時間模式</label>
 <div class="modes"><label><input type="radio" name="timeMode" value="game" checked> 🎮 遊戲時間</label><label><input type="radio" name="timeMode" value="local"> 🌍 當地時間</label></div>
 <label>套用方式</label>
@@ -19,10 +20,12 @@
 <div id="customTimes" hidden></div>
 <div class="meta">新增、刪除或修改時段後會立即記錄；不需要另外按儲存。若結束時間為 00:00，代表可操作到當日午夜。</div>
 </div>
-<div class="panel">
-<label for="max">庫存上限 MAX</label><input id="max" type="number" min="1" step="1" placeholder="例如 30"><button id="plan">開始規劃</button>
+<div class="setup-divider"></div>
+<label for="max">庫存上限 MAX</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
+<button id="plan">開始規劃</button>
 <div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。衝分日計算起點為「場上 11、庫存 MAX−8」；當日 3 次系統 +8 會計入可完成雷達數。v6 的可操作時間會隨設定即時更新，目前只記錄設定，不改變 v5 資源計算。</div>
 </div>
+<div class="result-heading">📊 規劃結果</div>
 <div id="out"><div class="panel empty">輸入庫存上限後開始規劃</div></div>
 </main>
 <script>
@@ -99,7 +102,7 @@ function render(){
  const MAX=Number($('#max').value);
  if(!Number.isInteger(MAX)||MAX<8){$('#out').innerHTML='<div class="panel empty">請輸入至少 8 的整數庫存上限。</div>';return}
  const rows=makePlan(MAX);
- let html=`<div class="panel result"><b>本週規劃</b><br>庫存上限：<b>${MAX}</b><br><span class="muted">週期起點：星期一衝分計算起點 → 場上 11、庫存 ${MAX-8}（MAX−8）</span><br><span class="warn">本版已納入勞拉操作規則；玩家可操作時間下一版再加入。</span></div>`;
+ let html=`<div class="panel result"><b>本週規劃</b><br>庫存上限：<b>${MAX}</b><br><span class="muted">週期起點：星期一衝分計算起點 → 場上 11、庫存 ${MAX-8}（MAX−8）</span><br><span class="warn">本版已保留 v5 已驗證的雷達資源與勞拉規則；玩家可操作時間目前僅作設定，尚未參與排程演算。</span></div>`;
  for(const r of rows){
    if(r.scoring){
      html+=`<section class="day score"><h2>${days[r.d]} <span class="tag">🏆 衝分日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><div class="formula"><b>可完成雷達數：${r.startF} + ${r.startI} + 24 + 20 = ${r.total}</b><br><span class="muted">場上 11 + 庫存（MAX−8）+ 系統 3 次 × +8 + 勞拉 +20</span></div><div class="action">🏆 衝分日：完成並收割所有雷達（共 ${r.total} 個）</div><div class="meta">勞拉：可在衝分日任意時機使用，但使用後庫存不得超過 MAX；點擊前後都可完成／收割雷達。</div><div class="state ok">結束：場上 0，庫存 0</div></section>`;
@@ -113,6 +116,7 @@ $('#plan').addEventListener('click',render);$('#max').addEventListener('input',(
 </script>
 <style>
 .modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.modes label{display:flex;align-items:center;gap:5px;border:1px solid #365574;background:#102842;color:#dce8f5;border-radius:10px;padding:9px 10px;margin:0}.modes input{width:auto}.time-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:7px;align-items:center;margin:8px 0}.time-row input,.time-row select{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:16px;padding:10px}.time-sep{color:var(--gold);font-weight:700;text-align:center;font-size:18px}.smallbtn{width:auto;margin:0;padding:10px 12px;font-size:13px}.day-title{font-size:13px;color:#dce8f5;margin-top:12px}
+.setup-panel{padding-bottom:16px}.section-title{font-size:18px;margin:0 0 14px;color:var(--gold)}.setup-divider{height:1px;background:#27415f;margin:16px 0}.result-heading{font-size:18px;font-weight:700;color:var(--gold);margin:18px 2px 10px}.setup-panel .day-title{font-weight:600}.setup-panel .meta{margin-top:12px}
 </style>
 <script>
 const timeStoreKey='lastz_radar_v6_availability';
