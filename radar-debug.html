@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>雷達規劃核心｜可操作時間 v11</title>
+<title>雷達規劃核心｜可操作時間 v12</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#071522;color:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif} .wrap{max-width:720px;margin:auto;padding:16px}.title{font-size:24px;font-weight:900;color:#d7ad45;margin-bottom:8px}.sub{color:#b9c4d0;line-height:1.65;margin-bottom:14px}.card{background:#0b1b2a;border:1px solid #31445e;border-radius:14px;padding:14px;margin:12px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin-bottom:10px}label{display:block;font-weight:800;margin-bottom:5px;color:#dce3ea}input,select{width:100%;background:#0e2133;color:#fff;border:1px solid #60728b;border-radius:9px;padding:11px;font-size:16px}button{width:100%;border:1px solid #d4ab4a;border-radius:9px;background:#9a7224;color:#fff;padding:12px;font-size:17px;font-weight:900}.hint{font-size:13px;color:#aeb9c7;line-height:1.6}.good{color:#8ee2a4}.warn{color:#ffd36b}.bad{color:#ff9292}.gold{color:#e0b650}.big{font-size:20px;font-weight:900}.state{background:#081522;border-radius:10px;padding:10px;margin:8px 0;line-height:1.7}.day{border:1px solid #30435c;border-radius:12px;margin:10px 0;overflow:hidden}.dayhead{background:#112238;padding:10px;font-size:18px;font-weight:900}.action{padding:11px;border-top:1px solid #22344b;line-height:1.6}.auto{color:#83c8ff}.op{color:#8fe0a4}.laura{color:#ffd36b}.score{color:#e8bd55}.summary{font-size:16px;line-height:1.8}.test{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.55;white-space:pre-wrap}.pill{display:inline-block;padding:3px 8px;border-radius:999px;background:#172a40;color:#e1b852;font-size:12px;margin-right:5px}@media(max-width:560px){.grid{grid-template-columns:1fr}.title{font-size:21px}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<div class="title">雷達規劃核心｜可操作時間 v11</div>
+<div class="title">雷達規劃核心｜可操作時間 v12</div>
 <div class="sub">這一版只做一件重要的事：把「你什麼時候有空上線」也納入規劃。系統 +8 會自動發生；完成／收割／勞拉只能安排在你的可操作時間內。結果直接告訴你每天要做什麼。</div>
 
 <div class="card">
@@ -35,7 +35,7 @@
 </div>
 
 <div id="out" class="card"><div class="hint">尚未規劃。輸入你的數字與每天可操作時間後，按「開始規劃」。</div></div>
-<div id="tests" class="card test"><span class="hint">v11 固定測試尚未執行。</span></div>
+<div id="tests" class="card test"><span class="hint">v12 固定測試尚未執行。</span></div>
 </div>
 
 <script>
@@ -120,7 +120,7 @@ function simulate(input){
   const base=input.base,score=nextScore(base); if(!score)throw Error('找不到下一個衝分日');
   const startMin=input.startMin,endMin=input.endMin;
   if(startMin===endMin)throw Error('可操作開始與結束時間不能相同');
-  if(startMin>endMin)throw Error('v11 目前只支援同一天內的可操作時間，例如 18:00～22:00');
+  if(startMin>endMin)throw Error('v12 可操作時間目前要求開始時間早於結束時間，例如 08:00～23:59');
   const windows=buildWindows(base,score,startMin,endMin);
   const systems=nextSystemAfter(base,score);
   const events=[];
@@ -194,7 +194,7 @@ function validateInput(){
   if(inv<0||field<0||completed<0||completed>field||todayDone<0)errs.push('輸入數字無效');
   if(!Number.isFinite(now.getTime()))errs.push('目前時間無效');
   if(startMin===endMin)errs.push('可操作開始與結束時間不能相同');
-  if(startMin>endMin)errs.push('v11 目前只支援同一天內的可操作時間');
+  if(startMin>endMin)errs.push('可操作開始時間必須早於結束時間；跨午夜時間區間將在下一版加入');
   return {errs,max,inv,field,completed,todayDone,base:now,startMin,endMin,lauraAvailable,lauraUsed:!lauraAvailable,lauraAmount:LAURA[star],star,targetField:11};
 }
 function renderAction(a){
@@ -252,7 +252,7 @@ function runTests(){
   T('T2 9/27開始，準備期系統+8應為18:00、02:00、10:00、18:00、02:00',p.systems.length===5);
   T('T3 MAX30、18:00-22:00 可找到可執行安排',!!p.best);
   T('T4 可執行安排最終衝分後為11/30',!!p.best&&p.best.field===11&&p.best.inventory===30);
-  const m46=clone(input);m46.max=46;m46.inv=22;const q=simulate(m46);T('T5 MAX46 同一操作時間也能找到安排',!!q.best);
+  const m46={...input,max:46,inv:22};const q=simulate(m46);T('T5 MAX46 同一操作時間也能找到安排',!!q.best);
   const early={...input,base:new Date('2026-09-26T11:27')};const r=simulate(early);T('T6 從9/26開始會納入兩個遊戲日的可操作時間',r.windows.length>=2);
   const bad={...input,startMin:2*60,endMin:4*60};const z=simulate(bad);T('T7 02:00-04:00 案例因 18:00 與 02:00 之間沒有可操作時間而判定無解',z.best===null);
   $("tests").textContent=o.join('\n')+'\n\n固定測試只驗證「可操作時間會真的影響結果」，不搜尋最佳策略。';
