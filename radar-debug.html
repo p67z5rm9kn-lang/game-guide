@@ -2,651 +2,136 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>雷達規劃核心｜遊戲日時間基準 v3</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>雷達規劃核心｜每日處理量 v4</title>
 <style>
-body{
-  margin:0;
-  background:#071522;
-  color:#eef4fa;
-  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;
-  padding:18px;
-}
-
-.wrap{
-  max-width:720px;
-  margin:auto;
-}
-
-.card{
-  background:#0b1d2b;
-  border:1px solid #304a61;
-  border-radius:16px;
-  padding:18px;
-  margin:14px 0;
-}
-
-h1{
-  color:#e9b53b;
-  font-size:24px;
-  margin:0 0 10px;
-}
-
-h2{
-  font-size:18px;
-  color:#e9b53b;
-}
-
-p{
-  line-height:1.65;
-  color:#cbd7e2;
-}
-
-.row{
-  display:grid;
-  gap:8px;
-  margin:12px 0;
-}
-
-label{
-  font-weight:700;
-}
-
-.box,
-button,
-select{
-  width:100%;
-  box-sizing:border-box;
-  border-radius:10px;
-  border:1px solid #5b7289;
-  background:#102538;
-  color:#fff;
-  padding:13px;
-  font-size:16px;
-}
-
-button{
-  background:#b48627;
-  border-color:#d4a83b;
-  font-weight:800;
-}
-
-.result{
-  border-left:4px solid #39d98a;
-  padding-left:12px;
-}
-
-.event{
-  padding:12px;
-  margin:10px 0;
-  background:#091925;
-  border:1px solid #294156;
-  border-radius:12px;
-}
-
-.ok{
-  color:#59e39b;
-  font-weight:800;
-}
-
-.warn{
-  color:#ffd36a;
-  font-weight:800;
-}
-
-small{
-  color:#9fb0c0;
-}
+*{box-sizing:border-box}body{margin:0;background:#071522;color:#eef4fa;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;line-height:1.55}
+.wrap{max-width:720px;margin:0 auto;padding:22px 18px 50px}.title{color:#f5bd3c;font-size:25px;font-weight:900}.sub{font-weight:700;color:#cbd7e3;margin:10px 0 18px}
+.card{background:#0b1d2b;border:1px solid #29435b;border-radius:18px;padding:18px;margin:14px 0}.card h2{font-size:20px;color:#f5bd3c;margin:0 0 14px}
+label{display:block;font-weight:800;margin:12px 0 6px}input,select{width:100%;padding:14px;border-radius:12px;border:1px solid #58718b;background:#102437;color:#fff;font-size:18px;font-weight:700}
+button{width:100%;padding:14px;border:1px solid #e0b53e;border-radius:12px;background:#a97922;color:#fff;font-size:18px;font-weight:900;margin-top:14px}
+.result{border-left:4px solid #39df96;padding-left:12px}.big{font-size:26px;font-weight:900;color:#57e2a0}.warn{color:#ff8b8b;font-weight:900}.ok{color:#55e5a2;font-weight:900}.muted{color:#aebdca}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.event{background:#081724;border:1px solid #29435b;border-radius:14px;padding:12px;margin:10px 0}.event b{color:#fff}.pill{display:inline-block;padding:3px 8px;border-radius:99px;background:#173248;color:#cfe0ee;font-weight:800}
+small{color:#aebdca}
 </style>
 </head>
-
 <body>
-
 <div class="wrap">
-
-<h1>雷達規劃核心｜遊戲日時間基準 v3</h1>
-
-<p>
-本版先固定一件事：
-<b>所有計算以遊戲時間 UTC−2 為唯一基準</b>。
-台灣時間只是顯示方式。
-遊戲日 9/27 00:00–23:59
-=
-台灣 9/27 10:00–9/28 09:59。
-</p>
+<div class="title">雷達規劃核心｜每日處理量 v4</div>
+<div class="sub">以「遊戲時間 UTC−2」計算。台灣時間只負責顯示。這版先確認每日處理量公式，不加入勇士戰令、黎明曙光、勞拉寶箱或已完成雷達。</div>
 
 <div class="card">
-
 <h2>目前資料</h2>
-
 <div class="row">
-<label>目前時間（台灣時間）</label>
-<input
-  id="local"
-  class="box"
-  type="datetime-local"
-  value="2026-09-27T11:27">
+<div><label>庫存 MAX</label><input id="max" type="number" value="30" min="1"></div>
+<div><label>目前庫存</label><input id="inv" type="number" value="22" min="0"></div>
+</div>
+<label>目前場上雷達</label><input id="field" type="number" value="8" min="0">
+<label>目前時間（台灣時間）</label><input id="localTime" type="datetime-local" value="2026-09-27T11:27">
+<label>今天／本遊戲日可用勞拉</label>
+<select id="laura"><option value="0">沒有</option><option value="5">0★（+5）</option><option value="10">1★～3★（+10）</option><option value="20" selected>4★～5★（+20）</option></select>
+<button id="calc">開始計算</button>
 </div>
 
-<div class="row">
-<label>顯示方式</label>
-
-<select id="display">
-  <option value="tw">台灣時間</option>
-  <option value="game">遊戲時間 UTC−2</option>
-</select>
-
+<div id="out" class="card"><div class="muted">尚未計算。</div></div>
 </div>
-
-<button id="run">
-檢查遊戲日時間軸
-</button>
-
-</div>
-
-<div id="out"></div>
-
-</div>
-
 
 <script>
-
-function pad(n){
-  return String(n).padStart(2,"0");
+const TZ=-2;
+function parseLocalTaiwan(s){
+  const [d,t]=s.split('T'); const [y,m,day]=d.split('-').map(Number); const [hh,mm]=t.split(':').map(Number);
+  // Taiwan UTC+8 -> UTC
+  return new Date(Date.UTC(y,m-1,day,hh-8,mm,0));
 }
-
-
-/*
-  將使用者輸入的「台灣時間」
-  轉成帶有 +08:00 的 Date。
-
-  這裡只把台灣時間當作輸入方式，
-  後續計算全部使用絕對時間。
-*/
-function parseLocal(s){
-
-  return new Date(
-    s + ":00+08:00"
-  );
-
+function gameParts(dt){
+  const game=new Date(dt.getTime()-10*3600*1000); // Taiwan -> UTC-2
+  return {game, date:game.toISOString().slice(0,10), hh:game.getUTCHours(), mm:game.getUTCMinutes()};
 }
-
-
-/*
-  顯示時間。
-
-  tw：
-    台灣時間 UTC+8
-
-  game：
-    遊戲時間 UTC−2
-*/
-function fmt(d,mode){
-
-  const offset =
-    mode === "game"
-    ? -2
-    : 8;
-
-  const ms =
-    d.getTime() +
-    offset * 3600 * 1000;
-
-  const x =
-    new Date(ms);
-
-  const y =
-    x.getUTCFullYear();
-
-  const m =
-    pad(x.getUTCMonth()+1);
-
-  const day =
-    pad(x.getUTCDate());
-
-  const h =
-    pad(x.getUTCHours());
-
-  const mi =
-    pad(x.getUTCMinutes());
-
-  return `${y}/${m}/${day} ${h}:${mi}`;
-
+function fmtGame(dt){
+  const p=gameParts(dt); return p.date+' '+String(p.hh).padStart(2,'0')+':'+String(p.mm).padStart(2,'0');
 }
-
-
-/*
-  取得某一時間在「遊戲時間 UTC−2」
-  下的日期與時間。
-*/
-function gameParts(d){
-
-  const ms =
-    d.getTime() -
-    2 * 3600 * 1000;
-
-  const x =
-    new Date(ms);
-
-  return {
-
-    y:x.getUTCFullYear(),
-
-    m:x.getUTCMonth(),
-
-    day:x.getUTCDate(),
-
-    h:x.getUTCHours(),
-
-    mi:x.getUTCMinutes()
-
-  };
-
+function fmtTaiwan(dt){
+  const t=new Date(dt.getTime()+8*3600*1000);
+  return t.getUTCFullYear()+'/'+String(t.getUTCMonth()+1).padStart(2,'0')+'/'+String(t.getUTCDate()).padStart(2,'0')+' '+String(t.getUTCHours()).padStart(2,'0')+':'+String(t.getUTCMinutes()).padStart(2,'0');
 }
-
-
-/*
-  遊戲日日期。
-*/
-function gameDateLabel(d){
-
-  const p =
-    gameParts(d);
-
-  return `${p.y}/${pad(p.m+1)}/${pad(p.day)}`;
-
+function dayStart(gameDate){
+  const [y,m,d]=gameDate.split('-').map(Number);
+  return new Date(Date.UTC(y,m-1,d,2,0,0)); // game 00:00 = UTC 02:00
 }
-
-
-/*
-  主程式
-*/
-function run(){
-
-  const now =
-    parseLocal(
-      document.getElementById("local").value
-    );
-
-  const mode =
-    document.getElementById("display").value;
-
-
-  if(isNaN(now)){
-
-    document.getElementById("out").innerHTML =
-      `<div class="card">
-        <div class="warn">
-          時間格式錯誤
-        </div>
-      </div>`;
-
-    return;
-
-  }
-
-
-  /*
-    取得目前遊戲日。
-  */
-  const p =
-    gameParts(now);
-
-
-  /*
-    遊戲日 00:00 的絕對時間。
-
-    UTC−2 00:00
-    = UTC 02:00
-  */
-  const dayStartGame =
-    new Date(
-      Date.UTC(
-        p.y,
-        p.m,
-        p.day,
-        2,
-        0,
-        0
-      )
-    );
-
-
-  /*
-    台灣時間的遊戲日開始：
-
-    遊戲 00:00
-    =
-    台灣 10:00
-  */
-  const dayStartTW =
-    new Date(
-      dayStartGame.getTime()
-      +
-      10 * 3600 * 1000
-    );
-
-
-  /*
-    下一個遊戲日開始。
-  */
-  const nextDay =
-    new Date(
-      dayStartTW.getTime()
-      +
-      24 * 3600 * 1000
-    );
-
-
-  /*
-    找目前遊戲日之後的 +8。
-
-    遊戲時間：
-
-    00:00
-    08:00
-    16:00
-
-    對應台灣：
-
-    10:00
-    18:00
-    隔日 02:00
-  */
-
-  const all = [];
-
-  let base =
-    dayStartGame;
-
-
-  for(let k=0;k<5;k++){
-
-    [0,8,16].forEach(h=>{
-
-      const ev =
-        new Date(
-          base.getTime()
-          +
-          h * 3600 * 1000
-        );
-
-      if(
-        ev > now &&
-        all.length < 3
-      ){
-
-        all.push(ev);
-
-      }
-
-    });
-
-
-    base =
-      new Date(
-        base.getTime()
-        +
-        24 * 3600 * 1000
-      );
-
-  }
-
-
-  /*
-    找下一個衝分日。
-
-    遊戲時間的星期一、星期五
-    00:00 開始。
-  */
-
-  let cursor =
-    new Date(dayStartGame);
-
-  let scoring =
-    null;
-
-
-  for(let i=0;i<8;i++){
-
-    const wd =
-      cursor.getUTCDay();
-
-
-    if(
-      (wd === 1 || wd === 5)
-      &&
-      cursor > now
-    ){
-
-      scoring =
-        new Date(cursor);
-
-      break;
-
+function addDays(dt,n){return new Date(dt.getTime()+n*86400000)}
+function nextScoring(gameDate,hh){
+  const [y,m,d]=gameDate.split('-').map(Number);
+  const base=new Date(Date.UTC(y,m-1,d,2,0,0));
+  const dow=base.getUTCDay(); // Sun0 Mon1...
+  // 衝分日就是「當天」：若目前已在週一遊戲日，目標就是今天 00:00；
+  // 否則找下一個週一 00:00。
+  if(dow===1) return base;
+  const delta=(1-dow+7)%7;
+  return addDays(base,delta);
+}
+function systemEvents(start,end){
+  const out=[];
+  // every game day 08:00,16:00,00:00. Start from the next event strictly after start.
+  let cur=new Date(start.getTime());
+  const firstDay=new Date(Date.UTC(cur.getUTCFullYear(),cur.getUTCMonth(),cur.getUTCDate(),0,0,0));
+  for(let i=-1;i<10;i++){
+    const day=addDays(firstDay,i);
+    for(const h of [0,8,16]){
+      const e=new Date(Date.UTC(day.getUTCFullYear(),day.getUTCMonth(),day.getUTCDate(),h+2,0,0));
+      if(e>start && e<=end) out.push(e);
     }
-
-
-    cursor =
-      new Date(
-        cursor.getTime()
-        +
-        24 * 3600 * 1000
-      );
-
   }
-
-
-  /*
-    輸出結果。
-  */
-
-  let html = `
-
-  <div class="card">
-
-    <h2>時間基準結果</h2>
-
-    <div class="result">
-
-      <div class="ok">
-        目前屬於遊戲日：
-        ${gameDateLabel(now)}
-      </div>
-
-      <div>
-        遊戲日範圍（台灣）：
-        ${gameDateLabel(dayStartTW)}
-        10:00 ～ 
-        ${gameDateLabel(nextDay)}
-        09:59
-      </div>
-
-      <div>
-        目前時間：
-        ${fmt(now,mode)}
-        （${mode === "tw"
-          ? "台灣時間"
-          : "遊戲時間 UTC−2"}）
-      </div>
-
-    </div>
-
-
-    <p>
-      例如台灣 9/27 23:59
-      與台灣 9/28 00:00，
-      仍然都是遊戲日
-      ${gameDateLabel(now)}。
-    </p>
-
-  </div>
-
-  `;
-
-
-  /*
-    顯示接下來的 +8。
-  */
-
-  html += `
-
-  <div class="card">
-
-    <h2>接下來的系統 +8</h2>
-
-  `;
-
-
-  all.forEach((ev,i)=>{
-
-    const gp =
-      gameParts(ev);
-
-
-    html += `
-
-      <div class="event">
-
-        <b>+8 #${i+1}</b>
-
-        <br>
-
-        顯示：
-        ${fmt(ev,mode)}
-
-        <br>
-
-        遊戲日：
-        ${gp.y}/${pad(gp.m+1)}/${pad(gp.day)}
-        ${pad(gp.h)}:${pad(gp.mi)}
-
-        <br>
-
-        <span class="ok">
-
-          這次 +8 歸屬於遊戲日
-          ${gp.y}/${pad(gp.m+1)}/${pad(gp.day)}
-
-        </span>
-
-      </div>
-
-    `;
-
-  });
-
-
-  html += `
-
-  </div>
-
-  `;
-
-
-  /*
-    顯示下一個衝分日。
-  */
-
-  if(scoring){
-
-    html += `
-
-    <div class="card">
-
-      <h2>下一個衝分日</h2>
-
-      <div class="result">
-
-        <b>
-          ${fmt(scoring,mode)}
-        </b>
-
-        <br>
-
-        遊戲日：
-        ${gameDateLabel(scoring)}
-        00:00
-
-        （台灣 10:00）
-
-      </div>
-
-    </div>
-
-    `;
-
-  }
-
-
-  /*
-    固定驗證。
-  */
-
-  html += `
-
-  <div class="card">
-
-    <h2>固定驗證</h2>
-
-    <div class="event">
-
-      🟢 <b>驗證 1</b>：
-
-      遊戲日不是以台灣 00:00 換日。
-
-    </div>
-
-
-    <div class="event">
-
-      🟢 <b>驗證 2</b>：
-
-      台灣 9/27 23:59
-      →
-      9/28 00:00，
-
-      仍屬同一遊戲日。
-
-    </div>
-
-
-    <div class="event">
-
-      🟢 <b>驗證 3</b>：
-
-      計算層使用 UTC−2，
-
-      顯示層才轉成台灣時間。
-
-    </div>
-
-  </div>
-
-  `;
-
-
-  document.getElementById("out").innerHTML =
-    html;
-
+  return out.sort((a,b)=>a-b);
 }
+function gameDate(dt){return gameParts(dt).date}
+function daysBetween(a,b){return Math.round((b-a)/86400000)}
+function calc(){
+  const max=Number(document.getElementById('max').value);
+  const inv=Number(document.getElementById('inv').value);
+  const field=Number(document.getElementById('field').value);
+  const local=document.getElementById('localTime').value;
+  const laura=Number(document.getElementById('laura').value);
+  const out=document.getElementById('out');
+  if(!max||max<=0||inv<0||field<0||inv>max){out.innerHTML='<div class="warn">資料無效：請確認 MAX＞0、庫存≥0、場上≥0，且目前庫存不可高於 MAX。</div>';return}
+  if(!local){out.innerHTML='<div class="warn">請輸入時間。</div>';return}
+  const now=parseLocalTaiwan(local);
+  const gp=gameParts(now);
+  const score=nextScoring(gp.date,gp.hh);
+  const events=systemEvents(now,score);
+  // Count future +8 events, including scoring-day 00:00. This is intentional: all +8 before/at scoring are part of the resource balance.
+  const totalAvailable=field+inv+events.length*8+laura;
+  const targetField=11;
+  const targetInv=max-8;
+  const targetTotal=targetField+targetInv;
+  const resourceNeed=Math.max(0,totalAvailable-targetTotal);
+  const dailyNeed=field+20;
+  const minimum=Math.max(dailyNeed,resourceNeed);
+  const firstDay=gp.date;
+  const lastDay=gameDate(score);
+  const dayCount=daysBetween(dayStart(firstDay),dayStart(lastDay))+1;
 
+  let html='<h2>計算結果</h2>';
+  html+=`<div class="result"><div>下一個衝分日</div><div class="big">${score.toISOString().slice(0,10)} 00:00（遊戲時間）</div><div>台灣時間：${fmtTaiwan(score)}</div></div>`;
+  html+=`<div class="card" style="margin:14px 0 0"><b>這段期間共有 <span class="pill">${events.length} 次 +8</span></b>`;
+  html+=events.map((e,i)=>`<div class="event"><b>+8 #${i+1}</b><br>遊戲時間：${fmtGame(e)}<br>台灣時間：${fmtTaiwan(e)}</div>`).join('');
+  html+='</div>';
 
-/*
-  只有按下按鈕時重新計算。
-*/
-document
-  .getElementById("run")
-  .onclick = run;
+  html+=`<div class="card" style="margin:14px 0 0"><div class="big">今天至少處理：${minimum} 個</div>
+  <p>每日最低線：目前場上 ${field} + 20 = <b>${dailyNeed}</b> 個。</p>
+  <p>資源線：(${field}+${inv}) + ${events.length}×8 + 勞拉 ${laura} − 最後目標 ${targetTotal} = <b>${resourceNeed}</b> 個。</p>
+  <p>所以取兩者較大值：<b>${minimum}</b>。</p>
+  <p class="muted">最後目標採衝分日前：場上 ${targetField}、庫存 ${targetInv}（MAX−8）。</p></div>`;
 
+  html+=`<div class="card" style="margin:14px 0 0"><h2>這版先確認的核心</h2>
+  <div class="ok">① 遊戲日以 UTC−2 的 00:00～23:59 為一天</div>
+  <div class="ok">② 台灣 9/27 10:00～9/28 09:59 都屬同一遊戲日</div>
+  <div class="ok">③ 從現在到衝分日的所有 +8 都算進資源線</div>
+  <div class="ok">④ 每日最低處理量與資源線取較大值</div>
+  <div class="ok">⑤ 不再把勇士戰令、黎明曙光、寶箱、已完成雷達當成輸入</div>
+  </div>`;
 
-/*
-  初次載入顯示一次結果。
-*/
-run();
-
+  out.innerHTML=html;
+}
+document.getElementById('calc').addEventListener('click',calc);
 </script>
-
 </body>
 </html>
