@@ -2,232 +2,360 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Last Z｜雷達時間軸測試原型 v3</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Last Z｜周計劃＋可操作時間測試原型 v4</title>
 <style>
-:root{--bg:#07111f;--card:#0d1b2d;--card2:#10263b;--line:#29445f;--text:#eef5fb;--muted:#9fb2c5;--gold:#d8ad55;--green:#65c18c;--red:#ef7777;--blue:#75aee8}
-*{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#06101c,#0a1625);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;padding:12px}
-.wrap{max-width:760px;margin:auto} h1{font-size:22px;margin:4px 0 5px}.sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:11px}.title{color:var(--gold);font-weight:800;font-size:16px;margin-bottom:11px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px} label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
-input,button{width:100%;border-radius:9px;border:1px solid #36536e;background:#0a1727;color:var(--text);padding:10px;font-size:15px}
-button{background:#173452;border-color:#456784;font-weight:800;cursor:pointer}.main{background:linear-gradient(180deg,#a77b2e,#76531c);border-color:#d8ad55}
-.buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:11px}.note,.legend{font-size:12px;color:var(--muted);line-height:1.7;margin-top:9px}
-.status{padding:10px 11px;border-radius:10px;margin-bottom:10px;font-size:13px;line-height:1.55}.ok{background:rgba(101,193,140,.10);border:1px solid rgba(101,193,140,.35)}.bad{background:rgba(239,119,119,.10);border:1px solid rgba(239,119,119,.4)}.info{background:rgba(117,174,232,.08);border:1px solid rgba(117,174,232,.3)}
-.summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px}.metric{background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:9px}.metric .k{font-size:11px;color:var(--muted)}.metric .v{font-size:19px;font-weight:800;margin-top:2px}
-.timeline{display:flex;flex-direction:column;gap:8px}.event{border:1px solid var(--line);border-radius:11px;padding:11px;background:#0b1929}.event-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px}.time{font-weight:900;color:var(--gold)}.tag{font-size:10px;border:1px solid #3c5d7b;color:#b9d0e5;padding:3px 6px;border-radius:999px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px;line-height:1.55}.box{background:#091522;border-radius:7px;padding:7px}.box b{font-size:14px}.waste{color:var(--red);font-weight:800}.good{color:var(--green);font-weight:800}.action{margin-top:7px;padding:7px;border-radius:7px;background:#10263b;color:#c5d8e9;font-size:12px;line-height:1.55}
-.small{font-size:11px;color:var(--muted)}
-@media(max-width:520px){body{padding:9px}.row{grid-template-columns:1fr 1fr}}
+:root{
+  --bg:#07111f;--card:#0d1b2d;--card2:#10243a;--line:#29445f;
+  --text:#eef5fb;--muted:#9fb2c5;--gold:#d8ad55;
+  --green:#65c18c;--red:#ef7777;--blue:#75aee8;--warn:#e6b85c;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:linear-gradient(180deg,#06101c,#0a1625);
+  color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;
+  padding:14px;
+}
+.wrap{max-width:780px;margin:auto}
+h1{font-size:21px;margin:4px 0 5px}
+.sub{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:11px}
+.title{color:var(--gold);font-weight:800;font-size:16px;margin-bottom:11px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px}
+input,button{
+  width:100%;border-radius:9px;border:1px solid #36536e;background:#0a1727;
+  color:var(--text);padding:9px;font-size:14px
+}
+button{background:#173452;border-color:#456784;font-weight:700}
+button.main{background:linear-gradient(180deg,#a77b2e,#76531c);border-color:#d8ad55}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.note{font-size:11px;color:var(--muted);line-height:1.65;margin-top:9px}
+.status{padding:10px;border-radius:9px;font-size:13px;line-height:1.55;margin-bottom:9px}
+.status.ok{background:rgba(101,193,140,.1);border:1px solid rgba(101,193,140,.35)}
+.status.bad{background:rgba(239,119,119,.1);border:1px solid rgba(239,119,119,.4)}
+.status.warn{background:rgba(230,184,92,.1);border:1px solid rgba(230,184,92,.35)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
+.metric{background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:8px}
+.metric .k{font-size:10px;color:var(--muted)}
+.metric .v{font-size:17px;font-weight:800;margin-top:2px}
+.day{border:1px solid var(--line);border-radius:11px;padding:10px;margin:8px 0;background:#0b1929}
+.dayhead{display:flex;justify-content:space-between;align-items:center;gap:7px}
+.dayname{font-size:16px;font-weight:800;color:var(--gold)}
+.tag{font-size:10px;border:1px solid #3c5d7b;border-radius:999px;padding:3px 6px;color:#bfd3e5}
+.daygrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+.box{background:#091522;border-radius:8px;padding:7px;font-size:11px;line-height:1.55}
+.box b{font-size:13px}
+.event{margin-top:7px;border-top:1px solid #20374d;padding-top:7px;font-size:11px;line-height:1.55}
+.event .time{color:var(--gold);font-weight:800}
+.bad{color:var(--red);font-weight:800}
+.good{color:var(--green);font-weight:800}
+.warnText{color:var(--warn);font-weight:800}
+.small{font-size:10px;color:var(--muted);line-height:1.6}
+ul{margin:6px 0 0;padding-left:19px}
+@media(max-width:520px){
+  body{padding:9px}
+  .metrics{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1>Last Z｜雷達時間軸測試原型 v3</h1>
-<div class="sub">這一版只驗證「整段可操作時間」與系統事件的先後關係。尚未接回完整周計劃。</div>
+  <h1>Last Z｜雷達周計劃＋可操作時間測試原型 v4</h1>
+  <div class="sub">
+    這一版開始把「v4 周計劃資源模型」與「玩家可操作時間」放在同一條時間軸。
+    目前仍是測試工具，不是正式規劃器。
+  </div>
 
-<div class="card">
-<div class="title">① 測試條件</div>
-<div class="grid">
-<div><label>庫存容量 MAX</label><input id="max" type="number" min="1" value="30"></div>
-<div><label>測試日期</label><input id="date" type="date" value="2026-09-27"></div>
-<div><label>每日可操作開始</label><input id="start" type="time" value="18:00"></div>
-<div><label>每日可操作結束</label><input id="end" type="time" value="22:00"></div>
-<div><label>初始場上雷達</label><input id="field" type="number" min="0" value="11"></div>
-<div><label>初始庫存雷達</label><input id="inventory" type="number" min="0" value="22"></div>
-</div>
-<div class="buttons">
-<button id="runBtn" class="main" type="button">開始模擬／重新計算</button>
-<button id="baseBtn" type="button">恢復 MAX=30 基準</button>
-</div>
-<div class="note">
-系統 +8：10:00、18:00、02:00（次日）。<br>
-場上正常容量 8；庫存容量 MAX。<br>
-玩家可操作時間是「整段區間」，不是只有 20:00 一個操作點。
-</div>
-</div>
+  <div class="card">
+    <div class="title">① 測試條件</div>
+    <div class="grid">
+      <div>
+        <label>庫存容量 MAX</label>
+        <input id="max" type="number" min="1" value="30">
+      </div>
+      <div>
+        <label>測試週起始日期（星期一）</label>
+        <input id="date" type="date" value="2026-09-28">
+      </div>
+      <div>
+        <label>每日可操作開始</label>
+        <input id="start" type="time" value="18:00">
+      </div>
+      <div>
+        <label>每日可操作結束</label>
+        <input id="end" type="time" value="22:00">
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="main" id="runBtn" type="button">開始模擬／重新計算</button>
+      <button id="baseBtn" type="button">恢復 MAX=30／18～22</button>
+    </div>
+    <div class="note">
+      v4 固定基準：週一、週五為得分日；週二 20、週三 38、週四 41、週六 20、週日 35 為每日處理量。
+      得分日基準起始為場上 11／庫存 MAX−8；得分日理論總量為 11＋(MAX−8)＋24＋20。
+    </div>
+  </div>
 
-<div id="result"></div>
+  <div id="result"></div>
 
-<div class="card">
-<div class="title">② v3 的核心規則</div>
-<div class="legend">
-<b>時間軸順序：</b>每一個時間點先判斷「玩家是否可操作」，再處理該時間點事件。<br><br>
-<b>重要：</b>如果「系統 +8」剛好發生在可操作開始時間，這一版會把玩家視為已經可以在同一時間點處理；但畫面會明確標示這是「同時點」假設，之後可依你的實際遊戲行為修正成「+8 先發生」或「玩家先操作」。<br><br>
-玩家操作測試採用兩種自動行為：<br>
-① 進入可操作時間時，可先清空現有場上＋庫存。<br>
-② Laura 每日 +20，只有在可操作時間內才能使用；使用後若仍在可操作時間內，可再清空。<br><br>
-<b>這不是正式最佳化策略。</b>目的是先看「玩家有沒有時間處理」以及「哪一次 +8 會不可避免地浪費」。
-</div>
-</div>
+  <div class="card">
+    <div class="title">③ 本版目前採用的規則</div>
+    <div class="small">
+      • 系統 +8：每天 10:00、18:00、02:00（次日）自動發生。<br>
+      • 玩家操作時間是一整段，不是單一操作點。<br>
+      • 在可操作時間內，原型會安排玩家執行當天必要處理；處理優先用來避免後續 +8 浪費。<br>
+      • Laura：每日 +20，一天一次；必須在可操作時間內使用。<br>
+      • Laura 若場上 < 8：先補到 8；若場上已 ≥ 8：本原型先採用「場上 +3、庫存 +17」的 v4 簡化規則。Laura 造成的庫存可暫時超過 MAX。<br>
+      • 一般系統 +8：先補場上到 8，再進庫存；庫存超過 MAX 的部分視為「系統浪費」。<br>
+      • 雷達不因本測試而自動消失；未完成雷達持續存在。<br>
+      • 「玩家處理」代表完成／收割，使總雷達數下降；場上不足 8 且庫存有雷達時，視為可立即補回場上。<br>
+      • 本版先用固定 v4 每日處理量驗證「能不能執行」，還沒有做正式最佳化。
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">④ 特別注意</div>
+    <div class="small">
+      <b>同一時間事件順序：</b>系統 +8 先發生，再判斷玩家是否能操作。這是目前測試用的保守假設。
+      如果實際遊戲在「18:00 +8」的同一瞬間允許玩家先清空再讓系統增加，之後只要改這一條規則即可，不需要重寫周計劃。
+    </div>
+  </div>
 </div>
 
 <script>
-function minOf(t){const p=t.split(':').map(Number);return p[0]*60+p[1];}
-function inWindow(m,s,e){if(s===e)return true; if(s<e)return m>=s&&m<e; return m>=s||m<e;}
-function fmt(n){return Math.round(n*100)/100;}
+const dayNames=["週一","週二","週三","週四","週五","週六","週日"];
+const dayTags=["得分日","準備日","準備日","準備日","得分日","準備日","準備日"];
+const processNeed=[0,20,38,41,0,20,35];
+const startStates=[[11,22],[0,0],[8,16],[8,22],[11,22],[0,0],[8,16]];
 
-function runTest(){
-  const MAX=Math.max(1,Number(document.getElementById('max').value)||30);
-  const date=document.getElementById('date').value||'2026-09-27';
-  const startStr=document.getElementById('start').value||'18:00';
-  const endStr=document.getElementById('end').value||'22:00';
-  let field=Math.max(0,Number(document.getElementById('field').value)||0);
-  let inv=Math.max(0,Number(document.getElementById('inventory').value)||0);
-  const s=minOf(startStr), e=minOf(endStr);
-  const initialF=field, initialI=inv;
+function mins(t){
+  const p=t.split(":").map(Number);
+  return p[0]*60+p[1];
+}
+function inWindow(t,start,end){
+  if(start===end) return true;
+  if(start<end) return t>=start && t<end;
+  return t>=start || t<end;
+}
+function state(f,i){return `場上 ${f}｜庫存 ${i}`;}
 
-  // 測試日 08:00/10:00 等不是操作事件，只在實際事件或窗口邊界留下節點。
-  // 為了避免把「00:00」當成次日 00:00 的歧義，內部以 0~1440+ 表示。
-  const events=[
-    {m:600,label:'10:00',type:'system',tag:'系統 +8'},
-    {m:1080,label:'18:00',type:'system',tag:'系統 +8'},
-    {m:1320,label:'22:00',type:'windowEnd',tag:'可操作時間結束'},
-    {m:1560,label:'02:00（次日）',type:'system',tag:'系統 +8（次日）'},
-    {m:2040,label:'10:00（次日）',type:'boundary',tag:'次日 10:00／日界線'}
-  ];
-  // 操作窗口開始點如果不是 18:00，補一個節點。
-  const startAbs = s;
-  if(startAbs!==1080 && startAbs!==600){
-    events.push({m:startAbs,label:startStr,type:'windowStart',tag:'可操作時間開始'});
+function systemAdd(f,i,maxi){
+  const beforeF=f,beforeI=i;
+  const toF=Math.max(0,Math.min(8-f,8));
+  f+=toF;
+  const remain=8-toF;
+  const room=Math.max(0,maxi-i);
+  const toI=Math.min(remain,room);
+  i+=toI;
+  const waste=remain-toI;
+  return {f,i,beforeF,beforeI,toF,toI,waste};
+}
+
+function lauraAdd(f,i){
+  const beforeF=f,beforeI=i;
+  if(f<8){
+    const toF=Math.min(8-f,20);
+    f+=toF;
+    i+=20-toF;
+    return {f,i,beforeF,beforeI,text:`Laura +20：場上 +${toF}、庫存 +${20-toF}`};
   }
-  // 窗口跨午夜時，結束點放在次日。
-  let endAbs=e;
-  if(s>e) endAbs=e+1440;
-  if(endAbs!==1320){
-    events.push({m:endAbs,label:endStr+(s>e?'（次日）':''),type:'windowEnd',tag:'可操作時間結束'});
-  }
-  events.sort((a,b)=>a.m-b.m);
+  f+=3;i+=17;
+  return {f,i,beforeF,beforeI,text:"Laura +20：場上 +3、庫存 +17"};
+}
 
-  let waste=0, systemAdded=0, playerClears=0, lauraUsed=false;
-  let rows=[];
-  let active=false;
+function processAllOrPart(f,i,n){
+  const total=f+i;
+  const actual=Math.min(total,Math.max(0,n));
+  const after=total-actual;
+  const newF=Math.min(8,after);
+  const newI=Math.max(0,after-newF);
+  return {f:newF,i:newI,actual,beforeF:f,beforeI:i};
+}
 
-  function state(){return `場上 ${fmt(field)}｜庫存 ${fmt(inv)}`;}
-  function clearAll(){
-    const amount=field+inv; field=0;inv=0;playerClears++;return amount;
-  }
-  function addSystem(){
-    systemAdded+=8;
-    const beforeF=field,beforeI=inv;
-    const toF=Math.max(0,Math.min(8-field,8));
-    field+=toF;
-    const rem=8-toF;
-    const room=Math.max(0,MAX-inv);
-    const toI=Math.min(rem,room);
-    inv+=toI;
-    const w=rem-toI;waste+=w;
-    return {beforeF,beforeI,toF,toI,w};
-  }
-  function addLaura(){
-    const amount=20;
-    const toF=Math.max(0,Math.min(8-field,amount));field+=toF;
-    const rem=amount-toF;
-    const room=Math.max(0,MAX-inv);
-    const toI=Math.min(rem,room);inv+=toI;
-    const w=rem-toI;waste+=w;
-    lauraUsed=true;
-    return {toF,toI,w};
-  }
+function dateAdd(dateStr,days){
+  const d=new Date(dateStr+"T00:00:00");
+  d.setDate(d.getDate()+days);
+  return d.toISOString().slice(0,10);
+}
 
-  rows.push({label:'起始',tag:'START',before:'—',after:state(),action:'測試開始。玩家是否可操作由時間軸判斷。'});
+function simulate(){
+  const MAX=Math.max(1,Number(document.getElementById("max").value)||30);
+  const date=document.getElementById("date").value||"2026-09-28";
+  const startS=document.getElementById("start").value||"18:00";
+  const endS=document.getElementById("end").value||"22:00";
+  const ws=mins(startS), we=mins(endS);
 
-  // 建立「真正的整段窗口」：每個事件點都判斷是否在窗口內。
-  // 在窗口開始節點，先允許玩家清空；Laura 也可在同一窗口內使用。
-  for(const ev of events){
-    const m=((ev.m%1440)+1440)%1440;
-    const can=inWindow(m,s,e);
-    const before=state();
-    let detail='', action='';
+  let weeklyWaste=0, weeklyProcessed=0, scoreTotal=0, impossible=false;
+  let firstProblem="";
+  let html="";
 
-    if(ev.type==='windowStart'){
-      active=true;
-      const got=clearAll();
-      let lr='';
-      if(!lauraUsed){
-        const r=addLaura();
-        lr=`；使用 Laura +20（場上 +${r.toF}、庫存 +${r.toI}${r.w?'、浪費 '+r.w:''}）`;
-        if(!r.w) {const again=clearAll(); lr+=`；再清空 ${again}`;}
-      }
-      detail=`玩家可操作開始；先清空 ${got} 個雷達${lr}`;
-      action='這表示玩家不是只能在固定 20:00 操作，而是從開始時間起就能操作。';
-    }else if(ev.type==='windowEnd'){
-      active=false;
-      detail='玩家可操作時間結束。';
-      action='之後直到下一個可操作窗口開始，玩家不能主動處理雷達。';
-    }else if(ev.type==='system'){
-      // 若事件時間與窗口開始相同，視為玩家可以在同一時間點先處理。
-      const sameAsStart=(ev.m%1440===s);
-      if(can && sameAsStart){
-        const got=clearAll();
-        let r=addSystem();
-        detail=`同時點假設：玩家先清空 ${got} 個雷達，再發生 +8；場上 +${r.toF}、庫存 +${r.toI}${r.w?'、浪費 '+r.w:''}`;
-        if(!r.w){
-          const after=clearAll();
-          detail+=`；玩家仍可操作，再清空 ${after} 個雷達`;
+  dayNames.forEach((day,idx)=>{
+    let [f,i]=startStates[idx];
+    const startF=f,startI=i;
+    let dayWaste=0, dayProcessed=0, lauraUsed=false, events=[];
+    const need=processNeed[idx];
+
+    // 得分日：理論上把當天三次 +8 與 Laura 全部算入；
+    // 但操作限制會決定能否在日界線前完成／收割。
+    const schedule=[
+      {label:"10:00",t:600},
+      {label:"18:00",t:1080},
+      {label:"02:00（次日）",t:120}
+    ];
+
+    // 每日只做一次「必要處理」，位置由第一個可操作事件決定。
+    // 為了測試可行性：若當天有處理需求，於第一個可操作事件後處理；
+    // Laura 同樣在第一個可操作事件後使用。
+    let operationDone=false;
+
+    for(const ev of schedule){
+      const can=inWindow(ev.t,ws,we);
+      const r=systemAdd(f,i,MAX);
+      f=r.f;i=r.i;dayWaste+=r.waste;weeklyWaste+=r.waste;
+
+      let detail=`系統 +8：場上 +${r.toF}、庫存 +${r.toI}`;
+      if(r.waste) detail+=`、浪費 ${r.waste}`;
+
+      if(can && !operationDone){
+        // 先 Laura，再做 v4 當天必要處理
+        if(!lauraUsed){
+          const l=lauraAdd(f,i);
+          f=l.f;i=l.i;lauraUsed=true;
+          detail+=`；${l.text}`;
         }
-        action='⚙️ 這裡是「玩家可在 +8 同時點處理」的測試假設。';
-      }else{
-        const r=addSystem();
-        detail=`系統自動 +8：場上 +${r.toF}、庫存 +${r.toI}${r.w?'、浪費 '+r.w:''}`;
-        action=r.w?`⚠️ 此 +8 發生時，玩家${can?'雖在可操作區間內':'不在可操作區間內'}；本原型會另外標示同時點規則。`:'沒有容量浪費。';
-        // 如果事件發生在窗口內但不是窗口開始，玩家可在事件後立即清空。
-        if(can && !r.w){
-          const got=clearAll();
-          detail+=`；玩家在 +8 後立即清空 ${got} 個雷達`;
-          action+=' 玩家仍可立即處理。';
-        }else if(can && r.w){
-          const got=clearAll();
-          detail+=`；玩家在事件後嘗試清空 ${got} 個雷達，但已發生的浪費無法追回`;
-          action+=' ⚠️ 因此要判斷是否需要在 +8 前先操作。';
+
+        if(day!=="週一" && day!=="週五"){
+          const p=processAllOrPart(f,i,need);
+          f=p.f;i=p.i;dayProcessed+=p.actual;weeklyProcessed+=p.actual;
+          detail+=`；完成／收割 ${p.actual}`;
+          operationDone=true;
+        }else{
+          // 得分日：玩家第一次可操作時不直接宣告成功，
+          // 先保留雷達，等後續 +8 與最後可操作時間再判斷。
+          operationDone=true;
         }
       }
-    }else if(ev.type==='boundary'){
-      detail=`次日狀態：${state()}`;
-      action='這個節點用來銜接之後的周計劃模型。';
+
+      events.push({
+        label:ev.label,
+        before:`場上 ${r.beforeF}｜庫存 ${r.beforeI}`,
+        after:`場上 ${f}｜庫存 ${i}`,
+        detail,
+        can
+      });
     }
 
-    rows.push({label:ev.label,tag:ev.tag,before,after:state(),detail,action,can});
-  }
+    // 得分日的「可完成總量」：本原型採用 v4 理論量，但實際可收割量
+    // 必須在玩家可操作時段內完成；因此做一個簡化的日終檢查。
+    if(day==="週一" || day==="週五"){
+      const theoretical=startF+startI+24+20;
+      scoreTotal+=theoretical;
 
-  const feasible=waste===0;
-  let html=`<div class="card"><div class="title">③ 測試結果</div>`;
-  html+=`<div class="status ${feasible?'ok':'bad'}">`;
-  html+=feasible?`目前這組條件沒有偵測到容量浪費。`:`目前偵測到 ${fmt(waste)} 個雷達容量浪費。`;
-  html+=`</div>`;
-  html+=`<div class="status info">本次條件：MAX=${MAX}｜可操作 ${startStr}～${endStr}｜起始 ${initialF}/${initialI}｜日期 ${date}<br><span class="small">v3 不代表正式周計劃結果；目前只驗證時間軸。</span></div>`;
-  html+=`<div class="summary"><div class="metric"><div class="k">初始場上／庫存</div><div class="v">${initialF}/${initialI}</div></div><div class="metric"><div class="k">系統新增</div><div class="v">+${systemAdded}</div></div><div class="metric"><div class="k">容量浪費</div><div class="v">${fmt(waste)}</div></div><div class="metric"><div class="k">玩家清空次數</div><div class="v">${playerClears}</div></div></div>`;
-  html+=`<div class="timeline">`;
-  rows.forEach(r=>{
-    html+=`<div class="event"><div class="event-head"><span class="time">${r.label}</span><span class="tag">${r.tag}</span></div>`;
-    html+=`<div class="row"><div class="box">事件前：${r.before}<br>事件後：<b>${r.after}</b><br>${r.detail}</div><div class="box">${r.action}</div></div></div>`;
+      // 如果最後一次 +8 發生在不可操作時間，該批無法在本日時間窗內收割。
+      const lastEventCan=inWindow(120,ws,we);
+      const totalAvailableBeforeBoundary=f+i;
+      const operationallyHarvested = lastEventCan ? totalAvailableBeforeBoundary : 0;
+      // 這裡不把「玩家實際收割量」硬算成最終分數，只標記是否能在窗口內處理全部。
+      if(!lastEventCan){
+        impossible=true;
+        if(!firstProblem) firstProblem=`${day}：02:00 +8 發生在可操作時間外，得分日最後一批雷達無法在本模型中於日界線前處理。`;
+      }
+    }
+
+    // 準備日：若處理量不足，視為不可達。
+    if(day!=="週一" && day!=="週五"){
+      if(dayProcessed<need){
+        impossible=true;
+        if(!firstProblem) firstProblem=`${day}：可操作時間不足，無法完成 v4 要求的 ${need} 個處理量。`;
+      }
+    }
+
+    // 準備日若有浪費，也標記為「偏離 v4 安全線」。
+    if(dayWaste>0){
+      impossible=true;
+      if(!firstProblem) firstProblem=`${day}：系統 +8 發生時庫存空間不足，浪費 ${dayWaste}。`;
+    }
+
+    const endF=f,endI=i;
+    const baselineF = idx===1?8:idx===2?8:idx===3?11:idx===5?8:idx===6?11:endF;
+    const baselineI = idx===1?16:idx===2?22:idx===3?22:idx===5?16:idx===6?22:endI;
+
+    html+=`<div class="day">
+      <div class="dayhead">
+        <div class="dayname">${day}</div>
+        <div class="tag">${dayTags[idx]}</div>
+      </div>
+      <div class="daygrid">
+        <div class="box">v4 起始<br><b>${startF}/${startI}</b></div>
+        <div class="box">本日處理要求<br><b>${need?need:"得分日"}</b></div>
+        <div class="box">實際結束<br><b>${endF}/${endI}</b></div>
+        <div class="box">本日系統浪費<br><b class="${dayWaste?'bad':'good'}">${dayWaste}</b></div>
+      </div>`;
+
+    events.forEach(e=>{
+      html+=`<div class="event">
+        <span class="time">${e.label}</span>｜
+        ${e.can?"玩家此時可操作":"玩家此時不可操作"}<br>
+        事件前：${e.before}<br>
+        事件後：${e.after}<br>
+        ${e.detail}
+      </div>`;
+    });
+
+    html+=`<div class="small" style="margin-top:7px;">
+      v4 參考結束：${idx===0||idx===4?"得分日進入清空／得分流程":baselineF+"/"+baselineI}
+    </div></div>`;
   });
-  html+=`</div></div>`;
 
-  html+=`<div class="card"><div class="title">④ 這次測試要看什麼</div><div class="legend">`;
-  html+=`<b>第一：</b>可操作時間是整段區間，不再只有 20:00。<br>`;
-  html+=`<b>第二：</b>特別注意「可操作開始時間」剛好遇到 +8 的情況。這一版先採用「玩家可以在同一時間點先處理」的假設，之後你可以依遊戲實際狀況修正。<br>`;
-  html+=`<b>第三：</b>這版故意不加入「星期二完成 20、星期三完成 38、星期四安全線」等周計劃規則。等時間軸正確後，再把 v4 周計劃接進來。<br>`;
-  html+=`<b>第四：</b>目前的清空只是測試用操作，不代表正式版會要求玩家每次全部收割。`;
-  html+=`</div></div>`;
-  document.getElementById('result').innerHTML=html;
+  const status = impossible
+    ? `<div class="status bad">目前這組條件：<b>未能完整符合 v4 周計劃。</b><br>${firstProblem}</div>`
+    : `<div class="status ok">目前這組條件：<b>在本原型的測試規則下沒有發現阻礙。</b></div>`;
+
+  html=`
+  <div class="card">
+    <div class="title">② 周計劃模擬結果</div>
+    ${status}
+    <div class="metrics">
+      <div class="metric"><div class="k">測試週</div><div class="v">${date}</div></div>
+      <div class="metric"><div class="k">操作時間</div><div class="v">${startS}～${endS}</div></div>
+      <div class="metric"><div class="k">系統新增</div><div class="v">+168</div></div>
+      <div class="metric"><div class="k">系統浪費</div><div class="v">${weeklyWaste}</div></div>
+    </div>
+    <div class="note">
+      v4 每週 7 天共有 21 次系統 +8，合計 +168；Laura 理論上每日 +20。
+      上方「系統浪費」只統計一般系統 +8，不把 Laura 的特殊超容量行為算成系統浪費。
+    </div>
+    ${html}
+  </div>
+
+  <div class="card">
+    <div class="title">⑤ 這一版要觀察什麼</div>
+    <div class="small">
+      <ul>
+        <li>哪一天第一次出現「+8 浪費」。</li>
+        <li>哪一天無法完成 v4 原本要求的處理量。</li>
+        <li>得分日的 02:00 +8 是否落在玩家可操作時間之外。</li>
+        <li>實際結束狀態是否開始偏離 v4 原本的 8/16、8/22、11/22。</li>
+      </ul>
+      <br>
+      <b>重要：</b>這一版不是在決定最終答案，而是在把「周計劃」與「可操作時間」放到同一條時間軸，找出第一個衝突點。
+    </div>
+  </div>`;
+  document.getElementById("result").innerHTML=html;
 }
 
-function restore(){
- document.getElementById('max').value=30;
- document.getElementById('date').value='2026-09-27';
- document.getElementById('start').value='18:00';
- document.getElementById('end').value='22:00';
- document.getElementById('field').value=11;
- document.getElementById('inventory').value=22;
- runTest();
-}
-document.addEventListener('DOMContentLoaded',()=>{
- document.getElementById('runBtn').addEventListener('click',runTest);
- document.getElementById('runBtn').addEventListener('touchend',e=>{e.preventDefault();runTest();},{passive:false});
- document.getElementById('baseBtn').addEventListener('click',restore);
- document.getElementById('baseBtn').addEventListener('touchend',e=>{e.preventDefault();restore();},{passive:false});
- runTest();
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("runBtn").addEventListener("click",simulate);
+  document.getElementById("runBtn").addEventListener("touchend",e=>{e.preventDefault();simulate();},{passive:false});
+  document.getElementById("baseBtn").addEventListener("click",()=>{
+    document.getElementById("max").value=30;
+    document.getElementById("start").value="18:00";
+    document.getElementById("end").value="22:00";
+    document.getElementById("date").value="2026-09-28";
+    simulate();
+  });
+  simulate();
 });
 </script>
 </body>
