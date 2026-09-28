@@ -2,30 +2,31 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z｜雷達週計劃 v6.3</title>
+<title>Last Z｜雷達週計劃 v6.4</title>
 <style>
-:root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674;--bad:#ef7777}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:720px;margin:auto}
-h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:14px}
-.panel{background:rgba(13,32,56,.95);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-label{display:block;color:var(--muted);font-size:13px;margin:9px 0 6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px}
-button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}
-.box{background:#09192c;border-radius:10px;padding:10px;margin-top:8px;font-size:13px;line-height:1.65}.big{font-size:18px;font-weight:700}
-.ok{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}.muted{color:var(--muted)}
-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}
-.day{background:#09192c;border-radius:11px;padding:10px;margin-top:9px}.day h3{font-size:15px;margin:0 0 7px;color:#f2d486}
-.event{display:flex;gap:7px;border-top:1px solid #203852;padding:7px 0;font-size:12px;line-height:1.5}.event:first-of-type{border-top:0}.time{min-width:48px;color:#f2d486;font-weight:700}
-</style></head>
+:root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674;--bad:#ef7373}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}
+h1{font-size:22px;margin:0 0 6px;color:var(--gold)}h2{font-size:17px;margin:0 0 9px}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:14px}
+.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.16)}
+label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}
+.meta{font-size:12px;color:var(--muted);line-height:1.65;margin-top:8px}.box{background:#09192c;border-radius:10px;padding:10px;margin-top:8px;font-size:13px;line-height:1.65}.ok{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}.muted{color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left;vertical-align:top}th{color:var(--muted);font-weight:500}
+.day h2{color:#f2d486}.score{border-color:#806b3e}.event{border-top:1px solid #203852;padding:8px 0;font-size:12px;line-height:1.55}.event:first-child{border-top:0}.time{display:inline-block;min-width:48px;color:#f2d486;font-weight:700}.state{font-weight:700}.pill{display:inline-block;border:1px solid #806b3e;border-radius:999px;padding:2px 7px;font-size:11px;margin-left:5px}
+</style>
+</head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v6.3</h1>
-<div class="sub">以 radar-weekly-v4 為唯一資源基準；這版第一次把「玩家可操作時間」真正接到週計劃，只判斷處理／勞拉能否在玩家時間內完成，v4 數字不重算。</div>
+<h1>Last Z｜雷達週計劃 v6.4</h1>
+<div class="sub">以 radar-weekly-v4 為唯一資源基準。這版恢復「開始狀態 → 每次事件 → 玩家操作 → 操作後狀態 → 日末狀態」，再把玩家可操作時間接進來。</div>
 
 <div class="panel">
-<b>設定</b>
-<label>庫存上限 MAX</label><input id="max" type="number" min="8" step="1" value="30">
-<label>每日可操作開始</label><input id="start" type="time" value="18:00">
-<label>每日可操作結束</label><input id="end" type="time" value="22:00">
+<label>庫存上限 MAX</label>
+<input id="max" type="number" min="8" step="1" value="30">
+<label>每日可操作開始時間</label>
+<input id="start" type="time" value="18:00">
+<label>每日可操作結束時間</label>
+<input id="end" type="time" value="22:00">
 <button id="run">開始模擬</button>
+<div class="meta">測試重點：先用 MAX 30／18:00～22:00。v4 的處理量、開始／結束狀態不自行改寫；時間模擬只判斷玩家是否能在事件之間完成 v4 原定操作。</div>
 </div>
 
 <div id="out"></div>
@@ -33,68 +34,131 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}td,th{bo
 <script>
 const $=s=>document.querySelector(s);
 const days=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
-const LAURA=20;
-// v4 已確認的 MAX=30 週基準。
-// 為避免改動 v4，這裡只在 MAX=30 做時間連動測試。
-const v4=[
- {startF:11,startI:22,process:null,endF:0,endI:0,total:77},
- {startF:0,startI:0,process:20,endF:8,endI:16},
- {startF:8,startI:16,process:38,endF:8,endI:22},
- {startF:8,startI:22,process:41,endF:11,endI:22},
- {startF:11,startI:22,process:null,endF:0,endI:0,total:77},
- {startF:0,startI:0,process:20,endF:8,endI:16},
- {startF:8,startI:16,process:35,endF:11,endI:22}
-];
 
-function m(s){const [h,x]=s.split(':').map(Number);return h*60+x}
-function inWindow(t,a,b){
-  if(a===b)return true;
-  if(a<b)return t>=a&&t<=b;
-  return t>=a||t<=b;
+function v4Plan(MAX){
+  const rows=[];let f=11,i=MAX-8;
+  for(let d=0;d<7;d++){
+    const scoring=d===0||d===4,sf=f,si=i;
+    if(scoring){
+      rows.push({d,scoring,sf,si,total:sf+si+24+20});
+      f=0;i=0;continue;
+    }
+    const system=24, minP=Math.max(sf+20,20), endF=(d===3||d===6)?11:8;
+    const avail=sf+si+system;
+    const safety=Math.max(0,avail+20-endF-(MAX-8));
+    const p=Math.max(minP,safety);
+    const after=avail-p;
+    let ef,ei;
+    if(d===3||d===6){
+      const fb=8,ib=after-8;ef=11;ei=ib+17;
+    }else{
+      const fb=Math.min(7,after),ib=after-fb,need=8-fb;ef=8;ei=ib+(20-need);
+    }
+    rows.push({d,scoring:false,sf,si,process:p,ef,ei});
+    f=ef;i=ei;
+  }
+  return rows;
 }
-function firstPlayable(events,a,b){
-  return events.find(e=>inWindow(e.min,a,b));
+function add8(f,i){
+  if(f<8){const n=Math.min(8-f,8);return [f+n,i+(8-n)];}
+  return [f,i+8];
 }
-function run(){
- const MAX=Number($('#max').value), start=$('#start').value,end=$('#end').value;
- if(MAX!==30){$('#out').innerHTML='<div class="panel warn">這個版本先固定 MAX=30，確保時間模組不會偷偷改動 v4 的計算。請先用 MAX 30 測試。</div>';return}
- const a=m(start),b=m(end);
- let h=`<div class="panel"><b>① v4 基準</b><div class="box ok"><b>✅ 直接沿用 v4</b><br>星期一／五：77；星期二 20、星期三 38、星期四 41、星期六 20、星期日 35。<br><span class="muted">以下時間模擬不會改寫這些數字。</span></div></div>`;
- h+=`<div class="panel"><b>② 玩家時間真正接入</b><div class="box">每天可操作：<span class="big">${start}～${end}</span><br><span class="muted">處理／收割立即完成；勞拉也視為玩家主動操作。</span></div>`;
+function useLaura(f,i){
+  if(f<8){const n=8-f;return [8,i+20-n];}
+  return [f+3,i+17];
+}
+function mins(s){const [h,m]=s.split(':').map(Number);return h*60+m}
+function canOperate(t,sm,em){
+  if(sm===em)return true;
+  if(sm<em)return t>=sm&&t<=em;
+  return t>=sm||t<=em;
+}
+function st(f,i){return `場上 <b>${f}</b>／庫存 <b>${i}</b>（合計 ${f+i}）`}
+function rowEvent(time,label,before,after,op,cls=''){
+  return `<div class="event"><span class="time">${time}</span><b>${label}</b><br>
+  操作前：${st(before[0],before[1])}<br>
+  ${op}<br>
+  操作後：<span class="${cls}">${st(after[0],after[1])}</span></div>`;
+}
 
- let anyBad=false;
- for(let d=0;d<7;d++){
-   const score=d===0||d===4;
-   const events=[
-     {time:'10:00',min:600,label:'系統 +8'},
-     {time:'18:00',min:1080,label:'系統 +8'},
-     {time:'02:00',min:120,label:'系統 +8（隔日）'}
-   ];
-   if(score){
-     h+=`<div class="day"><h3>${days[d]} 🏆 衝分日</h3><div class="muted">v4：完成全部雷達，77 個。時間限制本版先不拿來改衝分日總量。</div></div>`;
-     continue;
-   }
-   const need=v4[d].process;
-   // 找到當日玩家第一次可操作時段。若有，將「勞拉＋處理 need」視為立即操作。
-   // 若該窗口完全不存在，則無法執行當日主動操作。
-   const playable=firstPlayable(events,a,b);
-   let status,detail;
-   if(playable){
-     status='ok'; detail=`${playable.time} 可操作 → 可立即使用勞拉 +20，並處理 ${need} 個。`;
-   }else{
-     status='bad'; detail=`今天的可操作時間沒有落在 10:00／18:00／02:00 附近的事件區段，無法執行本日主動操作。`;
-     anyBad=true;
-   }
-   h+=`<div class="day"><h3>${days[d]}｜v4 今日處理 ${need}</h3>
-     <div class="event"><span class="time">10:00</span><span class="${inWindow(600,a,b)?'ok':'warn'}">${inWindow(600,a,b)?'🟢 可操作':'🔴 不可操作'}｜系統 +8</span></div>
-     <div class="event"><span class="time">18:00</span><span class="${inWindow(1080,a,b)?'ok':'warn'}">${inWindow(1080,a,b)?'🟢 可操作':'🔴 不可操作'}｜系統 +8</span></div>
-     <div class="event"><span class="time">02:00</span><span class="${inWindow(120,a,b)?'ok':'warn'}">${inWindow(120,a,b)?'🟢 可操作':'🔴 不可操作'}｜系統 +8（隔日）</span></div>
-     <div class="box ${status}"><b>${status==='ok'?'🟢 本日主動操作可安排':'🔴 本日主動操作無法安排'}</b><br>${detail}<br><span class="muted">v4 預定結束仍以 ${v4[d].endF}/${v4[d].endI} 為基準；本版不重新計算。</span></div>
-   </div>`;
- }
- h+='</div>';
- h+=`<div class="panel"><b>③ 這版要看什麼？</b><div class="box">不是看「一小時能處理幾個」。因為你已確認處理／收割是立即完成。<br><br>真正要驗證的是：<b>每天至少有一次可操作時段，讓玩家能在適當時間完成 v4 要求的處理量與勞拉操作。</b></div></div>`;
- $('#out').innerHTML=h;
+function render(){
+  const MAX=Number($('#max').value), start=$('#start').value, end=$('#end').value;
+  if(!Number.isInteger(MAX)||MAX<8){$('#out').innerHTML='<div class="panel bad">請輸入至少 8 的整數 MAX。</div>';return}
+  const plan=v4Plan(MAX),sm=mins(start),em=mins(end);
+  let h=`<div class="panel"><b>① v4 基準檢查</b>
+  <div class="box ok">✅ v4 計算保留<br>
+  星期一／五可完成：<b>${plan[0].total}</b><br>
+  星期二處理：<b>${plan[1].process}</b>｜星期三：<b>${plan[2].process}</b>｜星期四：<b>${plan[3].process}</b><br>
+  星期六：<b>${plan[5].process}</b>｜星期日：<b>${plan[6].process}</b></div>
+  <div class="meta">以下事件追蹤不會回頭修改 v4；它只是把 v4 的每日資源變化拆開顯示。</div></div>`;
+
+  for(const r of plan){
+    if(r.scoring){
+      // Score day detailed trace. For the 18-22 test, the last 02:00 +8 is outside
+      // the window, so the 77 cannot be fully harvested by the 10:00 game-day boundary.
+      let f=r.sf,i=r.si;
+      let d=`<section class="day score"><h2>${days[r.d]} <span class="pill">🏆 衝分日</span></h2>
+      <div class="box">開始：${st(f,i)}<br>v4 目標：<b>${r.total} 個</b></div>`;
+      let b=[f,i];[f,i]=add8(f,i);d+=rowEvent('10:00','系統 +8',b,[f,i],canOperate(600,sm,em)?'🟢 玩家可操作':'🔴 玩家不可操作','');
+      b=[f,i];[f,i]=add8(f,i);d+=rowEvent('18:00','系統 +8',b,[f,i],canOperate(1080,sm,em)?'🟢 玩家可操作':'🔴 玩家不可操作','');
+      b=[f,i];[f,i]=useLaura(f,i);d+=rowEvent('18:00','使用 Laura +20',b,[f,i],canOperate(1080,sm,em)?'🟢 可操作':'🔴 不可操作',canOperate(1080,sm,em)?'ok':'bad');
+      if(canOperate(1080,sm,em)){
+        // Show the maximum that can be processed before 02:00 while leaving the
+        // final +8 to demonstrate the score-day timing constraint.
+        const before02Total=f+i,remainAfter02=8;
+        const proc=Math.max(0,before02Total-remainAfter02);
+        let pf=f,pi=i,need=proc;
+        const rf=Math.min(pf,need);pf-=rf;need-=rf;pi-=need;
+        d+=rowEvent('18:00～22:00',`玩家處理／收割 ${proc} 個（示範：先清掉 02:00 前可處理的量）`,[f,i],[pf,pi],`🟢 可立即完成｜仍保留 ${remainAfter02} 個給 02:00 +8 前後的狀態`,'ok');
+        f=pf;i=pi;
+      }
+      b=[f,i];[f,i]=add8(f,i);
+      const op02=canOperate(120,sm,em);
+      d+=rowEvent('02:00','系統 +8（隔日）',b,[f,i],op02?'🟢 玩家可操作':'🔴 玩家不可操作',op02?'ok':'bad');
+      const scorePossible=op02;
+      d+=`<div class="box ${scorePossible?'ok':'bad'}"><b>${scorePossible?'🟢 02:00 可操作':'🔴 02:00 不可操作'}</b><br>
+      ${scorePossible?'可以在最後 +8 後完成剩餘收割。':'以目前 '+start+'～'+end+' 為例，02:00 不在操作時間內；因此 v4 的最後 +8 無法在本遊戲日 10:00 前完成收割，77 個衝分量無法完整落地。'}</div></section>`;
+      h+=d;continue;
+    }
+
+    let f=r.sf,i=r.si;
+    let d=`<section class="day"><h2>${days[r.d]} <span class="pill">準備日</span></h2>
+    <div class="box"><b>v4 開始</b>：${st(f,i)}<br>v4 今日處理量：<b>${r.process}</b><br>v4 預期結束：<b>${r.ef}／${r.ei}</b></div>`;
+    let b=[f,i];[f,i]=add8(f,i);d+=rowEvent('10:00','系統 +8',b,[f,i],canOperate(600,sm,em)?'🟢 玩家可操作':'🔴 玩家不可操作');
+    b=[f,i];[f,i]=add8(f,i);d+=rowEvent('18:00','系統 +8',b,[f,i],canOperate(1080,sm,em)?'🟢 玩家可操作':'🔴 玩家不可操作');
+    b=[f,i];let lf=f,li=i;[lf,li]=useLaura(f,i);
+    d+=rowEvent('18:00','玩家使用 Laura +20',b,[lf,li],canOperate(1080,sm,em)?'🟢 可操作':'🔴 不可操作',canOperate(1080,sm,em)?'ok':'bad');
+    if(canOperate(1080,sm,em)){
+      // Target state immediately before 02:00 so that the 02:00 +8 reproduces v4 end.
+      const targetF=r.ef,targetI=r.ei-8;
+      const needF=lf-targetF,needI=li-targetI,totalNeed=needF+needI;
+      if(needF>=0&&needI>=0&&totalNeed===r.process){
+        d+=rowEvent('18:00～22:00',`玩家處理／收割 ${r.process} 個`,[lf,li],[targetF,targetI],
+          `🟢 立即完成｜場上處理 ${needF}、庫存處理 ${needI}`,'ok');
+        f=targetF;i=targetI;
+      }else{
+        d+=`<div class="box bad">⚠️ 無法用目前事件順序重現 v4 結束狀態；先停在這裡，不自行改寫 v4。</div>`;
+        f=lf;i=li;
+      }
+    }else{
+      d+=`<div class="box bad">🔴 今日 v4 處理量 ${r.process} 無法在目前操作時間內執行；不自行補算。</div>`;
+      f=lf;i=li;
+    }
+    b=[f,i];[f,i]=add8(f,i);
+    d+=rowEvent('02:00','系統 +8（隔日）',b,[f,i],canOperate(120,sm,em)?'🟢 玩家可操作':'🔴 玩家不可操作',canOperate(120,sm,em)?'ok':'bad');
+    const matches=f===r.ef&&i===r.ei;
+    d+=`<div class="box ${matches?'ok':'warn'}"><b>${matches?'✅ 日末狀態與 v4 一致':'⚠️ 時間限制使日末狀態偏離 v4'}</b><br>
+    本日結束：${st(f,i)}<br>v4 預期：場上 <b>${r.ef}</b>／庫存 <b>${r.ei}</b></div></section>`;
+    h+=d;
+  }
+
+  h+=`<div class="panel"><b>③ 這版怎麼看</b>
+  <div class="box">🟢 <b>準備日</b>：看 18:00～22:00 是否能完成 v4 當日處理＋Laura，再看 02:00 +8 後是否回到 v4 日末。</div>
+  <div class="box">🔴 <b>衝分日</b>：特別看最後 02:00 +8。若 02:00 不在玩家操作時間，v4 的 77 個不能在 10:00 前全部收割。</div>
+  <div class="meta">目前採用「18:00 +8 → Laura → 完成 v4 當日處理 → 02:00 +8」作為測試操作順序；這是測試策略，不是新增遊戲規則。</div></div>`;
+  $('#out').innerHTML=h;
 }
-$('#run').addEventListener('click',run);run();
-</script></body></html>
+$('#run').addEventListener('click',render);
+render();
+</script>
+</body></html>
