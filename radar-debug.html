@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>雷達規劃核心｜每日處理量 v5</title>
+<title>雷達規劃核心｜每日處理量 v6</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#071522;color:#eef4fa;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;line-height:1.55}
 .wrap{max-width:720px;margin:0 auto;padding:22px 18px 50px}.title{color:#f5bd3c;font-size:25px;font-weight:900}.sub{font-weight:700;color:#cbd7e3;margin:10px 0 18px}
@@ -16,8 +16,8 @@ small{color:#aebdca}
 </head>
 <body>
 <div class="wrap">
-<div class="title">雷達規劃核心｜每日處理量 v5</div>
-<div class="sub">以「遊戲時間 UTC−2」計算。台灣時間只負責顯示。這版先確認每日處理量公式，不加入勇士戰令、黎明曙光、勞拉寶箱或已完成雷達。</div>
+<div class="title">雷達規劃核心｜每日處理量 v6</div>
+<div class="sub">以「遊戲時間 UTC−2」計算。台灣時間只負責顯示。這版加入「勞拉使用時機」規則：衝分日前一天場上8個才使用；其他日子場上不足8個時使用。先確認每日處理量分配，不加入舊任務或寶箱。</div>
 
 <div class="card">
 <h2>目前資料</h2>
@@ -97,17 +97,39 @@ function calc(){
   const gp=gameParts(now);
   const score=nextScoring(gp.date,gp.hh);
   const events=systemEvents(now,score);
-  // Count future +8 events, including scoring-day 00:00. This is intentional: all +8 before/at scoring are part of the resource balance.
   const totalAvailable=field+inv+events.length*8+laura;
   const targetField=11;
   const targetInv=max-8;
   const targetTotal=targetField+targetInv;
   const resourceNeed=Math.max(0,totalAvailable-targetTotal);
-  const dailyNeed=field+20;
-  const minimum=Math.max(dailyNeed,resourceNeed);
   const firstDay=gp.date;
   const lastDay=gameDate(score);
   const dayCount=daysBetween(dayStart(firstDay),dayStart(lastDay))+1;
+
+  function dayLabel(d){
+    const dt=dayStart(d); const w=['日','一','二','三','四','五','六'][dt.getUTCDay()];
+    return `${d}（週${w}）`;
+  }
+  function dayOffset(d){
+    return daysBetween(dayStart(firstDay),dayStart(d));
+  }
+  function lauraRuleForDay(d){
+    const diff=daysBetween(dayStart(d),dayStart(lastDay));
+    if(diff===0) return {name:'衝分日',rule:'場上不足 8 個時使用',reason:'避免衝分日的庫存超過 MAX',mode:'under8'};
+    if(diff===1) return {name:'衝分日前 1 天',rule:'場上 = 8 個時使用',reason:'把場上做成 11 個，作為衝分日前準備',mode:'exact8'};
+    if(diff>=2) return {name:`衝分日前 ${diff} 天`,rule:'場上不足 8 個時使用',reason:'避免把場上推到 11 個，降低當日最低處理量',mode:'under8'};
+    return {name:'已過衝分日',rule:'不列入',reason:'',mode:'none'};
+  }
+
+  // 這一版只做「規則分配」，不假裝已經完成完整資源模擬。
+  // 每日基準線仍是該日進入策略時的場上數量 + 20。
+  // Laura 的角色：除衝分日前一天外，不主動把場上推到 11；前一天才刻意做成 11。
+  const days=[];
+  for(let i=0;i<dayCount;i++){
+    const d=addDays(dayStart(firstDay),i); const ds=d.toISOString().slice(0,10);
+    const r=lauraRuleForDay(ds);
+    days.push({date:ds,rule:r,base:i===0?field:8,minimum:(i===0?field:8)+20});
+  }
 
   let html='<h2>計算結果</h2>';
   html+=`<div class="result"><div>下一個衝分日</div><div class="big">${score.toISOString().slice(0,10)} 00:00（遊戲時間）</div><div>台灣時間：${fmtTaiwan(score)}</div></div>`;
@@ -115,21 +137,31 @@ function calc(){
   html+=events.map((e,i)=>`<div class="event"><b>+8 #${i+1}</b><br>遊戲時間：${fmtGame(e)}<br>台灣時間：${fmtTaiwan(e)}</div>`).join('');
   html+='</div>';
 
-  html+=`<div class="card" style="margin:14px 0 0"><div class="big"><span style="font-size:20px">今天最低處理量：${dailyNeed} 個</span></div>
-  <p>每日最低線：目前場上 ${field} + 20 = <b>${dailyNeed}</b> 個。</p>
-  <p>資源線（到下一個衝分日）：(${field}+${inv}) + ${events.length}×8 + 勞拉 ${laura} − 最後目標 ${targetTotal} = <b>${resourceNeed}</b> 個。</p>
+  html+=`<div class="card" style="margin:14px 0 0"><h2>勞拉使用時機</h2>`;
+  days.forEach((d,i)=>{
+    const isToday=i===0;
+    html+=`<div class="event"><b>${dayLabel(d.date)}${isToday?'｜今天':''}</b><br><span class="ok">${d.rule.name}：${d.rule.rule}</span><br><small>${d.rule.reason}</small></div>`;
+  });
+  html+=`<p class="muted">4★～5★目前設定為 +20；0★～3★則依上方選擇的 +5／+10。這裡先確認「使用時機」，不先假裝精算每一次勞拉後的場上／庫存狀態。</p></div>`;
+
+  html+=`<div class="card" style="margin:14px 0 0"><h2>每日最低處理量</h2>`;
+  days.forEach((d,i)=>{
+    html+=`<div class="event"><b>${dayLabel(d.date)}${i===0?'｜今天':''}</b><br>基準場上：<b>${d.base}</b> 個 → 每日至少處理：<span class="ok">${d.minimum} 個</span></div>`;
+  });
+  html+=`<p class="muted">注意：這裡的「每日最低處理量」是每日規則線；資源線仍需另外檢查，不能直接把整段期間的總數平均分配。</p></div>`;
+
+  html+=`<div class="card" style="margin:14px 0 0"><h2>本次資源線</h2>
+  <p>(${field}+${inv}) + ${events.length}×8 + 勞拉 ${laura} − 最後目標 ${targetTotal} = <b>${resourceNeed}</b> 個。</p>
   <p>本次衝分日前，整段期間至少還需處理：<b>${resourceNeed}</b> 個。</p>
-  <p>這兩個數字用途不同，本版先分開顯示，不直接把資源線當成「今天」的處理量。</p>
-  <p class="muted">最後目標採衝分日前：場上 ${targetField}、庫存 ${targetInv}（MAX−8）。</p></div>`;
+  <p class="muted">最後目標：衝分日前場上 ${targetField}、庫存 ${targetInv}（MAX−8）。</p></div>`;
 
   html+=`<div class="card" style="margin:14px 0 0"><h2>這版先確認的核心</h2>
-  <div class="ok">① 遊戲日以 UTC−2 的 00:00～23:59 為一天</div>
-  <div class="ok">② 台灣 9/27 10:00～9/28 09:59 都屬同一遊戲日</div>
-  <div class="ok">③ 從現在到衝分日的所有 +8 都算進資源線</div>
-  <div class="ok">④ 每日最低處理量與資源線取較大值</div>
-  <div class="ok">⑤ 不再把勇士戰令、黎明曙光、寶箱、已完成雷達當成輸入</div>
+  <div class="ok">① 衝分日前 1 天：場上 8 個才使用勞拉 → 形成 11 個。</div>
+  <div class="ok">② 衝分日前 2、3 天：場上不足 8 個時使用 → 不刻意做成 11 個。</div>
+  <div class="ok">③ 衝分日：場上不足 8 個時使用 → 主要用於避免庫存超過 MAX。</div>
+  <div class="ok">④ 每日最低線仍以「場上數量 + 20」為基準。</div>
+  <div class="ok">⑤ 資源線與每日線分開，下一層再做真正的每日資源分配。</div>
   </div>`;
-
   out.innerHTML=html;
 }
 document.getElementById('calc').addEventListener('click',calc);
