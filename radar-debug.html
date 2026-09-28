@@ -5,7 +5,7 @@
 <title>Last Z 雷達週計劃 v7</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:17px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:13px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:13px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:6px;font-size:13px;line-height:1.6}.event.refresh{border-left:3px solid #557a9e}.event.harvest{border-left:3px solid #8fd3a7}.event.laura{border-left:3px solid #d7b56d}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:17px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:13px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:13px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block{background:#09192c;border-radius:10px;padding:8px 10px;margin-top:7px;font-size:13px;line-height:1.6}.operation-range{color:#f2d486;font-weight:700;margin-bottom:2px}.operation-step{padding:2px 0}.event{background:#09192c;border-radius:10px;padding:8px 10px;margin-top:7px;font-size:13px;line-height:1.6}.event.refresh{border-left:3px solid #557a9e}
 </style></head>
 <body><main>
 <h1>Last Z｜雷達週計劃 v8</h1>
@@ -22,7 +22,7 @@
 <div class="setup-divider"></div>
 <label for="max">儲存上限</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
 <button id="plan">開始規劃</button>
-<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。衝分日計算起點為「場上 11、儲存 MAX−8」；當日 3 次每 8h 刷新 8 個雷達 會計入可完成雷達數。v7 以遊戲時間 UTC−2 作為內部時間軸；當地時間會依裝置時區轉換後再排程。每 8h 刷新 8 個雷達 優先於玩家操作。</div>
+<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。衝分日計算起點為「場上 11、儲存 MAX−8」；當日 3 次每 8h 刷新 8 個雷達 會計入可完成雷達數。v8 以遊戲時間 UTC−2 作為內部時間軸；當地時間會依裝置時區轉換後再排程。每 8h 刷新 8 個雷達 優先於玩家操作。</div>
 </div>
 <div class="result-heading">📊 規劃結果</div>
 <div id="out"><div class="panel empty">輸入儲存上限後開始規劃</div></div>
@@ -373,11 +373,51 @@ function scheduleWeek(MAX,av){
   return {rows,impossible};
 }
 function eventDisplay(e,av){return gameMomentToDisplay(e.day,e.minute,av);}
-function eventText(e,av){
-  const x=eventDisplay(e,av), when=`${x.dateLabel} ${x.time}`;
-  if(e.type==='refresh') return `${when} → 每 8h 刷新 8 個雷達（場上：${e.afterF}，儲存：${e.afterI}）`;
-  if(e.type==='laura') return `${when} → 使用勞拉 +20（場上：${e.afterF}，儲存：${e.afterI}）`;
-  return `${when} → ${e.reason} ${e.qty} 個雷達（場上：${e.afterF}，儲存：${e.afterI}）`;
+function operationWindowForEvent(e,av){
+  const rows=dayWindows(av,e.day)||[];
+  // 優先找包含事件時間的玩家可操作區間；若事件正好落在區間邊界，仍視為該區間的一部分。
+  return rows.find(w=>e.minute>=w.start&&e.minute<=w.end)||null;
+}
+function formatGameRange(day,start,end,av){
+  const a=gameMomentToDisplay(day,start,av), b=gameMomentToDisplay(day,end,av);
+  const left=`${a.dateLabel} ${a.time}`;
+  const right=gameMomentToDisplay(day,end,av);
+  // 遊戲時間模式只顯示 MM/DD；當地時間模式顯示完整日期，避免跨日後誤解。
+  if(av.mode==='game') return `${a.dateLabel} ${a.time}–${fmtMin(end)}`;
+  const sameDate=a.dateLabel===b.dateLabel;
+  return sameDate?`${a.dateLabel} ${a.time}–${b.time}`:`${a.dateLabel} ${a.time}–${b.dateLabel} ${b.time}`;
+}
+function formatOperationRange(e,av){
+  const w=operationWindowForEvent(e,av);
+  if(!w)return `${eventDisplay(e,av).dateLabel} ${eventDisplay(e,av).time}`;
+  return formatGameRange(e.day,w.start,w.end,av);
+}
+function operationStepText(e,av,index,total){
+  const prefix=index===0?'':(index===total-1?'最後，':'接著，');
+  if(e.type==='laura') return `${prefix}使用勞拉 +20`;
+  return `${prefix}${e.reason.replace(/^(先|接著|最後)，?/,'')} ${e.qty} 個雷達`;
+}
+function renderEventGroups(events,av){
+  let html='';
+  let i=0;
+  while(i<events.length){
+    const e=events[i];
+    if(e.type==='refresh'){
+      const x=eventDisplay(e,av), when=`${x.dateLabel} ${x.time}`;
+      html+=`<div class="event refresh">${when} → 每 8h 刷新 8 個雷達 → 場上 ${e.afterF}、儲存 ${e.afterI}</div>`;
+      i++; continue;
+    }
+    const minute=e.minute;
+    const group=[];
+    while(i<events.length && events[i].type!=='refresh' && events[i].minute===minute){group.push(events[i]);i++;}
+    const range=formatOperationRange(e,av);
+    html+=`<div class="operation-block"><div class="operation-range">${range}</div>`;
+    group.forEach((g,idx)=>{
+      html+=`<div class="operation-step">${idx+1}. ${operationStepText(g,av,idx,group.length)} → 場上 ${g.afterF}、儲存 ${g.afterI}</div>`;
+    });
+    html+=`</div>`;
+  }
+  return html;
 }
 function render(){
  const MAX=Number($('#max').value);
@@ -390,15 +430,11 @@ function render(){
    const ev=r.events||[];
    html+=`<section class="day ${r.scoring?'score':''}"><h2>${weekNames[r.d]} <span class="tag">${r.scoring?'🏆 衝分日':'準備日'}</span></h2>`;
    html+=`<div class="state">開始：場上 ${r.startF}，儲存 ${r.startI}</div>`;
-   if(r.scoring) html+=`<div class="formula"><b>可完成雷達數：${r.startF} + ${r.startI} + 24 + 20 = ${r.total}</b><br><span class="muted">場上 11 + 儲存（MAX−8）+ 每 8h 刷新 3 次 × 8 + 勞拉 +20</span></div>`;
-   else html+=`<table><tr><th>項目</th><th>規劃</th></tr><tr><td>每日最低處理量</td><td>${r.minProcess}</td></tr><tr><td>每 8h 刷新</td><td>+24（00:00／08:00／16:00）</td></tr><tr><td>勞拉</td><td>+20｜${r.lauraNote}</td></tr><tr><td>安全線所需處理量</td><td>${r.safetyProcess}</td></tr><tr><td>本日實際處理量</td><td><b>${r.process}</b>（取以上兩者較大值）</td></tr></table>`;
-   html+=`<div class="timeline"><b>📋 當日事件（系統刷新與玩家操作）</b>`;
+   html+=`<div class="timeline"><b>📋 操作排程</b>`;
    if(!ev.length) html+=`<div class="empty">沒有可列出的事件。</div>`;
-   else for(const e of ev) html+=`<div class="event ${e.type}">${eventText(e,av)}</div>`;
+   else html+=renderEventGroups(ev,av);
    html+=`</div>`;
-   html+=`<div class="state ${r.simFeasible?'ok':'warn'}">本日實際處理量：${r.simProcessed} / ${r.scoring?r.total:r.process}</div>`;
-   html+=`<div class="state ok">v5 核准結果：結束場上 ${r.endF}，儲存 ${r.endI}</div>`;
-   if(!r.scoring && (r.d===3||r.d===6)) html+=`<div class="meta">衝分日前一天規則：完成本日應處理量 → 場上 = 8 → 使用勞拉；勞拉後不再收割。</div>`;
+   if(!r.simFeasible) html+=`<div class="state warn">⚠️ 目前可操作時間不足，這一天無法完成規劃。</div>`;
    html+=`</section>`;
  }
  $('#out').innerHTML=html;
