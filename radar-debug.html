@@ -1,186 +1,80 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>雷達規劃核心｜每日處理量 v9</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Last Z 雷達週計劃 v1</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#071522;color:#eef4fa;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;line-height:1.55}
-.wrap{max-width:720px;margin:0 auto;padding:22px 18px 50px}.title{color:#f5bd3c;font-size:25px;font-weight:900}.sub{font-weight:700;color:#cbd7e3;margin:10px 0 18px}
-.card{background:#0b1d2b;border:1px solid #29435b;border-radius:18px;padding:18px;margin:14px 0}.card h2{font-size:20px;color:#f5bd3c;margin:0 0 14px}
-label{display:block;font-weight:800;margin:12px 0 6px}input,select{width:100%;padding:14px;border-radius:12px;border:1px solid #58718b;background:#102437;color:#fff;font-size:18px;font-weight:700}
-button{width:100%;padding:14px;border:1px solid #e0b53e;border-radius:12px;background:#a97922;color:#fff;font-size:18px;font-weight:900;margin-top:14px}
-.result{border-left:4px solid #39df96;padding-left:12px}.big{font-size:26px;font-weight:900;color:#57e2a0}.warn{color:#ff8b8b;font-weight:900}.ok{color:#55e5a2;font-weight:900}.muted{color:#aebdca}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.event{background:#081724;border:1px solid #29435b;border-radius:14px;padding:12px;margin:10px 0}.event b{color:#fff}.pill{display:inline-block;padding:3px 8px;border-radius:99px;background:#173248;color:#cfe0ee;font-weight:800}
-small{color:#aebdca}
-</style>
-</head>
-<body>
-<div class="wrap">
-<div class="title">雷達規劃核心｜每日處理量 v9</div>
-<div class="sub">以「遊戲時間 UTC−2」計算。台灣時間只負責顯示。這版先處理「衝分日隔天起始場上=0」與勞拉時機。衝分日前一天要先完成當天最低處理量，再等場上回到8個才使用勞拉。衝分日不套用每日最低處理量。</div>
-
-<div class="card">
-<h2>目前資料</h2>
-<div class="row">
-<div><label>庫存 MAX</label><input id="max" type="number" value="30" min="1"></div>
-<div><label>目前庫存</label><input id="inv" type="number" value="22" min="0"></div>
+:root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:17px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:13px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:13px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}
+</style></head>
+<body><main>
+<h1>Last Z｜雷達週計劃 v1</h1>
+<div class="sub">只需輸入「庫存上限」。本版先建立不考慮玩家可操作時間的基礎週計劃。</div>
+<div class="panel">
+<label for="max">庫存上限 MAX</label><input id="max" type="number" min="1" step="1" placeholder="例如 30"><button id="plan">開始規劃</button>
+<div class="meta">週期固定為星期一～星期日。星期一、星期五為衝分日；衝分日完成並收割所有雷達後，下一天從「場上 0、庫存 0」開始。</div>
 </div>
-<label>目前場上雷達</label><input id="field" type="number" value="8" min="0">
-<label>目前時間（台灣時間）</label><input id="localTime" type="datetime-local" value="2026-09-27T11:27">
-<label>今天／本遊戲日可用勞拉</label>
-<select id="laura"><option value="0">沒有</option><option value="5">0★（+5）</option><option value="10">1★～3★（+10）</option><option value="20" selected>4★～5★（+20）</option></select>
-<button id="calc">開始計算</button>
-</div>
-
-<div id="out" class="card"><div class="muted">尚未計算。</div></div>
-</div>
-
+<div id="out"><div class="panel empty">輸入庫存上限後開始規劃</div></div>
+</main>
 <script>
-const TZ=-2;
-function parseLocalTaiwan(s){
-  const [d,t]=s.split('T'); const [y,m,day]=d.split('-').map(Number); const [hh,mm]=t.split(':').map(Number);
-  // Taiwan UTC+8 -> UTC
-  return new Date(Date.UTC(y,m-1,day,hh-8,mm,0));
+const $=s=>document.querySelector(s);
+const days=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
+function starAmount(){return 20} // v1：勞拉固定採 +20（4★/5★）
+function makePlan(MAX){
+ let field=0,inv=0; const rows=[]; let ok=true;
+ for(let d=0;d<7;d++){
+   const scoring=(d===0||d===4);
+   const startF=field,startI=inv;
+   if(scoring){
+     // 衝分日：直接清空；本版只記錄當日可收割總量。
+     const before=field+inv;
+     const harvested=before;
+     field=0;inv=0;
+     rows.push({d,scoring,startF,startI,actions:[`🏆 衝分日：完成並收割所有雷達（共 ${harvested} 個）`],endF:0,endI:0,harvested});
+     continue;
+   }
+   // 每個準備日：3 次系統 +8；v1 的日計畫以「日最低處理量」為核心。
+   // 星期二、六從 0 開始，因此最低 20；其餘準備日為起始場上 +20。
+   const minProcess=Math.max(startF+20,20);
+   let generated=24;
+   // v1 勞拉安排：星期五前 2/3 天（週三/四）及星期一前 2/3 天（週六/日）依場上<8使用；
+   // 前一天（週四、週日）先完成最低量，再確保場上8後使用。
+   let laura=0, lauraNote='本日不強制使用勞拉';
+   if(d===3 || d===6){
+      // 前一天：先處理最低量，再把場上維持到 8，最後勞拉。
+      laura=starAmount(); lauraNote='先完成今日最低處理量 → 確保場上 8 → 使用勞拉 +20';
+   } else if(d===2 || d===5){
+      // -2 / -3 規則：場上不足 8 時使用。
+      if(startF<8){laura=starAmount();lauraNote='場上不足 8 → 使用勞拉 +20';}
+      else lauraNote='場上已達 8 → 本日不強制使用勞拉';
+   }
+   generated+=laura;
+   // 若沒有足夠資源完成最低量，先把能取得的全部納入；此版本會標示需後續驗證。
+   const available=startF+startI+generated;
+   const process=Math.min(minProcess,available);
+   let total=startF+startI+generated-process;
+   // 以「場上 8 為準」表示剩餘資源的可操作狀態；不足 8 則全留場上。
+   if(total>=8){field=8;inv=total-8}else{field=total;inv=0}
+   // 前一天使用勞拉後，目標場上 11；把庫存重新拆分。
+   if(d===3||d===6){
+      if(field<8 && inv>0){const mv=Math.min(8-field,inv);field+=mv;inv-=mv}
+      if(field===8){field=11}
+   }
+   // MAX 是系統 +8 的一般容量；若本日結束已超過 MAX，保留狀態但提示需要進一步時序驗證。
+   const note=inv>MAX?`庫存目前 ${inv}，已超過 MAX（僅可能由勞拉造成）`:'';
+   rows.push({d,scoring,startF,startI,minProcess,laura,lauraNote,process,generated,endF:field,endI:inv,note});
+ }
+ return rows;
 }
-function gameParts(dt){
-  const game=new Date(dt.getTime()-10*3600*1000); // Taiwan -> UTC-2
-  return {game, date:game.toISOString().slice(0,10), hh:game.getUTCHours(), mm:game.getUTCMinutes()};
+function render(){
+ const MAX=Number($('#max').value); if(!Number.isInteger(MAX)||MAX<=0){$('#out').innerHTML='<div class="panel empty">請輸入大於 0 的整數庫存上限。</div>';return}
+ const rows=makePlan(MAX);
+ let html=`<div class="panel result"><b>本週規劃</b><br>庫存上限：<b>${MAX}</b><br><span class="muted">週期起點：星期一衝分結束後 → 場上 0、庫存 0</span><br><span class="warn">v1 先驗證週規則與資源流；玩家可操作時間下一版再加入。</span></div>`;
+ for(const r of rows){
+   if(r.scoring){html+=`<section class="day"><h2>${days[r.d]} <span class="tag">🏆 衝分日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><div class="action">${r.actions[0]}</div><div class="state ok">結束：場上 0，庫存 0</div></section>`}
+   else {html+=`<section class="day"><h2>${days[r.d]} <span class="tag">準備日</span></h2><div class="state">開始：場上 ${r.startF}，庫存 ${r.startI}</div><table><tr><th>項目</th><th>規劃</th></tr><tr><td>今日最低處理量</td><td>${r.minProcess}</td></tr><tr><td>系統雷達</td><td>+24（每日 3 次 × +8）</td></tr><tr><td>勞拉</td><td>${r.laura?`+${r.laura}｜${r.lauraNote}`:r.lauraNote}</td></tr><tr><td>本日實際處理</td><td>${r.process}</td></tr></table><div class="action">操作後：<b>（場上 ${r.endF}，庫存 ${r.endI}）</b></div>${r.note?`<div class="meta warn">${r.note}</div>`:''}</section>`}
+ }
+ $('#out').innerHTML=html;
 }
-function fmtGame(dt){
-  const p=gameParts(dt); return p.date+' '+String(p.hh).padStart(2,'0')+':'+String(p.mm).padStart(2,'0');
-}
-function fmtTaiwan(dt){
-  const t=new Date(dt.getTime()+8*3600*1000);
-  return t.getUTCFullYear()+'/'+String(t.getUTCMonth()+1).padStart(2,'0')+'/'+String(t.getUTCDate()).padStart(2,'0')+' '+String(t.getUTCHours()).padStart(2,'0')+':'+String(t.getUTCMinutes()).padStart(2,'0');
-}
-function dayStart(gameDate){
-  const [y,m,d]=gameDate.split('-').map(Number);
-  return new Date(Date.UTC(y,m-1,d,2,0,0)); // game 00:00 = UTC 02:00
-}
-function addDays(dt,n){return new Date(dt.getTime()+n*86400000)}
-function nextScoring(gameDate,hh){
-  const [y,m,d]=gameDate.split('-').map(Number);
-  const base=new Date(Date.UTC(y,m-1,d,2,0,0));
-  const dow=base.getUTCDay(); // Sun0 Mon1...
-  // 衝分日就是「當天」：若目前已在週一遊戲日，目標就是今天 00:00；
-  // 否則找下一個週一 00:00。
-  if(dow===1) return base;
-  const delta=(1-dow+7)%7;
-  return addDays(base,delta);
-}
-function systemEvents(start,end){
-  const out=[];
-  // every game day 08:00,16:00,00:00. Start from the next event strictly after start.
-  let cur=new Date(start.getTime());
-  const firstDay=new Date(Date.UTC(cur.getUTCFullYear(),cur.getUTCMonth(),cur.getUTCDate(),0,0,0));
-  for(let i=-1;i<10;i++){
-    const day=addDays(firstDay,i);
-    for(const h of [0,8,16]){
-      const e=new Date(Date.UTC(day.getUTCFullYear(),day.getUTCMonth(),day.getUTCDate(),h+2,0,0));
-      if(e>start && e<=end) out.push(e);
-    }
-  }
-  return out.sort((a,b)=>a-b);
-}
-function gameDate(dt){return gameParts(dt).date}
-function daysBetween(a,b){return Math.round((b-a)/86400000)}
-function calc(){
-  const max=Number(document.getElementById('max').value);
-  const inv=Number(document.getElementById('inv').value);
-  const field=Number(document.getElementById('field').value);
-  const local=document.getElementById('localTime').value;
-  const laura=Number(document.getElementById('laura').value);
-  const out=document.getElementById('out');
-  if(!max||max<=0||inv<0||field<0||inv>max){out.innerHTML='<div class="warn">資料無效：請確認 MAX＞0、庫存≥0、場上≥0，且目前庫存不可高於 MAX。</div>';return}
-  if(!local){out.innerHTML='<div class="warn">請輸入時間。</div>';return}
-  const now=parseLocalTaiwan(local);
-  const gp=gameParts(now);
-  const score=nextScoring(gp.date,gp.hh);
-  const events=systemEvents(now,score);
-  const totalAvailable=field+inv+events.length*8+laura;
-  const targetField=11;
-  const targetInv=max-8;
-  const targetTotal=targetField+targetInv;
-  const resourceNeed=Math.max(0,totalAvailable-targetTotal);
-  const firstDay=gp.date;
-  const lastDay=gameDate(score);
-  const dayCount=daysBetween(dayStart(firstDay),dayStart(lastDay))+1;
-
-  function dayLabel(d){
-    const dt=dayStart(d); const w=['日','一','二','三','四','五','六'][dt.getUTCDay()];
-    return `${d}（週${w}）`;
-  }
-  function dayOffset(d){
-    return daysBetween(dayStart(firstDay),dayStart(d));
-  }
-  function lauraRuleForDay(d){
-    const diff=daysBetween(dayStart(d),dayStart(lastDay));
-    if(diff===0) return {name:'衝分日',rule:'場上不足 8 個時使用',reason:'避免衝分日的庫存超過 MAX',mode:'under8'};
-    if(diff===1) return {name:'衝分日前 1 天',rule:'先完成當天最低處理量，再等場上 = 8 個時使用',reason:'完成當天必要處理後，再把場上做成 11 個，作為衝分日前準備',mode:'exact8'};
-    if(diff>=2) return {name:`衝分日前 ${diff} 天`,rule:'場上不足 8 個時使用',reason:'避免把場上推到 11 個，降低當日最低處理量',mode:'under8'};
-    return {name:'已過衝分日',rule:'不列入',reason:'',mode:'none'};
-  }
-
-  // 這一版只做「規則分配」，不假裝已經完成完整資源模擬。
-  // 每日基準線仍是該日進入策略時的場上數量 + 20。
-  // Laura 的角色：除衝分日前一天外，不主動把場上推到 11；前一天才刻意做成 11。
-  const days=[];
-  for(let i=0;i<dayCount;i++){
-    const d=addDays(dayStart(firstDay),i); const ds=d.toISOString().slice(0,10);
-    const r=lauraRuleForDay(ds);
-    const diff=daysBetween(dayStart(ds),dayStart(lastDay));
-    const isScoring=(ds===lastDay);
-    // 找出「上一個衝分日的隔一天」。這一天的起始場上固定為 0，
-    // 因為上一個衝分日已經完成並收割全部雷達。
-    const scoreDow=dayStart(lastDay).getUTCDay();
-    const dayAfterPreviousScoring=(scoreDow===1?addDays(dayStart(lastDay),-2):addDays(dayStart(lastDay),-3));
-    const isDayAfterPreviousScoring=(dayStart(ds).getTime()===dayAfterPreviousScoring.getTime());
-    // 即使玩家現在畫面看到後來新產生的 8 個，也直接算進這一天的 20。
-    const base=(i===0?((isDayAfterPreviousScoring)?0:field):(isDayAfterPreviousScoring?0:8));
-    days.push({date:ds,rule:r,base,minimum:isScoring?0:base+20,isScoring});
-  }
-
-  let html='<h2>計算結果</h2>';
-  html+=`<div class="result"><div>下一個衝分日</div><div class="big">${score.toISOString().slice(0,10)} 00:00（遊戲時間）</div><div>台灣時間：${fmtTaiwan(score)}</div></div>`;
-  html+=`<div class="card" style="margin:14px 0 0"><b>這段期間共有 <span class="pill">${events.length} 次 +8</span></b>`;
-  html+=events.map((e,i)=>`<div class="event"><b>+8 #${i+1}</b><br>遊戲時間：${fmtGame(e)}<br>台灣時間：${fmtTaiwan(e)}</div>`).join('');
-  html+='</div>';
-
-  html+=`<div class="card" style="margin:14px 0 0"><h2>勞拉使用時機</h2>`;
-  days.forEach((d,i)=>{
-    const isToday=i===0;
-    html+=`<div class="event"><b>${dayLabel(d.date)}${isToday?'｜今天':''}</b><br><span class="ok">${d.rule.name}：${d.rule.rule}</span><br><small>${d.rule.reason}</small></div>`;
-  });
-  html+=`<p class="muted">衝分日前 1 天的順序是：先完成當天最低處理量 → 場上回到 8 → 使用勞拉 → 場上 11。其他準備日則在場上不足 8 時使用。這裡先確認使用時機，不先假裝精算每一次勞拉後的場上／庫存狀態。</p></div>`;
-
-  html+=`<div class="card" style="margin:14px 0 0"><h2>每日最低處理量</h2>`;
-  const processDays=days.filter(d=>!d.isScoring);
-  if(processDays.length===0){
-    html+=`<div class="event"><b>今天就是衝分日</b><br><span class="ok">不套用「場上 + 20」的每日最低量。</span><br><small>今天直接完成並收割所有雷達。</small></div>`;
-  }else{
-    processDays.forEach((d)=>{
-      const i=days.indexOf(d);
-      html+=`<div class="event"><b>${dayLabel(d.date)}${i===0?'｜今天':''}</b><br>基準場上：<b>${d.base}</b> 個 → 每日至少處理：<span class="ok">${d.minimum} 個</span></div>`;
-    });
-    html+=`<div class="event"><b>${dayLabel(lastDay)}｜衝分日</b><br><span class="ok">不計入每日最低處理量</span><br><small>衝分日直接完成並收割所有雷達。</small></div>`;
-  }
-  html+=`<p class="muted">注意：只有衝分日前的遊戲日套用「場上 + 20」；衝分日不套用這條規則。資源線仍需另外檢查。</p></div>`;
-
-  html+=`<div class="card" style="margin:14px 0 0"><h2>本次資源線</h2>
-  <p>(${field}+${inv}) + ${events.length}×8 + 勞拉 ${laura} − 最後目標 ${targetTotal} = <b>${resourceNeed}</b> 個。</p>
-  <p>本次衝分日前，整段期間至少還需處理：<b>${resourceNeed}</b> 個。</p>
-  <p class="muted">最後目標：衝分日前場上 ${targetField}、庫存 ${targetInv}（MAX−8）。</p></div>`;
-
-  html+=`<div class="card" style="margin:14px 0 0"><h2>這版先確認的核心</h2>
-  <div class="ok">① 衝分日結束時已完成並收割全部雷達，因此衝分日隔天的起始場上 = 0。</div>
-  <div class="ok">② 衝分日隔天：每日最低量 = 20；當天新產生的場上雷達可以直接算進這 20。</div>
-  <div class="ok">③ 衝分日前 1 天：先完成當天最低處理量，再等場上回到 8，才使用勞拉形成 11。</div>
-  <div class="ok">④ 衝分日前 2、3 天：場上不足 8 個時使用勞拉，不刻意做成 11。</div>
-  <div class="ok">⑤ 衝分日不套用每日最低量，直接完成並收割所有雷達。</div>
-  </div>`;
-  out.innerHTML=html;
-}
-document.getElementById('calc').addEventListener('click',calc);
-</script>
-</body>
-</html>
+$('#plan').addEventListener('click',render);$('#max').addEventListener('input',()=>{$('#out').innerHTML='<div class="panel empty">輸入完成後按「開始規劃」。</div>'});
+</script></body></html>
