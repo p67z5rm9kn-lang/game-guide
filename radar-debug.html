@@ -197,8 +197,8 @@
     </div>
 
     <div class="buttons">
-      <button class="main" onclick="runTest()">開始模擬</button>
-      <button onclick="setBaseline()">載入 MAX=30 基準</button>
+      <button id="runBtn" class="main" type="button">開始模擬／重新計算</button>
+      <button id="baselineBtn" type="button">恢復 MAX=30 基準</button>
     </div>
 
     <div class="note">
@@ -394,6 +394,7 @@ function runTest(){
   let html='';
   html += `<div class="card">`;
   html += `<div class="title">② 測試結果</div>`;
+  html += `<div class="note" style="margin:-5px 0 10px;">本次模擬條件：MAX=${MAX}｜可操作 ${startStr}～${endStr}｜起始 ${fieldStartLabel()}｜重新按「開始模擬」會立即重算。</div>`;
   html += `<div class="status ${feasible?'ok':'bad'}">`;
   html += feasible
     ? `目前測試：沒有發現系統／Laura 的容量浪費。`
@@ -436,7 +437,34 @@ function runTest(){
   }
 }
 
-runTest();
+/* ===== v2：使用 addEventListener，避免手機瀏覽器 inline onclick 不觸發 ===== */
+document.addEventListener('DOMContentLoaded', function(){
+  const runBtn = document.getElementById('runBtn');
+  const baselineBtn = document.getElementById('baselineBtn');
+
+  if(runBtn){
+    runBtn.addEventListener('click', function(){
+      runTest();
+    });
+    runBtn.addEventListener('touchend', function(e){
+      e.preventDefault();
+      runTest();
+    }, {passive:false});
+  }
+
+  if(baselineBtn){
+    baselineBtn.addEventListener('click', function(){
+      setBaseline();
+    });
+    baselineBtn.addEventListener('touchend', function(e){
+      e.preventDefault();
+      setBaseline();
+    }, {passive:false});
+  }
+
+  // 首次開啟時自動顯示一次結果
+  runTest();
+});
 </script>
 </body>
 </html>
