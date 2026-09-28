@@ -17,7 +17,7 @@ small{color:#aebdca}
 <body>
 <div class="wrap">
 <div class="title">雷達規劃核心｜每日處理量 v7</div>
-<div class="sub">以「遊戲時間 UTC−2」計算。台灣時間只負責顯示。這版加入「勞拉使用時機」規則：衝分日前一天場上8個才使用；其他日子場上不足8個時使用。衝分日不套用每日最低處理量，衝分日直接完成並收割所有雷達。</div>
+<div class="sub">以「遊戲時間 UTC−2」計算。台灣時間只負責顯示。這版加入「勞拉使用時機」規則：衝分日前一天必須先完成當天最低處理量，且場上重新達到8個後才使用；其他日子場上不足8個時使用。衝分日不套用每日最低處理量，衝分日直接完成並收割所有雷達。</div>
 
 <div class="card">
 <h2>目前資料</h2>
@@ -116,14 +116,14 @@ function calc(){
   function lauraRuleForDay(d){
     const diff=daysBetween(dayStart(d),dayStart(lastDay));
     if(diff===0) return {name:'衝分日',rule:'場上不足 8 個時使用',reason:'避免衝分日的庫存超過 MAX',mode:'under8'};
-    if(diff===1) return {name:'衝分日前 1 天',rule:'場上 = 8 個時使用',reason:'把場上做成 11 個，作為衝分日前準備',mode:'exact8'};
+    if(diff===1) return {name:'衝分日前 1 天',rule:'先完成當天最低處理量，再等場上 = 8 個時使用',reason:'先完成當天應處理的雷達；之後等場上回到8個，再把場上做成11個，作為衝分日前準備',mode:'afterDailyAt8'};
     if(diff>=2) return {name:`衝分日前 ${diff} 天`,rule:'場上不足 8 個時使用',reason:'避免把場上推到 11 個，降低當日最低處理量',mode:'under8'};
     return {name:'已過衝分日',rule:'不列入',reason:'',mode:'none'};
   }
 
   // 這一版只做「規則分配」，不假裝已經完成完整資源模擬。
   // 每日基準線仍是該日進入策略時的場上數量 + 20。
-  // Laura 的角色：除衝分日前一天外，不主動把場上推到 11；前一天才刻意做成 11。
+  // Laura 的角色：除衝分日前一天外，不主動把場上推到 11；前一天必須先完成當天最低處理量，再等場上=8才刻意做成11。
   const days=[];
   for(let i=0;i<dayCount;i++){
     const d=addDays(dayStart(firstDay),i); const ds=d.toISOString().slice(0,10);
@@ -163,7 +163,7 @@ function calc(){
   <p class="muted">最後目標：衝分日前場上 ${targetField}、庫存 ${targetInv}（MAX−8）。</p></div>`;
 
   html+=`<div class="card" style="margin:14px 0 0"><h2>這版先確認的核心</h2>
-  <div class="ok">① 衝分日前 1 天：場上 8 個才使用勞拉 → 形成 11 個。</div>
+  <div class="ok">① 衝分日前 1 天：先完成當天最低處理量；之後等場上回到 8 個，再使用勞拉 → 形成 11 個。</div>
   <div class="ok">② 衝分日前 2、3 天：場上不足 8 個時使用 → 不刻意做成 11 個。</div>
   <div class="ok">③ 衝分日：場上不足 8 個時使用 → 主要用於避免庫存超過 MAX。</div>
   <div class="ok">④ 只有衝分日前的遊戲日套用「場上數量 + 20」；衝分日不套用每日最低量。</div>
