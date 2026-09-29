@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z 雷達週計劃 v8.3.1</title>
+<title>Last Z 雷達週計劃 v8.3.2</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
@@ -371,8 +371,15 @@ function simulateDay(d,startF,startI,r,av){
         if(hasLaura&&!lauraUsed){
           applyLaura(); lauraUsed=true;
           events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});
+
+          // Step 5：Laura 完成後立即重新評估「剩餘需求」。
+          // 若 Laura 後目前已有足夠雷達，必須在同一個可操作時間立即完成剩餘需求；
+          // 只有仍然不足時，才等待下一次刷新／可操作時間。
+          const remainingAfterLaura=Math.max(0,target-processed);
+          if(remainingAfterLaura>0 && sf+si>0){
+            applyHarvest(Math.min(remainingAfterLaura,sf+si));
+          }
         }
-        // Laura 後若仍有剩餘需求，不在同一時間點重複操作；等下一個刷新／可操作時間重新評估。
       }
     }
   }
