@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z 雷達週計劃 v8.2</title>
+<title>Last Z 雷達週計劃 v8.2.1</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
@@ -312,13 +312,40 @@ function addLauraEvent(events,d,minute,field,inv){
   return {field:f,inv:i};
 }
 function simulateDay(d,startF,startI,r,av){
-  const events=[]; const score=(d===0||d===4), dayBefore=(d===3||d===6);
-  const lauraAmount=r.lauraAmount||0, hasLaura=!!r.hasLaura;
+  const events=[];
+  const score=(d===0||d===4);
+  const dayBefore=(d===3||d===6);
+  const lauraAmount=r.lauraAmount||0;
+  const hasLaura=!!r.hasLaura;
   let sf=startF, si=startI, processed=0, lauraUsed=false;
   const target=score?r.total:r.process;
-  const applyRefresh=()=>{let add=8;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}si+=add;};
-  const applyLaura=()=>{let add=lauraAmount;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}else{const toField=Math.min(3,add);sf+=toField;add-=toField;}si+=add;};
-  const applyHarvest=(qty,reason='完成／收割')=>{const want=Math.max(0,Math.min(qty,sf+si));if(want<=0)return 0;let q=want;const fromField=Math.min(sf,q);sf-=fromField;q-=fromField;si=Math.max(0,si-q);if(sf<8&&si>0){const fill=Math.min(8-sf,si);sf+=fill;si-=fill;}events.push({type:'harvest',day:d,minute:currentMinute,qty:want,reason,afterF:sf,afterI:si});processed+=want;return want;};
+
+  const applyRefresh=()=>{
+    let add=8;
+    if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}
+    si+=add;
+  };
+  const applyLaura=()=>{
+    let add=lauraAmount;
+    if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}
+    else{const toField=Math.min(3,add);sf+=toField;add-=toField;}
+    si+=add;
+  };
+  const applyHarvest=(qty,reason='完成／收割')=>{
+    const want=Math.max(0,Math.min(qty,sf+si));
+    if(want<=0)return 0;
+    let q=want;
+    const fromField=Math.min(sf,q);
+    sf-=fromField;
+    q-=fromField;
+    si=Math.max(0,si-q);
+    // 儲存有資源且場上不足 8 時，系統立即補回場上。
+    if(sf<8&&si>0){const fill=Math.min(8-sf,si);sf+=fill;si-=fill;}
+    events.push({type:'harvest',day:d,minute:currentMinute,qty:want,reason,afterF:sf,afterI:si});
+    processed+=want;
+    return want;
+  };
+
   const opTimes=[];
   for(const w of dayWindows(av,d)){
     if(w.start===w.end)continue;
@@ -339,35 +366,54 @@ function simulateDay(d,startF,startI,r,av){
       events.push({type:'refresh',day:d,minute:node.minute,delta:8,afterF:sf,afterI:si});
       continue;
     }
-    const m=node.minute;
-    if(!inWindow(d,m,av))continue;
+    if(!inWindow(d,currentMinute,av))continue;
 
     if(score){
-      // 衝分日：第一個可操作時段優先點擊勞拉；若儲存空間不足，先收割足夠雷達騰出空間。
-      if(hasLaura && !lauraUsed){
-        const needRoom=Math.max(0,sf+si+lauraAmount-r.max);
-        if(needRoom>0)applyHarvest(needRoom,'騰出儲存空間');
-        if(sf+si+lauraAmount<=r.max){applyLaura();lauraUsed=true;events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});}
+      // 衝分日：第一個可操作時間先收割當下全部可用雷達，再點擊勞拉，再處理勞拉產生的雷達。
+      if(!lauraUsed){
+        applyHarvest(sf+si,'衝分日先完成當下可用雷達');
+        if(hasLaura){
+          // 優先確保使用後不超過儲存上限；此時若仍超過，先騰出必要空間。
+          const needRoom=Math.max(0,sf+si+lauraAmount-r.max);
+          if(needRoom>0)applyHarvest(needRoom,'為點擊勞拉騰出儲存空間');
+          if(sf+si+lauraAmount<=r.max){
+            applyLaura();
+            lauraUsed=true;
+            events.push({type:'laura',day:d,minute:currentMinute,delta:lauraAmount,afterF:sf,afterI:si});
+          }
+        }
+        if(hasLaura)applyHarvest(sf+si,'處理勞拉產生的雷達');
+      }else if(processed<target){
+        applyHarvest(target-processed);
       }
-      if(processed<target){applyHarvest(target-processed);}
     }else if(dayBefore){
-      // 衝分日前一天：先完成當日處理量，場上回到 8 後點擊勞拉；點擊後不再收割。
+      // 衝分日前一天：先完成當日應處理量，確認場上=8後點擊勞拉；點擊後停止收割。
       if(processed<target)applyHarvest(target-processed);
       if(hasLaura && !lauraUsed && processed>=target && sf===8){
-        applyLaura();lauraUsed=true;events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});
+        applyLaura();
+        lauraUsed=true;
+        events.push({type:'laura',day:d,minute:currentMinute,delta:lauraAmount,afterF:sf,afterI:si});
       }
     }else{
-      // 一般準備日：先處理當前需求；若場上仍為 8，先多收割 1 個使場上 <8，再點擊勞拉，之後完成剩餘需求。
+      // 一般準備日：先完成最低／安全需求；再找能合法使用勞拉的狀態。
+      // 場上必須 <8。若儲存仍有資源，系統會自動補回場上，因此必須把總資源降到 7 以下才可能點擊。
       if(processed<target)applyHarvest(target-processed);
       if(hasLaura && !lauraUsed){
-        if(sf>=8 && sf+si>0)applyHarvest(1,'為點擊勞拉騰出場上空間');
-        if(sf<8){applyLaura();lauraUsed=true;events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});}
+        if(sf>=8 && sf+si>7){
+          applyHarvest(sf+si-7,'為使用勞拉完成必要收割');
+        }
+        if(sf<8){
+          applyLaura();
+          lauraUsed=true;
+          events.push({type:'laura',day:d,minute:currentMinute,delta:lauraAmount,afterF:sf,afterI:si});
+        }
       }
       if(processed<target)applyHarvest(target-processed);
     }
   }
+
   const hasOperation=uniqueOps.length>0;
-  const feasible=processed>=target && (!score || uniqueOps.some(m=>m>=960)) && (!dayBefore || hasOperation) && (!hasLaura || lauraUsed);
+  const feasible=processed>=target && (!score || uniqueOps.length>0) && (!dayBefore || hasOperation) && (!hasLaura || lauraUsed);
   return {events,processed,lauraUsed,feasible};
 }
 function scheduleWeek(MAX,av){
