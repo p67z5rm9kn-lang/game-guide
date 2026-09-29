@@ -8,7 +8,7 @@
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v8.3.3</h1>
+<h1>Last Z｜雷達週計劃 v8.3.4</h1>
 <div class="sub">先設定「玩家可操作時間」。依照玩家可操作時間安排每一步操作與刷新雷達。</div>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
@@ -396,10 +396,55 @@ function scheduleWeek(MAX,av){
     const baseR=base[d];
     let r={...baseR,d,scoring:(d===0||d===4),windows:dayWindows(av,d),max:MAX};
 
-    // v8.3.3：普通日的「安全處理量」改為依實際時間軸驗證。
-    // 不再把尚未發生的未來刷新一次性算進公式；逐一測試當日處理量，
-    // 直到每次未來刷新前的儲存都能保留下一次 +8 的空間（MAX-8）。
-    if(!r.scoring && !((d===3)||(d===6))){
+    // v8.3.4：一般日沿用 v8.3.3；只有星期四／星期日（衝分日前一天）
+    // 改用「時間序列安全線」計算。
+    // 目標：在本日點擊勞拉後禁止再收割的前提下，從勞拉後一路模擬到
+    // 下一個衝分日的第一個可操作時間，所有後續 +8 都不能讓儲存超過 MAX。
+    if(!r.scoring && ((d===3)||(d===6))){
+      const dailyMin=r.dailyMin||20;
+      const maxCandidate=Math.max(dailyMin,MAX+24+ls.lauraAmount+24);
+      let chosen=null;
+      for(let p=dailyMin;p<=maxCandidate;p++){
+        const candidate={...r,process:p,minProcess:dailyMin};
+        const test=simulateDay(d,field,inv,candidate,av);
+        if(!test.feasible)continue;
+
+        // 只從本日實際點擊勞拉之後開始檢查。
+        // 勞拉之前的刷新屬於前一天安全線的責任；本版只修正「點勞拉後禁止再收割」
+        // 到下一個衝分日前的承接安全。
+        const lauraEvent=(test.events||[]).find(e=>e.type==='laura');
+        // 有勞拉：從實際點擊勞拉後開始；無勞拉：從本日結束狀態開始。
+        const startAbs=d*1440+(lauraEvent?lauraEvent.minute:1439);
+        let safe=true;
+        if(lauraEvent && lauraEvent.afterI>MAX) safe=false;
+        if(!safe)continue;
+
+        // 下一個衝分日就是隔天；找該日第一個玩家可操作時間。
+        const nextScoreDay=d===6?7:4;
+        const scoreDayIndex=((nextScoreDay%7)+7)%7;
+        const nextScoreWindow=(dayWindows(av,scoreDayIndex)||[]).find(w=>w.start<=w.end);
+        const endAbs=nextScoreWindow?nextScoreDay*1440+nextScoreWindow.start:(d+1)*1440+960;
+
+        // 從勞拉後（或本日結束）到下一個衝分日第一個可操作時間，
+        // 逐一檢查每次 00:00／08:00／16:00 刷新。刷新與玩家操作同時發生時，刷新優先。
+        let sf=test.endF,si=test.endI;
+        if(lauraEvent){sf=lauraEvent.afterF;si=lauraEvent.afterI;}
+        for(let abs=Math.floor(startAbs/480)*480+480;abs<=endAbs;abs+=480){
+          const day=Math.floor(abs/1440), minute=abs%1440;
+          let add=8;
+          if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}
+          si+=add;
+          if(si>MAX){safe=false;break;}
+        }
+        if(!safe)continue;
+
+        chosen={...candidate};
+        break;
+      }
+      if(chosen) r=chosen;
+      else r={...r,process:dailyMin,minProcess:dailyMin};
+    }else if(!r.scoring){
+      // v8.3.3：一般日的「安全處理量」維持原規則，不在 v8.3.4 改動。
       const dailyMin=r.dailyMin||((d===1||d===5)?12:20);
       const maxCandidate=Math.max(dailyMin,MAX+24+ls.lauraAmount+20);
       let chosen=null;
