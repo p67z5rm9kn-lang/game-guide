@@ -396,10 +396,7 @@ function scheduleWeek(MAX,av){
     const baseR=base[d];
     let r={...baseR,d,scoring:(d===0||d===4),windows:dayWindows(av,d),max:MAX};
 
-    // v8.3.4：一般日沿用 v8.3.3；只有星期四／星期日（衝分日前一天）
-    // 改用「時間序列安全線」計算。
-    // 目標：在本日點擊勞拉後禁止再收割的前提下，從勞拉後一路模擬到
-    // 下一個衝分日的第一個可操作時間，所有後續 +8 都不能讓儲存超過 MAX。
+    // v8.3.4：一般日沿用原規則；星期四／星期日使用時間序列安全線。
     if(!r.scoring && ((d===3)||(d===6))){
       const dailyMin=r.dailyMin||20;
       const maxCandidate=Math.max(dailyMin,MAX+24+ls.lauraAmount+24);
@@ -409,28 +406,20 @@ function scheduleWeek(MAX,av){
         const test=simulateDay(d,field,inv,candidate,av);
         if(!test.feasible)continue;
 
-        // 只從本日實際點擊勞拉之後開始檢查。
-        // 勞拉之前的刷新屬於前一天安全線的責任；本版只修正「點勞拉後禁止再收割」
-        // 到下一個衝分日前的承接安全。
         const lauraEvent=(test.events||[]).find(e=>e.type==='laura');
-        // 有勞拉：從實際點擊勞拉後開始；無勞拉：從本日結束狀態開始。
         const startAbs=d*1440+(lauraEvent?lauraEvent.minute:1439);
         let safe=true;
         if(lauraEvent && lauraEvent.afterI>MAX) safe=false;
         if(!safe)continue;
 
-        // 下一個衝分日就是隔天；找該日第一個玩家可操作時間。
         const nextScoreDay=d===6?7:4;
         const scoreDayIndex=((nextScoreDay%7)+7)%7;
         const nextScoreWindow=(dayWindows(av,scoreDayIndex)||[]).find(w=>w.start<=w.end);
         const endAbs=nextScoreWindow?nextScoreDay*1440+nextScoreWindow.start:(d+1)*1440+960;
 
-        // 從勞拉後（或本日結束）到下一個衝分日第一個可操作時間，
-        // 逐一檢查每次 00:00／08:00／16:00 刷新。刷新與玩家操作同時發生時，刷新優先。
         let sf=test.endF,si=test.endI;
         if(lauraEvent){sf=lauraEvent.afterF;si=lauraEvent.afterI;}
         for(let abs=Math.floor(startAbs/480)*480+480;abs<=endAbs;abs+=480){
-          const day=Math.floor(abs/1440), minute=abs%1440;
           let add=8;
           if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}
           si+=add;
@@ -444,7 +433,7 @@ function scheduleWeek(MAX,av){
       if(chosen) r=chosen;
       else r={...r,process:dailyMin,minProcess:dailyMin};
     }else if(!r.scoring){
-      // v8.3.3：一般日的「安全處理量」維持原規則，不在 v8.3.4 改動。
+      // v8.3.3：一般日安全處理量維持原規則。
       const dailyMin=r.dailyMin||((d===1||d===5)?12:20);
       const maxCandidate=Math.max(dailyMin,MAX+24+ls.lauraAmount+20);
       let chosen=null;
@@ -467,9 +456,20 @@ function scheduleWeek(MAX,av){
     r.events=sim.events;
     r.simProcessed=sim.processed;
     r.simFeasible=sim.feasible;
-    // 跨日一律承接「實際模擬結束狀態」。
     r.endSimF=sim.endF;
     r.endSimI=sim.endI;
+
+    // v8.3.5：星期日之後不是另一個獨立的「新週」，而是自然接到下一個星期一。
+    // 本週第一個星期一仍保留固定的衝分日起始基準 11／MAX-8；
+    // 同時把星期日實際結束狀態帶入「下一週星期一」的銜接資訊，避免把兩者混成同一天。
+    if(d===6){
+      r.nextMondayF=sim.endF;
+      r.nextMondayI=sim.endI;
+      r.nextMondayTargetF=11;
+      r.nextMondayTargetI=MAX-8;
+      r.nextMondayContinuous=(sim.endF===11 && sim.endI===MAX-8);
+    }
+
     field=sim.endF;
     inv=sim.endI;
 
@@ -563,6 +563,10 @@ function render(){
    else html+=renderEventGroups(ev,av);
    html+=`</div>`;
    if(!r.simFeasible) html+=`<div class="state warn">⚠️ 目前可操作時間不足，這一天無法完成規劃。</div>`;
+   if(r.d===6){
+     const nf=r.nextMondayF,ni=r.nextMondayI,tf=r.nextMondayTargetF,ti=r.nextMondayTargetI;
+     html+=`<div class="cycle-bridge"><div class="cycle-bridge-title">↪ 下一週星期一銜接</div><div class="cycle-bridge-text">星期日結束 → 場上 ${nf}、儲存 ${ni}</div><div class="cycle-bridge-text">星期一衝分日起始基準 → 場上 ${tf}、儲存 ${ti}</div>${r.nextMondayContinuous?'':'<div class="cycle-bridge-warn">⚠️ 目前星期日結束狀態與下一週星期一衝分日起始基準不一致，兩者不能視為同一個狀態。</div>'}</div>`;
+   }
    html+=`</section>`;
  }
  $('#out').innerHTML=html;
@@ -593,7 +597,7 @@ $('#plan').addEventListener('click',render);$('#max').addEventListener('input',(
 </script>
 <style>
 .modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.modes label{display:flex;align-items:center;gap:5px;border:1px solid #365574;background:#102842;color:#dce8f5;border-radius:10px;padding:9px 10px;margin:0}.modes input{width:auto}.time-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:7px;align-items:center;margin:8px 0}.time-row input,.time-row select,.setting-select{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px}.setting-select{margin-bottom:4px}.time-sep{color:var(--gold);font-weight:700;text-align:center;font-size:18px}.smallbtn{width:auto;margin:0;padding:10px 12px;font-size:14px}.day-title{font-size:13px;color:#dce8f5;margin-top:12px}
-.laura-toggle-row{display:flex;align-items:center;gap:12px;margin-bottom:4px}.switch-label{display:flex!important;align-items:center;gap:8px!important;border:0!important;background:transparent!important;padding:0!important;color:#dce8f5!important}.switch-label input{position:absolute;opacity:0;pointer-events:none}.switch{position:relative;width:48px;height:26px;border-radius:999px;background:#365574;display:inline-block;transition:.2s}.switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.switch-label input:checked + .switch{background:#b28c3f}.switch-label input:checked + .switch:after{transform:translateX(22px)}.laura-toggle-row #lauraDetail{flex:1;min-width:0}.laura-toggle-row #lauraDetail label{margin-bottom:4px}.setup-panel{padding-bottom:16px}.section-title{font-size:18px;margin:0 0 14px;color:var(--gold)}.setup-divider{height:1px;background:#27415f;margin:16px 0}.result-heading{font-size:18px;font-weight:700;color:var(--gold);margin:18px 2px 10px}.setup-panel .day-title{font-weight:600}.setup-panel .meta{margin-top:12px}
+.laura-toggle-row{display:flex;align-items:center;gap:12px;margin-bottom:4px}.switch-label{display:flex!important;align-items:center;gap:8px!important;border:0!important;background:transparent!important;padding:0!important;color:#dce8f5!important}.switch-label input{position:absolute;opacity:0;pointer-events:none}.switch{position:relative;width:48px;height:26px;border-radius:999px;background:#365574;display:inline-block;transition:.2s}.switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.switch-label input:checked + .switch{background:#b28c3f}.switch-label input:checked + .switch:after{transform:translateX(22px)}.laura-toggle-row #lauraDetail{flex:1;min-width:0}.laura-toggle-row #lauraDetail label{margin-bottom:4px}.setup-panel{padding-bottom:16px}.section-title{font-size:18px;margin:0 0 14px;color:var(--gold)}.setup-divider{height:1px;background:#27415f;margin:16px 0}.result-heading{font-size:18px;font-weight:700;color:var(--gold);margin:18px 2px 10px}.setup-panel .day-title{font-weight:600}.setup-panel .meta{margin-top:12px}.cycle-bridge{margin-top:10px;padding:12px 14px;border:1px solid #365574;border-radius:12px;background:#102842}.cycle-bridge-title{font-weight:700;color:var(--gold);margin-bottom:6px}.cycle-bridge-text{font-size:14px;line-height:1.6;color:#dce8f5}.cycle-bridge-warn{margin-top:6px;color:#ffd36a;font-size:13px;line-height:1.5}
 </style>
 <script>
 const timeStoreKey='lastz_radar_v8_availability';
