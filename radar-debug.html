@@ -9,11 +9,11 @@
 </style></head>
 <body><main>
 <h1>Last Z｜雷達週計劃 v8</h1>
-<div class="sub">先設定「玩家可操作時間」。依照玩家可操作時間安排每一步操作；系統刷新與玩家操作會分開顯示。</div>
+<div class="sub">先設定「玩家可操作時間」。依照玩家可操作時間安排每一步操作與刷新雷達。</div>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
 <label>時間模式</label>
-<div class="modes"><label><input type="radio" name="timeMode" value="game" checked> 🎮 遊戲時間</label><label><input type="radio" name="timeMode" value="local"> 🌍 當地時間</label></div>
+<div class="modes"><label><input type="radio" name="timeMode" value="game" checked> 遊戲時間</label><label><input type="radio" name="timeMode" value="local"> 當地時間</label></div>
 <label>套用方式</label>
 <div class="modes"><label><input type="radio" name="applyMode" value="same" checked> 每天相同</label><label><input type="radio" name="applyMode" value="custom"> 每天個別設定</label></div>
 <div id="sameTimes"></div>
@@ -21,11 +21,10 @@
 <div class="meta">新增、刪除或修改時段後會立即記錄；不需要另外按儲存。若結束時間為 00:00，代表可操作到當日午夜。</div>
 <div class="setup-divider"></div>
 <label>勞拉</label>
-<div class="modes"><label><input type="radio" name="lauraAvailable" value="yes" checked> 有勞拉</label><label><input type="radio" name="lauraAvailable" value="no"> 無勞拉</label></div>
-<div id="lauraDetail">
+<div class="laura-toggle-row"><label class="switch-label"><input type="checkbox" id="lauraToggle" checked><span class="switch"></span><span>有勞拉</span></label><div id="lauraDetail">
 <label for="lauraStar">勞拉幾星</label>
 <select id="lauraStar" class="setting-select"><option value="0">0★（+5）</option><option value="1">1★（+10）</option><option value="2">2★（+10）</option><option value="3">3★（+10）</option><option value="4" selected>4★（+20）</option><option value="5">5★（+20）</option></select>
-</div>
+</div></div>
 <div class="meta">勞拉數量會依星級直接連動每日排程；無勞拉時，排程不會安排點擊勞拉。</div>
 <div class="setup-divider"></div>
 <label for="max">儲存上限</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
@@ -40,7 +39,7 @@ const $=s=>document.querySelector(s);
 const days=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
 const LAURA_AMOUNTS={0:5,1:10,2:10,3:10,4:20,5:20};
 function getLauraSettings(){
-  const has=document.querySelector('input[name="lauraAvailable"]:checked')?.value==='yes';
+  const has=document.getElementById('lauraToggle')?.checked!==false;
   const star=Number(document.getElementById('lauraStar')?.value||4);
   return {hasLaura:has,lauraStar:star,lauraAmount:has?(LAURA_AMOUNTS[star]??20):0};
 }
@@ -311,79 +310,60 @@ function addLauraEvent(events,d,minute,field,inv){
 function simulateDay(d,startF,startI,r,av){
   const events=[]; const score=(d===0||d===4), dayBefore=(d===3||d===6);
   const lauraAmount=r.lauraAmount||0, hasLaura=!!r.hasLaura;
-  let remaining=score?r.total:r.process;
-  let sf=startF, si=startI;
+  let sf=startF, si=startI, processed=0, lauraUsed=false;
+  const target=score?r.total:r.process;
   const applyRefresh=()=>{let add=8;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}si+=add;};
-  const applyLaura=()=>{
-    let add=lauraAmount;
-    if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}
-    else {const toField=Math.min(3,add);sf+=toField;add-=toField;}
-    si+=add;
-  };
-  const applyHarvest=(qty)=>{let q=Math.max(0,Math.min(qty,sf+si));const take=Math.min(sf,q);sf-=take;q-=take;si=Math.max(0,si-q);if(sf<8&&si>0){const fill=Math.min(8-sf,si);sf+=fill;si-=fill;}};
-  const ops=[];
+  const applyLaura=()=>{let add=lauraAmount;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}else{const toField=Math.min(3,add);sf+=toField;add-=toField;}si+=add;};
+  const applyHarvest=(qty,reason='完成／收割')=>{const want=Math.max(0,Math.min(qty,sf+si));if(want<=0)return 0;let q=want;const fromField=Math.min(sf,q);sf-=fromField;q-=fromField;si=Math.max(0,si-q);if(sf<8&&si>0){const fill=Math.min(8-sf,si);sf+=fill;si-=fill;}events.push({type:'harvest',day:d,minute:currentMinute,qty:want,reason,afterF:sf,afterI:si});processed+=want;return want;};
+  const opTimes=[];
   for(const w of dayWindows(av,d)){
-    if(w.start===w.end) continue;
-    ops.push(w.start);
-    for(const m of [480,960]) if(m>w.start&&m<w.end) ops.push(m);
+    if(w.start===w.end)continue;
+    opTimes.push(w.start);
+    for(const m of [480,960]) if(m>w.start&&m<w.end)opTimes.push(m);
   }
-  const opTimes=[...new Set(ops)].sort((a,b)=>a-b);
-  const refreshes=[0,480,960];
+  const uniqueOps=[...new Set(opTimes)].sort((a,b)=>a-b);
   const timeline=[];
-  refreshes.forEach(m=>timeline.push({type:'refresh',day:d,minute:m}));
-  opTimes.forEach(m=>timeline.push({type:'op',day:d,minute:m}));
+  [0,480,960].forEach(m=>timeline.push({type:'refresh',minute:m}));
+  uniqueOps.forEach(m=>timeline.push({type:'op',minute:m}));
   timeline.sort((a,b)=>a.minute-b.minute||(a.type==='refresh'?-1:1));
-  let processed=0, lauraUsed=false;
+  let currentMinute=0;
 
   for(const node of timeline){
+    currentMinute=node.minute;
     if(node.type==='refresh'){
       applyRefresh();
       events.push({type:'refresh',day:d,minute:node.minute,delta:8,afterF:sf,afterI:si});
       continue;
     }
     const m=node.minute;
+    if(!inWindow(d,m,av))continue;
 
-    if(dayBefore){
-      // 衝分日前一天：在最早可操作時段完成本日處理量，場上回到 8 後點擊勞拉；點擊後不再收割。
-      if(!inWindow(d,m,av)) continue;
-      if(processed<r.process){
-        const q=Math.min(r.process-processed,sf+si);
-        if(q>0){applyHarvest(q);processed+=q;remaining=Math.max(0,r.process-processed);events.push({type:'harvest',day:d,minute:m,qty:q,reason:'完成／收割',afterF:sf,afterI:si});}
+    if(score){
+      // 衝分日：第一個可操作時段優先點擊勞拉；若儲存空間不足，先收割足夠雷達騰出空間。
+      if(hasLaura && !lauraUsed){
+        const needRoom=Math.max(0,sf+si+lauraAmount-r.max);
+        if(needRoom>0)applyHarvest(needRoom,'騰出儲存空間');
+        if(sf+si+lauraAmount<=r.max){applyLaura();lauraUsed=true;events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});}
       }
-      if(hasLaura && !lauraUsed && processed>=r.process && sf===8){
-        applyLaura();lauraUsed=true;
-        events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});
+      if(processed<target){applyHarvest(target-processed);}
+    }else if(dayBefore){
+      // 衝分日前一天：先完成當日處理量，場上回到 8 後點擊勞拉；點擊後不再收割。
+      if(processed<target)applyHarvest(target-processed);
+      if(hasLaura && !lauraUsed && processed>=target && sf===8){
+        applyLaura();lauraUsed=true;events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});
       }
-    }else if(score){
-      // 衝分日：在每個可操作時間處理「截至此刻已取得」的雷達；勞拉安排在不超過 MAX 的可操作節點。
-      if(hasLaura && !lauraUsed && sf+si<=r.max-lauraAmount){
-        applyLaura();lauraUsed=true;
-        events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});
-      }
-      const q=Math.min(remaining,sf+si);
-      if(q>0){applyHarvest(q);processed+=q;remaining-=q;events.push({type:'harvest',day:d,minute:m,qty:q,reason:'完成／收割',afterF:sf,afterI:si});}
     }else{
-      // 一般準備日：先處理目前可用雷達，再點擊勞拉，再處理勞拉帶來的雷達。
-      if(!lauraUsed){
-        const current=Math.min(Math.max(0,r.process-processed),sf+si);
-        if(current>0){
-          applyHarvest(current);processed+=current;remaining=Math.max(0,r.process-processed);
-          events.push({type:'harvest',day:d,minute:m,qty:current,reason:'完成／收割',afterF:sf,afterI:si});
-        }
-        if(hasLaura && sf<8){
-          applyLaura();lauraUsed=true;
-          events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});
-          const after=Math.min(Math.max(0,r.process-processed),sf+si);
-          if(after>0){applyHarvest(after);processed+=after;remaining=Math.max(0,r.process-processed);events.push({type:'harvest',day:d,minute:m,qty:after,reason:'完成／收割',afterF:sf,afterI:si});}
-        }
-      }else if(processed<r.process){
-        const q=Math.min(r.process-processed,sf+si);
-        if(q>0){applyHarvest(q);processed+=q;remaining=Math.max(0,r.process-processed);events.push({type:'harvest',day:d,minute:m,qty:q,reason:'完成／收割',afterF:sf,afterI:si});}
+      // 一般準備日：先處理當前需求；若場上仍為 8，先多收割 1 個使場上 <8，再點擊勞拉，之後完成剩餘需求。
+      if(processed<target)applyHarvest(target-processed);
+      if(hasLaura && !lauraUsed){
+        if(sf>=8 && sf+si>0)applyHarvest(1,'為點擊勞拉騰出場上空間');
+        if(sf<8){applyLaura();lauraUsed=true;events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});}
       }
+      if(processed<target)applyHarvest(target-processed);
     }
   }
-
-  const feasible=processed>=(score?r.total:r.process) && (!score || opTimes.some(m=>m>=960)) && (!dayBefore || opTimes.length>0);
+  const hasOperation=uniqueOps.length>0;
+  const feasible=processed>=target && (!score || uniqueOps.some(m=>m>=960)) && (!dayBefore || hasOperation) && (!hasLaura || lauraUsed);
   return {events,processed,lauraUsed,feasible};
 }
 function scheduleWeek(MAX,av){
@@ -410,9 +390,24 @@ function operationWindowForEvent(e,av){
   return rows.find(w=>e.minute>=w.start&&e.minute<=w.end)||null;
 }
 function formatGameRange(day,start,end,av){
-  const displayEnd=end<1440&&[480,960].includes(end)?end-1:end;
-  const a=gameMomentToDisplay(day,start,av), b=gameMomentToDisplay(day,displayEnd,av);
-  if(av.mode==='game') return `${a.dateLabel} ${a.time}–${b.time}`;
+  const a=gameMomentToDisplay(day,start,av);
+  if(av.mode==='game'){
+    const displayEnd=end<1440&&[480,960].includes(end)?end-1:end;
+    const b=gameMomentToDisplay(day,displayEnd,av);
+    return `${a.dateLabel} ${a.time}–${b.time}`;
+  }
+  // 當地時間模式必須先判斷「結束的遊戲瞬間」是否就是刷新瞬間，再往前退 1 分鐘；
+  // 不直接用當地顯示時間判斷，避免跨日／時區時把刷新邊界算錯。
+  const endBoundary=new Date(Date.UTC(av.mon.getUTCFullYear(),av.mon.getUTCMonth(),av.mon.getUTCDate()+day,0,0)+end*60000);
+  const utcEndMs=endBoundary.getTime()+2*3600000;
+  const localEnd=localParts(new Date(utcEndMs),av.tz);
+  let b;
+  if(end<1440&&[480,960].includes(end)){
+    const prevGameMinute=end-1;
+    b=gameMomentToDisplay(day,prevGameMinute,av);
+  }else{
+    b={dateLabel:`${localEnd.month}/${localEnd.day}`,time:`${localEnd.hour}:${localEnd.minute}`};
+  }
   const sameDate=a.dateLabel===b.dateLabel;
   return sameDate?`${a.dateLabel} ${a.time}–${b.time}`:`${a.dateLabel} ${a.time}–${b.dateLabel} ${b.time}`;
 }
@@ -424,7 +419,7 @@ function formatOperationRange(e,av){
   return formatGameRange(e.day,start,w.end,av);
 }
 function operationStepText(e,av,index,total){
-  const prefix=index===0?'':(index===total-1?'最後，':'接著，');
+  const prefix=index===0?'':(index===1?'接著，':(index===2?'再來，':(index===3?'最後，':'接著，')));
   if(e.type==='laura') return `${prefix}點擊勞拉`;
   return `${prefix}收割 ${e.qty} 個雷達，完成場上雷達`;
 }
@@ -451,7 +446,7 @@ function renderEventGroups(events,av){
     const end=Math.min(w?w.end:nextRefresh,nextRefresh);
     const range=formatGameRange(first.day,start,end,av);
     html+=`<div class="operation-block"><div class="operation-range">${range}</div>`;
-    group.forEach((g,idx)=>html+=`<div class="operation-step">${idx+1}. ${operationStepText(g,av,idx,group.length)} → 場上 ${g.afterF}、儲存 ${g.afterI}</div>`);
+    group.forEach((g,idx)=>{ const n=group.length>1?`${idx+1}. `:''; html+=`<div class="operation-step">${n}${operationStepText(g,av,idx,group.length)} → 場上 ${g.afterF}、儲存 ${g.afterI}</div>`; });
     html+=`</div>`;
   }
   return html;
@@ -461,7 +456,7 @@ function render(){
  if(!Number.isInteger(MAX)||MAX<8){$('#out').innerHTML='<div class="panel empty">請輸入至少 8 的整數儲存上限。</div>';return}
  const av=buildGameAvailability(),plan=scheduleWeek(MAX,av);
  const ls=getLauraSettings();
- let html=`<div class="panel result">勞拉：<b>${ls.hasLaura?'有':'無'}</b>${ls.hasLaura?`｜${ls.lauraStar}★（+${ls.lauraAmount}）`:''}<br>儲存上限：<b>${MAX}</b></div>`;
+ let html='';
 
  if(plan.impossible.length) html+=`<div class="panel result"><b class="warn">⚠️ 時間限制</b><div class="meta">${plan.impossible.join('<br>')}</div></div>`;
  for(const r of plan.rows){
@@ -478,11 +473,11 @@ function render(){
  $('#out').innerHTML=html;
 }
 function syncLauraUI(){
-  const has=document.querySelector('input[name="lauraAvailable"]:checked')?.value==='yes';
+  const has=document.getElementById('lauraToggle')?.checked!==false;
   document.getElementById('lauraDetail').style.display=has?'block':'none';
 }
 function saveLauraSettings(){
-  const has=document.querySelector('input[name="lauraAvailable"]:checked')?.value==='yes';
+  const has=document.getElementById('lauraToggle')?.checked!==false;
   const star=Number(document.getElementById('lauraStar').value||4);
   localStorage.setItem(lauraStoreKey,JSON.stringify({hasLaura:has,star}));
 }
@@ -490,12 +485,12 @@ function loadLauraSettings(){
   try{
     const d=JSON.parse(localStorage.getItem(lauraStoreKey)||'null');
     if(!d)return;
-    const radio=document.querySelector(`input[name="lauraAvailable"][value="${d.hasLaura===false?'no':'yes'}"]`);
-    if(radio)radio.checked=true;
+    const toggle=document.getElementById('lauraToggle');
+    if(toggle)toggle.checked=d.hasLaura!==false;
     if(d.star!==undefined)document.getElementById('lauraStar').value=String(d.star);
   }catch(e){}
 }
-document.querySelectorAll('input[name="lauraAvailable"]').forEach(x=>x.addEventListener('change',()=>{saveLauraSettings();syncLauraUI();render();}));
+document.getElementById('lauraToggle').addEventListener('change',()=>{saveLauraSettings();syncLauraUI();render();});
 document.getElementById('lauraStar').addEventListener('change',()=>{saveLauraSettings();render();});
 loadLauraSettings();
 syncLauraUI();
@@ -503,7 +498,7 @@ $('#plan').addEventListener('click',render);$('#max').addEventListener('input',(
 </script>
 <style>
 .modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.modes label{display:flex;align-items:center;gap:5px;border:1px solid #365574;background:#102842;color:#dce8f5;border-radius:10px;padding:9px 10px;margin:0}.modes input{width:auto}.time-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:7px;align-items:center;margin:8px 0}.time-row input,.time-row select,.setting-select{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px}.setting-select{margin-bottom:4px}.time-sep{color:var(--gold);font-weight:700;text-align:center;font-size:18px}.smallbtn{width:auto;margin:0;padding:10px 12px;font-size:14px}.day-title{font-size:13px;color:#dce8f5;margin-top:12px}
-.setup-panel{padding-bottom:16px}.section-title{font-size:18px;margin:0 0 14px;color:var(--gold)}.setup-divider{height:1px;background:#27415f;margin:16px 0}.result-heading{font-size:18px;font-weight:700;color:var(--gold);margin:18px 2px 10px}.setup-panel .day-title{font-weight:600}.setup-panel .meta{margin-top:12px}
+.laura-toggle-row{display:flex;align-items:center;gap:12px;margin-bottom:4px}.switch-label{display:flex!important;align-items:center;gap:8px!important;border:0!important;background:transparent!important;padding:0!important;color:#dce8f5!important}.switch-label input{position:absolute;opacity:0;pointer-events:none}.switch{position:relative;width:48px;height:26px;border-radius:999px;background:#365574;display:inline-block;transition:.2s}.switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.switch-label input:checked + .switch{background:#b28c3f}.switch-label input:checked + .switch:after{transform:translateX(22px)}.laura-toggle-row #lauraDetail{flex:1;min-width:0}.laura-toggle-row #lauraDetail label{margin-bottom:4px}.setup-panel{padding-bottom:16px}.section-title{font-size:18px;margin:0 0 14px;color:var(--gold)}.setup-divider{height:1px;background:#27415f;margin:16px 0}.result-heading{font-size:18px;font-weight:700;color:var(--gold);margin:18px 2px 10px}.setup-panel .day-title{font-weight:600}.setup-panel .meta{margin-top:12px}
 </style>
 <script>
 const timeStoreKey='lastz_radar_v8_availability';
