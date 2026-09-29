@@ -8,7 +8,7 @@
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v8.3.14</h1>
+<h1>Last Z｜雷達週計劃 v8.3.15</h1>
 <div class="sub">先設定「玩家可操作時間」。依照玩家可操作時間安排每一步操作與刷新雷達。</div>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
@@ -313,8 +313,8 @@ function simulateDay(d,startF,startI,r,av){
   let sf=startF, si=startI, processed=0, lauraUsed=false;
   const target=score?r.total:r.process;
   let currentMinute=0;
-  const applyRefresh=()=>{let add=8;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}si+=add;};
-  const applyLaura=()=>{let add=lauraAmount;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}else{const toField=Math.min(3,add);sf+=toField;add-=toField;}si+=add;};
+  const applyRefresh=()=>{let add=8;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}si+=add;if(r.allowLoss&&si>r.max){const overflow=si-r.max;events.push({type:'loss',sourceType:'refresh',day:d,minute:currentMinute,beforeF:sf,beforeI:si,afterF:sf,afterI:r.max,overflow});si=r.max;}};
+  const applyLaura=()=>{let add=lauraAmount;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}else{const toField=Math.min(3,add);sf+=toField;add-=toField;}si+=add;if(r.allowLoss&&si>r.max){const overflow=si-r.max;events.push({type:'loss',sourceType:'laura',day:d,minute:currentMinute,beforeF:sf,beforeI:si,afterF:sf,afterI:r.max,overflow});si=r.max;}};
   const applyHarvest=(qty,reason='完成／收割')=>{const want=Math.max(0,Math.min(qty,sf+si));if(want<=0)return 0;let q=want;const fromField=Math.min(sf,q);sf-=fromField;q-=fromField;si=Math.max(0,si-q);if(sf<8&&si>0){const fill=Math.min(8-sf,si);sf+=fill;si-=fill;}events.push({type:'harvest',day:d,minute:currentMinute,qty:want,reason,afterF:sf,afterI:si});processed+=want;return want;};
   const opTimes=[];
   for(const w of dayWindows(av,d)){ if(w.start===w.end)continue; opTimes.push(w.start); for(const m of [480,960]) if(m>w.start&&m<w.end)opTimes.push(m); }
@@ -420,9 +420,9 @@ function simulateRiskDay(d,field,inv,MAX,ls,av){
   const maxCandidate=Math.max(dailyMin,MAX+24+ls.lauraAmount+40);
   let best=null;
   for(let p=dailyMin;p<=maxCandidate;p++){
-    const r={d,scoring:false,windows:dayWindows(av,d),max:MAX,dailyMin,lauraAmount:ls.lauraAmount,hasLaura:ls.hasLaura,process:p,minProcess:dailyMin};
+    const r={d,scoring:false,windows:dayWindows(av,d),max:MAX,dailyMin,lauraAmount:ls.lauraAmount,hasLaura:ls.hasLaura,process:p,minProcess:dailyMin,allowLoss:true};
     const sim=simulateDay(d,field,inv,r,av);
-    const risks=overflowInfo(sim.events,MAX);
+    const risks=(sim.events||[]).filter(e=>e.type==='loss').map(e=>({type:e.sourceType,day:e.day,minute:e.minute,beforeF:e.beforeF,beforeI:e.beforeI,afterF:e.afterF,afterI:e.afterI,overflow:e.overflow}));
     let future=[];
     if(!dayBefore){
       // 每日終安全線：23:59:59 儲存不得超過 MAX-8。
@@ -463,7 +463,6 @@ function simulateRiskDay(d,field,inv,MAX,ls,av){
 function buildLossAnalysis(rows,MAX,av,ls){
   const out=[];
   for(const r of rows){
-    if(r.scoring)continue;
     let risks=overflowInfo(r.events,MAX);
     if(r.impossible){
       const risk=simulateRiskDay(r.d,r.startF,r.startI,MAX,ls,av);
@@ -619,27 +618,18 @@ function scheduleWeek(MAX,av){
         startI:inv,
         total,
         lauraAmount:ls.lauraAmount,
-        hasLaura:ls.hasLaura
+        hasLaura:ls.hasLaura,
+        allowLoss:true
       };
     }else{
       r=choosePrep(d,field,inv);
       if(!r){
         const dailyMin=(d===1||d===5)?12:20;
-        r={d,scoring:false,windows:dayWindows(av,d),max:MAX,dailyMin,lauraAmount:ls.lauraAmount,hasLaura:ls.hasLaura,process:dailyMin,minProcess:dailyMin,impossible:true};
-        impossible.push(`${weekNames[d]}：目前可操作時間無法做到零損失，將改以風險分析說明可能的雷達損失。`);
+        const risk=simulateRiskDay(d,field,inv,MAX,ls,av);
+        r={d,scoring:false,windows:dayWindows(av,d),max:MAX,dailyMin,lauraAmount:ls.lauraAmount,hasLaura:ls.hasLaura,
+          process:risk?.process||dailyMin,minProcess:dailyMin,impossible:true,allowLoss:true};
+        impossible.push(`${weekNames[d]}：目前固定條件下無法做到零損失，以下改顯示最少損失的可執行排程，並以實際保留下來的雷達數量銜接後續日期。`);
       }
-    }
-
-    if(r.impossible){
-      r.startF=field;
-      r.startI=inv;
-      r.events=[];
-      r.simProcessed=0;
-      r.simFeasible=false;
-      r.endSimF=field;
-      r.endSimI=inv;
-      rows.push(r);
-      break;
     }
 
     const sim=simulateDay(d,field,inv,r,av);
@@ -722,9 +712,11 @@ function renderEventGroups(events,av){
   let i=0;
   while(i<events.length){
     const e=events[i];
+    if(e.type==='loss'){ i++; continue; }
     if(e.type==='refresh'){
       const x=eventDisplay(e,av);
-      html+=`<div class="event refresh"><div class="event-time">${x.dateLabel} ${x.time}</div><div class="event-action">刷新雷達 → 場上 ${e.afterF}、儲存 ${e.afterI}</div></div>`;
+      const loss=events[i+1]&&events[i+1].type==='loss'&&events[i+1].sourceType==='refresh'?events[i+1].overflow:0;
+      html+=`<div class="event refresh"><div class="event-time">${x.dateLabel} ${x.time}</div><div class="event-action">刷新雷達 → 場上 ${e.afterF}、儲存 ${e.afterI}${loss?`（⚠️ 預計 ${loss} 個雷達無法保留）`:''}</div></div>`;
       i++; continue;
     }
     const segStart=[0,480,960].filter(x=>x<=e.minute).pop()??0;
@@ -780,14 +772,10 @@ function render(){
      const loss=r.lossRisks.reduce((n,e)=>n+e.overflow,0);
      html+=`<div class="state warn">⚠️ 這一天預計會有 <b>${loss}</b> 個雷達因超過儲存上限而無法保留。</div>`;
    }
-   if(r.impossible){
-     html+=`<div class="timeline"><b>📋 每日操作排程</b><div class="empty">目前沒有安全排程，不顯示會造成爆倉的假操作步驟。</div></div>`;
-   }else{
-     html+=`<div class="timeline"><b>📋 每日操作排程</b>`;
-     if(!ev.length) html+=`<div class="empty">沒有可列出的事件。</div>`;
-     else html+=renderEventGroups(ev,av);
-     html+=`</div>`;
-   }
+   html+=`<div class="timeline"><b>📋 每日操作排程</b>`;
+   if(!ev.length) html+=`<div class="empty">沒有可列出的事件。</div>`;
+   else html+=renderEventGroups(ev,av);
+   html+=`</div>`;
    if(!r.simFeasible) html+=`<div class="state warn">⚠️ 目前可操作時間不足，這一天無法完成規劃。</div>`;
    if(r.d===6){
      const nf=r.nextMondayF,ni=r.nextMondayI,tf=r.nextMondayTargetF,ti=r.nextMondayTargetI;
