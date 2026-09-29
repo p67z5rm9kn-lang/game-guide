@@ -2,13 +2,13 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z 雷達週計劃 v8.3.3</title>
+<title>Last Z 雷達週計劃 v8.3.5</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v8.3.4</h1>
+<h1>Last Z｜雷達週計劃 v8.3.5</h1>
 <div class="sub">先設定「玩家可操作時間」。依照玩家可操作時間安排每一步操作與刷新雷達。</div>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
@@ -29,7 +29,7 @@
 <div class="setup-divider"></div>
 <label for="max">儲存上限</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
 <button id="plan">開始規劃</button>
-<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。v8 以遊戲時間 UTC−2 作為內部時間軸；當地時間會依裝置時區轉換後再排程。每 8h 刷新 8 個雷達優先於玩家操作；普通日安全處理量依實際刷新時間順序計算。</div>
+<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。星期一會直接承接上一個星期日的實際結束狀態。v8 以遊戲時間 UTC−2 作為內部時間軸；當地時間會依裝置時區轉換後再排程。每 8h 刷新 8 個雷達優先於玩家操作；普通日安全處理量依實際刷新時間順序計算。</div>
 </div>
 <div class="result-heading">📊 規劃結果</div>
 <div id="out"><div class="panel empty">輸入儲存上限後開始規劃</div></div>
@@ -388,21 +388,35 @@ function simulateDay(d,startF,startI,r,av){
   return {events,processed,lauraUsed,feasible,endF:sf,endI:si};
 }
 function scheduleWeek(MAX,av){
-  const ls=getLauraSettings();
-  const base=makePlan(MAX,ls.lauraAmount,ls.hasLaura),rows=[],impossible=[];
-  let field=11,inv=MAX-8;
+  const ls=getLauraSettings(), rows=[], impossible=[];
 
-  for(let d=0;d<7;d++){
-    const baseR=base[d];
-    let r={...baseR,d,scoring:(d===0||d===4),windows:dayWindows(av,d),max:MAX};
+  // v8.3.5：
+  // 星期二～星期五是一個週期；星期六～下一個星期一是另一個週期。
+  // 因此畫面上的星期一不能固定重設成 11／MAX-8，
+  // 而必須由「上一個星期六 → 星期日」實際承接過來。
+  //
+  // 先計算上一個週期的星期六、星期日，得到本週星期一真正的起始狀態。
+  // 上一個星期五為衝分日，完成後以 0／0 作為星期六週期起點。
+  function choosePrep(d,field,inv){
+    const dailyMin=(d===1||d===5)?12:20;
+    const dayBefore=(d===3||d===6);
+    let baseR={
+      d,
+      scoring:false,
+      windows:dayWindows(av,d),
+      max:MAX,
+      dailyMin,
+      lauraAmount:ls.lauraAmount,
+      hasLaura:ls.hasLaura,
+      process:dailyMin,
+      minProcess:dailyMin
+    };
 
-    // v8.3.4：一般日沿用原規則；星期四／星期日使用時間序列安全線。
-    if(!r.scoring && ((d===3)||(d===6))){
-      const dailyMin=r.dailyMin||20;
+    if(dayBefore){
       const maxCandidate=Math.max(dailyMin,MAX+24+ls.lauraAmount+24);
       let chosen=null;
       for(let p=dailyMin;p<=maxCandidate;p++){
-        const candidate={...r,process:p,minProcess:dailyMin};
+        const candidate={...baseR,process:p,minProcess:dailyMin};
         const test=simulateDay(d,field,inv,candidate,av);
         if(!test.feasible)continue;
 
@@ -412,13 +426,17 @@ function scheduleWeek(MAX,av){
         if(lauraEvent && lauraEvent.afterI>MAX) safe=false;
         if(!safe)continue;
 
+        // 星期四的下一個衝分日是本週星期五；星期日的下一個衝分日是下一週星期一。
         const nextScoreDay=d===6?7:4;
         const scoreDayIndex=((nextScoreDay%7)+7)%7;
         const nextScoreWindow=(dayWindows(av,scoreDayIndex)||[]).find(w=>w.start<=w.end);
-        const endAbs=nextScoreWindow?nextScoreDay*1440+nextScoreWindow.start:(d+1)*1440+960;
+        const endAbs=nextScoreWindow
+          ? nextScoreDay*1440+nextScoreWindow.start
+          : (d+1)*1440+960;
 
         let sf=test.endF,si=test.endI;
         if(lauraEvent){sf=lauraEvent.afterF;si=lauraEvent.afterI;}
+
         for(let abs=Math.floor(startAbs/480)*480+480;abs<=endAbs;abs+=480){
           let add=8;
           if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}
@@ -430,24 +448,55 @@ function scheduleWeek(MAX,av){
         chosen={...candidate};
         break;
       }
-      if(chosen) r=chosen;
-      else r={...r,process:dailyMin,minProcess:dailyMin};
-    }else if(!r.scoring){
-      // v8.3.3：一般日安全處理量維持原規則。
-      const dailyMin=r.dailyMin||((d===1||d===5)?12:20);
-      const maxCandidate=Math.max(dailyMin,MAX+24+ls.lauraAmount+20);
-      let chosen=null;
-      for(let p=dailyMin;p<=maxCandidate;p++){
-        const candidate={...r,process:p,minProcess:dailyMin};
-        const test=simulateDay(d,field,inv,candidate,av);
-        const refreshUnsafe=(test.events||[]).some(e=>e.type==='refresh' && e.afterI>MAX-8);
-        if(test.simFeasible!==false && !refreshUnsafe){
-          chosen={...candidate};
-          break;
-        }
+      return chosen||baseR;
+    }
+
+    // 一般準備日沿用 v8.3.3 的安全處理量。
+    const maxCandidate=Math.max(dailyMin,MAX+24+ls.lauraAmount+20);
+    let chosen=null;
+    for(let p=dailyMin;p<=maxCandidate;p++){
+      const candidate={...baseR,process:p,minProcess:dailyMin};
+      const test=simulateDay(d,field,inv,candidate,av);
+      const refreshUnsafe=(test.events||[]).some(e=>e.type==='refresh'&&e.afterI>MAX-8);
+      if(test.simFeasible!==false&&!refreshUnsafe){
+        chosen={...candidate};
+        break;
       }
-      if(chosen) r=chosen;
-      else r={...r,process:dailyMin,minProcess:dailyMin};
+    }
+    return chosen||baseR;
+  }
+
+  // 先求「上一個星期六 → 星期日」的週期 B 終點。
+  let priorField=0,priorInv=0;
+  for(const d of [5,6]){
+    const r=choosePrep(d,priorField,priorInv);
+    const sim=simulateDay(d,priorField,priorInv,r,av);
+    priorField=sim.endF;
+    priorInv=sim.endI;
+  }
+
+  // 本週星期一直接承接上一個星期日的實際結束狀態。
+  let field=priorField,inv=priorInv;
+
+  for(let d=0;d<7;d++){
+    let r;
+    if(d===0||d===4){
+      // 衝分日不重新套用固定 11／MAX-8。
+      // 目標是從當天實際起始狀態出發，吃掉當日可取得的系統刷新與勞拉資源。
+      const total=field+inv+24+ls.lauraAmount;
+      r={
+        d,
+        scoring:true,
+        windows:dayWindows(av,d),
+        max:MAX,
+        startF:field,
+        startI:inv,
+        total,
+        lauraAmount:ls.lauraAmount,
+        hasLaura:ls.hasLaura
+      };
+    }else{
+      r=choosePrep(d,field,inv);
     }
 
     const sim=simulateDay(d,field,inv,r,av);
@@ -459,23 +508,15 @@ function scheduleWeek(MAX,av){
     r.endSimF=sim.endF;
     r.endSimI=sim.endI;
 
-    // v8.3.5：星期日之後不是另一個獨立的「新週」，而是自然接到下一個星期一。
-    // 本週第一個星期一仍保留固定的衝分日起始基準 11／MAX-8；
-    // 同時把星期日實際結束狀態帶入「下一週星期一」的銜接資訊，避免把兩者混成同一天。
-    if(d===6){
-      r.nextMondayF=sim.endF;
-      r.nextMondayI=sim.endI;
-      r.nextMondayTargetF=11;
-      r.nextMondayTargetI=MAX-8;
-      r.nextMondayContinuous=(sim.endF===11 && sim.endI===MAX-8);
-    }
-
     field=sim.endF;
     inv=sim.endI;
 
-    if(!sim.feasible) impossible.push(`${weekNames[d]}：目前可操作時間不足，無法在當日完成 v5 規劃的本日實際處理量。`);
+    if(!sim.feasible){
+      impossible.push(`${weekNames[d]}：目前可操作時間不足，無法在當日完成規劃。`);
+    }
     rows.push(r);
   }
+
   return {rows,impossible};
 }
 function eventDisplay(e,av){return gameMomentToDisplay(e.day,e.minute,av);}
@@ -563,10 +604,6 @@ function render(){
    else html+=renderEventGroups(ev,av);
    html+=`</div>`;
    if(!r.simFeasible) html+=`<div class="state warn">⚠️ 目前可操作時間不足，這一天無法完成規劃。</div>`;
-   if(r.d===6){
-     const nf=r.nextMondayF,ni=r.nextMondayI,tf=r.nextMondayTargetF,ti=r.nextMondayTargetI;
-     html+=`<div class="cycle-bridge"><div class="cycle-bridge-title">↪ 下一週星期一銜接</div><div class="cycle-bridge-text">星期日結束 → 場上 ${nf}、儲存 ${ni}</div><div class="cycle-bridge-text">星期一衝分日起始基準 → 場上 ${tf}、儲存 ${ti}</div>${r.nextMondayContinuous?'':'<div class="cycle-bridge-warn">⚠️ 目前星期日結束狀態與下一週星期一衝分日起始基準不一致，兩者不能視為同一個狀態。</div>'}</div>`;
-   }
    html+=`</section>`;
  }
  $('#out').innerHTML=html;
