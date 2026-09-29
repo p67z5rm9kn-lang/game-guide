@@ -8,7 +8,7 @@
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v8.3.15</h1>
+<h1>Last Z｜雷達週計劃 v8.3.16</h1>
 <div class="sub">先設定「玩家可操作時間」。依照玩家可操作時間安排每一步操作與刷新雷達。</div>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
@@ -487,6 +487,22 @@ function scheduleWeek(MAX,av){
   // 不能在每個星期一重新套用 11／MAX-8。
   // 本次只修正週期承接；v8.3.7 的一般日／隔日安全線保留。
 
+  // v8.3.16：星期四／星期日的「每日終」安全線，不再固定為 MAX-8。
+  // 依下一個衝分日玩家第一次可操作前，實際會經歷的系統刷新次數動態計算。
+  // 事件優先順序為「刷新優先於玩家操作」，因此若玩家剛好在 00:00／08:00／16:00 可操作，
+  // 該時刻的刷新仍然要先計入安全線。
+  function crossDayRefreshCountToNextScore(d){
+    const nextScoreDay=d===6?7:4;
+    const scoreIdx=((nextScoreDay%7)+7)%7;
+    const nextW=(dayWindows(av,scoreIdx)||[]).find(w=>w.start<=w.end);
+    const opMinute=nextW?nextW.start:960;
+    const endAbs=nextScoreDay*1440+opMinute;
+    const startAbs=(d+1)*1440;
+    let count=0;
+    for(let abs=startAbs;abs<=endAbs;abs+=480)count++;
+    return {count,endAbs,opMinute};
+  }
+
   function choosePrep(d,field,inv){
     const dailyMin=(d===1||d===5)?12:20;
     const dayBefore=(d===3||d===6);
@@ -516,8 +532,10 @@ function scheduleWeek(MAX,av){
         const refreshUnsafe=(test.events||[]).some(e=>e.type==='refresh'&&e.afterI>MAX);
         if(refreshUnsafe)continue;
 
-        // 每日終安全線：23:59:59 儲存不得超過 MAX-8。
-        const endSafeLimit=Math.max(0,MAX-8);
+        // v8.3.16：星期四／星期日每日終安全線，必須一次預留到下一個衝分日第一次可操作前的所有刷新。
+        // 例如下一次操作前會經歷 3 次 +8，MAX=38 時每日終最多只能保留 14。
+        const crossDay=crossDayRefreshCountToNextScore(d);
+        const endSafeLimit=Math.max(0,MAX-8*crossDay.count);
         if(test.endI>endSafeLimit)continue;
 
         const lauraEvent=(test.events||[]).find(e=>e.type==='laura');
@@ -762,7 +780,8 @@ function render(){
    if(r.impossible){
      const risk=r.lossRisks||[];
      const loss=risk.reduce((n,e)=>n+e.overflow,0);
-     html+=`<div class="state warn">⚠️ ${weekNames[r.d]} 目前無法做到零損失。依目前固定的儲存上限、勞拉星級與可操作時間推算，預計至少有 <b>${loss}</b> 個雷達無法保留。請提早可操作時間，或增加可操作時段。</div>`;
+     const crossDayNote=(r.d===3||r.d===6)?`；本日結束安全線會依下一個衝分日前實際剩餘的刷新次數動態計算`:"";
+     html+=`<div class="state warn">⚠️ ${weekNames[r.d]} 目前無法做到零損失。依目前固定的儲存上限、勞拉星級與可操作時間推算，預計至少有 <b>${loss}</b> 個雷達無法保留${crossDayNote}。請提早可操作時間，或增加可操作時段。</div>`;
      if(risk.length){
        html+=`<div class="loss-panel"><div class="loss-title">📉 預計雷達損失</div>`;
        risk.forEach(e=>{const x=eventDisplay(e,av);const kind=e.type==='laura'?'勞拉':'刷新雷達';html+=`<div class="loss-item"><b>${x.dateLabel} ${x.time}｜${kind}</b><br>發生前：場上 ${e.beforeF}、儲存 ${e.beforeI}<br>${kind==='刷新雷達'?'刷新 +8':'勞拉增加'} → 儲存將達 ${e.afterI}<br>儲存上限：${MAX}｜<b>預計無法保留 ${e.overflow} 個</b></div>`;});
