@@ -5,7 +5,7 @@
 <title>Last Z 雷達週計劃 v8.3.12</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.risk-detail{margin-top:8px;padding:10px 12px;border:1px solid #806b3e;border-radius:10px;background:#1a2630}.risk-detail b{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
 </style></head>
 <body><main>
 <h1>Last Z｜雷達週計劃 v8.3.12</h1>
@@ -25,7 +25,7 @@
 <label for="lauraStar">勞拉幾星</label>
 <select id="lauraStar" class="setting-select"><option value="0">0★（+5）</option><option value="1">1★（+10）</option><option value="2">2★（+10）</option><option value="3">3★（+10）</option><option value="4" selected>4★（+20）</option><option value="5">5★（+20）</option></select>
 </div></div>
-<div class="meta">勞拉數量會依星級直接連動每日排程；無勞拉時，排程不會安排點擊勞拉。</div>
+<div class="meta">勞拉星級會直接連動每日排程；無勞拉時，排程不會安排點擊勞拉。儲存上限與勞拉星級視為固定條件，不會因風險分析自動調整。</div>
 <div class="setup-divider"></div>
 <label for="max">儲存上限</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
 <button id="plan">重新規劃</button>
@@ -313,11 +313,7 @@ function simulateDay(d,startF,startI,r,av){
   let sf=startF, si=startI, processed=0, lauraUsed=false;
   const target=score?r.total:r.process;
   let currentMinute=0;
-  const applyRefresh=()=>{
-    const beforeF=sf,beforeI=si;
-    let add=8;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}si+=add;
-    return {beforeF,beforeI,afterF:sf,afterI:si,delta:8};
-  };
+  const applyRefresh=()=>{let add=8;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}si+=add;};
   const applyLaura=()=>{let add=lauraAmount;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}else{const toField=Math.min(3,add);sf+=toField;add-=toField;}si+=add;};
   const applyHarvest=(qty,reason='完成／收割')=>{const want=Math.max(0,Math.min(qty,sf+si));if(want<=0)return 0;let q=want;const fromField=Math.min(sf,q);sf-=fromField;q-=fromField;si=Math.max(0,si-q);if(sf<8&&si>0){const fill=Math.min(8-sf,si);sf+=fill;si-=fill;}events.push({type:'harvest',day:d,minute:currentMinute,qty:want,reason,afterF:sf,afterI:si});processed+=want;return want;};
   const opTimes=[];
@@ -333,8 +329,9 @@ function simulateDay(d,startF,startI,r,av){
   for(const node of timeline){
     currentMinute=node.minute;
     if(node.type==='refresh'){
-      const refreshState=applyRefresh();
-      events.push({type:'refresh',day:d,minute:node.minute,...refreshState});
+      const beforeF=sf,beforeI=si;
+      applyRefresh();
+      events.push({type:'refresh',day:d,minute:node.minute,delta:8,beforeF,beforeI,afterF:sf,afterI:si});
       continue;
     }
     const m=node.minute;
@@ -344,15 +341,17 @@ function simulateDay(d,startF,startI,r,av){
       if(hasLaura&&!lauraUsed){
         // 衝分日：第一個可操作時間先收割所有目前可用雷達，再點 Laura。
         if(sf+si>0)applyHarvest(sf+si,'完成場上與儲存雷達');
+        const lauraBeforeF=sf,lauraBeforeI=si;
         applyLaura(); lauraUsed=true;
-        events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});
+        events.push({type:'laura',day:d,minute:m,delta:lauraAmount,beforeF:lauraBeforeF,beforeI:lauraBeforeI,afterF:sf,afterI:si});
       }
       if(processed<target)applyHarvest(target-processed);
     }else if(dayBefore){
       if(processed<target)applyHarvest(target-processed);
       if(hasLaura&&!lauraUsed&&processed>=target&&sf===8){
+        const lauraBeforeF=sf,lauraBeforeI=si;
         applyLaura(); lauraUsed=true;
-        events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});
+        events.push({type:'laura',day:d,minute:m,delta:lauraAmount,beforeF:lauraBeforeF,beforeI:lauraBeforeI,afterF:sf,afterI:si});
       }
     }else{
       // v8.3.1 普通日：每一次玩家可操作時，都重新依「剩餘需求」與「當下可用雷達」評估。
@@ -365,16 +364,18 @@ function simulateDay(d,startF,startI,r,av){
         // 目前雷達足夠：先完成剩餘需求。若 Laura 尚未使用，再於需求完成後點擊 Laura。
         applyHarvest(remaining);
         if(hasLaura&&!lauraUsed){
+          const lauraBeforeF=sf,lauraBeforeI=si;
           applyLaura(); lauraUsed=true;
-          events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});
+          events.push({type:'laura',day:d,minute:m,delta:lauraAmount,beforeF:lauraBeforeF,beforeI:lauraBeforeI,afterF:sf,afterI:si});
         }
       }else{
         // 目前雷達不足：先處理全部目前可用雷達。
         applyHarvest(available);
         // 若 Laura 尚未使用，處理完目前雷達後立即使用 Laura。
         if(hasLaura&&!lauraUsed){
+          const lauraBeforeF=sf,lauraBeforeI=si;
           applyLaura(); lauraUsed=true;
-          events.push({type:'laura',day:d,minute:m,delta:lauraAmount,afterF:sf,afterI:si});
+          events.push({type:'laura',day:d,minute:m,delta:lauraAmount,beforeF:lauraBeforeF,beforeI:lauraBeforeI,afterF:sf,afterI:si});
 
           // Step 5：Laura 完成後立即重新評估「剩餘需求」。
           // 若 Laura 後目前已有足夠雷達，必須在同一個可操作時間立即完成剩餘需求；
@@ -391,32 +392,80 @@ function simulateDay(d,startF,startI,r,av){
   const feasible=processed>=target && (!score || uniqueOps.some(m=>m>=960)) && (!dayBefore || hasOperation) && (!hasLaura || lauraUsed);
   return {events,processed,lauraUsed,feasible,endF:sf,endI:si};
 }
-function analyzeOverflow(events,MAX){
-  const refreshes=(events||[]).filter(e=>e.type==='refresh'&&e.afterI>MAX).map(e=>({
-    day:e.day,minute:e.minute,beforeF:e.beforeF,beforeI:e.beforeI,afterF:e.afterF,afterI:e.afterI,overflow:e.afterI-MAX
-  }));
-  const total=refreshes.reduce((sum,e)=>sum+e.overflow,0);
-  const maxObserved=(events||[]).reduce((m,e)=>Math.max(m,e.afterI??0),0);
-  return {refreshes,total,maxObserved};
+function overflowInfo(events,MAX){
+  let carriedLoss=0, actualStorage=null;
+  const out=[];
+  for(const e of (events||[])){
+    if(e.type!=='refresh'&&e.type!=='laura')continue;
+    let beforeI=actualStorage===null?e.beforeI:Math.min(e.beforeI,MAX);
+    let rawAfter=e.afterI;
+    if(actualStorage!==null){
+      const delta=Math.max(0,e.afterI-e.beforeI);
+      rawAfter=beforeI+delta;
+    }
+    if(rawAfter>MAX){
+      const overflow=rawAfter-MAX;
+      out.push({type:e.type,day:e.day,minute:e.minute,beforeF:e.beforeF,beforeI,afterF:e.afterF,afterI:rawAfter,overflow});
+      carriedLoss+=overflow;
+      actualStorage=MAX;
+    }else{
+      actualStorage=rawAfter;
+    }
+  }
+  return out;
 }
-function bestRiskCandidate(d,field,inv,baseR,MAX,av){
-  const dailyMin=baseR.dailyMin;
-  const maxCandidate=Math.max(dailyMin,MAX+24+(baseR.lauraAmount||0)+40);
+function simulateRiskDay(d,field,inv,MAX,ls,av){
+  const dailyMin=(d===1||d===5)?12:20;
+  const dayBefore=(d===3||d===6);
+  const maxCandidate=Math.max(dailyMin,MAX+24+ls.lauraAmount+40);
   let best=null;
   for(let p=dailyMin;p<=maxCandidate;p++){
-    const candidate={...baseR,process:p,minProcess:dailyMin};
-    const sim=simulateDay(d,field,inv,candidate,av);
-    const risk=analyzeOverflow(sim.events,MAX);
-    const score=[risk.total, sim.processed<Math.min(candidate.process||0, candidate.process||0)?1:0, p];
-    if(!best || score[0]<best.score[0] || (score[0]===best.score[0]&&score[2]<best.score[2])){
-      best={candidate,sim,risk,score};
+    const r={d,scoring:false,windows:dayWindows(av,d),max:MAX,dailyMin,lauraAmount:ls.lauraAmount,hasLaura:ls.hasLaura,process:p,minProcess:dailyMin};
+    const sim=simulateDay(d,field,inv,r,av);
+    const risks=overflowInfo(sim.events,MAX);
+    let future=[];
+    if(dayBefore){
+      const laura=(sim.events||[]).find(e=>e.type==='laura');
+      if(laura){
+        const nextScoreDay=d===6?7:4;
+        const scoreIdx=((nextScoreDay%7)+7)%7;
+        const nextW=(dayWindows(av,scoreIdx)||[]).find(w=>w.start<=w.end);
+        const endAbs=nextW?nextScoreDay*1440+nextW.start:(d+1)*1440+960;
+        let sf=laura.afterF,si=laura.afterI;
+        for(let abs=(d+1)*1440;abs<=endAbs;abs+=480){
+          let add=8,beforeF=sf,beforeI=si;
+          if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}
+          si+=add;
+          if(si>MAX)future.push({type:'refresh',day:Math.floor(abs/1440),minute:abs%1440,beforeF,beforeI,afterF:sf,afterI:si,overflow:si-MAX});
+        }
+      }
+    }
+    const all=[...risks,...future];
+    const loss=all.reduce((n,e)=>n+e.overflow,0);
+    const score=[loss,sim.feasible?0:1,p];
+    if(!best||score[0]<best.score[0]||(score[0]===best.score[0]&&score[1]<best.score[1])||(score[0]===best.score[0]&&score[1]===best.score[1]&&score[2]<best.score[2])){
+      best={process:p,events:sim.events,risks:all,loss,feasible:sim.feasible,score};
     }
   }
   return best;
 }
-function formatRiskTime(e,av){
-  const x=gameMomentToDisplay(e.day,e.minute,av);
-  return `${x.dateLabel} ${x.time}`;
+function buildLossAnalysis(rows,MAX,av,ls){
+  const out=[];
+  for(const r of rows){
+    if(r.scoring)continue;
+    let risks=overflowInfo(r.events,MAX);
+    if(r.impossible){
+      const risk=simulateRiskDay(r.d,r.startF,r.startI,MAX,ls,av);
+      risks=risk?risk.risks:[];
+      r.riskProcess=risk?.process||null;
+      r.riskFeasible=risk?.feasible||false;
+    }
+    if(risks.length){
+      out.push({day:r.d,loss:risks.reduce((n,e)=>n+e.overflow,0),risks});
+      r.lossRisks=risks;
+    }
+  }
+  return out;
 }
 function scheduleWeek(MAX,av){
   const ls=getLauraSettings(), rows=[], impossible=[];
@@ -543,19 +592,8 @@ function scheduleWeek(MAX,av){
       r=choosePrep(d,field,inv);
       if(!r){
         const dailyMin=(d===1||d===5)?12:20;
-        const baseR={d,scoring:false,windows:dayWindows(av,d),max:MAX,dailyMin,lauraAmount:ls.lauraAmount,hasLaura:ls.hasLaura,process:dailyMin,minProcess:dailyMin};
-        const risk=bestRiskCandidate(d,field,inv,baseR,MAX,av);
-        r={...baseR,impossible:true};
-        r.risk=risk;
-        if(risk?.risk?.total>0){
-          const details=risk.risk.refreshes.map(e=>`${formatRiskTime(e,av)}：刷新前場上 ${e.beforeF}、儲存 ${e.beforeI} → +8 → 儲存 ${e.afterI}，上限 ${MAX}，預計無法保留 ${e.overflow} 個`).join('<br>');
-          r.riskSummary=`預計至少有 ${risk.risk.total} 個雷達會因刷新超過儲存上限而無法保留。`;
-          r.riskDetails=details;
-          impossible.push(`${weekNames[d]}：目前可操作時間下，若照目前設定規劃，預計至少有 ${risk.risk.total} 個雷達會因刷新超過儲存上限而無法保留。`);
-        }else{
-          r.riskSummary='目前沒有找到可在現有可操作時間內完成的安全方案。';
-          impossible.push(`${weekNames[d]}：目前可操作時間不足，無法完成安全規劃。`);
-        }
+        r={d,scoring:false,windows:dayWindows(av,d),max:MAX,dailyMin,lauraAmount:ls.lauraAmount,hasLaura:ls.hasLaura,process:dailyMin,minProcess:dailyMin,impossible:true};
+        impossible.push(`${weekNames[d]}：目前設定無法在不超過儲存上限的前提下完成隔日衝分安全線；請提早可操作時間，或增加可操作時段。`);
       }
     }
 
@@ -674,6 +712,7 @@ function render(){
  if(!Number.isInteger(MAX)||MAX<8){$('#out').innerHTML='<div class="panel empty">請輸入至少 8 的整數儲存上限。</div>';return}
  const av=buildGameAvailability(),plan=scheduleWeek(MAX,av);
  const ls=getLauraSettings();
+ const lossAnalysis=buildLossAnalysis(plan.rows,MAX,av,ls);
  let html='';
 
  if(plan.impossible.length) html+=`<div class="panel result"><b class="warn">⚠️ 時間限制</b><div class="meta">${plan.impossible.join('<br>')}</div></div>`;
@@ -682,11 +721,17 @@ function render(){
    html+=`<section class="day ${r.scoring?'score':''}"><h2>${weekNames[r.d]} <span class="tag">${r.scoring?'🏆 衝分日':'準備日'}</span></h2>`;
    html+=`<div class="state">開始：場上 ${r.startF}、儲存 ${r.startI}</div>`;
    if(r.impossible){
-     html+=`<div class="state warn">⚠️ ${weekNames[r.d]} 目前無法產生「零損失」的安全排程。`;
-     if(r.riskSummary) html+=`<br>${r.riskSummary}`;
-     html+=`</div>`;
-     if(r.riskDetails) html+=`<div class="risk-detail"><b>損失發生點</b><div class="meta">${r.riskDetails}</div></div>`;
-     html+=`<div class="meta">儲存上限與勞拉星級視為目前固定設定，本次不會自動修改；若要降低損失，請優先調整玩家可操作時間。</div>`;
+     const risk=r.lossRisks||[];
+     const loss=risk.reduce((n,e)=>n+e.overflow,0);
+     html+=`<div class="state warn">⚠️ ${weekNames[r.d]} 目前無法做到零損失。依目前固定的儲存上限、勞拉星級與可操作時間推算，預計至少有 <b>${loss}</b> 個雷達無法保留。請提早可操作時間，或增加可操作時段。</div>`;
+     if(risk.length){
+       html+=`<div class="loss-panel"><div class="loss-title">📉 預計雷達損失</div>`;
+       risk.forEach(e=>{const x=eventDisplay(e,av);const kind=e.type==='laura'?'勞拉':'刷新雷達';html+=`<div class="loss-item"><b>${x.dateLabel} ${x.time}｜${kind}</b><br>發生前：場上 ${e.beforeF}、儲存 ${e.beforeI}<br>${kind==='刷新雷達'?'刷新 +8':'勞拉增加'} → 儲存將達 ${e.afterI}<br>儲存上限：${MAX}｜<b>預計無法保留 ${e.overflow} 個</b></div>`;});
+       html+=`</div>`;
+     }
+   } else if(r.lossRisks&&r.lossRisks.length){
+     const loss=r.lossRisks.reduce((n,e)=>n+e.overflow,0);
+     html+=`<div class="state warn">⚠️ 這一天預計會有 <b>${loss}</b> 個雷達因超過儲存上限而無法保留。</div>`;
    }
    html+=`<div class="timeline"><b>📋 每日操作排程</b>`;
    if(!ev.length) html+=`<div class="empty">沒有可列出的事件。</div>`;
@@ -727,10 +772,13 @@ $('#plan').addEventListener('click',render);
 $('#max').addEventListener('input',autoPlanIfReady);
 $('#max').addEventListener('change',autoPlanIfReady);
 $('#max').addEventListener('blur',autoPlanIfReady);
+$('#max').addEventListener('keyup',autoPlanIfReady);
+$('#max').addEventListener('focusout',autoPlanIfReady);
 </script>
 <style>
 .modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.modes label{display:flex;align-items:center;gap:5px;border:1px solid #365574;background:#102842;color:#dce8f5;border-radius:10px;padding:9px 10px;margin:0}.modes input{width:auto}.time-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:7px;align-items:center;margin:8px 0}.time-row input,.time-row select,.setting-select{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px}.setting-select{margin-bottom:4px}.time-sep{color:var(--gold);font-weight:700;text-align:center;font-size:18px}.smallbtn{width:auto;margin:0;padding:10px 12px;font-size:14px}.day-title{font-size:13px;color:#dce8f5;margin-top:12px}
 .laura-toggle-row{display:flex;align-items:center;gap:12px;margin-bottom:4px}.switch-label{display:flex!important;align-items:center;gap:8px!important;border:0!important;background:transparent!important;padding:0!important;color:#dce8f5!important}.switch-label input{position:absolute;opacity:0;pointer-events:none}.switch{position:relative;width:48px;height:26px;border-radius:999px;background:#365574;display:inline-block;transition:.2s}.switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.switch-label input:checked + .switch{background:#b28c3f}.switch-label input:checked + .switch:after{transform:translateX(22px)}.laura-toggle-row #lauraDetail{flex:1;min-width:0}.laura-toggle-row #lauraDetail label{margin-bottom:4px}.setup-panel{padding-bottom:16px}.section-title{font-size:18px;margin:0 0 14px;color:var(--gold)}.setup-divider{height:1px;background:#27415f;margin:16px 0}.result-heading{font-size:18px;font-weight:700;color:var(--gold);margin:18px 2px 10px}.setup-panel .day-title{font-weight:600}.setup-panel .meta{margin-top:12px}.cycle-bridge{margin-top:10px;padding:12px 14px;border:1px solid #365574;border-radius:12px;background:#102842}.cycle-bridge-title{font-weight:700;color:var(--gold);margin-bottom:6px}.cycle-bridge-text{font-size:14px;line-height:1.6;color:#dce8f5}.cycle-bridge-warn{margin-top:6px;color:#ffd36a;font-size:13px;line-height:1.5}
+.loss-panel{margin-top:10px;padding:12px 14px;border:1px solid #8a6a2b;border-radius:12px;background:#102842}.loss-title{font-weight:700;color:#ffd36a;margin-bottom:8px}.loss-item{font-size:14px;line-height:1.6;padding:8px 0;border-top:1px solid #27415f}.loss-item:first-of-type{border-top:0}.loss-item b{color:#ffd36a}
 </style>
 <script>
 const timeStoreKey='lastz_radar_v8_availability';
