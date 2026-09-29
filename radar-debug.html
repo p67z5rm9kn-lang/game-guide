@@ -2,13 +2,13 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z 雷達週計劃 v8.3.12</title>
+<title>Last Z 雷達週計劃 v8.3.13</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v8.3.12</h1>
+<h1>Last Z｜雷達週計劃 v8.3.13</h1>
 <div class="sub">先設定「玩家可操作時間」。依照玩家可操作時間安排每一步操作與刷新雷達。</div>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
@@ -29,7 +29,7 @@
 <div class="setup-divider"></div>
 <label for="max">儲存上限</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
 <button id="plan">重新規劃</button>
-<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。v8 以遊戲時間 UTC−2 作為內部時間軸；當地時間會依裝置時區轉換後再排程。每 8h 刷新 8 個雷達優先於玩家操作；普通日安全處理量依實際刷新時間順序計算。</div>
+<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。v8 以遊戲時間 UTC−2 作為內部時間軸；當地時間會依裝置時區轉換後再排程。每 8h 刷新 8 個雷達優先於玩家操作；普通日安全處理量依實際刷新時間順序計算；每日中儲存不得超過上限，23:59:59 儲存不得超過「儲存上限－8」。</div>
 </div>
 <div class="result-heading">📊 規劃結果</div>
 <div id="out"><div class="panel empty">輸入儲存上限後會自動規劃</div></div>
@@ -424,6 +424,17 @@ function simulateRiskDay(d,field,inv,MAX,ls,av){
     const sim=simulateDay(d,field,inv,r,av);
     const risks=overflowInfo(sim.events,MAX);
     let future=[];
+    if(!dayBefore){
+      // 每日終安全線：23:59:59 儲存不得超過 MAX-8。
+      // 若超過，下一個 00:00 刷新會立刻造成損失，因此把 00:00 視為預計損失時間。
+      const endLimit=Math.max(0,MAX-8);
+      if(sim.endI>endLimit){
+        const overflow=Math.max(0,sim.endI+8-MAX);
+        if(overflow>0){
+          future.push({type:'refresh',day:d+1,minute:0,beforeF:sim.endF,beforeI:sim.endI,afterF:sim.endF,afterI:Math.min(MAX,sim.endI+8),overflow});
+        }
+      }
+    }
     if(dayBefore){
       const laura=(sim.events||[]).find(e=>e.type==='laura');
       if(laura){
@@ -555,7 +566,9 @@ function scheduleWeek(MAX,av){
       chosen={...candidate};
       break;
     }
-    return chosen||baseR;
+    // 找不到符合每日中／每日終安全線的候選時，必須回傳 null。
+    // 不可以再用 dailyMin 當成假方案，否則排程畫面會出現超過儲存上限的狀態。
+    return chosen;
   }
 
   // 先計算「上一個星期六→星期日」的週期 B，
@@ -593,7 +606,7 @@ function scheduleWeek(MAX,av){
       if(!r){
         const dailyMin=(d===1||d===5)?12:20;
         r={d,scoring:false,windows:dayWindows(av,d),max:MAX,dailyMin,lauraAmount:ls.lauraAmount,hasLaura:ls.hasLaura,process:dailyMin,minProcess:dailyMin,impossible:true};
-        impossible.push(`${weekNames[d]}：目前設定無法在不超過儲存上限的前提下完成隔日衝分安全線；請提早可操作時間，或增加可操作時段。`);
+        impossible.push(`${weekNames[d]}：目前可操作時間無法做到零損失，將改以風險分析說明可能的雷達損失。`);
       }
     }
 
@@ -622,7 +635,12 @@ function scheduleWeek(MAX,av){
     inv=sim.endI;
 
     if(!sim.feasible){
-      impossible.push(`${weekNames[d]}：目前可操作時間不足，無法當日完成規劃。`);
+      if(r.scoring){
+        const need=Math.max(0,r.total-sim.processed);
+        r.scoreShortfall=need;
+        r.scoreAdvice='建議在本日新增可操作時段；至少要讓玩家再有一次可操作機會來處理剩餘雷達。';
+      }
+      impossible.push(`${weekNames[d]}：目前可操作時間不足，無法完成本日預計收割量。`);
     }
     rows.push(r);
   }
@@ -715,11 +733,20 @@ function render(){
  const lossAnalysis=buildLossAnalysis(plan.rows,MAX,av,ls);
  let html='';
 
- if(plan.impossible.length) html+=`<div class="panel result"><b class="warn">⚠️ 時間限制</b><div class="meta">${plan.impossible.join('<br>')}</div></div>`;
+ if(plan.impossible.length) html+=`<div class="panel result"><b class="warn">⚠️ 規劃提醒</b><div class="meta">${plan.impossible.join('<br>')}</div></div>`;
  for(const r of plan.rows){
    const ev=r.events||[];
    html+=`<section class="day ${r.scoring?'score':''}"><h2>${weekNames[r.d]} <span class="tag">${r.scoring?'🏆 衝分日':'準備日'}</span></h2>`;
    html+=`<div class="state">開始：場上 ${r.startF}、儲存 ${r.startI}</div>`;
+   if(r.scoring){
+     const planned=Math.max(0,r.total||0),actual=Math.max(0,r.simProcessed||0),shortfall=Math.max(0,planned-actual);
+     if(r.simFeasible){
+       html+=`<div class="score-plan">📌 本日預計收割 <b>${planned}</b> 個雷達</div>`;
+     }else{
+       html+=`<div class="state warn">⚠️ 本日預計需要收割 <b>${planned}</b> 個雷達；依目前可操作時間，預計只能收割 <b>${actual}</b> 個，還差 <b>${shortfall}</b> 個。</div>`;
+       html+=`<div class="score-advice">💡 建議：在本日新增可操作時段，讓剩餘 ${shortfall} 個雷達有機會完成收割。</div>`;
+     }
+   }
    if(r.impossible){
      const risk=r.lossRisks||[];
      const loss=risk.reduce((n,e)=>n+e.overflow,0);
@@ -733,10 +760,14 @@ function render(){
      const loss=r.lossRisks.reduce((n,e)=>n+e.overflow,0);
      html+=`<div class="state warn">⚠️ 這一天預計會有 <b>${loss}</b> 個雷達因超過儲存上限而無法保留。</div>`;
    }
-   html+=`<div class="timeline"><b>📋 每日操作排程</b>`;
-   if(!ev.length) html+=`<div class="empty">沒有可列出的事件。</div>`;
-   else html+=renderEventGroups(ev,av);
-   html+=`</div>`;
+   if(r.impossible){
+     html+=`<div class="timeline"><b>📋 每日操作排程</b><div class="empty">目前沒有安全排程，不顯示會造成爆倉的假操作步驟。</div></div>`;
+   }else{
+     html+=`<div class="timeline"><b>📋 每日操作排程</b>`;
+     if(!ev.length) html+=`<div class="empty">沒有可列出的事件。</div>`;
+     else html+=renderEventGroups(ev,av);
+     html+=`</div>`;
+   }
    if(!r.simFeasible) html+=`<div class="state warn">⚠️ 目前可操作時間不足，這一天無法完成規劃。</div>`;
    if(r.d===6){
      const nf=r.nextMondayF,ni=r.nextMondayI,tf=r.nextMondayTargetF,ti=r.nextMondayTargetI;
@@ -768,17 +799,12 @@ document.getElementById('lauraToggle').addEventListener('change',()=>{saveLauraS
 document.getElementById('lauraStar').addEventListener('change',()=>{saveLauraSettings();autoPlanIfReady();});
 loadLauraSettings();
 syncLauraUI();
-$('#plan').addEventListener('click',render);
-$('#max').addEventListener('input',autoPlanIfReady);
-$('#max').addEventListener('change',autoPlanIfReady);
-$('#max').addEventListener('blur',autoPlanIfReady);
-$('#max').addEventListener('keyup',autoPlanIfReady);
-$('#max').addEventListener('focusout',autoPlanIfReady);
+// v8.3.13：所有重新規劃事件統一在 autoPlanIfReady 定義完成後綁定，避免儲存上限按鈕／輸入事件失效。
 </script>
 <style>
 .modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.modes label{display:flex;align-items:center;gap:5px;border:1px solid #365574;background:#102842;color:#dce8f5;border-radius:10px;padding:9px 10px;margin:0}.modes input{width:auto}.time-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:7px;align-items:center;margin:8px 0}.time-row input,.time-row select,.setting-select{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px}.setting-select{margin-bottom:4px}.time-sep{color:var(--gold);font-weight:700;text-align:center;font-size:18px}.smallbtn{width:auto;margin:0;padding:10px 12px;font-size:14px}.day-title{font-size:13px;color:#dce8f5;margin-top:12px}
 .laura-toggle-row{display:flex;align-items:center;gap:12px;margin-bottom:4px}.switch-label{display:flex!important;align-items:center;gap:8px!important;border:0!important;background:transparent!important;padding:0!important;color:#dce8f5!important}.switch-label input{position:absolute;opacity:0;pointer-events:none}.switch{position:relative;width:48px;height:26px;border-radius:999px;background:#365574;display:inline-block;transition:.2s}.switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.switch-label input:checked + .switch{background:#b28c3f}.switch-label input:checked + .switch:after{transform:translateX(22px)}.laura-toggle-row #lauraDetail{flex:1;min-width:0}.laura-toggle-row #lauraDetail label{margin-bottom:4px}.setup-panel{padding-bottom:16px}.section-title{font-size:18px;margin:0 0 14px;color:var(--gold)}.setup-divider{height:1px;background:#27415f;margin:16px 0}.result-heading{font-size:18px;font-weight:700;color:var(--gold);margin:18px 2px 10px}.setup-panel .day-title{font-weight:600}.setup-panel .meta{margin-top:12px}.cycle-bridge{margin-top:10px;padding:12px 14px;border:1px solid #365574;border-radius:12px;background:#102842}.cycle-bridge-title{font-weight:700;color:var(--gold);margin-bottom:6px}.cycle-bridge-text{font-size:14px;line-height:1.6;color:#dce8f5}.cycle-bridge-warn{margin-top:6px;color:#ffd36a;font-size:13px;line-height:1.5}
-.loss-panel{margin-top:10px;padding:12px 14px;border:1px solid #8a6a2b;border-radius:12px;background:#102842}.loss-title{font-weight:700;color:#ffd36a;margin-bottom:8px}.loss-item{font-size:14px;line-height:1.6;padding:8px 0;border-top:1px solid #27415f}.loss-item:first-of-type{border-top:0}.loss-item b{color:#ffd36a}
+.score-plan{margin-top:9px;padding:10px 12px;border:1px solid #806b3e;border-radius:10px;background:#102842;color:#f2d486;font-size:15px}.score-advice{margin-top:8px;padding:9px 12px;border-left:3px solid var(--gold);background:#0b2138;color:#dce8f5;font-size:14px;line-height:1.6}.loss-panel{margin-top:10px;padding:12px 14px;border:1px solid #8a6a2b;border-radius:12px;background:#102842}.loss-title{font-weight:700;color:#ffd36a;margin-bottom:8px}.loss-item{font-size:14px;line-height:1.6;padding:8px 0;border-top:1px solid #27415f}.loss-item:first-of-type{border-top:0}.loss-item b{color:#ffd36a}
 </style>
 <script>
 const timeStoreKey='lastz_radar_v8_availability';
@@ -824,6 +850,17 @@ function loadAvailability(){
  }catch(e){}
 }
 function toggleApply(){const m=document.querySelector('input[name=applyMode]:checked').value;document.querySelector('#sameTimes').hidden=m!=='same';document.querySelector('#customTimes').hidden=m!=='custom';autoSaveAvailability();}
-renderTimes();loadAvailability();toggleApply();document.querySelectorAll('input[name=applyMode]').forEach(x=>x.onchange=toggleApply);document.querySelectorAll('input[name=timeMode]').forEach(x=>x.onchange=autoSaveAvailability);autoPlanIfReady();
+renderTimes();loadAvailability();toggleApply();document.querySelectorAll('input[name=applyMode]').forEach(x=>x.onchange=toggleApply);document.querySelectorAll('input[name=timeMode]').forEach(x=>x.onchange=autoSaveAvailability);
+
+// v8.3.13：重新規劃按鈕與儲存上限事件必須在所有函式定義完成後綁定。
+const planBtn=document.getElementById('plan');
+if(planBtn)planBtn.addEventListener('click',render);
+const maxInput=document.getElementById('max');
+if(maxInput){
+  maxInput.addEventListener('input',autoPlanIfReady);
+  maxInput.addEventListener('change',autoPlanIfReady);
+  maxInput.addEventListener('blur',autoPlanIfReady);
+}
+autoPlanIfReady();
 </script>
 </body></html>
