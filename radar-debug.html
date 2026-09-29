@@ -36,7 +36,9 @@
 </main>
 <script>
 const $=s=>document.querySelector(s);
-const days=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
+const weekNames=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
+const days=weekNames;
+const lauraStoreKey='lastz_radar_v9_laura';
 const LAURA_AMOUNTS={0:5,1:10,2:10,3:10,4:20,5:20};
 function getLauraSettings(){
   const has=document.getElementById('lauraToggle')?.checked!==false;
@@ -337,8 +339,7 @@ $('#plan').addEventListener('click',render);$('#max').addEventListener('input',(
 </style>
 <script>
 const timeStoreKey='lastz_radar_v9_availability';
-const lauraStoreKey='lastz_radar_v9_laura';
-const weekNames=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
+
 function timeRow(h='',end=''){return `<div class="time-row"><input type="time" aria-label="開始時間" value="${h}"><span class="time-sep">－</span><input type="time" aria-label="結束時間" value="${end}"><button type="button" class="smallbtn delTime">刪除</button></div>`}
 function bindDelete(){document.querySelectorAll('.delTime').forEach(b=>{if(b.dataset.bound)return;b.dataset.bound='1';b.onclick=()=>{const row=b.closest('.time-row');const parent=row.parentElement;if(parent.querySelectorAll('.time-row').length>1)row.remove();else row.querySelectorAll('input').forEach(x=>x.value='');autoSaveAvailability();};});}
 function bindTimeInputs(){document.querySelectorAll('.time-row input').forEach(x=>{if(x.dataset.bound)return;x.dataset.bound='1';x.addEventListener('input',autoSaveAvailability);x.addEventListener('change',autoSaveAvailability);});}
