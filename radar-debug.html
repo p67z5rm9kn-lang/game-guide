@@ -492,7 +492,11 @@ function saveLauraSettings(){
 }
 function loadLauraSettings(){
   try{
-    const d=JSON.parse(localStorage.getItem(lauraStoreKey)||'null');
+    // v8.2 沿用前版玩家設定；只有找不到舊設定時才使用 v8.2 自己的儲存。
+    const keys=[lauraStoreKey,'lastz_radar_v81_laura','lastz_radar_v8_laura'];
+    let raw=null;
+    for(const k of keys){const x=localStorage.getItem(k);if(x){raw=x;break;}}
+    const d=JSON.parse(raw||'null');
     if(!d)return;
     const toggle=document.getElementById('lauraToggle');
     if(toggle)toggle.checked=d.hasLaura!==false;
@@ -536,7 +540,11 @@ function autoSaveAvailability(){
 }
 function loadAvailability(){
  try{
-  const d=JSON.parse(localStorage.getItem(timeStoreKey));if(!d)return;
+  // v8.2 沿用前版玩家可操作時間；只有找不到舊設定時才使用 v8.2 自己的儲存。
+  const keys=[timeStoreKey,'lastz_radar_v81_availability','lastz_radar_v8_availability'];
+  let raw=null;
+  for(const k of keys){const x=localStorage.getItem(k);if(x){raw=x;break;}}
+  const d=JSON.parse(raw||'null');if(!d)return;
   if(d.timeMode)document.querySelector(`input[name=timeMode][value="${d.timeMode}"]`).checked=true;
   if(d.applyMode)document.querySelector(`input[name=applyMode][value="${d.applyMode}"]`).checked=true;
   const same=document.querySelector('#sameDayTimes');
