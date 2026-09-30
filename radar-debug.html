@@ -2,13 +2,13 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z 雷達週計劃 v8.3.18</title>
+<title>Last Z 雷達週計劃 v8.3.20</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v8.3.18</h1>
+<h1>Last Z｜雷達週計劃 v8.3.20</h1>
 <div class="sub">先設定「玩家可操作時間」。依照玩家可操作時間安排每一步操作與刷新雷達。</div>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
@@ -35,7 +35,7 @@
 <div id="out"><div class="panel empty">輸入儲存上限後會自動規劃</div></div>
 </main>
 <script>
-// v8.3.19：同時刻刷新後立即可操作時，延後確認 MAX 損失；預警與實際事件共用同一套結果。
+// v8.3.20：同時刻刷新後立即可操作時，延後確認 MAX 損失；預警與實際事件共用同一套結果。
 const $=s=>document.querySelector(s);
 const days=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
 const LAURA_AMOUNTS={0:5,1:10,2:10,3:10,4:20,5:20};
@@ -330,8 +330,9 @@ function simulateDay(d,startF,startI,r,av){
         pendingRefreshEvent.afterI=r.max;
         pendingRefreshEvent.afterF=sf;
       }else{
-        pendingRefreshEvent.afterI=si;
-        pendingRefreshEvent.afterF=sf;
+        // 刷新事件的 afterF/afterI 必須保留「刷新完成當下」的狀態。
+        // 同時刻後續玩家操作只影響下一個事件，不可回寫刷新卡片，
+        // 否則會把「刷新後場上 8、儲存 8」錯誤顯示成「場上 0、儲存 0」。
       }
       pendingRefreshEvent=null;
       pendingLossSource=null;
@@ -503,7 +504,7 @@ function simulateRiskDay(d,field,inv,MAX,ls,av){
 function buildLossAnalysis(rows,MAX,av,ls){
   const out=[];
   for(const r of rows){
-    // v8.3.19：損失預警必須使用「實際排程事件」的狀態，不能再另外
+    // v8.3.20：損失預警必須使用「實際排程事件」的狀態，不能再另外
     // 以 simulateRiskDay 從當日開始重新推演一套不同的狀態。
     // 否則會出現：每日排程已經先收割／點擊勞拉，但損失面板仍拿
     // 舊的儲存量去預估下一次刷新，造成重複或錯位的損失。
@@ -742,7 +743,7 @@ function scheduleWeek(MAX,av){
     r.simFeasible=sim.feasible;
     r.endSimF=sim.endF;
     r.endSimI=sim.endI;
-    // v8.3.19：無安全方案時，預計損失也必須來自這次實際執行的事件，
+    // v8.3.20：無安全方案時，預計損失也必須來自這次實際執行的事件，
     // 不再沿用 simulateRiskDay 的獨立估算，避免把同時刻可立即收割的刷新誤列為損失。
     if(r.impossible){
       r.lossRisks=(sim.events||[])
