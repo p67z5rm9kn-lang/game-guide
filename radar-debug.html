@@ -2,13 +2,13 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z 雷達週計劃 v8.3.17</title>
+<title>Last Z 雷達週計劃 v8.3.18</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v8.3.17</h1>
+<h1>Last Z｜雷達週計劃 v8.3.18</h1>
 <div class="sub">先設定「玩家可操作時間」。依照玩家可操作時間安排每一步操作與刷新雷達。</div>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
@@ -463,16 +463,30 @@ function simulateRiskDay(d,field,inv,MAX,ls,av){
 function buildLossAnalysis(rows,MAX,av,ls){
   const out=[];
   for(const r of rows){
-    let risks=overflowInfo(r.events,MAX);
-    if(r.impossible){
-      const risk=simulateRiskDay(r.d,r.startF,r.startI,MAX,ls,av);
-      risks=risk?risk.risks:[];
-      r.riskProcess=risk?.process||null;
-      r.riskFeasible=risk?.feasible||false;
-    }
+    // v8.3.18：損失預警必須使用「實際排程事件」的狀態，不能再另外
+    // 以 simulateRiskDay 從當日開始重新推演一套不同的狀態。
+    // 否則會出現：每日排程已經先收割／點擊勞拉，但損失面板仍拿
+    // 舊的儲存量去預估下一次刷新，造成重複或錯位的損失。
+    // simulateDay 已經按照「刷新 → 玩家操作」的事件順序記錄真正發生的 loss，
+    // 因此直接以 loss 事件作為預計損失來源。
+    const risks=(r.events||[])
+      .filter(e=>e.type==='loss' && Number(e.overflow)>0)
+      .map(e=>({
+        type:e.sourceType,
+        day:e.day,
+        minute:e.minute,
+        beforeF:e.beforeF,
+        beforeI:e.beforeI,
+        afterF:e.afterF,
+        afterI:e.afterI,
+        overflow:e.overflow
+      }));
+
+    r.lossRisks=risks;
+    r.actualLoss=risks.reduce((n,e)=>n+e.overflow,0);
+
     if(risks.length){
-      out.push({day:r.d,loss:risks.reduce((n,e)=>n+e.overflow,0),risks});
-      r.lossRisks=risks;
+      out.push({day:r.d,loss:r.actualLoss,risks});
     }
   }
   return out;
