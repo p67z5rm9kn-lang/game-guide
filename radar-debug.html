@@ -2,13 +2,13 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z 雷達週計劃 v8.3.23</title>
+<title>Last Z 雷達週計劃 v8.3.24</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v8.3.23</h1>
+<h1>Last Z｜雷達週計劃 v8.3.24</h1>
 <div class="sub">先設定「玩家可操作時間」。依照玩家可操作時間安排每一步操作與刷新雷達。</div>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
@@ -35,7 +35,7 @@
 <div id="out"><div class="panel empty">輸入儲存上限後會自動規劃</div></div>
 </main>
 <script>
-// v8.3.23：儲存上限為硬上限；同時刻刷新產生的超出量只可作為「立即操作」可收割量，不會進入儲存。
+// v8.3.24：儲存上限為硬上限；刷新或勞拉超過上限的數量立即判定為無法保留，不會成為可收割的暫存量。
 const $=s=>document.querySelector(s);
 const days=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
 const LAURA_AMOUNTS={0:5,1:10,2:10,3:10,4:20,5:20};
@@ -312,65 +312,49 @@ function simulateDay(d,startF,startI,r,av){
   const events=[]; const score=(d===0||d===4), dayBefore=(d===3||d===6);
   const lauraAmount=r.lauraAmount||0, hasLaura=!!r.hasLaura;
   let sf=startF, si=Math.min(startI,r.max), processed=0, lauraUsed=false;
-  let pendingExtra=0; // 刷新／勞拉超過儲存上限的數量；只在同一時刻玩家操作時可立即收割
   const target=score?r.total:r.process;
   let currentMinute=null;
-  let pendingLossEvent=null;
 
-  const finalizePendingLoss=()=>{
-    if(pendingLossEvent && pendingExtra>0){
-      const overflow=pendingExtra;
-      events.push({type:'loss',sourceType:pendingLossEvent.sourceType,day:d,minute:pendingLossEvent.minute,
-        beforeF:pendingLossEvent.beforeF,beforeI:pendingLossEvent.beforeI,afterF:sf,afterI:si,overflow});
-      pendingExtra=0;
-    }
-    pendingLossEvent=null;
-  };
+  const beginMinute=m=>{ currentMinute=m; };
 
-  const beginMinute=m=>{
-    if(currentMinute!==null && m!==currentMinute)finalizePendingLoss();
-    currentMinute=m;
-  };
-
+  // v8.3.24：儲存上限是「立即生效的硬上限」。
+  // 刷新／勞拉超過 MAX 的數量不是暫存待玩家收割，而是在該事件發生時立即判定為無法保留。
+  // 因此即使刷新與玩家操作發生在同一時刻，仍然必須先刷新、先損失，再讓玩家收割實際保留下來的雷達。
   const applyRefresh=()=>{
+    const beforeF=sf,beforeI=si;
     let add=8;
     if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}
-    const beforeI=si;
     const keep=Math.min(add,Math.max(0,r.max-si));
     si+=keep;
     const overflow=add-keep;
-    const ev={type:'refresh',day:d,minute:currentMinute,delta:8,beforeF:sf,beforeI,afterF:sf,afterI:si,pendingExtra:overflow};
-    events.push(ev);
+    events.push({type:'refresh',day:d,minute:currentMinute,delta:8,beforeF,beforeI,afterF:sf,afterI:si});
     if(overflow>0){
-      pendingExtra+=overflow;
-      pendingLossEvent={sourceType:'refresh',minute:currentMinute,beforeF:ev.beforeF,beforeI:ev.beforeI};
+      events.push({type:'loss',sourceType:'refresh',day:d,minute:currentMinute,
+        beforeF, beforeI, afterF:sf, afterI:si, overflow});
     }
   };
 
   const applyLaura=()=>{
+    const beforeF=sf,beforeI=si;
     let add=lauraAmount;
     if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}else{const toField=Math.min(3,add);sf+=toField;add-=toField;}
-    const beforeI=si;
     const keep=Math.min(add,Math.max(0,r.max-si));
     si+=keep;
     const overflow=add-keep;
-    const ev={type:'laura',day:d,minute:currentMinute,delta:lauraAmount,beforeF:sf,beforeI,afterF:sf,afterI:si,pendingExtra:overflow};
-    events.push(ev);
+    events.push({type:'laura',day:d,minute:currentMinute,delta:lauraAmount,beforeF,beforeI,afterF:sf,afterI:si});
     if(overflow>0){
-      pendingExtra+=overflow;
-      pendingLossEvent={sourceType:'laura',minute:currentMinute,beforeF:ev.beforeF,beforeI:ev.beforeI};
+      events.push({type:'loss',sourceType:'laura',day:d,minute:currentMinute,
+        beforeF, beforeI, afterF:sf, afterI:si, overflow});
     }
   };
 
   const applyHarvest=(qty,reason='完成／收割')=>{
-    const available=sf+si+pendingExtra;
+    const available=sf+si;
     const want=Math.max(0,Math.min(qty,available));
     if(want<=0)return 0;
     let q=want;
     const fromField=Math.min(sf,q); sf-=fromField; q-=fromField;
     const fromStorage=Math.min(si,q); si-=fromStorage; q-=fromStorage;
-    const fromPending=Math.min(pendingExtra,q); pendingExtra-=fromPending; q-=fromPending;
-    if(pendingExtra===0)pendingLossEvent=null;
     if(sf<8&&si>0){const fill=Math.min(8-sf,si);sf+=fill;si-=fill;}
     events.push({type:'harvest',day:d,minute:currentMinute,qty:want,reason,afterF:sf,afterI:si});
     processed+=want;
@@ -392,7 +376,7 @@ function simulateDay(d,startF,startI,r,av){
 
     if(score){
       if(hasLaura&&!lauraUsed){
-        if(sf+si+pendingExtra>0)applyHarvest(sf+si+pendingExtra,'完成場上與儲存雷達');
+        if(sf+si>0)applyHarvest(sf+si,'完成場上與儲存雷達');
         const lauraBeforeF=sf,lauraBeforeI=si;
         applyLaura(); lauraUsed=true;
       }
@@ -405,7 +389,7 @@ function simulateDay(d,startF,startI,r,av){
     }else{
       const remaining=Math.max(0,target-processed);
       if(remaining<=0)continue;
-      const available=sf+si+pendingExtra;
+      const available=sf+si;
       if(available>=remaining){
         applyHarvest(remaining);
         if(hasLaura&&!lauraUsed){applyLaura();lauraUsed=true;}
@@ -414,12 +398,11 @@ function simulateDay(d,startF,startI,r,av){
         if(hasLaura&&!lauraUsed){
           applyLaura(); lauraUsed=true;
           const remainingAfterLaura=Math.max(0,target-processed);
-          if(remainingAfterLaura>0&&sf+si+pendingExtra>0)applyHarvest(Math.min(remainingAfterLaura,sf+si+pendingExtra));
+          if(remainingAfterLaura>0&&sf+si>0)applyHarvest(Math.min(remainingAfterLaura,sf+si));
         }
       }
     }
   }
-  finalizePendingLoss();
   const hasOperation=uniqueOps.length>0;
   const feasible=processed>=target && (!score || uniqueOps.some(m=>m>=960)) && (!dayBefore || hasOperation) && (!hasLaura || lauraUsed);
   return {events,processed,lauraUsed,feasible,endF:sf,endI:si};
@@ -486,8 +469,11 @@ function simulateRiskDay(d,field,inv,MAX,ls,av){
     }
     const all=[...risks,...future];
     const loss=all.reduce((n,e)=>n+e.overflow,0);
-    const score=[loss,sim.feasible?0:1,p];
-    if(!best||score[0]<best.score[0]||(score[0]===best.score[0]&&score[1]<best.score[1])||(score[0]===best.score[0]&&score[1]===best.score[1]&&score[2]<best.score[2])){
+    // 同樣損失且都可執行時，優先讓玩家把當下實際可保留的雷達收割掉；
+    // 例如 MAX=8、無勞拉時，18:00 刷新後實際只有場上 8 + 儲存 8 = 16 可收割，
+    // 因此不應因「每日最低量 12」而只排 12。
+    const score=[loss,sim.feasible?0:1,-sim.processed,p];
+    if(!best||score[0]<best.score[0]||(score[0]===best.score[0]&&score[1]<best.score[1])||(score[0]===best.score[0]&&score[1]===best.score[1]&&score[2]<best.score[2])||(score[0]===best.score[0]&&score[1]===best.score[1]&&score[2]===best.score[2]&&score[3]<best.score[3])){
       best={process:p,events:sim.events,risks:all,loss,feasible:sim.feasible,score};
     }
   }
@@ -496,7 +482,7 @@ function simulateRiskDay(d,field,inv,MAX,ls,av){
 function buildLossAnalysis(rows,MAX,av,ls){
   const out=[];
   for(const r of rows){
-    // v8.3.23：損失預警必須使用「實際排程事件」的狀態，不能再另外
+    // v8.3.24：損失預警必須使用「實際排程事件」的狀態，不能再另外
     // 以 simulateRiskDay 從當日開始重新推演一套不同的狀態。
     // 否則會出現：每日排程已經先收割／點擊勞拉，但損失面板仍拿
     // 舊的儲存量去預估下一次刷新，造成重複或錯位的損失。
@@ -577,7 +563,8 @@ function scheduleWeek(MAX,av){
         // 隔日安全線也必須檢查「勞拉前」的每一次刷新；
         // 不能只檢查勞拉後，否則可能在當天下午已經先爆倉。
         const refreshUnsafe=(test.events||[]).some(e=>e.type==='refresh'&&e.afterI>MAX);
-        if(refreshUnsafe)continue;
+        const actualLoss=(test.events||[]).some(e=>e.type==='loss'&&Number(e.overflow)>0);
+        if(refreshUnsafe||actualLoss)continue;
 
         // v8.3.16：星期四／星期日每日終安全線，必須一次預留到下一個衝分日第一次可操作前的所有刷新。
         // 例如下一次操作前會經歷 3 次 +8，MAX=38 時每日終最多只能保留 14。
@@ -657,7 +644,8 @@ function scheduleWeek(MAX,av){
 
     // 當日已發生的刷新／勞拉也必須先安全。
     const refreshUnsafe=(test.events||[]).some(e=>e.type==='refresh'&&e.afterI>MAX);
-    if(refreshUnsafe)continue;
+    const actualLoss=(test.events||[]).some(e=>e.type==='loss'&&Number(e.overflow)>0);
+    if(refreshUnsafe||actualLoss)continue;
     const lauraUnsafe=(test.events||[]).some(e=>e.type==='laura'&&e.afterI>MAX);
     if(lauraUnsafe)continue;
 
@@ -735,7 +723,7 @@ function scheduleWeek(MAX,av){
     r.simFeasible=sim.feasible;
     r.endSimF=sim.endF;
     r.endSimI=sim.endI;
-    // v8.3.23：無安全方案時，預計損失也必須來自這次實際執行的事件，
+    // v8.3.24：無安全方案時，預計損失也必須來自這次實際執行的事件，
     // 不再沿用 simulateRiskDay 的獨立估算，避免把同時刻可立即收割的刷新誤列為損失。
     if(r.impossible){
       r.lossRisks=(sim.events||[])
@@ -748,7 +736,7 @@ function scheduleWeek(MAX,av){
     inv=sim.endI;
 
     if(!sim.feasible){
-      // v8.3.23：不再把「可操作時間不足」另外加入最上方規劃提醒。
+      // v8.3.24：不再把「可操作時間不足」另外加入最上方規劃提醒。
       // 衝分日與準備日都直接在各自的日期卡片內呈現結果，避免重複敘述。
       if(r.scoring){
         const need=Math.max(0,r.total-sim.processed);
@@ -854,7 +842,7 @@ function render(){
    html+=`<div class="state">開始：場上 ${r.startF}、儲存 ${r.startI}</div>`;
    if(r.scoring){
      const actual=Math.max(0,r.simProcessed||0);
-     // v8.3.23：衝分日只在可操作時間不足時顯示「最多可收割量／實際可收割量」警語。
+     // v8.3.24：衝分日只在可操作時間不足時顯示「最多可收割量／實際可收割量」警語。
      // X = 場上基準 8 + 勞拉把場上 8 提升至 11 的額外 3 + 儲存上限 + 勞拉額外雷達 + 當日另外兩次系統刷新 16。
      const maxHarvestCapacity=8+(r.hasLaura?3:0)+MAX+(r.hasLaura?(r.lauraAmount||0):0)+8*2;
      if(r.simFeasible){
@@ -866,7 +854,7 @@ function render(){
    if(r.impossible){
      const risk=r.lossRisks||[];
      const loss=risk.reduce((n,e)=>n+e.overflow,0);
-     // v8.3.23：準備日只有確定有實際損失時才顯示損失警語；0 不顯示。
+     // v8.3.24：準備日只有確定有實際損失時才顯示損失警語；0 不顯示。
      if(loss>0){
        html+=`<div class="state warn">⚠️ 本日預計有 <b>${loss}</b> 個雷達無法保留；請提早可操作時間，或增加可操作時段。</div>`;
      }
