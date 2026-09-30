@@ -35,6 +35,7 @@
 <div id="out"><div class="panel empty">輸入儲存上限後會自動規劃</div></div>
 </main>
 <script>
+// v8.3.19：同時刻刷新後立即可操作時，延後確認 MAX 損失；預警與實際事件共用同一套結果。
 const $=s=>document.querySelector(s);
 const days=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
 const LAURA_AMOUNTS={0:5,1:10,2:10,3:10,4:20,5:20};
@@ -312,9 +313,48 @@ function simulateDay(d,startF,startI,r,av){
   const lauraAmount=r.lauraAmount||0, hasLaura=!!r.hasLaura;
   let sf=startF, si=startI, processed=0, lauraUsed=false;
   const target=score?r.total:r.process;
-  let currentMinute=0;
-  const applyRefresh=()=>{let add=8;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}si+=add;if(r.allowLoss&&si>r.max){const overflow=si-r.max;events.push({type:'loss',sourceType:'refresh',day:d,minute:currentMinute,beforeF:sf,beforeI:si,afterF:sf,afterI:r.max,overflow});si=r.max;}};
-  const applyLaura=()=>{let add=lauraAmount;if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}else{const toField=Math.min(3,add);sf+=toField;add-=toField;}si+=add;if(r.allowLoss&&si>r.max){const overflow=si-r.max;events.push({type:'loss',sourceType:'laura',day:d,minute:currentMinute,beforeF:sf,beforeI:si,afterF:sf,afterI:r.max,overflow});si=r.max;}};
+  let currentMinute=null;
+  let pendingRefreshEvent=null;
+  let pendingLossSource=null;
+  // v8.3.19：同一時間點若「系統刷新」後立即進入玩家可操作時段，
+  // 先保留刷新帶來的超出量，讓該時間點的玩家操作有機會立即收割；
+  // 只有該時間點所有玩家操作完成後仍超過 MAX，才正式記錄損失。
+  // 這修正了 MAX=8、18:00–19:00 時「刷新後立即收割」卻被誤報損失的問題。
+  const finalizePendingLoss=()=>{
+    if(pendingRefreshEvent){
+      if(si>r.max){
+        const overflow=si-r.max;
+        events.push({type:'loss',sourceType:pendingLossSource||'refresh',day:d,minute:currentMinute,
+          beforeF:pendingRefreshEvent.beforeF,beforeI:pendingRefreshEvent.beforeI,afterF:sf,afterI:r.max,overflow});
+        si=r.max;
+        pendingRefreshEvent.afterI=r.max;
+        pendingRefreshEvent.afterF=sf;
+      }else{
+        pendingRefreshEvent.afterI=si;
+        pendingRefreshEvent.afterF=sf;
+      }
+      pendingRefreshEvent=null;
+      pendingLossSource=null;
+    }
+  };
+  const applyRefresh=()=>{
+    let add=8;
+    if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}
+    si+=add;
+    const ev={type:'refresh',day:d,minute:currentMinute,delta:8,beforeF:sf,beforeI:si-add,afterF:sf,afterI:si};
+    events.push(ev);
+    pendingRefreshEvent=ev;
+    pendingLossSource='refresh';
+  };
+  const applyLaura=()=>{
+    let add=lauraAmount;
+    if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}else{const toField=Math.min(3,add);sf+=toField;add-=toField;}
+    si+=add;
+    if(si>r.max){pendingRefreshEvent={type:'laura',day:d,minute:currentMinute,beforeF:sf,beforeI:si-add,afterF:sf,afterI:si,delta:lauraAmount};
+      events.push(pendingRefreshEvent);
+      pendingLossSource='laura';
+    }
+  };
   const applyHarvest=(qty,reason='完成／收割')=>{const want=Math.max(0,Math.min(qty,sf+si));if(want<=0)return 0;let q=want;const fromField=Math.min(sf,q);sf-=fromField;q-=fromField;si=Math.max(0,si-q);if(sf<8&&si>0){const fill=Math.min(8-sf,si);sf+=fill;si-=fill;}events.push({type:'harvest',day:d,minute:currentMinute,qty:want,reason,afterF:sf,afterI:si});processed+=want;return want;};
   const opTimes=[];
   for(const w of dayWindows(av,d)){ if(w.start===w.end)continue; opTimes.push(w.start); for(const m of [480,960]) if(m>w.start&&m<w.end)opTimes.push(m); }
@@ -327,11 +367,10 @@ function simulateDay(d,startF,startI,r,av){
   // 若不足：先處理全部現有雷達，再點 Laura；之後等刷新並重新評估。
   let ordinaryLauraPending=!score&&!dayBefore;
   for(const node of timeline){
+    if(currentMinute!==null && node.minute!==currentMinute)finalizePendingLoss();
     currentMinute=node.minute;
     if(node.type==='refresh'){
-      const beforeF=sf,beforeI=si;
       applyRefresh();
-      events.push({type:'refresh',day:d,minute:node.minute,delta:8,beforeF,beforeI,afterF:sf,afterI:si});
       continue;
     }
     const m=node.minute;
@@ -388,6 +427,7 @@ function simulateDay(d,startF,startI,r,av){
       }
     }
   }
+  finalizePendingLoss();
   const hasOperation=uniqueOps.length>0;
   const feasible=processed>=target && (!score || uniqueOps.some(m=>m>=960)) && (!dayBefore || hasOperation) && (!hasLaura || lauraUsed);
   return {events,processed,lauraUsed,feasible,endF:sf,endI:si};
@@ -463,12 +503,12 @@ function simulateRiskDay(d,field,inv,MAX,ls,av){
 function buildLossAnalysis(rows,MAX,av,ls){
   const out=[];
   for(const r of rows){
-    // v8.3.18：損失預警必須使用「實際排程事件」的狀態，不能再另外
+    // v8.3.19：損失預警必須使用「實際排程事件」的狀態，不能再另外
     // 以 simulateRiskDay 從當日開始重新推演一套不同的狀態。
     // 否則會出現：每日排程已經先收割／點擊勞拉，但損失面板仍拿
     // 舊的儲存量去預估下一次刷新，造成重複或錯位的損失。
-    // simulateDay 已經按照「刷新 → 玩家操作」的事件順序記錄真正發生的 loss，
-    // 因此直接以 loss 事件作為預計損失來源。
+    // simulateDay 已經按照「刷新 → 同時刻玩家操作 → 最後才確認是否仍超過 MAX」的事件順序記錄真正發生的 loss，
+    // 因此直接以 loss 事件作為預計損失來源；同時刻能被玩家立即收割的超出量不算損失。
     const risks=(r.events||[])
       .filter(e=>e.type==='loss' && Number(e.overflow)>0)
       .map(e=>({
@@ -702,6 +742,14 @@ function scheduleWeek(MAX,av){
     r.simFeasible=sim.feasible;
     r.endSimF=sim.endF;
     r.endSimI=sim.endI;
+    // v8.3.19：無安全方案時，預計損失也必須來自這次實際執行的事件，
+    // 不再沿用 simulateRiskDay 的獨立估算，避免把同時刻可立即收割的刷新誤列為損失。
+    if(r.impossible){
+      r.lossRisks=(sim.events||[])
+        .filter(e=>e.type==='loss'&&Number(e.overflow)>0)
+        .map(e=>({type:e.sourceType,day:e.day,minute:e.minute,beforeF:e.beforeF,beforeI:e.beforeI,afterF:e.afterF,afterI:e.afterI,overflow:e.overflow}));
+      r.actualLoss=r.lossRisks.reduce((n,e)=>n+e.overflow,0);
+    }
 
     field=sim.endF;
     inv=sim.endI;
