@@ -2,13 +2,13 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Last Z 雷達週計劃 v8.3.14</title>
+<title>Last Z 雷達週計劃 v8.3.17</title>
 <style>
 :root{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#061120,#0a192c);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:18px 12px 40px}main{max-width:760px;margin:auto}h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.panel,.day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.day h2{font-size:18px;margin:0 0 8px}.tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.state{font-size:15px;color:#dce8f5;margin:8px 0}.action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.result{font-size:15px;line-height:1.65}.muted{color:var(--muted)}.ok{color:var(--good)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}td,th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}th{color:var(--muted);font-weight:500}.empty{padding:16px;text-align:center;color:var(--muted)}.formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.score{border-color:#806b3e}.timeline{margin-top:10px}.operation-block,.event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.operation-block{border-left:3px solid var(--gold);background:#0b2138}.operation-range,.event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.operation-step,.event-action{padding:2px 0;font-size:16px}.event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.event.refresh .event-time{color:#f2d486}.schedule-legend,.player-mark,.system-mark{display:none}
 </style></head>
 <body><main>
-<h1>Last Z｜雷達週計劃 v8.3.16</h1>
+<h1>Last Z｜雷達週計劃 v8.3.17</h1>
 <div class="sub">先設定「玩家可操作時間」。依照玩家可操作時間安排每一步操作與刷新雷達。</div>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
@@ -29,7 +29,7 @@
 <div class="setup-divider"></div>
 <label for="max">儲存上限</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
 <button id="plan">重新規劃</button>
-<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。v8 以遊戲時間 UTC−2 作為內部時間軸；當地時間會依裝置時區轉換後再排程。每 8h 刷新 8 個雷達優先於玩家操作；普通日安全處理量依實際刷新時間順序計算；每日中儲存不得超過上限，23:59:59 儲存不得超過「儲存上限－8」。</div>
+<div class="meta">星期一、星期五為衝分日；星期二～四準備星期五，星期六～日準備下週一。v8 以遊戲時間 UTC−2 作為內部時間軸；當地時間會依裝置時區轉換後再排程。每 8h 刷新 8 個雷達優先於玩家操作；安全處理量會向後模擬到下一次實際可操作時間，逐次檢查中間所有刷新，避免只看當日結束安全線而漏掉隔日爆倉。</div>
 </div>
 <div class="result-heading">📊 規劃結果</div>
 <div id="out"><div class="panel empty">輸入儲存上限後會自動規劃</div></div>
@@ -569,32 +569,62 @@ function scheduleWeek(MAX,av){
       return chosen;
     }
 
-    // v8.3.7：一般日安全線.
-    // 找出「最少處理量」使：
-    // 1. 每日最低處理量完成；
-    // 2. 每次刷新後儲存 <= MAX；
-    // 3. 勞拉完成後儲存 <= MAX；
-    // 4. 23:59:59 儲存 <= MAX-8。
-    const maxCandidate=Math.max(dailyMin,MAX+24+ls.lauraAmount+40);
-    let chosen=null;
-    for(let p=dailyMin;p<=maxCandidate;p++){
-      const candidate={...baseR,process:p,minProcess:dailyMin};
-      const test=simulateDay(d,field,inv,candidate,av);
-      if(!test.feasible)continue;
-
-      const refreshUnsafe=(test.events||[]).some(e=>e.type==='refresh'&&e.afterI>MAX);
-      if(refreshUnsafe)continue;
-      const lauraUnsafe=(test.events||[]).some(e=>e.type==='laura'&&e.afterI>MAX);
-      if(lauraUnsafe)continue;
-      const endSafeLimit=Math.max(0,MAX-8);
-      if(test.endI>endSafeLimit)continue;
-
-      chosen={...candidate};
-      break;
+    // v8.3.17：一般日安全線改為「向後模擬到下一次實際可操作時間」。
+  // 不再把 MAX-8 當成所有情況的固定日末安全線。
+  // 例如星期三最後一次可操作時間為 19:00，而星期四下一次可操作時間也是 19:00，
+  // 中間會經歷 02:00、10:00、18:00 三次刷新；玩家星期三的收割量必須能讓這三次刷新全部安全通過。
+  function nextPlayerOperationAbsAfterDay(day){
+    for(let k=1;k<=7;k++){
+      const idx=(day+k)%7;
+      const rows=dayWindows(av,idx);
+      if(rows&&rows.length)return (day+k)*1440+rows[0].start;
     }
-    // 找不到符合每日中／每日終安全線的候選時，必須回傳 null。
-    // 不可以再用 dailyMin 當成假方案，否則排程畫面會出現超過儲存上限的狀態。
-    return chosen;
+    return null;
+  }
+
+  function checkFutureRefreshSafety(fieldStart,invStart,fromDay,MAX,nextOpAbs){
+    let sf=fieldStart,si=invStart;
+    const refreshes=[];
+    if(nextOpAbs===null)return {safe:true,refreshes};
+    const startAbs=(fromDay+1)*1440;
+    for(let abs=startAbs;abs<=nextOpAbs;abs+=480){
+      const day=Math.floor(abs/1440),minute=abs%1440;
+      const beforeF=sf,beforeI=si;
+      let add=8;
+      if(sf<8){const fill=Math.min(8-sf,add);sf+=fill;add-=fill;}
+      si+=add;
+      const event={day,minute,beforeF,beforeI,afterF:sf,afterI:si};
+      refreshes.push(event);
+      if(si>MAX)return {safe:false,refreshes,overflow:si-MAX,event};
+    }
+    return {safe:true,refreshes,field:sf,inv:si};
+  }
+
+  const nextOpAbs=nextPlayerOperationAbsAfterDay(d);
+  const maxCandidate=Math.max(dailyMin,MAX+24+ls.lauraAmount+40);
+  let chosen=null;
+  for(let p=dailyMin;p<=maxCandidate;p++){
+    const candidate={...baseR,process:p,minProcess:dailyMin};
+    const test=simulateDay(d,field,inv,candidate,av);
+    if(!test.feasible)continue;
+
+    // 當日已發生的刷新／勞拉也必須先安全。
+    const refreshUnsafe=(test.events||[]).some(e=>e.type==='refresh'&&e.afterI>MAX);
+    if(refreshUnsafe)continue;
+    const lauraUnsafe=(test.events||[]).some(e=>e.type==='laura'&&e.afterI>MAX);
+    if(lauraUnsafe)continue;
+
+    // 核心修正：從本日最後狀態一路模擬到「下一次實際可操作時間」。
+    // 刷新在同一時刻永遠優先於玩家操作，所以 nextOpAbs 當下的刷新也必須先安全。
+    const future=checkFutureRefreshSafety(test.endF,test.endI,d,MAX,nextOpAbs);
+    if(!future.safe)continue;
+
+    chosen={...candidate};
+    break;
+  }
+  // 找不到符合「當日已發生事件安全 + 下一次實際可操作前所有刷新安全」的候選時，回傳 null。
+  // 上層會改用最少損失模式，不會製造一個看似安全但實際會爆倉的假方案。
+  return chosen;
   }
 
   // 先計算「上一個星期六→星期日」的週期 B，
