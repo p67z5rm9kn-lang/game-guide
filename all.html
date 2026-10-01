@@ -1206,10 +1206,10 @@ function saveActive(){const p=db.profiles.find(x=>x.id===db.active);if(p){p.stat
 let saveTimer;function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveActive,120);}
 function renderRoles(){const box=document.getElementById('roleList');box.innerHTML='';db.profiles.forEach(p=>{const row=document.createElement('div');row.className='roleRow'+(p.id===db.active?' active':'');const name=document.createElement('div');name.className='roleName';name.textContent=p.name+(p.id===db.active?'（目前）':'');const actions=document.createElement('div');actions.className='roleActions';const choose=document.createElement('button');choose.textContent=p.id===db.active?'✓ 使用中':'切換';choose.addEventListener('click',()=>switchRole(p.id));const edit=document.createElement('button');edit.textContent='編輯';edit.addEventListener('click',()=>renameRole(p.id));const del=document.createElement('button');del.textContent='刪除';del.disabled=db.profiles.length<=1;del.addEventListener('click',()=>deleteRole(p.id));actions.append(choose,edit,del);row.append(name,actions);box.append(row);});document.getElementById('currentRoleName').textContent=db.profiles.find(x=>x.id===db.active)?.name||'玩家A';}
 function resetProfileUI(){document.querySelectorAll('#scorePage input').forEach(x=>{if(x.type==='checkbox')x.checked=x.defaultChecked;else x.value=x.defaultValue;});document.querySelectorAll('#scorePage select').forEach(x=>{const opt=[...x.options].findIndex(o=>o.defaultSelected);x.selectedIndex=opt>=0?opt:0;});applyBonusState(null);}
-function switchRole(id){saveActive();db.active=id;saveDB();const p=db.profiles.find(x=>x.id===id);if(p?.state)applyState(p.state);else{resetProfileUI();calc();saveActive();}applyAutoGameDayJump();document.getElementById('currentRoleName').textContent=p.name;renderRoles();if(document.getElementById('helpPage').style.display!=='none')helpRender();}
-function renameRole(id){const p=db.profiles.find(x=>x.id===id);if(!p)return;const n=prompt('請輸入角色名稱',p.name);if(n&&n.trim()){p.name=n.trim();saveDB();renderRoles();}}
+function switchRole(id){saveActive();db.active=id;saveDB();const p=db.profiles.find(x=>x.id===id);if(p?.state)applyState(p.state);else{resetProfileUI();calc();saveActive();}applyAutoGameDayJump();document.getElementById('currentRoleName').textContent=p.name;renderRoles();if(document.getElementById('helpPage').style.display!=='none'){helpDB.selectedRoleId=id;helpSave();helpRender();}}
+function renameRole(id){const p=db.profiles.find(x=>x.id===id);if(!p)return;const n=prompt('請輸入角色名稱',p.name);if(n&&n.trim()){p.name=n.trim();saveDB();renderRoles();if(document.getElementById('helpPage').style.display!=='none')helpRender();}}
 function deleteRole(id){if(db.profiles.length<=1)return;const idx=db.profiles.findIndex(x=>x.id===id);if(idx<0)return;if(!confirm('確定刪除「'+db.profiles[idx].name+'」？'))return;const was=id===db.active;db.profiles.splice(idx,1);if(was){db.active=db.profiles[0].id;const p=db.profiles[0];if(p.state)applyState(p.state);}saveDB();renderRoles();document.getElementById('currentRoleName').textContent=db.profiles.find(x=>x.id===db.active).name;calc();if(document.getElementById('helpPage').style.display!=='none')helpRender();}
-document.getElementById('addRole').addEventListener('click',()=>{const n=prompt('請輸入新角色名稱','新角色');if(!n||!n.trim())return;saveActive();const id='p'+Date.now();db.profiles.push({id,name:n.trim(),state:null});db.active=id;saveDB();resetProfileUI();renderRoles();calc();saveActive();});
+document.getElementById('addRole').addEventListener('click',()=>{const n=prompt('請輸入新角色名稱','新角色');if(!n||!n.trim())return;saveActive();const id='p'+Date.now();db.profiles.push({id,name:n.trim(),state:null});db.active=id;saveDB();resetProfileUI();renderRoles();calc();saveActive();if(document.getElementById('helpPage').style.display!=='none'){helpDB.selectedRoleId=id;helpSave();helpRender();}});
 
 const HELP_STORE='league_help_settings_v1';
 let helpDB=JSON.parse(localStorage.getItem(HELP_STORE)||'null')||{clicks:5,rose:true,disc:true,killDay:true,roles:{}};
@@ -1232,6 +1232,17 @@ function helpRoleData(p){
    tier:tierForProfile(p)
  };
 }
+function helpSelectRole(id){
+ const p=db.profiles.find(x=>x.id===id);
+ if(!p)return;
+ helpDB.selectedRoleId=id;
+ helpSave();
+ if(db.active!==id){
+   switchRole(id);
+ }else{
+   helpRender();
+ }
+}
 function helpRefreshJumpTabs(){
  const nav=document.getElementById('helpRoleJump');
  if(!nav)return;
@@ -1241,20 +1252,19 @@ function helpRefreshJumpTabs(){
    b.type='button'; b.className='helpJumpBtn'; b.dataset.roleId=p.id;
    b.innerHTML=`<span class="helpJumpName"></span><span class="helpJumpValue">—</span>`;
    b.querySelector('.helpJumpName').textContent=p.name;
-   b.addEventListener('click',()=>{
-     helpDB.selectedRoleId=p.id;
-     helpSave();
-     helpRender();
-   });
+   b.addEventListener('click',()=>helpSelectRole(p.id));
    nav.appendChild(b);
  });
- document.querySelectorAll('.helpJumpBtn').forEach(b=>b.classList.toggle('active',b.dataset.roleId===String(helpDB.selectedRoleId)));
+ const selectedId=String(db.active);
+ helpDB.selectedRoleId=db.active;
+ document.querySelectorAll('.helpJumpBtn').forEach(b=>b.classList.toggle('active',b.dataset.roleId===selectedId));
  document.querySelectorAll('.helpRole').forEach(card=>{
-   card.style.display = card.dataset.roleId===String(helpDB.selectedRoleId) ? '' : 'none';
+   card.style.display = card.dataset.roleId===selectedId ? '' : 'none';
    const id=card.dataset.roleId;
    const btn=[...nav.querySelectorAll('.helpJumpBtn')].find(x=>x.dataset.roleId===id);
    if(btn){const v=card.querySelector('.helpResultValue')?.textContent||'—';btn.querySelector('.helpJumpValue').textContent=v==='—'?'—':v+' 隻';}
  });
+ helpSave();
 }
 function helpUpdateJumpValue(id,value){
  const nav=document.getElementById('helpRoleJump'); if(!nav)return;
