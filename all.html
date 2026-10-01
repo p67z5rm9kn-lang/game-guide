@@ -1034,6 +1034,23 @@ main.radar-active{padding-bottom:0!important}
 }
 </style>
 
+<style id="radarNavSameModeFix">
+/* 雷達頁主導覽：採用與其他頁相同的固定效果；只處理導覽，不改雷達內容邏輯。 */
+main.radar-active .topbar{
+  position:fixed;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(820px,100vw);
+  margin:0;
+}
+main.radar-active{
+  padding-top:var(--radar-nav-height,0px) !important;
+}
+@media(max-width:560px){
+  main.radar-active .topbar{width:100vw;margin:0;}
+}
+</style>
 </head><body><main>
 <nav class="topbar"><div class="brand">Last Z</div><div class="mainPageNav" role="tablist" aria-label="主要頁面"><button class="mainPageTab active" data-page="scorePage" role="tab" aria-selected="true">對決積分</button><button class="mainPageTab" data-page="helpPage" role="tab" aria-selected="false">聯盟幫助</button><button class="mainPageTab" data-page="radarPage" role="tab" aria-selected="false">雷達週計劃</button></div><button class="guideNavBtn" id="guideNavBtn" type="button" aria-label="新手導覽">🧭 導覽</button><button class="roleBtn" id="roleBtn">👤 <span id="currentRoleName">玩家A</span>⌄</button></nav><div id="scorePage"><section class="card hero"><div class="titleLine"><h1>聯盟對決積分配置計算器</h1><button class="bonusBtn" id="bonusBtn">設定積分加成</button></div>
 <div class="summaryRows"><div class="summaryRow"><span>目標積分</span><select id="target"><option value="20000">20,000</option><option value="80000">80,000</option><option value="300000">300,000</option><option value="550000">550,000</option><option value="840000">840,000</option><option value="1500000">1,500,000</option><option value="2200000">2,200,000</option><option value="3000000">3,000,000</option><option value="6000000" selected>6,000,000</option></select></div><div class="summaryRow"><span>目前積分</span><input id="current" type="number" min="0" inputmode="numeric"></div><div class="summaryRow"><span>預計最終積分</span><b id="final" class="finalValue">0</b></div></div></section>
@@ -1436,22 +1453,7 @@ function scheduleHelpKillDayRefresh(){
 }
 
 function switchPage(id){document.getElementById('scorePage').style.display=id==='scorePage'?'block':'none';document.getElementById('helpPage').style.display=id==='helpPage'?'block':'none';document.getElementById('radarPage').style.display=id==='radarPage'?'block':'none';document.querySelector('main')?.classList.toggle('radar-active',id==='radarPage');document.querySelectorAll('.mainPageTab').forEach(b=>{const active=b.dataset.page===id;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');});if(id==='helpPage')helpRender();if(id==='scorePage'||id==='helpPage')setTimeout(()=>{if(!document.getElementById('guideOverlay').classList.contains('show'))guideOpen(id==='helpPage'?'help':'score');},80);}
-document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
-document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>requestAnimationFrame(syncRadarTopbarSpace)));
-function syncRadarTopbarSpace(){
-  const main=document.querySelector('main'), topbar=document.querySelector('.topbar');
-  if(!main||!topbar)return;
-  if(main.classList.contains('radar-active')){
-    const h=topbar.getBoundingClientRect().height;
-    main.style.setProperty('--radar-topbar-space',Math.ceil(h+12)+'px');
-  }else{
-    main.style.removeProperty('--radar-topbar-space');
-  }
-}
-requestAnimationFrame(syncRadarTopbarSpace);
-window.addEventListener('resize',()=>requestAnimationFrame(syncRadarTopbarSpace));
-window.addEventListener('orientationchange',()=>setTimeout(syncRadarTopbarSpace,80));
-document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
+document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
 
 document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{helpDB.clicks=clampHelpClicks(helpDB.clicks+(+b.dataset.step));helpRender();helpSave();}));
 document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks=clampHelpClicks(e.target.value);e.target.value=helpDB.clicks;helpSyncAll();});
@@ -2545,7 +2547,27 @@ if(maxInput){
 }
 autoPlanIfReady();
 
-})();</script></body></html>
+})();</script>
+<script id="radarNavSameModeScript">
+(function(){
+  function syncRadarNav(){
+    const main=document.querySelector('main');
+    const topbar=document.querySelector('.topbar');
+    if(!main||!topbar)return;
+    if(main.classList.contains('radar-active')){
+      const h=Math.ceil(topbar.getBoundingClientRect().height);
+      main.style.setProperty('--radar-nav-height',(h+12)+'px');
+    }else{
+      main.style.removeProperty('--radar-nav-height');
+    }
+  }
+  document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>requestAnimationFrame(syncRadarNav)));
+  window.addEventListener('resize',()=>requestAnimationFrame(syncRadarNav));
+  window.addEventListener('orientationchange',()=>setTimeout(syncRadarNav,100));
+  requestAnimationFrame(syncRadarNav);
+})();
+</script>
+</body></html>
 <style id="readabilityStandardV9">
 /* v9｜按鈕、設定內容與規劃結果閱讀層級統一
    只調整視覺樣式，不修改計算、資料、儲存或事件邏輯。 */
