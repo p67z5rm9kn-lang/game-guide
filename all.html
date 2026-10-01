@@ -565,6 +565,37 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 #radarPage .meta,#radarPage .muted{color:var(--radar-muted)}
 #radarPage .modes label{border:1px solid #304b59;background:#102732;color:#dce7eb;border-radius:9px}
 #radarPage .modes label:has(input:checked){background:#6f5523;border-color:#d0a44b;color:#fff1cf}
+#radarPage .modes input[type="radio"]{
+  -webkit-appearance:none;
+  appearance:none;
+  width:22px!important;
+  height:22px!important;
+  min-width:22px;
+  margin:0!important;
+  padding:0!important;
+  border:2px solid #9aa7b3!important;
+  border-radius:50%!important;
+  background:#f3f3f3!important;
+  box-shadow:none!important;
+  position:relative;
+  flex:0 0 22px;
+}
+#radarPage .modes input[type="radio"]:checked{
+  border-color:#d0a44b!important;
+  background:#6f5523!important;
+}
+#radarPage .modes input[type="radio"]:checked::after{
+  content:"";
+  position:absolute;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#fff1cf;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+}
+
 #radarPage .time-row input,#radarPage .time-row select,#radarPage .setting-select{padding:9px 10px;font-size:15px}
 #radarPage .time-sep{color:var(--radar-gold-soft)}
 #radarPage .switch{background:#36515d}
