@@ -1275,7 +1275,7 @@ function helpRender(){
    card.dataset.roleId=p.id;
 
    card.innerHTML=`<div class="helpRoleHead">
-     <div class="helpRoleTitle"><div class="helpRoleName"></div></div>
+     <div class="helpRoleName"></div>
    </div>
    <div class="helpTable">
      <div class="helpTierSetting">
@@ -1453,7 +1453,8 @@ const GUIDE_DATA={
  help:{
    introTitle:'🤝 歡迎使用聯盟幫助計算器',introText:'有傷兵需要治療時，這個工具可以依照你的治療條件，快速計算一次最適合治療多少士兵。',
    steps:[
-    {title:'🪖 選擇士兵等級',text:'先到下方角色卡片的「士兵等級」選擇目前要治療的士兵等級。',target:'.helpSelectedRole .helpTierSetting',scroll:true},
+    {title:'👤 選擇角色',text:'先選擇目前要計算的角色。不同角色的治療相關設定會分別保存，切換角色後會載入該角色的資料。',target:'.helpSelectedRole .helpRoleHead',scroll:true},
+    {title:'🪖 選擇士兵等級',text:'在目前角色卡片的「士兵等級」選擇目前要治療的士兵等級。',target:'.helpSelectedRole .helpTierSetting',scroll:true},
     {title:'⏱️ 填入單手幫助時間',text:'在角色卡片中設定單手幫助時間相關資訊，包含聯盟科技、專精與避難招募等資料。',target:'.helpSelectedRole .helpTreatmentTime',scroll:true},
     {title:'⚡ 填入治療速度提高',text:'再填入目前的治療速度提高資訊，系統會把科技、聯盟科技、避難招募與殺敵日效果納入計算。',target:'.helpSelectedRole .helpTreatmentSpeed',scroll:true},
     {title:'✋ 輸入每次使用的手數',text:'輸入你預計每次要使用幾隻手進行治療。',target:'#helpClicks',scroll:true},
