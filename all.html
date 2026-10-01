@@ -550,6 +550,128 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 
 .radarPage .modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 14px}.radarPage .modes label{display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #365574;background:#102842;color:#dce8f5;border-radius:10px;padding:9px 10px;margin:0;min-height:42px}.radarPage .modes input{width:auto;margin:0}.radarPage .time-row{display:flex;align-items:center;gap:5px;width:100%;margin:8px 0;min-width:0}.radarPage .time-row input,.radarPage .time-row select,.radarPage .setting-select{width:100%;max-width:100%;min-width:0;box-sizing:border-box;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:14px 12px 8px}.radarPage .time-row input[type="time"]{flex:1 1 0;width:0;min-width:0;min-inline-size:0;box-sizing:border-box;display:block}.radarPage .setting-select{margin-bottom:4px}.radarPage .time-sep{flex:0 0 18px;width:18px;color:var(--gold);font-weight:700;text-align:center;font-size:18px;line-height:1}.radarPage .smallbtn{box-sizing:border-box;min-width:0;margin:0;padding:10px 6px;font-size:14px;white-space:nowrap}.radarPage .time-row .delTime{flex:0 0 82px;width:82px;min-width:82px}.radarPage .addSameTime,.radarPage .addTime{width:auto;min-width:0;display:inline-block}.radarPage .day-title{font-size:14px;font-weight:600;color:#dce8f5;margin:12px 0 7px}.radarPage .setup-panel>label{margin-top:10px}.radarPage .setup-panel>label:first-of-type{margin-top:0}.radarPage .laura-toggle-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;margin-bottom:4px}.radarPage .switch-label{display:flex!important;align-items:center;justify-content:flex-start;gap:8px!important;border:0!important;background:transparent!important;padding:9px 0!important;color:#dce8f5!important;border-radius:0!important;min-height:42px}.radarPage .switch-label input{position:absolute;opacity:0;pointer-events:none}.radarPage .switch{position:relative;width:48px;height:26px;border-radius:999px;background:#365574;display:inline-block;transition:.2s}.radarPage .switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.radarPage .switch-label input:checked + .switch{background:#b28c3f}.radarPage .switch-label input:checked + .switch:after{transform:translateX(22px)}.radarPage .laura-toggle-row #lauraDetail{min-width:0}.radarPage .laura-toggle-row #lauraDetail .setting-select{margin:0;min-height:42px}.radarPage .setup-panel{padding-bottom:16px}.radarPage .section-title{font-size:18px;margin:0 0 14px;color:var(--gold)}.radarPage .setup-divider{height:1px;background:#27415f;margin:16px 0}.radarPage .result-heading{font-size:18px;font-weight:700;color:var(--gold);margin:18px 2px 10px}.radarPage .setup-panel .day-title{font-weight:600}.radarPage .setup-panel .meta{margin-top:12px}.radarPage .cycle-bridge{margin-top:10px;padding:12px 14px;border:1px solid #365574;border-radius:12px;background:#102842}.radarPage .cycle-bridge-title{font-weight:700;color:var(--gold);margin-bottom:6px}.radarPage .cycle-bridge-text{font-size:14px;line-height:1.6;color:#dce8f5}.radarPage .cycle-bridge-warn{margin-top:6px;color:#ffd36a;font-size:13px;line-height:1.5}.radarPage .score-plan{margin-top:9px;padding:10px 12px;border:1px solid #806b3e;border-radius:10px;background:#102842;color:#f2d486;font-size:15px}.radarPage .schedule-loss{margin-top:4px;color:#ffd36a;font-size:14px;line-height:1.5}
 @media(max-width:560px){.radarPage .modes{grid-template-columns:repeat(2,minmax(0,1fr))}.radarPage .time-row{display:flex;gap:5px;min-width:0}.radarPage .time-row input[type="time"]{flex:1 1 0;width:0;min-width:0}.radarPage .time-row .delTime{flex:0 0 82px;width:82px;min-width:82px}.radarPage .addSameTime,.radarPage .addTime{width:auto}.radarPage .laura-toggle-row{align-items:center}.radarPage .laura-toggle-row #lauraDetail{width:auto}}
+</style><style id="radarUnifiedThemeClean">
+.radarPage{display:none;}
+
+.radarPage{
+  --radar-bg:#07131b;--radar-card:#0d202b;--radar-card2:#102732;--radar-line:#294553;
+  --radar-gold:#d0a44b;--radar-gold-soft:#f2d47e;--radar-text:#eef3f5;--radar-muted:#b7c5ca;
+  background:#07131b;color:var(--radar-text);padding:0 0 28px;
+}
+.radarPage .radarInner{max-width:820px;padding:0 0 8px;margin:auto}
+.radarPage{margin-top:0!important}
+.radarPage .setup-panel{margin-top:0!important}
+.radarPage h1{font-size:21px;color:var(--radar-text);font-weight:900;margin:0 0 6px}
+.radarPage .sub{color:var(--radar-muted);font-size:12px;line-height:1.5;margin-bottom:12px}
+.radarPage .panel,.radarPage .day{background:#0d202b;border:1px solid var(--radar-line);border-radius:16px;padding:13px 14px;margin:10px 0;box-shadow:none}
+.radarPage .setup-panel{background:linear-gradient(145deg,#11232d,#09151d);border-color:#735725}
+.radarPage label{font-size:13px;color:var(--radar-muted);margin-bottom:6px}
+.radarPage input,.radarPage select,.radarPage .time-row input,.radarPage .time-row select,.radarPage .setting-select{background:#f3f3f3;color:#111;border:1px solid #cfd4d7;border-radius:8px}
+.radarPage input:focus,.radarPage select:focus{outline:2px solid rgba(208,164,75,.35);outline-offset:1px}
+.radarPage button{border:1px solid #3a5360;background:#122833;color:#eaf1f4;border-radius:9px;font-weight:900}
+.radarPage button:hover{background:#17313d}
+.radarPage .smallbtn{background:#122833;color:#eaf1f4}
+.radarPage .section-title,.radarPage .result-heading{color:var(--radar-gold-soft);font-weight:900}
+.radarPage .day-title{color:#dce7eb}
+.radarPage .meta,.radarPage .muted{color:var(--radar-muted)}
+.radarPage .modes label{border:1px solid #304b59;background:#102732;color:#dce7eb;border-radius:9px}
+.radarPage .modes label:has(input:checked){background:#6f5523;border-color:#d0a44b;color:#fff1cf}
+.radarPage .time-row input,.radarPage .time-row select,.radarPage .setting-select{padding:9px 10px;font-size:15px}
+.radarPage .time-sep{color:var(--radar-gold-soft)}
+.radarPage .switch{background:#36515d}
+.radarPage .switch-label input:checked + .switch{background:#6f5523}
+.radarPage .cycle-bridge,.radarPage .score-plan{border-color:#735725;background:#102732}
+.radarPage .cycle-bridge-title,.radarPage .score-plan{color:var(--radar-gold-soft)}
+.radarPage .operation-block,.radarPage .event,.radarPage .action,.radarPage .formula{background:#091b24}
+.radarPage .operation-block{border-left-color:#d0a44b}
+.radarPage .operation-range,.radarPage .event-time{color:var(--radar-gold-soft)}
+.radarPage .score{border-color:#735725}
+.radarPage .tag{border-color:#735725;color:var(--radar-gold-soft);background:#211b11}
+.radarPage td,.radarPage th{border-bottom-color:#203640}
+.radarPage th{color:#9fb0b8}
+@media(max-width:560px){
+  .radarPage .radarInner{padding:0}
+  .radarPage .panel,.radarPage .day{border-radius:14px;padding:11px 12px}
+  .radarPage h1{font-size:19px}
+  .radarPage .sub{font-size:11px}
+  .radarPage .time-row input,.radarPage .time-row select,.radarPage .setting-select{font-size:15px;padding:8px 8px}
+  .radarPage .time-row input[type="time"]{line-height:40px;padding:2px 8px 0!important;}
+}
+
+/* 雷達頁 v4：移除頁間空白、單選按鈕改為整顆按鈕、修正時間欄垂直置中 */
+.radarPage .setup-panel > h1{
+  margin:0 0 12px;
+  font-size:21px;
+  line-height:1.25;
+  font-weight:900;
+  color:#eef3f5;
+}
+.radarPage .section-title{
+  margin:0 0 14px;
+  font-size:18px;
+  line-height:1.25;
+  font-weight:900;
+  color:#f2d47e;
+}
+.radarPage .modes label{
+  border:1px solid #304b59;
+  background:#102732;
+  color:#dce7eb;
+  border-radius:9px;
+  min-height:42px;
+  padding:8px 10px;
+  font-size:16px;
+  font-weight:900;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.radarPage .modes label:has(input:checked){
+  background:#6f5523;
+  border-color:#d0a44b;
+  color:#fff1cf;
+  box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);
+}
+.radarPage .modes label{position:relative;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.radarPage .modes input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  margin:0;
+  padding:0;
+  opacity:0;
+  pointer-events:none;
+}
+.radarPage .modes label:focus-within{
+  outline:2px solid rgba(208,164,75,.55);
+  outline-offset:1px;
+}
+.radarPage .time-row input[type="time"],
+.radarPage .setting-select,
+.radarPage #max{
+  height:40px !important;
+  min-height:40px !important;
+  background:#f3f3f3 !important;
+  border:1px solid #cfd4d7 !important;
+  color:#111 !important;
+  border-radius:9px !important;
+  font-size:16px !important;
+  font-weight:900 !important;
+  line-height:1.1 !important;
+  padding:0 10px !important;
+  box-sizing:border-box;
+}
+.radarPage .time-row input[type="time"]{text-align:center;-webkit-appearance:none;appearance:none;line-height:40px;padding:2px 10px 0!important;}
+.radarPage .setting-select{text-align:right;text-align-last:right;}
+.radarPage #max::placeholder{color:#777;opacity:1;font-weight:900;}
+.radarPage .time-row input[type="time"]:focus,
+.radarPage .setting-select:focus,
+.radarPage #max:focus{
+  outline:2px solid rgba(208,164,75,.55);
+  outline-offset:1px;
+}
+@media(max-width:560px){
+  .radarPage .setup-panel > h1{font-size:21px;}
+  .radarPage .modes label{font-size:15px;}
+}
 </style></head><body><main><nav class="topbar siteTopbar">
   <div class="siteTopRow">
     <div class="brand">Last Z</div>
@@ -592,8 +714,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <div class="stRow"><span>突擊</span><input class="troopCount" type="number" min="0" value="177" inputmode="numeric"><span class="unitInput"><input class="troopSpeed" type="number" min="0" step="0.01" value="529" inputmode="decimal"><span>%</span></span><span class="prodTime">0:0:0</span><span class="twelveQty">0</span></div>
 </div>
 </details></section></div>
-<section id="helpPage" class="helpPage" style="display:none"><div class="helpCard"><div class="helpHead"><div class="helpTitleRow"><div class="helpTitle">聯盟幫助｜快速計算每次治療士兵數量</div><div class="helpInfoWrap"><button type="button" class="helpInfo" id="helpInfoBtn" aria-label="聯盟幫助說明">i</button></div></div><div class="helpInfoPanel" id="helpInfoPanel">士兵等級可直接在角色資料中調整，並與「聯盟對決」星期五／士兵訓練／加速計算的士兵等級保持連動。<br>目前提供 T9 / T10 原始治療時間：T9 為 3:58、T10 為 4:38。<br>其他士兵等級目前沒有原始治療時間資料。</div><div class="helpSub">所有角色共用點手數量、玫瑰花、光碟；殺敵日依台灣時間自動判斷，其餘數值依角色分別設定。</div></div><div class="globalHelp"><div class="globalLabel">全體角色共用設定｜點手數量</div><div class="stepper"><button type="button" data-step="-5">−5</button><button type="button" data-step="-1">−1</button><input id="helpClicks" type="number" min="0" max="80" step="1" value="5" inputmode="numeric"><button type="button" data-step="1">＋1</button><button type="button" data-step="5">＋5</button></div><div class="globalChecks"><label class="checkPill"><input id="helpRose" type="checkbox" checked>玫瑰花</label><label class="checkPill"><input id="helpDisc" type="checkbox" checked>光碟</label></div></div></div><div id="helpRoleJump" class="helpRoleJump"></div><div id="helpRoles" class="helpRoles"></div></section></main>
-<div class="guideOverlay" id="guideOverlay" aria-hidden="true">
+<section id="helpPage" class="helpPage" style="display:none"><div class="helpCard"><div class="helpHead"><div class="helpTitleRow"><div class="helpTitle">聯盟幫助｜快速計算每次治療士兵數量</div><div class="helpInfoWrap"><button type="button" class="helpInfo" id="helpInfoBtn" aria-label="聯盟幫助說明">i</button></div></div><div class="helpInfoPanel" id="helpInfoPanel">士兵等級可直接在角色資料中調整，並與「聯盟對決」星期五／士兵訓練／加速計算的士兵等級保持連動。<br>目前提供 T9 / T10 原始治療時間：T9 為 3:58、T10 為 4:38。<br>其他士兵等級目前沒有原始治療時間資料。</div><div class="helpSub">所有角色共用點手數量、玫瑰花、光碟；殺敵日依台灣時間自動判斷，其餘數值依角色分別設定。</div></div><div class="globalHelp"><div class="globalLabel">全體角色共用設定｜點手數量</div><div class="stepper"><button type="button" data-step="-5">−5</button><button type="button" data-step="-1">−1</button><input id="helpClicks" type="number" min="0" max="80" step="1" value="5" inputmode="numeric"><button type="button" data-step="1">＋1</button><button type="button" data-step="5">＋5</button></div><div class="globalChecks"><label class="checkPill"><input id="helpRose" type="checkbox" checked>玫瑰花</label><label class="checkPill"><input id="helpDisc" type="checkbox" checked>光碟</label></div></div></div><div id="helpRoleJump" class="helpRoleJump"></div><div id="helpRoles" class="helpRoles"></div></section><div class="guideOverlay" id="guideOverlay" aria-hidden="true">
   <div class="guideShade"></div>
   <div class="guideFocus" id="guideFocus"></div>
   <div class="guideCard" id="guideCard">
@@ -942,7 +1063,7 @@ function scheduleHelpKillDayRefresh(){
 }
 
 function switchPage(id){document.getElementById('scorePage').style.display=id==='scorePage'?'block':'none';document.getElementById('helpPage').style.display=id==='helpPage'?'block':'none';document.getElementById('radarPage').style.display=id==='radarPage'?'block':'none';document.querySelectorAll('.mainPageTab').forEach(b=>{const active=b.dataset.page===id;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');});if(id==='helpPage')helpRender();if(id==='radarPage'){window.scrollTo(0,0);}else{setTimeout(()=>{if(!document.getElementById('guideOverlay').classList.contains('show'))guideOpen(id==='helpPage'?'help':'score');},80);}}
-document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
+document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));switchPage('scorePage');document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
 
 document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{helpDB.clicks=clampHelpClicks(helpDB.clicks+(+b.dataset.step));helpRender();helpSave();}));
 document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks=clampHelpClicks(e.target.value);e.target.value=helpDB.clicks;helpSyncAll();});
