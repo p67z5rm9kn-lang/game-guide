@@ -664,6 +664,149 @@ main.radar-active{padding-bottom:0!important}
   #radarPage .modes label{font-size:15px;}
 }
 </style>
+
+<style id="radarReadableV5">
+/* 雷達頁 v5：可讀性統一＋iPhone 時間欄垂直對齊 */
+#radarPage label{
+  font-size:16px !important;
+  line-height:1.35 !important;
+  font-weight:800 !important;
+  color:#b7c5ca !important;
+  margin-bottom:7px !important;
+}
+#radarPage .setup-panel > h1{
+  font-size:22px !important;
+  line-height:1.25 !important;
+  margin:0 0 14px !important;
+}
+#radarPage .section-title,
+#radarPage .result-heading{
+  font-size:20px !important;
+  line-height:1.3 !important;
+  font-weight:900 !important;
+}
+#radarPage .day-title{
+  font-size:16px !important;
+  line-height:1.35 !important;
+  font-weight:800 !important;
+}
+#radarPage .sub,
+#radarPage .meta,
+#radarPage .muted{
+  font-size:14px !important;
+  line-height:1.55 !important;
+}
+#radarPage .modes label{
+  min-height:44px !important;
+  padding:9px 10px !important;
+  font-size:17px !important;
+  font-weight:900 !important;
+}
+#radarPage input,
+#radarPage select,
+#radarPage .time-row input,
+#radarPage .time-row select,
+#radarPage .setting-select,
+#radarPage #max{
+  font-size:18px !important;
+  font-weight:900 !important;
+}
+#radarPage #max::placeholder{
+  font-size:18px !important;
+  font-weight:900 !important;
+}
+#radarPage .time-row input[type="time"]{
+  height:42px !important;
+  min-height:42px !important;
+  line-height:normal !important;
+  padding:0 10px !important;
+  text-align:center !important;
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  display:block !important;
+}
+#radarPage .time-row input[type="time"]::-webkit-date-and-time-value{
+  text-align:center !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+#radarPage .time-row input[type="time"]::-webkit-datetime-edit,
+#radarPage .time-row input[type="time"]::-webkit-datetime-edit-fields-wrapper{
+  padding:0 !important;
+  margin:0 !important;
+  line-height:normal !important;
+}
+#radarPage .time-row input[type="time"]::-webkit-datetime-edit-hour-field,
+#radarPage .time-row input[type="time"]::-webkit-datetime-edit-minute-field,
+#radarPage .time-row input[type="time"]::-webkit-datetime-edit-ampm-field{
+  padding:0 !important;
+  margin:0 !important;
+}
+#radarPage .setting-select,
+#radarPage #max{
+  height:42px !important;
+  min-height:42px !important;
+  line-height:normal !important;
+  padding:0 10px !important;
+}
+#radarPage .time-sep{
+  font-size:19px !important;
+  font-weight:900 !important;
+}
+#radarPage button{
+  font-size:16px;
+}
+#radarPage .smallbtn{
+  font-size:15px !important;
+}
+#radarPage .operation-block,
+#radarPage .event,
+#radarPage .action{
+  font-size:15px !important;
+  line-height:1.7 !important;
+}
+#radarPage .operation-step,
+#radarPage .event-action{
+  font-size:15px !important;
+}
+#radarPage .cycle-bridge-text,
+#radarPage .cycle-bridge-warn,
+#radarPage .schedule-loss{
+  font-size:14px !important;
+}
+#radarPage .score-plan{
+  font-size:16px !important;
+}
+#radarPage table{
+  font-size:14px !important;
+}
+#radarPage .formula{
+  font-size:14px !important;
+  line-height:1.7 !important;
+}
+@media(max-width:560px){
+  #radarPage .setup-panel > h1{font-size:22px !important;}
+  #radarPage .section-title,
+  #radarPage .result-heading{font-size:20px !important;}
+  #radarPage label{font-size:16px !important;}
+  #radarPage .sub,
+  #radarPage .meta,
+  #radarPage .muted{font-size:14px !important;}
+  #radarPage .modes label{font-size:16px !important;min-height:44px !important;}
+  #radarPage input,
+  #radarPage select,
+  #radarPage .time-row input,
+  #radarPage .time-row select,
+  #radarPage .setting-select,
+  #radarPage #max{font-size:18px !important;}
+  #radarPage .time-row input[type="time"]{
+    height:42px !important;
+    line-height:normal !important;
+    padding:0 8px !important;
+  }
+}
+</style>
+
 </head><body><main>
 <nav class="topbar"><div class="brand">Last Z</div><div class="mainPageNav" role="tablist" aria-label="主要頁面"><button class="mainPageTab active" data-page="scorePage" role="tab" aria-selected="true">對決積分</button><button class="mainPageTab" data-page="helpPage" role="tab" aria-selected="false">聯盟幫助</button><button class="mainPageTab" data-page="radarPage" role="tab" aria-selected="false">雷達週計劃</button></div><button class="guideNavBtn" id="guideNavBtn" type="button" aria-label="新手導覽">🧭 導覽</button><button class="roleBtn" id="roleBtn">👤 <span id="currentRoleName">玩家A</span>⌄</button></nav><div id="scorePage"><section class="card hero"><div class="titleLine"><h1>聯盟對決積分配置計算器</h1><button class="bonusBtn" id="bonusBtn">設定積分加成</button></div>
 <div class="summaryRows"><div class="summaryRow"><span>目標積分</span><select id="target"><option value="20000">20,000</option><option value="80000">80,000</option><option value="300000">300,000</option><option value="550000">550,000</option><option value="840000">840,000</option><option value="1500000">1,500,000</option><option value="2200000">2,200,000</option><option value="3000000">3,000,000</option><option value="6000000" selected>6,000,000</option></select></div><div class="summaryRow"><span>目前積分</span><input id="current" type="number" min="0" inputmode="numeric"></div><div class="summaryRow"><span>預計最終積分</span><b id="final" class="finalValue">0</b></div></div></section>
