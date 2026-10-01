@@ -534,7 +534,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 </style>
 <style id="sharedRoleSwitchV101">
-/* v0.10.1 第一批修正：三頁角色卡使用同一套位置、尺寸、間距與兩行結構。對決／雷達第二行保留空白，不硬塞數字；聯盟幫助顯示治療數量。 */
+/* v0.10.3 第一批收尾：三頁角色卡使用同一套位置、尺寸、間距與兩行結構。對決／雷達第二行保留空白，不硬塞數字；聯盟幫助顯示治療數量。 */
 .pageRoleSwitch{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0 12px;padding:0;}
 .pageRoleCard{width:100%;min-width:0;min-height:66px;margin:0!important;padding:8px 10px;border:1px solid #304b59;border-radius:12px;background:#102732;color:#dce7eb;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;line-height:1.2;}
 .pageRoleCard.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);}
@@ -551,6 +551,17 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 #radarPage .pageRoleSwitch .pageRoleCard{width:100%;margin:0!important;padding:8px 10px;min-height:66px;font-size:inherit;}
 @media(max-width:699px){.pageRoleSwitch{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pageRoleCard{min-height:66px}.pageRoleName{font-size:16px}.pageRoleValue{font-size:15px}}
 @media(max-width:390px){.pageRoleSwitch{gap:6px}.pageRoleCard{padding:7px 6px;min-height:64px}.pageRoleName{font-size:15px}.pageRoleValue{font-size:14px;min-height:17px;line-height:17px}}
+</style>
+<style id="roleCardLayoutV103">
+/* v0.10.3：角色卡高度依內容決定。對決／雷達只有角色名稱時採單列；聯盟幫助有數值時採雙列。 */
+.pageRoleCard.compact{min-height:54px !important;height:54px !important;padding:7px 10px !important;flex-direction:row !important;gap:0 !important;}
+#radarPage .pageRoleSwitch .pageRoleCard.compact{min-height:54px !important;height:54px !important;}
+@media(max-width:699px){.pageRoleCard.compact{min-height:54px !important;height:54px !important;}}
+@media(max-width:390px){.pageRoleCard.compact{min-height:52px !important;height:52px !important;padding:6px 8px !important;}}
+/* 聯盟幫助：設定標題與雷達採同一種內距節奏，避免手機版文字貼邊。 */
+#helpPage .helpSettingGroupTitle{display:block;box-sizing:border-box;width:100%;padding-left:14px;padding-right:14px;margin-left:0;margin-right:0;overflow-wrap:anywhere;}
+#helpPage .helpRoleGroupTitle{padding-top:14px;padding-left:14px;padding-right:14px;}
+@media(max-width:560px){#helpPage .helpSettingGroupTitle{font-size:17px !important;line-height:1.35 !important;}}
 </style>
 <style id="newUserGuideV1">
 .guideOverlay{position:fixed;inset:0;z-index:500;background:rgba(2,8,12,.74);display:none;align-items:center;justify-content:center;padding:18px}.guideOverlay.show{display:block}.guideShade{position:absolute;inset:0}.guideFocus{position:fixed;z-index:502;pointer-events:none;border:2px solid #e0b85a;border-radius:12px;box-shadow:0 0 0 5px rgba(224,184,90,.16),0 0 24px rgba(224,184,90,.42);transition:all .22s ease;display:none}.guideCard{position:fixed;z-index:503;width:min(390px,calc(100vw - 28px));background:#0d202b;border:1px solid #735725;border-radius:16px;box-shadow:0 20px 55px rgba(0,0,0,.62);padding:16px;color:#eef3f5}.guideCard h3{margin:0 0 8px;font-size:19px;color:#f2d47e}.guideCard p{margin:0;color:#d7e3e7;font-size:14px;line-height:1.65}.guideStep{margin-top:10px;font-size:12px;color:#aebfc6}.guideActions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.guideActions button{border:1px solid #3a5360;background:#122833;color:#eaf1f4;border-radius:9px;padding:8px 12px;font-weight:800}.guideActions .guideNext,.guideActions .guideDone{border-color:#d0a44b;background:#6f5523;color:#fff4d0}.guideSkip{margin-right:auto}.guideNavBtn{border:1px solid #735725;background:#162a33;color:#f2d47e;border-radius:9px;padding:8px 10px;font-weight:900;white-space:nowrap}.guideTargetPulse{position:relative!important;z-index:501!important}
@@ -1423,7 +1434,7 @@ document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks
 ['helpRose','helpDisc'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{helpDB[id==='helpRose'?'rose':'disc']=e.target.checked;helpSyncAll();}));
 
 
-// ==================== 新手導覽 V1｜V11 聯盟幫助＋聯盟對決智慧置中版 ====================
+// ==================== 新手導覽 V1｜v0.10.3 三頁共通導覽版 ====================
 const GUIDE_VERSION='v1';
 const GUIDE_KEYS={score:'lastz_guide_score_'+GUIDE_VERSION,help:'lastz_guide_help_'+GUIDE_VERSION,radar:'lastz_guide_radar_'+GUIDE_VERSION};
 const GUIDE_DATA={
@@ -1448,7 +1459,8 @@ const GUIDE_DATA={
     {title:'✋ 輸入每次使用的手數',text:'輸入你預計每次要使用幾隻手進行治療。',target:'#helpClicks',scroll:true},
     {title:'🌹💿 確認玫瑰花／光碟效果',text:'確認目前是否有玫瑰花或光碟效果，系統會把勾選的效果一起算入單手幫助時間。',target:'.globalChecks',scroll:true},
     {title:'🧮 查看結果',text:'完成設定後，角色卡片的「每次治療個數」就是目前條件下建議一次治療的士兵數量。',target:'.helpSelectedRole .helpResultRow',scroll:true}
-   ],
+   ]
+ },
  radar:{
    introTitle:'📡 歡迎使用雷達週計劃',introText:'這個工具可以依照遊戲時間、儲存上限、勞拉與玩家可操作時間，安排一週雷達規劃。第一次使用可以跟著導覽走一遍。',
    steps:[
@@ -1457,8 +1469,6 @@ const GUIDE_DATA={
     {title:'👤 角色設定',text:'這裡設定目前角色自己的勞拉、星等與儲存上限。切換角色後，這些資料會跟著角色切換。',target:'#radarPage .radarRoleSettings',scroll:true},
     {title:'📊 查看規劃結果',text:'完成設定後查看規劃結果，依照系統安排操作雷達。',target:'#radarPage .result-heading',scroll:true}
    ]
- }
-
  }
 };
 let guideState={type:null,index:0,intro:true};
