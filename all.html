@@ -1034,22 +1034,25 @@ main.radar-active{padding-bottom:0!important}
 }
 </style>
 <style id="radarNavFixTest">
-/* v11 測試：僅讓雷達頁主導覽固定；對決積分／聯盟幫助維持 v11 原樣。 */
-/* 雷達固定導覽配套：預留完整兩列導覽高度，避免第一個設定標題被遮住。 */
+/* v12：三個主頁籤統一使用同一套主導覽定位。
+   對決積分／聯盟幫助／雷達週計劃全部沿用全域 .topbar 的 sticky。
+   雷達不再另外使用 fixed，也不再額外補 215px 高度，避免內容被導覽列蓋住。 */
 main.radar-active .topbar{
-  position:fixed;
+  position:sticky;
   top:0;
-  left:50%;
-  transform:translateX(-50%);
-  width:min(820px,100vw);
-  margin:0;
+  left:auto;
+  transform:none;
+  width:auto;
+  margin:0 -14px 12px;
 }
 main.radar-active #radarPage{
-  /* 固定導覽脫離版面流後，額外預留實際導覽高度＋安全間距，避免第一個設定標題被遮住。 */
-  padding-top:var(--radar-topbar-space,240px);
+  padding-top:0;
 }
 @media(max-width:560px){
-  main.radar-active .topbar{width:100vw;margin:0;}
+  main.radar-active .topbar{
+    width:auto;
+    margin:0 -10px 10px;
+  }
 }
 </style>
 </head><body><main>
@@ -1455,23 +1458,7 @@ function scheduleHelpKillDayRefresh(){
 
 function switchPage(id){document.getElementById('scorePage').style.display=id==='scorePage'?'block':'none';document.getElementById('helpPage').style.display=id==='helpPage'?'block':'none';document.getElementById('radarPage').style.display=id==='radarPage'?'block':'none';document.querySelector('main')?.classList.toggle('radar-active',id==='radarPage');document.querySelectorAll('.mainPageTab').forEach(b=>{const active=b.dataset.page===id;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');});if(id==='helpPage')helpRender();if(id==='scorePage'||id==='helpPage')setTimeout(()=>{if(!document.getElementById('guideOverlay').classList.contains('show'))guideOpen(id==='helpPage'?'help':'score');},80);}
 document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
-document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>requestAnimationFrame(syncRadarTopbarSpace)));
-function syncRadarTopbarSpace(){
-  const main=document.querySelector('main'), topbar=document.querySelector('.topbar');
-  if(!main||!topbar)return;
-  if(main.classList.contains('radar-active')){
-    // 直接量測目前固定導覽的實際高度；再保留 24px 安全間距。
-    // 不依賴固定 215px，避免手機尺寸／字體載入後導覽高度改變造成內容被遮住。
-    const h=topbar.getBoundingClientRect().height;
-    main.style.setProperty('--radar-topbar-space',Math.ceil(h+24)+'px');
-  }else{
-    main.style.removeProperty('--radar-topbar-space');
-  }
-}
-requestAnimationFrame(()=>requestAnimationFrame(syncRadarTopbarSpace));
-window.addEventListener('load',()=>requestAnimationFrame(syncRadarTopbarSpace));
-window.addEventListener('resize',()=>requestAnimationFrame(syncRadarTopbarSpace));
-window.addEventListener('orientationchange',()=>setTimeout(syncRadarTopbarSpace,120));
+// 三個主頁籤共用同一套 .topbar sticky 導覽，不再為雷達另外計算導覽高度。
 document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
 
 document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{helpDB.clicks=clampHelpClicks(helpDB.clicks+(+b.dataset.step));helpRender();helpSave();}));
@@ -1619,6 +1606,7 @@ window.addEventListener('resize',()=>{if(document.getElementById('guideOverlay')
 (function init(){helpDB.selectedRoleId=db.active||helpDB.selectedRoleId||db.profiles[0]?.id;saveDB();renderRoles();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}applyAutoGameDayJump();scheduleHelpKillDayRefresh();document.getElementById('currentRoleName').textContent=p?.name||'玩家A';setTimeout(()=>guideOpen('score'),450);})();
 </script><script id="radarPageScript">(function(){
 
+// v12 角色化第一階段：只將「勞拉設定＋儲存上限」改為依角色獨立記憶；時間模式／可操作時間仍維持原本共用儲存。
 // v8.3.32：微調玩家可操作時間的時間輸入欄垂直內距，讓時間文字視覺上更接近欄位垂直中心；保留 v8.3.31 的欄位比例與 Flex 結構。
 // v8.3.31：沿用 v8.3.25 的計算邏輯；重新整理規劃設定區：時段採固定分隔符與刪除欄位，勞拉切換不顯示外框並與星等選單對齊。
 // v8.3.25：儲存上限為硬上限；刷新或勞拉超過上限的數量立即判定為無法保留，不會成為可收割的暫存量。
@@ -2482,25 +2470,43 @@ function syncLauraUI(){
   const has=document.getElementById('lauraToggle')?.checked!==false;
   document.getElementById('lauraDetail').style.display=has?'block':'none';
 }
+function getActiveProfile(){
+  try{return db?.profiles?.find(p=>p.id===db.active)||null;}catch(e){return null;}
+}
+function readCurrentLauraSettings(){
+  return {
+    hasLaura:document.getElementById('lauraToggle')?.checked!==false,
+    star:Number(document.getElementById('lauraStar')?.value||4)
+  };
+}
 function saveLauraSettings(){
-  const has=document.getElementById('lauraToggle')?.checked!==false;
-  const star=Number(document.getElementById('lauraStar').value||4);
-  localStorage.setItem(lauraStoreKey,JSON.stringify({hasLaura:has,star}));
+  const p=getActiveProfile();
+  if(!p)return;
+  const cur=readCurrentLauraSettings();
+  p.radarSettings={...(p.radarSettings||{}),hasLaura:cur.hasLaura,star:cur.star};
+  const max=document.getElementById('max');
+  if(max)p.radarSettings.max=max.value;
+  saveDB();
 }
-function loadLauraSettings(){
-  try{
-    const d=JSON.parse(localStorage.getItem(lauraStoreKey)||'null');
-    if(!d)return;
-    const toggle=document.getElementById('lauraToggle');
-    if(toggle)toggle.checked=d.hasLaura!==false;
-    if(d.star!==undefined)document.getElementById('lauraStar').value=String(d.star);
-  }catch(e){}
+function loadLauraSettingsForRole(id){
+  const p=db?.profiles?.find(x=>x.id===id);
+  const legacy=(()=>{try{return JSON.parse(localStorage.getItem(lauraStoreKey)||'null');}catch(e){return null;}})();
+  let d=p?.radarSettings;
+  if(!d){
+    d={hasLaura:legacy?.hasLaura!==false,star:legacy?.star!==undefined?legacy.star:4,max:''};
+    if(p){p.radarSettings={...d};saveDB();}
+  }
+  const toggle=document.getElementById('lauraToggle');
+  const star=document.getElementById('lauraStar');
+  const max=document.getElementById('max');
+  if(toggle)toggle.checked=d.hasLaura!==false;
+  if(star&&d.star!==undefined)star.value=String(d.star);
+  if(max&&d.max!==undefined)max.value=String(d.max??'');
 }
+window.lastZRadarRoleSave=saveLauraSettings;
+window.lastZRadarRoleLoad=loadLauraSettingsForRole;
 document.getElementById('lauraToggle').addEventListener('change',()=>{saveLauraSettings();syncLauraUI();syncLauraStatus();autoPlanIfReady();});
 document.getElementById('lauraStar').addEventListener('change',()=>{saveLauraSettings();autoPlanIfReady();});
-loadLauraSettings();
-syncLauraUI();
-syncLauraStatus();
 
 
 const timeStoreKey='lastz_radar_v8_availability';
@@ -2556,50 +2562,17 @@ function loadAvailability(){
 function toggleApply(){const m=radarRoot.querySelector('input[name=applyMode]:checked').value;radarRoot.querySelector('#sameTimes').hidden=m!=='same';radarRoot.querySelector('#customTimes').hidden=m!=='custom';autoSaveAvailability();}
 renderTimes();loadAvailability();toggleApply();radarRoot.querySelectorAll('input[name=applyMode]').forEach(x=>x.onchange=toggleApply);radarRoot.querySelectorAll('input[name=timeMode]').forEach(x=>x.onchange=autoSaveAvailability);
 
-// ===== 角色化第一階段：每個角色獨立記住勞拉與儲存上限 =====
-function getActiveRadarProfile(){
-  try{return db?.profiles?.find(p=>p.id===db.active)||null;}catch(e){return null;}
-}
-function readCurrentRadarRoleSettings(){
-  return {
-    hasLaura:radarRoot.querySelector('#lauraToggle')?.checked!==false,
-    star:Number(radarRoot.querySelector('#lauraStar')?.value||4),
-    max:radarRoot.querySelector('#max')?.value??''
-  };
-}
-function saveRadarRoleSettings(){
-  const p=getActiveRadarProfile();
-  if(!p)return;
-  const cur=readCurrentRadarRoleSettings();
-  p.radarSettings={...(p.radarSettings||{}),...cur};
-  saveDB();
-}
-function loadRadarRoleSettings(id){
-  const p=db?.profiles?.find(x=>x.id===id);
-  if(!p)return;
-  const d=p.radarSettings||{hasLaura:true,star:4,max:''};
-  p.radarSettings={...d};
-  const toggle=radarRoot.querySelector('#lauraToggle');
-  const star=radarRoot.querySelector('#lauraStar');
-  const max=radarRoot.querySelector('#max');
-  if(toggle)toggle.checked=d.hasLaura!==false;
-  if(star)star.value=String(d.star??4);
-  if(max)max.value=String(d.max??'');
-  syncLauraUI();
-  syncLauraStatus();
-  saveDB();
-}
-window.lastZRadarRoleSave=saveRadarRoleSettings;
-window.lastZRadarRoleLoad=loadRadarRoleSettings;
-
 const planBtn=document.getElementById('plan');
 if(planBtn)planBtn.addEventListener('click',runPlan);
 const maxInput=document.getElementById('max');
 if(maxInput){
-  maxInput.addEventListener('input',autoPlanIfReady);
-  maxInput.addEventListener('change',autoPlanIfReady);
-  maxInput.addEventListener('blur',autoPlanIfReady);
+  maxInput.addEventListener('input',()=>{saveLauraSettings();autoPlanIfReady();});
+  maxInput.addEventListener('change',()=>{saveLauraSettings();autoPlanIfReady();});
+  maxInput.addEventListener('blur',()=>{saveLauraSettings();autoPlanIfReady();});
 }
+loadLauraSettingsForRole(db.active);
+syncLauraUI();
+syncLauraStatus();
 autoPlanIfReady();
 
 })();</script></body></html>
