@@ -672,7 +672,21 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   .radarPage .setup-panel > h1{font-size:21px;}
   .radarPage .modes label{font-size:15px;}
 }
-</style></head><body><main><nav class="topbar siteTopbar">
+</style><style id="radarUiBaselineV03">
+/* v0.3：依 UI 完整基準調整雷達規劃設定外觀；不修改計算邏輯。 */
+.radarPage .radarInner > h1,.radarPage .setup-panel > h1{font-size:22px !important;line-height:1.25;}
+.radarPage .section-title{font-size:20px !important;line-height:1.25;}
+.radarPage .setup-panel > label,.radarPage .day-title{font-size:16px !important;line-height:1.35;}
+.radarPage .sub,.radarPage .cycle-bridge-warn,.radarPage .schedule-loss{font-size:14px !important;}
+.radarPage .modes label{font-size:16px !important;min-height:44px;}
+.radarPage .time-row input[type="text"],.radarPage .setting-select,.radarPage #max{height:44px !important;min-height:44px !important;background:#f3f3f3 !important;border:1px solid #cfd4d7 !important;color:#111 !important;border-radius:9px !important;font-size:18px !important;font-weight:900 !important;line-height:44px !important;padding:0 10px !important;box-sizing:border-box;}
+.radarPage .time-row input[type="text"]{text-align:center !important;-webkit-appearance:none;appearance:none;}
+.radarPage .time-row input[type="text"]::placeholder{color:#777;opacity:1;font-weight:900;}
+.radarPage .time-sep{font-size:18px;}
+.radarPage .smallbtn{font-size:15px !important;}
+@media(max-width:560px){.radarPage .radarInner > h1,.radarPage .setup-panel > h1{font-size:22px !important}.radarPage .section-title{font-size:20px !important}.radarPage .setup-panel > label,.radarPage .day-title{font-size:16px !important}.radarPage .modes label{font-size:16px !important}.radarPage .time-row input[type="text"]{font-size:18px !important;line-height:44px !important}}
+</style>
+</head><body><main><nav class="topbar siteTopbar">
   <div class="siteTopRow">
     <div class="brand">Last Z</div>
     <button class="guideNavBtn" id="guideNavBtn" type="button" aria-label="新手導覽">🧭 導覽</button>
@@ -2098,7 +2112,7 @@ syncLauraStatus();
 const timeStoreKey='lastz_radar_v8_availability';
 const lauraStoreKey='lastz_radar_v8_laura';
 const weekNames=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
-function timeRow(h='',end=''){return `<div class="time-row"><input type="time" aria-label="開始時間" value="${h}"><span class="time-sep">－</span><input type="time" aria-label="結束時間" value="${end}"><button type="button" class="smallbtn delTime">刪除</button></div>`}
+function timeRow(h='',end=''){return `<div class="time-row"><input type="text" inputmode="numeric" maxlength="5" pattern="(?:[01]\\d|2[0-3]):[0-5]\\d" placeholder="07:59" aria-label="開始時間" value="${h}"><span class="time-sep">－</span><input type="text" inputmode="numeric" maxlength="5" pattern="(?:[01]\\d|2[0-3]):[0-5]\\d" placeholder="23:01" aria-label="結束時間" value="${end}"><button type="button" class="smallbtn delTime">刪除</button></div>`}
 function bindDelete(){document.querySelectorAll('.delTime').forEach(b=>{if(b.dataset.bound)return;b.dataset.bound='1';b.onclick=()=>{const row=b.closest('.time-row');const parent=row.parentElement;if(parent.querySelectorAll('.time-row').length>1)row.remove();else row.querySelectorAll('input').forEach(x=>x.value='');autoSaveAvailability();};});}
 function bindTimeInputs(){document.querySelectorAll('.time-row input').forEach(x=>{if(x.dataset.bound)return;x.dataset.bound='1';x.addEventListener('input',autoSaveAvailability);x.addEventListener('change',autoSaveAvailability);});}
 function addTimeRow(container,h='',end=''){container.insertAdjacentHTML('beforeend',timeRow(h,end));bindDelete();bindTimeInputs();autoSaveAvailability();}
