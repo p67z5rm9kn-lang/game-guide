@@ -1033,9 +1033,9 @@ main.radar-active{padding-bottom:0!important}
   #radarPage .operation-block,#radarPage .event,#radarPage .operation-step,#radarPage .event-action{font-size:16px !important}
 }
 </style>
-
-<style id="radarNavSameModeFix">
-/* 雷達頁主導覽：採用與其他頁相同的固定效果；只處理導覽，不改雷達內容邏輯。 */
+<style id="radarNavFixTest">
+/* v11 測試：僅讓雷達頁主導覽固定；對決積分／聯盟幫助維持 v11 原樣。 */
+/* 雷達固定導覽配套：預留完整兩列導覽高度，避免第一個設定標題被遮住。 */
 main.radar-active .topbar{
   position:fixed;
   top:0;
@@ -1044,8 +1044,8 @@ main.radar-active .topbar{
   width:min(820px,100vw);
   margin:0;
 }
-main.radar-active{
-  padding-top:var(--radar-nav-height,0px) !important;
+main.radar-active #radarPage{
+  padding-top:var(--radar-topbar-space,215px);
 }
 @media(max-width:560px){
   main.radar-active .topbar{width:100vw;margin:0;}
@@ -1220,14 +1220,14 @@ function applyBonusState(st){const b=st||{};const ch=document.getElementById('ch
 function captureState(){return {values:controlList().map(x=>x.value),checks:[...document.querySelectorAll('#scorePage input[type=checkbox]')].map(x=>x.checked),day:tabs.findIndex(x=>x.classList.contains('active')),bonus:captureBonusState()};}
 function applyState(st){if(!st)return;st=normalizeBlankManualState(st);const cs=controlList();(st.values||[]).forEach((v,i)=>{if(cs[i]){cs[i].value=(cs[i].type==='number'&&Number(v)===0)?'':v;}});const ch=[...document.querySelectorAll('#scorePage input[type=checkbox]')];(st.checks||[]).forEach((v,i)=>{if(ch[i])ch[i].checked=v;});applyBonusState(st.bonus);show(Math.max(0,Math.min(4,st.day||0)));}
 function saveDB(){localStorage.setItem(STORE,JSON.stringify(db));}
-function saveActive(){const p=db.profiles.find(x=>x.id===db.active);if(p){p.state=captureState();saveDB();}}
+function saveActive(){const p=db.profiles.find(x=>x.id===db.active);if(p){p.state=captureState();if(typeof saveRadarRoleSettings==='function')saveRadarRoleSettings();saveDB();}}
 let saveTimer;function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveActive,120);}
 function renderRoles(){const box=document.getElementById('roleList');box.innerHTML='';db.profiles.forEach(p=>{const row=document.createElement('div');row.className='roleRow'+(p.id===db.active?' active':'');const name=document.createElement('div');name.className='roleName';name.textContent=p.name+(p.id===db.active?'（目前）':'');const actions=document.createElement('div');actions.className='roleActions';const choose=document.createElement('button');choose.textContent=p.id===db.active?'✓ 使用中':'切換';choose.addEventListener('click',()=>switchRole(p.id));const edit=document.createElement('button');edit.textContent='編輯';edit.addEventListener('click',()=>renameRole(p.id));const del=document.createElement('button');del.textContent='刪除';del.disabled=db.profiles.length<=1;del.addEventListener('click',()=>deleteRole(p.id));actions.append(choose,edit,del);row.append(name,actions);box.append(row);});document.getElementById('currentRoleName').textContent=db.profiles.find(x=>x.id===db.active)?.name||'玩家A';}
 function resetProfileUI(){document.querySelectorAll('#scorePage input').forEach(x=>{if(x.type==='checkbox')x.checked=x.defaultChecked;else x.value=x.defaultValue;});document.querySelectorAll('#scorePage select').forEach(x=>{const opt=[...x.options].findIndex(o=>o.defaultSelected);x.selectedIndex=opt>=0?opt:0;});applyBonusState(null);}
-function switchRole(id){saveActive();db.active=id;saveDB();const p=db.profiles.find(x=>x.id===id);if(p?.state)applyState(p.state);else{resetProfileUI();calc();saveActive();}applyAutoGameDayJump();document.getElementById('currentRoleName').textContent=p.name;renderRoles();if(document.getElementById('helpPage').style.display!=='none'){helpDB.selectedRoleId=id;helpSave();helpRender();}}
+function switchRole(id){saveActive();db.active=id;saveDB();const p=db.profiles.find(x=>x.id===id);if(p?.state)applyState(p.state);else{resetProfileUI();calc();saveActive();}if(typeof applyRadarRoleSettings==='function')applyRadarRoleSettings();applyAutoGameDayJump();document.getElementById('currentRoleName').textContent=p.name;renderRoles();if(document.getElementById('helpPage').style.display!=='none'){helpDB.selectedRoleId=id;helpSave();helpRender();}}
 function renameRole(id){const p=db.profiles.find(x=>x.id===id);if(!p)return;const n=prompt('請輸入角色名稱',p.name);if(n&&n.trim()){p.name=n.trim();saveDB();renderRoles();if(document.getElementById('helpPage').style.display!=='none')helpRender();}}
-function deleteRole(id){if(db.profiles.length<=1)return;const idx=db.profiles.findIndex(x=>x.id===id);if(idx<0)return;if(!confirm('確定刪除「'+db.profiles[idx].name+'」？'))return;const was=id===db.active;db.profiles.splice(idx,1);if(was){db.active=db.profiles[0].id;const p=db.profiles[0];if(p.state)applyState(p.state);}saveDB();renderRoles();document.getElementById('currentRoleName').textContent=db.profiles.find(x=>x.id===db.active).name;calc();if(document.getElementById('helpPage').style.display!=='none')helpRender();}
-document.getElementById('addRole').addEventListener('click',()=>{const n=prompt('請輸入新角色名稱','新角色');if(!n||!n.trim())return;saveActive();const id='p'+Date.now();db.profiles.push({id,name:n.trim(),state:null});db.active=id;saveDB();resetProfileUI();renderRoles();calc();saveActive();if(document.getElementById('helpPage').style.display!=='none'){helpDB.selectedRoleId=id;helpSave();helpRender();}});
+function deleteRole(id){if(db.profiles.length<=1)return;const idx=db.profiles.findIndex(x=>x.id===id);if(idx<0)return;if(!confirm('確定刪除「'+db.profiles[idx].name+'」？'))return;const was=id===db.active;db.profiles.splice(idx,1);if(was){db.active=db.profiles[0].id;const p=db.profiles[0];if(p.state)applyState(p.state);if(typeof applyRadarRoleSettings==='function')applyRadarRoleSettings();}saveDB();renderRoles();document.getElementById('currentRoleName').textContent=db.profiles.find(x=>x.id===db.active).name;calc();if(document.getElementById('helpPage').style.display!=='none')helpRender();}
+document.getElementById('addRole').addEventListener('click',()=>{const n=prompt('請輸入新角色名稱','新角色');if(!n||!n.trim())return;saveActive();const id='p'+Date.now();db.profiles.push({id,name:n.trim(),state:null,radar:{hasLaura:true,star:4,max:''}});db.active=id;saveDB();resetProfileUI();renderRoles();calc();if(typeof applyRadarRoleSettings==='function')applyRadarRoleSettings();saveActive();if(document.getElementById('helpPage').style.display!=='none'){helpDB.selectedRoleId=id;helpSave();helpRender();}});
 
 const HELP_STORE='league_help_settings_v1';
 let helpDB=JSON.parse(localStorage.getItem(HELP_STORE)||'null')||{clicks:5,rose:true,disc:true,killDay:true,roles:{}};
@@ -1453,7 +1453,22 @@ function scheduleHelpKillDayRefresh(){
 }
 
 function switchPage(id){document.getElementById('scorePage').style.display=id==='scorePage'?'block':'none';document.getElementById('helpPage').style.display=id==='helpPage'?'block':'none';document.getElementById('radarPage').style.display=id==='radarPage'?'block':'none';document.querySelector('main')?.classList.toggle('radar-active',id==='radarPage');document.querySelectorAll('.mainPageTab').forEach(b=>{const active=b.dataset.page===id;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');});if(id==='helpPage')helpRender();if(id==='scorePage'||id==='helpPage')setTimeout(()=>{if(!document.getElementById('guideOverlay').classList.contains('show'))guideOpen(id==='helpPage'?'help':'score');},80);}
-document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
+document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
+document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>requestAnimationFrame(syncRadarTopbarSpace)));
+function syncRadarTopbarSpace(){
+  const main=document.querySelector('main'), topbar=document.querySelector('.topbar');
+  if(!main||!topbar)return;
+  if(main.classList.contains('radar-active')){
+    const h=topbar.getBoundingClientRect().height;
+    main.style.setProperty('--radar-topbar-space',Math.ceil(h+12)+'px');
+  }else{
+    main.style.removeProperty('--radar-topbar-space');
+  }
+}
+requestAnimationFrame(syncRadarTopbarSpace);
+window.addEventListener('resize',()=>requestAnimationFrame(syncRadarTopbarSpace));
+window.addEventListener('orientationchange',()=>setTimeout(syncRadarTopbarSpace,80));
+document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
 
 document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{helpDB.clicks=clampHelpClicks(helpDB.clicks+(+b.dataset.step));helpRender();helpSave();}));
 document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks=clampHelpClicks(e.target.value);e.target.value=helpDB.clicks;helpSyncAll();});
@@ -1600,6 +1615,7 @@ window.addEventListener('resize',()=>{if(document.getElementById('guideOverlay')
 (function init(){helpDB.selectedRoleId=db.active||helpDB.selectedRoleId||db.profiles[0]?.id;saveDB();renderRoles();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}applyAutoGameDayJump();scheduleHelpKillDayRefresh();document.getElementById('currentRoleName').textContent=p?.name||'玩家A';setTimeout(()=>guideOpen('score'),450);})();
 </script><script id="radarPageScript">(function(){
 
+// 測試版：角色化第一階段（勞拉／儲存上限）
 // v8.3.32：微調玩家可操作時間的時間輸入欄垂直內距，讓時間文字視覺上更接近欄位垂直中心；保留 v8.3.31 的欄位比例與 Flex 結構。
 // v8.3.31：沿用 v8.3.25 的計算邏輯；重新整理規劃設定區：時段採固定分隔符與刪除欄位，勞拉切換不顯示外框並與星等選單對齊。
 // v8.3.25：儲存上限為硬上限；刷新或勞拉超過上限的數量立即判定為無法保留，不會成為可收割的暫存量。
@@ -2466,16 +2482,17 @@ function syncLauraUI(){
 function saveLauraSettings(){
   const has=document.getElementById('lauraToggle')?.checked!==false;
   const star=Number(document.getElementById('lauraStar').value||4);
+  const p=getActiveRadarRole();
+  if(p){
+    p.radar={...(p.radar||{}),hasLaura:has,star};
+    saveDB();
+  }
+  // 保留舊版 key，避免既有資料升級時失去勞拉設定；之後以角色資料為準。
   localStorage.setItem(lauraStoreKey,JSON.stringify({hasLaura:has,star}));
 }
 function loadLauraSettings(){
-  try{
-    const d=JSON.parse(localStorage.getItem(lauraStoreKey)||'null');
-    if(!d)return;
-    const toggle=document.getElementById('lauraToggle');
-    if(toggle)toggle.checked=d.hasLaura!==false;
-    if(d.star!==undefined)document.getElementById('lauraStar').value=String(d.star);
-  }catch(e){}
+  // 角色化後由 applyRadarRoleSettings() 統一載入；這裡保留函式名稱供舊初始化流程使用。
+  applyRadarRoleSettings();
 }
 document.getElementById('lauraToggle').addEventListener('change',()=>{saveLauraSettings();syncLauraUI();syncLauraStatus();autoPlanIfReady();});
 document.getElementById('lauraStar').addEventListener('change',()=>{saveLauraSettings();autoPlanIfReady();});
@@ -2486,6 +2503,55 @@ syncLauraStatus();
 
 const timeStoreKey='lastz_radar_v8_availability';
 const lauraStoreKey='lastz_radar_v8_laura';
+// v8.3.x 角色化第一階段：只將「勞拉」與「儲存上限」改為跟目前角色綁定；
+// 時間模式與玩家可操作時間仍維持全體角色共用。
+function getActiveRadarRole(){
+  if(!db||!Array.isArray(db.profiles))return null;
+  const p=db.profiles.find(x=>x.id===db.active);
+  if(!p)return null;
+  if(!p.radar||typeof p.radar!=='object')p.radar={};
+  return p;
+}
+function captureRadarRoleSettings(){
+  return {
+    hasLaura:document.getElementById('lauraToggle')?.checked!==false,
+    star:Number(document.getElementById('lauraStar')?.value||4),
+    max:document.getElementById('max')?.value??''
+  };
+}
+function saveRadarRoleSettings(){
+  const p=getActiveRadarRole();
+  if(!p)return;
+  p.radar=captureRadarRoleSettings();
+}
+function applyRadarRoleSettings(){
+  const p=getActiveRadarRole();
+  const state=p?.radar;
+  let has=true,star=4,max='';
+  if(state&&typeof state==='object'&&('hasLaura' in state||'star' in state||'max' in state)){
+    has=state.hasLaura!==false;
+    star=Number.isFinite(Number(state.star))?Number(state.star):4;
+    max=state.max??'';
+  }else{
+    // 舊版只有全域勞拉設定時，第一次進入目前角色沿用舊資料；之後即改由角色各自保存。
+    try{
+      const legacy=JSON.parse(localStorage.getItem(lauraStoreKey)||'null');
+      if(legacy){has=legacy.hasLaura!==false;star=Number.isFinite(Number(legacy.star))?Number(legacy.star):4;}
+    }catch(e){}
+  }
+  const toggle=document.getElementById('lauraToggle');
+  const starEl=document.getElementById('lauraStar');
+  const maxEl=document.getElementById('max');
+  if(toggle)toggle.checked=has;
+  if(starEl)starEl.value=String(star);
+  if(maxEl)maxEl.value=max;
+  syncLauraUI();
+  syncLauraStatus();
+  if(Number.isInteger(Number(max))&&Number(max)>=8)autoPlanIfReady();
+  else if(max==='')$('#out').innerHTML='<div class="panel empty">輸入儲存上限後會自動規劃</div>';
+  else autoPlanIfReady();
+}
+
 const weekNames=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
 function timeRow(h='',end=''){return `<div class="time-row"><input type="text" inputmode="text" maxlength="5" autocomplete="off" aria-label="開始時間" placeholder="00:00" value="${h}"><span class="time-sep">－</span><input type="text" inputmode="text" maxlength="5" autocomplete="off" aria-label="結束時間" placeholder="00:00" value="${end}"><button type="button" class="smallbtn delTime">刪除</button></div>`}
 function bindDelete(){radarRoot.querySelectorAll('.delTime').forEach(b=>{if(b.dataset.bound)return;b.dataset.bound='1';b.onclick=()=>{const row=b.closest('.time-row');const parent=row.parentElement;if(parent.querySelectorAll('.time-row').length>1)row.remove();else row.querySelectorAll('input').forEach(x=>x.value='');autoSaveAvailability();};});}
@@ -2541,33 +2607,13 @@ const planBtn=document.getElementById('plan');
 if(planBtn)planBtn.addEventListener('click',runPlan);
 const maxInput=document.getElementById('max');
 if(maxInput){
-  maxInput.addEventListener('input',autoPlanIfReady);
-  maxInput.addEventListener('change',autoPlanIfReady);
-  maxInput.addEventListener('blur',autoPlanIfReady);
+  maxInput.addEventListener('input',()=>{saveRadarRoleSettings();saveDB();autoPlanIfReady();});
+  maxInput.addEventListener('change',()=>{saveRadarRoleSettings();saveDB();autoPlanIfReady();});
+  maxInput.addEventListener('blur',()=>{saveRadarRoleSettings();saveDB();autoPlanIfReady();});
 }
 autoPlanIfReady();
 
-})();</script>
-<script id="radarNavSameModeScript">
-(function(){
-  function syncRadarNav(){
-    const main=document.querySelector('main');
-    const topbar=document.querySelector('.topbar');
-    if(!main||!topbar)return;
-    if(main.classList.contains('radar-active')){
-      const h=Math.ceil(topbar.getBoundingClientRect().height);
-      main.style.setProperty('--radar-nav-height',(h+12)+'px');
-    }else{
-      main.style.removeProperty('--radar-nav-height');
-    }
-  }
-  document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>requestAnimationFrame(syncRadarNav)));
-  window.addEventListener('resize',()=>requestAnimationFrame(syncRadarNav));
-  window.addEventListener('orientationchange',()=>setTimeout(syncRadarNav,100));
-  requestAnimationFrame(syncRadarNav);
-})();
-</script>
-</body></html>
+})();</script></body></html>
 <style id="readabilityStandardV9">
 /* v9｜按鈕、設定內容與規劃結果閱讀層級統一
    只調整視覺樣式，不修改計算、資料、儲存或事件邏輯。 */
