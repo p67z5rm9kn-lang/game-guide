@@ -1032,30 +1032,22 @@ main.radar-active{padding-bottom:0!important}
   #radarPage .formula{font-size:14px !important}
   #radarPage .operation-block,#radarPage .event,#radarPage .operation-step,#radarPage .event-action{font-size:16px !important}
 }
-/* ===== v11 導覽凍結：保留原本手機兩列結構 ===== */
-.topbar{
-  position:-webkit-sticky;
-  position:sticky;
+</style>
+<style id="radarNavFixTest">
+/* v11 測試：僅讓雷達頁主導覽固定；對決積分／聯盟幫助維持 v11 原樣。 */
+main.radar-active .topbar{
+  position:fixed;
   top:0;
-  z-index:1000;
-  isolation:isolate;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(820px,100vw);
+  margin:0;
+}
+main.radar-active #radarPage{
+  padding-top:var(--radar-topbar-space,130px);
 }
 @media(max-width:560px){
-  .topbar{
-    display:flex;
-    flex-wrap:wrap;
-    width:auto;
-  }
-  .topbar .brand{order:1}
-  .topbar .guideNavBtn{order:2}
-  .topbar .roleBtn{order:3}
-  .topbar .mainPageNav{
-    order:4;
-    flex:1 0 100% !important;
-    width:100%;
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-  }
+  main.radar-active .topbar{width:100vw;margin:0;}
 }
 </style>
 </head><body><main>
@@ -1460,7 +1452,22 @@ function scheduleHelpKillDayRefresh(){
 }
 
 function switchPage(id){document.getElementById('scorePage').style.display=id==='scorePage'?'block':'none';document.getElementById('helpPage').style.display=id==='helpPage'?'block':'none';document.getElementById('radarPage').style.display=id==='radarPage'?'block':'none';document.querySelector('main')?.classList.toggle('radar-active',id==='radarPage');document.querySelectorAll('.mainPageTab').forEach(b=>{const active=b.dataset.page===id;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');});if(id==='helpPage')helpRender();if(id==='scorePage'||id==='helpPage')setTimeout(()=>{if(!document.getElementById('guideOverlay').classList.contains('show'))guideOpen(id==='helpPage'?'help':'score');},80);}
-document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
+document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
+document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>requestAnimationFrame(syncRadarTopbarSpace)));
+function syncRadarTopbarSpace(){
+  const main=document.querySelector('main'), topbar=document.querySelector('.topbar');
+  if(!main||!topbar)return;
+  if(main.classList.contains('radar-active')){
+    const h=topbar.getBoundingClientRect().height;
+    main.style.setProperty('--radar-topbar-space',Math.ceil(h+12)+'px');
+  }else{
+    main.style.removeProperty('--radar-topbar-space');
+  }
+}
+requestAnimationFrame(syncRadarTopbarSpace);
+window.addEventListener('resize',()=>requestAnimationFrame(syncRadarTopbarSpace));
+window.addEventListener('orientationchange',()=>setTimeout(syncRadarTopbarSpace,80));
+document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
 
 document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{helpDB.clicks=clampHelpClicks(helpDB.clicks+(+b.dataset.step));helpRender();helpSave();}));
 document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks=clampHelpClicks(e.target.value);e.target.value=helpDB.clicks;helpSyncAll();});
