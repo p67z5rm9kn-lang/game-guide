@@ -538,6 +538,11 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .pageRoleSwitch{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0 12px;padding:0;}
 .pageRoleCard{width:100%;min-width:0;min-height:66px;margin:0!important;padding:8px 10px;border:1px solid #304b59;border-radius:12px;background:#102732;color:#dce7eb;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;line-height:1.2;}
 .pageRoleCard.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);}
+.pageRoleCard.compact{min-height:54px;padding:8px 10px;}
+.helpSettingGroupTitle{font-size:17px;font-weight:900;color:#f2d47e;margin:14px 0 8px;}
+.helpRoleGroupTitle{margin-top:18px;padding-top:14px;border-top:1px solid #294553;}
+@media(max-width:699px){.pageRoleCard.compact{min-height:54px;}.helpSettingGroupTitle{font-size:17px;margin-top:12px;}}
+@media(max-width:390px){.pageRoleCard.compact{min-height:52px;padding:7px 6px;}}
 .pageRoleName{font-size:16px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
 .pageRoleValue{font-size:15px;font-weight:900;color:#f2d47e;white-space:nowrap;min-height:18px;line-height:18px;}
 .pageRoleCard.active .pageRoleValue{color:#fff1cf;}
@@ -965,6 +970,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <style id="radarRoleCardOverrideV101">
 /* 必須放在雷達原始 scoped button 規則之後，確保三頁角色卡真正共用同一套視覺規格。 */
 #radarPage .pageRoleSwitch .pageRoleCard{border:1px solid #304b59;background:#102732;color:#dce7eb;border-radius:12px;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;line-height:1.2;}
+#radarPage .pageRoleSwitch .pageRoleCard.compact{min-height:54px;padding:8px 10px;}
 #radarPage .pageRoleSwitch .pageRoleCard.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);}
 </style>
 </head><body><main><nav class="topbar siteTopbar">
@@ -1009,7 +1015,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <div class="stRow"><span>突擊</span><input class="troopCount" type="number" min="0" value="177" inputmode="numeric"><span class="unitInput"><input class="troopSpeed" type="number" min="0" step="0.01" value="529" inputmode="decimal"><span>%</span></span><span class="prodTime">0:0:0</span><span class="twelveQty">0</span></div>
 </div>
 </details></section></div>
-<section id="helpPage" class="helpPage" style="display:none"><div id="helpRoleJump" class="pageRoleSwitch" aria-label="角色快速切換"></div><div class="helpCard"><div class="helpHead"><div class="helpTitleRow"><div class="helpTitle">聯盟幫助｜快速計算每次治療士兵數量</div><div class="helpInfoWrap"><button type="button" class="helpInfo" id="helpInfoBtn" aria-label="聯盟幫助說明">i</button></div></div><div class="helpInfoPanel" id="helpInfoPanel">士兵等級可直接在角色資料中調整，並與「聯盟對決」星期五／士兵訓練／加速計算的士兵等級保持連動。<br>目前提供 T9 / T10 原始治療時間：T9 為 3:58、T10 為 4:38。<br>其他士兵等級目前沒有原始治療時間資料。</div><div class="helpSub">所有角色共用點手數量、玫瑰花、光碟；殺敵日依台灣時間自動判斷，其餘數值依角色分別設定。</div></div><div class="globalHelp"><div class="globalLabel">全體角色共用設定｜點手數量</div><div class="stepper"><button type="button" data-step="-5">−5</button><button type="button" data-step="-1">−1</button><input id="helpClicks" type="number" min="0" max="80" step="1" value="5" inputmode="numeric"><button type="button" data-step="1">＋1</button><button type="button" data-step="5">＋5</button></div><div class="globalChecks"><label class="checkPill"><input id="helpRose" type="checkbox" checked>玫瑰花</label><label class="checkPill"><input id="helpDisc" type="checkbox" checked>光碟</label></div></div><div id="helpRoles" class="helpRoles"></div></section><div class="guideOverlay" id="guideOverlay" aria-hidden="true">
+<section id="helpPage" class="helpPage" style="display:none"><div id="helpRoleJump" class="pageRoleSwitch" aria-label="角色快速切換"></div><div class="helpCard"><div class="helpHead"><div class="helpTitleRow"><div class="helpTitle">聯盟幫助｜快速計算每次治療士兵數量</div><div class="helpInfoWrap"><button type="button" class="helpInfo" id="helpInfoBtn" aria-label="聯盟幫助說明">i</button></div></div><div class="helpInfoPanel" id="helpInfoPanel">士兵等級可直接在角色資料中調整，並與「聯盟對決」星期五／士兵訓練／加速計算的士兵等級保持連動。<br>目前提供 T9 / T10 原始治療時間：T9 為 3:58、T10 為 4:38。<br>其他士兵等級目前沒有原始治療時間資料。</div><div class="helpSub">所有角色共用點手數量、玫瑰花、光碟；殺敵日依台灣時間自動判斷，其餘數值依角色分別設定。</div></div><div class="helpSettingGroupTitle">共用設定</div><div class="globalHelp"><div class="globalLabel">點手數量</div><div class="stepper"><button type="button" data-step="-5">−5</button><button type="button" data-step="-1">−1</button><input id="helpClicks" type="number" min="0" max="80" step="1" value="5" inputmode="numeric"><button type="button" data-step="1">＋1</button><button type="button" data-step="5">＋5</button></div><div class="globalChecks"><label class="checkPill"><input id="helpRose" type="checkbox" checked>玫瑰花</label><label class="checkPill"><input id="helpDisc" type="checkbox" checked>光碟</label></div></div><div class="helpSettingGroupTitle helpRoleGroupTitle">角色設定</div><div id="helpRoles" class="helpRoles"></div></section><div class="guideOverlay" id="guideOverlay" aria-hidden="true">
   <div class="guideShade"></div>
   <div class="guideFocus" id="guideFocus"></div>
   <div class="guideCard" id="guideCard">
@@ -1170,15 +1176,15 @@ function renderSharedRoleSwitchers(){
   const activeId=RoleManager.activeId();
   const profiles=RoleManager.list();
   const configs=[
-    {id:'scoreRoleSwitch',showValue:true,blankValue:true},
-    {id:'helpRoleJump',showValue:true,blankValue:false},
-    {id:'radarRoleSwitch',showValue:true,blankValue:true}
+    {id:'scoreRoleSwitch',showValue:false,compact:true},
+    {id:'helpRoleJump',showValue:true,compact:false},
+    {id:'radarRoleSwitch',showValue:false,compact:true}
   ];
   configs.forEach(cfg=>{
     const box=document.getElementById(cfg.id); if(!box)return;
     box.innerHTML='';
     profiles.forEach(p=>{
-      const b=document.createElement('button'); b.type='button'; b.className='pageRoleCard'+(p.id===activeId?' active':''); b.dataset.roleId=p.id;
+      const b=document.createElement('button'); b.type='button'; b.className='pageRoleCard'+(cfg.compact?' compact':'')+(p.id===activeId?' active':''); b.dataset.roleId=p.id;
       const n=document.createElement('span'); n.className='pageRoleName'; n.textContent=p.name; b.appendChild(n);
       if(cfg.showValue){const v=document.createElement('span');v.className='pageRoleValue';v.textContent=cfg.blankValue?'\u00a0':'—';b.appendChild(v);}
       b.addEventListener('click',()=>RoleManager.select(p.id)); box.appendChild(b);
@@ -1408,7 +1414,8 @@ function scheduleHelpKillDayRefresh(){
  },30000);
 }
 
-function switchPage(id){document.getElementById('scorePage').style.display=id==='scorePage'?'block':'none';document.getElementById('helpPage').style.display=id==='helpPage'?'block':'none';document.getElementById('radarPage').style.display=id==='radarPage'?'block':'none';document.querySelectorAll('.mainPageTab').forEach(b=>{const active=b.dataset.page===id;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');});renderSharedRoleSwitchers();if(id==='helpPage')helpRender();if(id==='radarPage'){window.scrollTo(0,0);}else{setTimeout(()=>{if(!document.getElementById('guideOverlay').classList.contains('show'))guideOpen(id==='helpPage'?'help':id==='radarPage'?'radar':'score');},80);}}
+function switchPage(id){document.getElementById('scorePage').style.display=id==='scorePage'?'block':'none';document.getElementById('helpPage').style.display=id==='helpPage'?'block':'none';document.getElementById('radarPage').style.display=id==='radarPage'?'block':'none';document.querySelectorAll('.mainPageTab').forEach(b=>{const active=b.dataset.page===id;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');});renderSharedRoleSwitchers();if(id==='helpPage')helpRender();setTimeout(()=>{if(!document.getElementById('guideOverlay').classList.contains('show'))guideOpen(id==='helpPage'?'help':id==='radarPage'?'radar':'score');},80);}
+
 document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));switchPage('scorePage');document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
 
 document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{helpDB.clicks=clampHelpClicks(helpDB.clicks+(+b.dataset.step));helpRender();helpSave();}));
@@ -1560,7 +1567,10 @@ function guideLater(){guideCloseModals();guideClearFocus();document.getElementBy
 document.getElementById('guideNext').addEventListener('click',()=>{if(guideState.intro){guideState.intro=false;guideState.index=0;guideRender();return;}if(guideState.index>=GUIDE_DATA[guideState.type].steps.length-1){guideFinish();return;}guideState.index++;guideRender();});
 document.getElementById('guidePrev').addEventListener('click',()=>{if(guideState.intro)return;if(guideState.index>0){guideState.index--;guideRender();}});
 document.getElementById('guideLater').addEventListener('click',guideLater);
-document.getElementById('guideNavBtn').addEventListener('click',()=>{const type=document.getElementById('helpPage').style.display!=='none'?'help':document.getElementById('radarPage').style.display!=='none'?'radar':'score';guideOpen(type,true);});
+function currentGuideType(){if(document.getElementById('helpPage')?.style.display!=='none')return 'help';if(document.getElementById('radarPage')?.style.display!=='none')return 'radar';return 'score';}
+const guideNavButton=document.getElementById('guideNavBtn');
+if(guideNavButton){guideNavButton.onclick=()=>guideOpen(currentGuideType(),true);}
+
 window.addEventListener('resize',()=>{if(document.getElementById('guideOverlay').classList.contains('show')&&!guideState.intro){const el=guideTarget(GUIDE_DATA[guideState.type].steps[guideState.index].target);if(el)guidePosition(el);}});
 
 (function init(){helpDB.selectedRoleId=RoleManager.activeId()||db.profiles[0]?.id;saveDB();renderRoles();syncSharedActiveRoleUI();renderSharedRoleSwitchers();const p=db.profiles.find(x=>x.id===db.active);if(p?.state){p.state=normalizeBlankManualState(p.state);applyState(p.state);saveDB();}else{calc();}applyAutoGameDayJump();scheduleHelpKillDayRefresh();document.getElementById('currentRoleName').textContent=p?.name||'玩家A';setTimeout(()=>guideOpen('score'),450);})();
