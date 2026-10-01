@@ -866,6 +866,84 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .helpRoleHead{cursor:pointer;}
 .helpRoleHead:focus-visible{outline:2px solid #d0a44b;outline-offset:2px;border-radius:8px;}
 </style>
+
+<style id="sharedUIFinalV09">
+/* v0.9：共同 UI 最終統一規格
+   這裡集中處理三頁的閱讀層級；不修改任何計算、資料、角色或事件邏輯。 */
+:root{
+  --ui-title:22px;
+  --ui-section:20px;
+  --ui-label:16px;
+  --ui-body:16px;
+  --ui-small:14px;
+  --ui-input:18px;
+  --ui-number:18px;
+  --ui-tab:17px;
+  --ui-button:16px;
+  --ui-line:1.4;
+}
+
+/* ===== 對決積分：主按鈕與星期五特殊區塊 ===== */
+#scorePage .bonusBtn,
+#scorePage .dayHeader button{font-size:var(--ui-button);line-height:1.25;font-weight:900;}
+#scorePage .dayHeader{font-size:var(--ui-section);line-height:1.3;}
+#scorePage .name{font-size:var(--ui-body);line-height:1.4;}
+#scorePage .tablehead{font-size:var(--ui-small);line-height:1.4;font-weight:800;}
+#scorePage .single,#scorePage .need{font-size:var(--ui-small);line-height:1.35;}
+#scorePage summary{font-size:var(--ui-label);line-height:1.4;}
+#scorePage .soldierBox > summary{font-size:var(--ui-section);line-height:1.35;font-weight:900;}
+#scorePage .soldierInputs label{font-size:15px;line-height:1.4;}
+#scorePage .stHead{font-size:var(--ui-small);line-height:1.35;}
+#scorePage .stRow{font-size:var(--ui-body);line-height:1.35;}
+#scorePage .prodTime,#scorePage .twelveQty{font-size:var(--ui-small);line-height:1.35;}
+
+/* ===== 設定積分加成視窗 ===== */
+#bonusModal .modalHead h2{font-size:20px;line-height:1.3;}
+#bonusModal .settingTitle{font-size:17px;line-height:1.4;}
+#bonusModal .brow{font-size:var(--ui-body);line-height:1.45;}
+#bonusModal .check{font-size:var(--ui-body);}
+#bonusModal .settingControl,
+#bonusModal .bonus,
+#bonusModal .chikaSettingWrap input{font-size:var(--ui-input);font-weight:900;}
+#bonusModal .unitInput>span{font-size:var(--ui-body);}
+#bonusModal .infoFlyout,
+#bonusModal .chikaFlyout{font-size:15px;line-height:1.6;}
+
+/* ===== 聯盟幫助：上方共用設定 ===== */
+#helpPage .helpSub{font-size:var(--ui-small);line-height:1.55;}
+#helpPage .globalLabel{font-size:var(--ui-label);line-height:1.4;}
+#helpPage .globalChecks .checkPill{font-size:var(--ui-body);line-height:1.35;font-weight:900;}
+#helpPage .helpJumpName,#helpPage .helpJumpValue{font-size:var(--ui-body);line-height:1.35;font-weight:900;}
+
+/* ===== 聯盟幫助：下方角色卡 ===== */
+#helpPage .helpRoleName{font-size:var(--ui-body);line-height:1.3;font-weight:900;}
+#helpPage .helpTierBadge{font-size:var(--ui-small);line-height:1.3;}
+#helpPage .helpTierSetting .helpMetric{font-size:var(--ui-label);line-height:1.4;font-weight:800;}
+#helpPage .helpTierSelect{font-size:var(--ui-input);font-weight:900;}
+#helpPage .helpMetric{font-size:var(--ui-label);line-height:1.4;font-weight:800;}
+#helpPage .helpValue{font-size:var(--ui-number);line-height:1.3;font-weight:900;}
+#helpPage .helpLine{font-size:15px;line-height:1.45;}
+#helpPage .helpLine b{font-size:var(--ui-body);font-weight:900;}
+#helpPage .helpDetailPanel select,
+#helpPage .helpDetailPanel input{font-size:var(--ui-input);font-weight:900;}
+#helpPage .helpDetailPanel .helpLine span:first-child{font-size:15px;}
+#helpPage .helpResultRow .helpMetric{font-size:var(--ui-label);}
+#helpPage .helpResultValue{font-size:var(--ui-number);line-height:1.3;}
+#helpPage .helpMuted,#helpPage .helpNote{font-size:var(--ui-small);line-height:1.55;}
+
+/* 手機版仍使用同一套閱讀層級，不再讓元件各自縮小。 */
+@media(max-width:560px){
+  #scorePage .bonusBtn,#scorePage .dayHeader button{font-size:16px;}
+  #scorePage .soldierBox > summary{font-size:20px;}
+  #bonusModal .settingTitle{font-size:17px;}
+  #bonusModal .brow,#bonusModal .check{font-size:16px;}
+  #helpPage .helpRoleName{font-size:16px;}
+  #helpPage .helpMetric{font-size:16px;}
+  #helpPage .helpValue{font-size:18px;}
+  #helpPage .helpLine{font-size:15px;}
+  #helpPage .helpLine b{font-size:16px;}
+}
+</style>
 </head><body><main><nav class="topbar siteTopbar">
   <div class="siteTopRow">
     <div class="brand">Last Z</div>
@@ -2415,109 +2493,3 @@ autoPlanIfReady();
 
 })();
 </script></body></html>
-
-<style id="readabilityStandardV9">
-/* v0.8｜補回 v11 已確認的共同 UI 閱讀層級
-   只調整視覺樣式，不修改計算、資料、儲存或事件邏輯。 */
-
-/* ===== 聯盟對決：主要操作按鈕 ===== */
-#scorePage .bonusBtn,
-#scorePage .dayHeader button{
-  font-size:16px !important;
-  line-height:1.25 !important;
-  font-weight:900 !important;
-}
-
-/* ===== 聯盟對決：設定積分加成視窗 ===== */
-#bonusModal .modalHead h2{
-  font-size:20px !important;
-  line-height:1.3 !important;
-}
-#bonusModal .settingTitle{
-  font-size:17px !important;
-  line-height:1.4 !important;
-}
-#bonusModal .brow{
-  font-size:16px !important;
-  line-height:1.45 !important;
-}
-#bonusModal .check{
-  font-size:16px !important;
-}
-#bonusModal .settingControl,
-#bonusModal .bonus,
-#bonusModal .chikaSettingWrap input{
-  font-size:18px !important;
-  font-weight:900 !important;
-}
-#bonusModal .unitInput>span{
-  font-size:16px !important;
-}
-#bonusModal .infoFlyout,
-#bonusModal .chikaFlyout{
-  font-size:15px !important;
-  line-height:1.6 !important;
-}
-
-/* ===== 聯盟對決：士兵訓練／加速計算 ===== */
-#scorePage .soldierBox > summary{
-  font-size:18px !important;
-  line-height:1.35 !important;
-}
-#scorePage .soldierInputs label{
-  font-size:15px !important;
-  line-height:1.4 !important;
-}
-#scorePage .stHead{
-  font-size:14px !important;
-  line-height:1.35 !important;
-}
-#scorePage .stRow{
-  font-size:16px !important;
-  line-height:1.35 !important;
-}
-#scorePage .prodTime,
-#scorePage .twelveQty{
-  font-size:15px !important;
-  line-height:1.35 !important;
-}
-
-/* ===== 聯盟幫助：玫瑰花／光碟與共用設定 ===== */
-#helpPage .globalChecks .checkPill{
-  font-size:16px !important;
-  line-height:1.35 !important;
-  font-weight:900 !important;
-}
-#helpPage .globalChecks .checkPill input{
-  width:19px !important;
-  height:19px !important;
-}
-
-/* ===== 聯盟幫助：角色快速選擇卡文字與玫瑰花／光碟統一 ===== */
-#helpPage .helpJumpName{
-  font-size:16px !important;
-  line-height:1.35 !important;
-  font-weight:900 !important;
-}
-#helpPage .helpJumpValue{
-  font-size:16px !important;
-  line-height:1.35 !important;
-  font-weight:900 !important;
-}
-
-@media(max-width:560px){
-  #scorePage .bonusBtn,
-  #scorePage .dayHeader button{
-    font-size:16px !important;
-  }
-  #bonusModal .settingTitle{font-size:16px !important;}
-  #bonusModal .brow{font-size:16px !important;}
-  #bonusModal .check{font-size:16px !important;}
-  #scorePage .soldierBox > summary{font-size:18px !important;}
-  #scorePage .soldierInputs label{font-size:15px !important;}
-  #scorePage .stHead{font-size:14px !important;}
-  #scorePage .stRow{font-size:16px !important;}
-  #scorePage .prodTime,#scorePage .twelveQty{font-size:15px !important;}
-  #helpPage .globalChecks .checkPill{font-size:16px !important;}
-}
-</style>
