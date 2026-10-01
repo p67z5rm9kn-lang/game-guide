@@ -1035,6 +1035,7 @@ main.radar-active{padding-bottom:0!important}
 </style>
 <style id="radarNavFixTest">
 /* v11 測試：僅讓雷達頁主導覽固定；對決積分／聯盟幫助維持 v11 原樣。 */
+/* 雷達固定導覽配套：預留完整兩列導覽高度，避免第一個設定標題被遮住。 */
 main.radar-active .topbar{
   position:fixed;
   top:0;
@@ -1044,7 +1045,7 @@ main.radar-active .topbar{
   margin:0;
 }
 main.radar-active #radarPage{
-  padding-top:var(--radar-topbar-space,130px);
+  padding-top:var(--radar-topbar-space,215px);
 }
 @media(max-width:560px){
   main.radar-active .topbar{width:100vw;margin:0;}
