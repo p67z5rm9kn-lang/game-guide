@@ -1033,24 +1033,7 @@ main.radar-active{padding-bottom:0!important}
   #radarPage .operation-block,#radarPage .event,#radarPage .operation-step,#radarPage .event-action{font-size:16px !important}
 }
 </style>
-<style id="radarNavFixTest">
-/* v11 測試：僅讓雷達頁主導覽固定；對決積分／聯盟幫助維持 v11 原樣。 */
-/* 雷達固定導覽配套：預留完整兩列導覽高度，避免第一個設定標題被遮住。 */
-main.radar-active .topbar{
-  position:fixed;
-  top:0;
-  left:50%;
-  transform:translateX(-50%);
-  width:min(820px,100vw);
-  margin:0;
-}
-main.radar-active #radarPage{
-  padding-top:var(--radar-topbar-space,215px);
-}
-@media(max-width:560px){
-  main.radar-active .topbar{width:100vw;margin:0;}
-}
-</style>
+
 </head><body><main>
 <nav class="topbar"><div class="brand">Last Z</div><div class="mainPageNav" role="tablist" aria-label="主要頁面"><button class="mainPageTab active" data-page="scorePage" role="tab" aria-selected="true">對決積分</button><button class="mainPageTab" data-page="helpPage" role="tab" aria-selected="false">聯盟幫助</button><button class="mainPageTab" data-page="radarPage" role="tab" aria-selected="false">雷達週計劃</button></div><button class="guideNavBtn" id="guideNavBtn" type="button" aria-label="新手導覽">🧭 導覽</button><button class="roleBtn" id="roleBtn">👤 <span id="currentRoleName">玩家A</span>⌄</button></nav><div id="scorePage"><section class="card hero"><div class="titleLine"><h1>聯盟對決積分配置計算器</h1><button class="bonusBtn" id="bonusBtn">設定積分加成</button></div>
 <div class="summaryRows"><div class="summaryRow"><span>目標積分</span><select id="target"><option value="20000">20,000</option><option value="80000">80,000</option><option value="300000">300,000</option><option value="550000">550,000</option><option value="840000">840,000</option><option value="1500000">1,500,000</option><option value="2200000">2,200,000</option><option value="3000000">3,000,000</option><option value="6000000" selected>6,000,000</option></select></div><div class="summaryRow"><span>目前積分</span><input id="current" type="number" min="0" inputmode="numeric"></div><div class="summaryRow"><span>預計最終積分</span><b id="final" class="finalValue">0</b></div></div></section>
