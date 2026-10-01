@@ -874,6 +874,165 @@ main.radar-active{padding-bottom:0!important}
   #radarPage .time-row input[type="text"],#radarPage .setting-select,#radarPage #max{font-size:18px !important;height:44px !important;line-height:44px !important;}
 }
 </style>
+
+<style id="readabilityStandardV8">
+/* v8｜三頁閱讀標準統一
+   只調整文字的閱讀層級與間距，不修改任何計算／資料／事件邏輯。 */
+
+/* ===== 聯盟對決 ===== */
+#scorePage .summaryRow>span{
+  font-size:16px !important;
+  font-weight:700;
+  line-height:1.35;
+}
+#scorePage .finalValue{
+  font-size:20px !important;
+  line-height:1.3;
+}
+#scorePage .tablehead{
+  font-size:14px !important;
+  font-weight:800;
+  line-height:1.35;
+}
+#scorePage .name{
+  font-size:16px !important;
+  line-height:1.35;
+}
+#scorePage .single,
+#scorePage .need{
+  font-size:14px !important;
+  line-height:1.35;
+}
+#scorePage .dayHeader{
+  font-size:18px;
+}
+#scorePage .settingTitle{
+  font-size:17px;
+}
+#scorePage .brow{
+  font-size:15px;
+  line-height:1.4;
+}
+
+/* ===== 聯盟幫助 ===== */
+#helpPage .helpSub{
+  font-size:15px !important;
+  line-height:1.55;
+}
+#helpPage .globalLabel{
+  font-size:16px !important;
+  line-height:1.4;
+}
+#helpPage .helpRoleName{
+  font-size:17px !important;
+}
+#helpPage .helpTierBadge,
+#helpPage .helpTier{
+  font-size:12px !important;
+}
+#helpPage .helpMetric{
+  font-size:16px !important;
+  line-height:1.4;
+}
+#helpPage .helpValue{
+  font-size:18px !important;
+  line-height:1.3;
+}
+#helpPage .helpLine{
+  font-size:15px !important;
+  line-height:1.45;
+}
+#helpPage .helpField label{
+  font-size:14px !important;
+  line-height:1.4;
+}
+#helpPage .helpResultLabel{
+  font-size:14px !important;
+}
+#helpPage .helpNote{
+  font-size:15px !important;
+  line-height:1.55;
+}
+
+/* ===== 雷達週計劃 ===== */
+#radarPage h1{
+  font-size:23px !important;
+  line-height:1.3;
+}
+#radarPage .sub{
+  font-size:15px !important;
+  line-height:1.6;
+}
+#radarPage label{
+  font-size:17px !important;
+  font-weight:700;
+  line-height:1.4;
+}
+#radarPage .meta,
+#radarPage .state{
+  font-size:16px !important;
+  line-height:1.6;
+}
+#radarPage .day h2{
+  font-size:19px !important;
+  line-height:1.35;
+}
+#radarPage .tag{
+  font-size:12px !important;
+}
+#radarPage .action,
+#radarPage .result{
+  font-size:16px !important;
+  line-height:1.7;
+}
+#radarPage table{
+  font-size:14px !important;
+}
+#radarPage td,
+#radarPage th{
+  line-height:1.45;
+}
+#radarPage .formula{
+  font-size:14px !important;
+  line-height:1.7;
+}
+#radarPage .day-title{
+  font-size:16px !important;
+  line-height:1.4;
+}
+#radarPage .operation-block,
+#radarPage .event,
+#radarPage .operation-step,
+#radarPage .event-action{
+  font-size:16px !important;
+  line-height:1.75;
+}
+#radarPage .operation-range,
+#radarPage .event-time{
+  font-size:16px !important;
+  line-height:1.45;
+}
+
+/* 手機：不要再把上述閱讀文字縮回去 */
+@media(max-width:560px){
+  #scorePage .summaryRow>span{font-size:16px !important}
+  #scorePage .tablehead{font-size:14px !important}
+  #scorePage .name{font-size:16px !important}
+  #scorePage .single,#scorePage .need{font-size:14px !important}
+  #helpPage .helpSub{font-size:15px !important}
+  #helpPage .globalLabel{font-size:16px !important}
+  #helpPage .helpMetric{font-size:16px !important}
+  #helpPage .helpValue{font-size:18px !important}
+  #helpPage .helpLine{font-size:15px !important}
+  #helpPage .helpField label{font-size:14px !important}
+  #radarPage label{font-size:17px !important}
+  #radarPage .meta,#radarPage .state{font-size:16px !important}
+  #radarPage .action,#radarPage .result{font-size:16px !important}
+  #radarPage table{font-size:14px !important}
+  #radarPage .formula{font-size:14px !important}
+  #radarPage .operation-block,#radarPage .event,#radarPage .operation-step,#radarPage .event-action{font-size:16px !important}
+}
+</style>
 </head><body><main>
 <nav class="topbar"><div class="brand">Last Z</div><div class="mainPageNav" role="tablist" aria-label="主要頁面"><button class="mainPageTab active" data-page="scorePage" role="tab" aria-selected="true">對決積分</button><button class="mainPageTab" data-page="helpPage" role="tab" aria-selected="false">聯盟幫助</button><button class="mainPageTab" data-page="radarPage" role="tab" aria-selected="false">雷達週計劃</button></div><button class="guideNavBtn" id="guideNavBtn" type="button" aria-label="新手導覽">🧭 導覽</button><button class="roleBtn" id="roleBtn">👤 <span id="currentRoleName">玩家A</span>⌄</button></nav><div id="scorePage"><section class="card hero"><div class="titleLine"><h1>聯盟對決積分配置計算器</h1><button class="bonusBtn" id="bonusBtn">設定積分加成</button></div>
 <div class="summaryRows"><div class="summaryRow"><span>目標積分</span><select id="target"><option value="20000">20,000</option><option value="80000">80,000</option><option value="300000">300,000</option><option value="550000">550,000</option><option value="840000">840,000</option><option value="1500000">1,500,000</option><option value="2200000">2,200,000</option><option value="3000000">3,000,000</option><option value="6000000" selected>6,000,000</option></select></div><div class="summaryRow"><span>目前積分</span><input id="current" type="number" min="0" inputmode="numeric"></div><div class="summaryRow"><span>預計最終積分</span><b id="final" class="finalValue">0</b></div></div></section>
