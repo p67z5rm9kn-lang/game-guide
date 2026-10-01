@@ -1098,8 +1098,10 @@ main.radar-active{padding-bottom:0!important}
 <label for="max">儲存上限</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
 
 </div>
+<div class="radarResultCard">
 <div class="result-heading">規劃結果</div>
 <div id="out"><div class="panel empty">輸入儲存上限後會自動規劃</div></div>
+</div>
 </div>
 
 <style>
@@ -2518,3 +2520,119 @@ if(maxInput){
 autoPlanIfReady();
 
 })();</script></body></html>
+<style id="readabilityStandardV9">
+/* v9｜按鈕、設定內容與規劃結果閱讀層級統一
+   只調整視覺樣式，不修改計算、資料、儲存或事件邏輯。 */
+
+/* ===== 聯盟對決：主要操作按鈕 ===== */
+#scorePage .bonusBtn,
+#scorePage .dayHeader button{
+  font-size:16px !important;
+  line-height:1.25 !important;
+  font-weight:900 !important;
+}
+
+/* ===== 聯盟對決：設定積分加成視窗 ===== */
+#bonusModal .modalHead h2{
+  font-size:20px !important;
+  line-height:1.3 !important;
+}
+#bonusModal .settingTitle{
+  font-size:17px !important;
+  line-height:1.4 !important;
+}
+#bonusModal .brow{
+  font-size:16px !important;
+  line-height:1.45 !important;
+}
+#bonusModal .check{
+  font-size:16px !important;
+}
+#bonusModal .settingControl,
+#bonusModal .bonus,
+#bonusModal .chikaSettingWrap input{
+  font-size:18px !important;
+  font-weight:900 !important;
+}
+#bonusModal .unitInput>span{
+  font-size:16px !important;
+}
+#bonusModal .infoFlyout,
+#bonusModal .chikaFlyout{
+  font-size:15px !important;
+  line-height:1.6 !important;
+}
+
+/* ===== 聯盟對決：士兵訓練／加速計算 ===== */
+#scorePage .soldierBox > summary{
+  font-size:18px !important;
+  line-height:1.35 !important;
+}
+#scorePage .soldierInputs label{
+  font-size:15px !important;
+  line-height:1.4 !important;
+}
+#scorePage .stHead{
+  font-size:14px !important;
+  line-height:1.35 !important;
+}
+#scorePage .stRow{
+  font-size:16px !important;
+  line-height:1.35 !important;
+}
+#scorePage .prodTime,
+#scorePage .twelveQty{
+  font-size:15px !important;
+  line-height:1.35 !important;
+}
+
+/* ===== 聯盟幫助：玫瑰花／光碟與共用設定 ===== */
+#helpPage .globalChecks .checkPill{
+  font-size:16px !important;
+  line-height:1.35 !important;
+  font-weight:900 !important;
+}
+#helpPage .globalChecks .checkPill input{
+  width:19px !important;
+  height:19px !important;
+}
+
+/* ===== 雷達週計劃：規劃結果與上方規劃設定使用同一張卡片 ===== */
+#radarPage .radarResultCard{
+  margin-top:12px;
+  padding:13px 14px 14px;
+  background:linear-gradient(145deg,#11232d,#09151d);
+  border:1px solid #735725;
+  border-radius:16px;
+}
+#radarPage .radarResultCard .result-heading{
+  margin:0 0 10px !important;
+  font-size:20px !important;
+  line-height:1.35 !important;
+}
+#radarPage .radarResultCard #out{
+  margin:0;
+}
+#radarPage .radarResultCard #out > .panel:first-child{
+  margin-top:0;
+}
+
+@media(max-width:560px){
+  #scorePage .bonusBtn,
+  #scorePage .dayHeader button{
+    font-size:16px !important;
+  }
+  #bonusModal .settingTitle{font-size:16px !important;}
+  #bonusModal .brow{font-size:16px !important;}
+  #bonusModal .check{font-size:16px !important;}
+  #scorePage .soldierBox > summary{font-size:18px !important;}
+  #scorePage .soldierInputs label{font-size:15px !important;}
+  #scorePage .stHead{font-size:14px !important;}
+  #scorePage .stRow{font-size:16px !important;}
+  #scorePage .prodTime,#scorePage .twelveQty{font-size:15px !important;}
+  #helpPage .globalChecks .checkPill{font-size:16px !important;}
+  #radarPage .radarResultCard{padding:12px 12px 13px;}
+  #radarPage .radarResultCard .result-heading{font-size:20px !important;}
+}
+</style>
+
