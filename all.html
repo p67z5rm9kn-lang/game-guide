@@ -533,18 +533,19 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   #helpPage .helpDetailPanel select{width:112px !important;min-width:112px !important;max-width:112px !important;}
 }
 </style>
-<style id="sharedRoleSwitchV10">
-/* v0.10 第一批：三頁共用角色快速切換。位置、卡片外觀、選取方式一致；聯盟幫助保留有意義的治療數量。 */
+<style id="sharedRoleSwitchV101">
+/* v0.10.1 第一批修正：三頁角色卡使用同一套位置、尺寸、間距與兩行結構。對決／雷達第二行保留空白，不硬塞數字；聯盟幫助顯示治療數量。 */
 .pageRoleSwitch{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0 12px;padding:0;}
-.pageRoleCard{min-width:0;min-height:54px;padding:8px 10px;border:1px solid #304b59;border-radius:12px;background:#102732;color:#dce7eb;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;line-height:1.2;}
+.pageRoleCard{width:100%;min-width:0;min-height:66px;margin:0!important;padding:8px 10px;border:1px solid #304b59;border-radius:12px;background:#102732;color:#dce7eb;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;line-height:1.2;}
 .pageRoleCard.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);}
-.pageRoleName{font-size:16px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.pageRoleValue{font-size:15px;font-weight:900;color:#f2d47e;white-space:nowrap;}
+.pageRoleName{font-size:16px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+.pageRoleValue{font-size:15px;font-weight:900;color:#f2d47e;white-space:nowrap;min-height:18px;line-height:18px;}
 .pageRoleCard.active .pageRoleValue{color:#fff1cf;}
 #scorePage .pageRoleSwitch,#helpPage .pageRoleSwitch,#radarPage .pageRoleSwitch{margin-top:10px;}
-#helpPage .pageRoleSwitch .pageRoleCard{min-height:62px;flex-direction:column;gap:3px;}
-@media(max-width:699px){.pageRoleSwitch{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pageRoleCard{min-height:52px}.pageRoleName{font-size:16px}.pageRoleValue{font-size:15px}}
-@media(max-width:390px){.pageRoleSwitch{gap:6px}.pageRoleCard{padding:7px 6px}.pageRoleName{font-size:15px}.pageRoleValue{font-size:14px}}
+/* 雷達原本的全域 button 規則會把角色卡拉成滿版大按鈕，這裡明確回到共同角色卡規格。 */
+#radarPage .pageRoleSwitch .pageRoleCard{width:100%;margin:0!important;padding:8px 10px;min-height:66px;font-size:inherit;}
+@media(max-width:699px){.pageRoleSwitch{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pageRoleCard{min-height:66px}.pageRoleName{font-size:16px}.pageRoleValue{font-size:15px}}
+@media(max-width:390px){.pageRoleSwitch{gap:6px}.pageRoleCard{padding:7px 6px;min-height:64px}.pageRoleName{font-size:15px}.pageRoleValue{font-size:14px;min-height:17px;line-height:17px}}
 </style>
 <style id="newUserGuideV1">
 .guideOverlay{position:fixed;inset:0;z-index:500;background:rgba(2,8,12,.74);display:none;align-items:center;justify-content:center;padding:18px}.guideOverlay.show{display:block}.guideShade{position:absolute;inset:0}.guideFocus{position:fixed;z-index:502;pointer-events:none;border:2px solid #e0b85a;border-radius:12px;box-shadow:0 0 0 5px rgba(224,184,90,.16),0 0 24px rgba(224,184,90,.42);transition:all .22s ease;display:none}.guideCard{position:fixed;z-index:503;width:min(390px,calc(100vw - 28px));background:#0d202b;border:1px solid #735725;border-radius:16px;box-shadow:0 20px 55px rgba(0,0,0,.62);padding:16px;color:#eef3f5}.guideCard h3{margin:0 0 8px;font-size:19px;color:#f2d47e}.guideCard p{margin:0;color:#d7e3e7;font-size:14px;line-height:1.65}.guideStep{margin-top:10px;font-size:12px;color:#aebfc6}.guideActions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.guideActions button{border:1px solid #3a5360;background:#122833;color:#eaf1f4;border-radius:9px;padding:8px 12px;font-weight:800}.guideActions .guideNext,.guideActions .guideDone{border-color:#d0a44b;background:#6f5523;color:#fff4d0}.guideSkip{margin-right:auto}.guideNavBtn{border:1px solid #735725;background:#162a33;color:#f2d47e;border-radius:9px;padding:8px 10px;font-weight:900;white-space:nowrap}.guideTargetPulse{position:relative!important;z-index:501!important}
@@ -559,6 +560,10 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .radarPage .radarInner>h1{font-size:21px;margin:0 0 6px;color:#d7b56d;}
 .radarPage .radarInner input,.radarPage .radarInner select,.radarPage .radarInner button{font-family:inherit;}
 @media(max-width:560px){main{padding:0 10px 36px}.siteTopbar{margin:0 -10px 10px;padding:8px 10px}.siteTopRow{min-height:36px}.sitePageNav{margin-top:5px}.sitePageNav .mainPageTab{font-size:11px;padding:7px 5px;min-height:36px}.radarPage .radarInner{max-width:none;}.radarPage .radarInner>h1{font-size:19px;}}
+</style><style id="radarSettingGroupV101">
+.radarPage .radarSettingGroup{margin:0;}
+.radarPage .radarSettingGroupTitle{font-size:17px;font-weight:900;color:var(--radar-gold-soft,var(--gold));margin:0 0 12px;line-height:1.35;}
+.radarPage .radarRoleSettings>label[for="max"]{margin-top:12px;}
 </style><style id="radarScopedV832">.radarPage{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}.radarPage *{box-sizing:border-box}.radarPage h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.radarPage .sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.radarPage .panel,.radarPage .day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}.radarPage label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}.radarPage input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}.radarPage button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.radarPage .meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.radarPage .day h2{font-size:18px;margin:0 0 8px}.radarPage .tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.radarPage .state{font-size:15px;color:#dce8f5;margin:8px 0}.radarPage .action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.radarPage .result{font-size:15px;line-height:1.65}.radarPage .muted{color:var(--muted)}.radarPage .ok{color:var(--good)}.radarPage .warn{color:var(--warn)}.radarPage table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}.radarPage td,.radarPage th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}.radarPage th{color:var(--muted);font-weight:500}.radarPage .empty{padding:16px;text-align:center;color:var(--muted)}.radarPage .formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.radarPage .score{border-color:#806b3e}.radarPage .timeline{margin-top:10px}.radarPage .operation-block,.radarPage .event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.radarPage .operation-block{border-left:3px solid var(--gold);background:#0b2138}.radarPage .operation-range,.radarPage .event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.radarPage .operation-step,.radarPage .event-action{padding:2px 0;font-size:16px}.radarPage .event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.radarPage .event.refresh .event-time{color:#f2d486}.radarPage .schedule-legend,.radarPage .player-mark,.radarPage .system-mark{display:none}
 
 .radarPage .modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 14px}.radarPage .modes label{display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #365574;background:#102842;color:#dce8f5;border-radius:10px;padding:9px 10px;margin:0;min-height:42px}.radarPage .modes input{width:auto;margin:0}.radarPage .time-row{display:flex;align-items:center;gap:5px;width:100%;margin:8px 0;min-width:0}.radarPage .time-row input,.radarPage .time-row select,.radarPage .setting-select{width:100%;max-width:100%;min-width:0;box-sizing:border-box;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:14px 12px 8px}.radarPage .time-row input[type="time"]{flex:1 1 0;width:0;min-width:0;min-inline-size:0;box-sizing:border-box;display:block}.radarPage .setting-select{margin-bottom:4px}.radarPage .time-sep{flex:0 0 18px;width:18px;color:var(--gold);font-weight:700;text-align:center;font-size:18px;line-height:1}.radarPage .smallbtn{box-sizing:border-box;min-width:0;margin:0;padding:10px 6px;font-size:14px;white-space:nowrap}.radarPage .time-row .delTime{flex:0 0 82px;width:82px;min-width:82px}.radarPage .addSameTime,.radarPage .addTime{width:auto;min-width:0;display:inline-block}.radarPage .day-title{font-size:14px;font-weight:600;color:#dce8f5;margin:12px 0 7px}.radarPage .setup-panel>label{margin-top:10px}.radarPage .setup-panel>label:first-of-type{margin-top:0}.radarPage .laura-toggle-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;margin-bottom:4px}.radarPage .switch-label{display:flex!important;align-items:center;justify-content:flex-start;gap:8px!important;border:0!important;background:transparent!important;padding:9px 0!important;color:#dce8f5!important;border-radius:0!important;min-height:42px}.radarPage .switch-label input{position:absolute;opacity:0;pointer-events:none}.radarPage .switch{position:relative;width:48px;height:26px;border-radius:999px;background:#365574;display:inline-block;transition:.2s}.radarPage .switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.radarPage .switch-label input:checked + .switch{background:#b28c3f}.radarPage .switch-label input:checked + .switch:after{transform:translateX(22px)}.radarPage .laura-toggle-row #lauraDetail{min-width:0}.radarPage .laura-toggle-row #lauraDetail .setting-select{margin:0;min-height:42px}.radarPage .setup-panel{padding-bottom:16px}.radarPage .section-title{font-size:18px;margin:0 0 14px;color:var(--gold)}.radarPage .setup-divider{height:1px;background:#27415f;margin:16px 0}.radarPage .result-heading{font-size:18px;font-weight:700;color:var(--gold);margin:18px 2px 10px}.radarPage .setup-panel .day-title{font-weight:600}.radarPage .setup-panel .meta{margin-top:12px}.radarPage .cycle-bridge{margin-top:10px;padding:12px 14px;border:1px solid #365574;border-radius:12px;background:#102842}.radarPage .cycle-bridge-title{font-weight:700;color:var(--gold);margin-bottom:6px}.radarPage .cycle-bridge-text{font-size:14px;line-height:1.6;color:#dce8f5}.radarPage .cycle-bridge-warn{margin-top:6px;color:#ffd36a;font-size:13px;line-height:1.5}.radarPage .score-plan{margin-top:9px;padding:10px 12px;border:1px solid #806b3e;border-radius:10px;background:#102842;color:#f2d486;font-size:15px}.radarPage .schedule-loss{margin-top:4px;color:#ffd36a;font-size:14px;line-height:1.5}
@@ -957,6 +962,11 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   #helpPage .helpLine b{font-size:16px;}
 }
 </style>
+<style id="radarRoleCardOverrideV101">
+/* 必須放在雷達原始 scoped button 規則之後，確保三頁角色卡真正共用同一套視覺規格。 */
+#radarPage .pageRoleSwitch .pageRoleCard{border:1px solid #304b59;background:#102732;color:#dce7eb;border-radius:12px;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;line-height:1.2;}
+#radarPage .pageRoleSwitch .pageRoleCard.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);}
+</style>
 </head><body><main><nav class="topbar siteTopbar">
   <div class="siteTopRow">
     <div class="brand">Last Z</div>
@@ -1019,19 +1029,22 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <h1>雷達週計劃</h1>
 <div class="panel setup-panel">
 <h2 class="section-title">⚙️ 規劃設定</h2>
-<label>時間模式</label>
-<div class="modes"><label><input type="radio" name="timeMode" value="game" checked> 遊戲時間</label><label><input type="radio" name="timeMode" value="local"> 當地時間</label></div>
-<label>玩家可操作時間</label>
-<div class="modes"><label><input type="radio" name="applyMode" value="same" checked> 每天相同</label><label><input type="radio" name="applyMode" value="custom"> 每天個別設定</label></div>
-<div id="sameTimes"></div>
-<div id="customTimes" hidden></div>
+<div class="radarSettingGroup radarCommonSettings">
+  <h3 class="radarSettingGroupTitle">共用設定</h3>
+  <label>時間模式</label>
+  <div class="modes"><label><input type="radio" name="timeMode" value="game" checked> 遊戲時間</label><label><input type="radio" name="timeMode" value="local"> 當地時間</label></div>
+  <label>玩家可操作時間</label>
+  <div class="modes"><label><input type="radio" name="applyMode" value="same" checked> 每天相同</label><label><input type="radio" name="applyMode" value="custom"> 每天個別設定</label></div>
+  <div id="sameTimes"></div>
+  <div id="customTimes" hidden></div>
+</div>
 <div class="setup-divider"></div>
-<label>勞拉星等</label>
-<div class="laura-toggle-row"><label class="switch-label"><input type="checkbox" id="lauraToggle" checked><span class="switch"></span><span id="lauraStatus">有勞拉</span></label><div id="lauraDetail"><select id="lauraStar" class="setting-select" aria-label="勞拉星等"><option value="0">0★（+5）</option><option value="1">1★（+10）</option><option value="2">2★（+10）</option><option value="3">3★（+10）</option><option value="4" selected>4★（+20）</option><option value="5">5★（+20）</option></select></div></div>
-
-<div class="setup-divider"></div>
-<label for="max">儲存上限</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
-
+<div class="radarSettingGroup radarRoleSettings">
+  <h3 class="radarSettingGroupTitle">角色設定</h3>
+  <label>勞拉星等</label>
+  <div class="laura-toggle-row"><label class="switch-label"><input type="checkbox" id="lauraToggle" checked><span class="switch"></span><span id="lauraStatus">有勞拉</span></label><div id="lauraDetail"><select id="lauraStar" class="setting-select" aria-label="勞拉星等"><option value="0">0★（+5）</option><option value="1">1★（+10）</option><option value="2">2★（+10）</option><option value="3">3★（+10）</option><option value="4" selected>4★（+20）</option><option value="5">5★（+20）</option></select></div></div>
+  <label for="max">儲存上限</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
+</div>
 </div>
 <div class="result-heading">📊 規劃結果</div>
 <div id="out"><div class="panel empty">輸入儲存上限後會自動規劃</div></div>
@@ -1157,9 +1170,9 @@ function renderSharedRoleSwitchers(){
   const activeId=RoleManager.activeId();
   const profiles=RoleManager.list();
   const configs=[
-    {id:'scoreRoleSwitch',showValue:false},
-    {id:'helpRoleJump',showValue:true},
-    {id:'radarRoleSwitch',showValue:false}
+    {id:'scoreRoleSwitch',showValue:true,blankValue:true},
+    {id:'helpRoleJump',showValue:true,blankValue:false},
+    {id:'radarRoleSwitch',showValue:true,blankValue:true}
   ];
   configs.forEach(cfg=>{
     const box=document.getElementById(cfg.id); if(!box)return;
@@ -1167,7 +1180,7 @@ function renderSharedRoleSwitchers(){
     profiles.forEach(p=>{
       const b=document.createElement('button'); b.type='button'; b.className='pageRoleCard'+(p.id===activeId?' active':''); b.dataset.roleId=p.id;
       const n=document.createElement('span'); n.className='pageRoleName'; n.textContent=p.name; b.appendChild(n);
-      if(cfg.showValue){const v=document.createElement('span');v.className='pageRoleValue';v.textContent='—';b.appendChild(v);}
+      if(cfg.showValue){const v=document.createElement('span');v.className='pageRoleValue';v.textContent=cfg.blankValue?'\u00a0':'—';b.appendChild(v);}
       b.addEventListener('click',()=>RoleManager.select(p.id)); box.appendChild(b);
     });
   });
@@ -1411,7 +1424,7 @@ const GUIDE_DATA={
    introTitle:'🪖 歡迎使用聯盟對決積分計算器',introText:'這個工具可以協助你設定目標積分、整理目前進度，並預估需要投入哪些資源。第一次使用可以跟著導覽走一遍。',
    steps:[
     {title:'👤 角色設定',text:'先選擇或建立你要使用的角色。角色會保存自己的計算資料，之後再次使用時可以直接載入。',target:'#roleBtn',open:'roleModal'},
-    {title:'⭐ 積分加成',text:'這裡是「設定積分加成」入口。需要設定時再點擊按鈕開啟設定視窗，填入你目前擁有的各項積分加成。',target:'#bonusBtn'},
+    {title:'⭐ 積分加成',text:'這裡是「設定積分加成」入口。需要設定時再點擊按鈕開啟設定視窗，填入你目前擁有的各項積分加成。',target:'#bonusBtn',scroll:true},
     {title:'🎯 設定目標',text:'設定這次希望達成的目標積分，系統會以這個數值計算還需要完成多少。',target:'#target',scroll:true},
     {title:'📊 目前進度',text:'輸入你目前已經取得的積分，系統會計算距離目標還差多少。',target:'#current',scroll:true},
     {title:'📅 選擇星期',text:'選擇目前要計算的聯盟對決星期。不同星期的積分項目不同。',target:'.dayTabs',scroll:true},
@@ -1433,9 +1446,8 @@ const GUIDE_DATA={
    introTitle:'📡 歡迎使用雷達週計劃',introText:'這個工具可以依照遊戲時間、儲存上限、勞拉與玩家可操作時間，安排一週雷達規劃。第一次使用可以跟著導覽走一遍。',
    steps:[
     {title:'👤 選擇角色',text:'先選擇目前要規劃的角色。雷達的勞拉、星等與儲存上限會依角色分別保存。',target:'#radarRoleSwitch',scroll:true},
-    {title:'🕐 設定時間模式',text:'選擇要使用遊戲時間或當地時間進行規劃。',target:'#radarPage .setup-panel .modes',scroll:true},
-    {title:'⏱️ 設定玩家可操作時間',text:'設定每天相同或每天個別的可操作時間，系統會依這些時段安排操作。',target:'#radarPage #sameTimes',scroll:true},
-    {title:'📡 設定雷達角色資料',text:'設定目前角色的勞拉、勞拉星等與儲存上限。',target:'#radarPage #lauraToggle',scroll:true},
+    {title:'⚙️ 共用設定',text:'這裡設定所有角色共用的時間模式與玩家可操作時間。',target:'#radarPage .radarCommonSettings',scroll:true},
+    {title:'👤 角色設定',text:'這裡設定目前角色自己的勞拉、星等與儲存上限。切換角色後，這些資料會跟著角色切換。',target:'#radarPage .radarRoleSettings',scroll:true},
     {title:'📊 查看規劃結果',text:'完成設定後查看規劃結果，依照系統安排操作雷達。',target:'#radarPage .result-heading',scroll:true}
    ]
  }
