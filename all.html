@@ -563,6 +563,24 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 #helpPage .helpRoleGroupTitle{padding-top:14px;padding-left:14px;padding-right:14px;}
 @media(max-width:560px){#helpPage .helpSettingGroupTitle{font-size:17px !important;line-height:1.35 !important;}}
 </style>
+<style id="helpFlatRoleLayoutV105">
+/* v0.10.5：聯盟幫助角色區改為雷達式的簡潔層級，避免「大卡片＋角色卡＋內容卡」層層套疊。角色名稱保留作為辨識，不再增加「玩家名稱」等重複標籤。 */
+#helpPage .helpRoles{padding:0 14px 10px;background:transparent;}
+#helpPage .helpRole{border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;border-top:1px solid #294553;}
+#helpPage .helpRole:first-child{border-top:0;}
+#helpPage .helpRoleHead{padding:14px 0 10px;background:transparent;border-bottom:0;display:block;}
+#helpPage .helpRoleName{font-size:18px!important;line-height:1.3;font-weight:950;color:#eef3f5;}
+#helpPage .helpTable{padding:0;}
+#helpPage .helpTierSetting{padding:10px 0;border-bottom:1px solid #294553;}
+#helpPage .helpTableRow{padding:11px 0;}
+#helpPage .helpDetailPanel{padding:2px 0 9px;}
+#helpPage .helpResultRow{margin:0;padding:11px 0;}
+@media(max-width:560px){
+  #helpPage .helpRoles{padding-left:14px;padding-right:14px;}
+  #helpPage .helpRoleHead{padding:13px 0 9px;}
+  #helpPage .helpRoleName{font-size:18px!important;}
+}
+</style>
 <style id="newUserGuideV1">
 .guideOverlay{position:fixed;inset:0;z-index:500;background:rgba(2,8,12,.74);display:none;align-items:center;justify-content:center;padding:18px}.guideOverlay.show{display:block}.guideShade{position:absolute;inset:0}.guideFocus{position:fixed;z-index:502;pointer-events:none;border:2px solid #e0b85a;border-radius:12px;box-shadow:0 0 0 5px rgba(224,184,90,.16),0 0 24px rgba(224,184,90,.42);transition:all .22s ease;display:none}.guideCard{position:fixed;z-index:503;width:min(390px,calc(100vw - 28px));background:#0d202b;border:1px solid #735725;border-radius:16px;box-shadow:0 20px 55px rgba(0,0,0,.62);padding:16px;color:#eef3f5}.guideCard h3{margin:0 0 8px;font-size:19px;color:#f2d47e}.guideCard p{margin:0;color:#d7e3e7;font-size:14px;line-height:1.65}.guideStep{margin-top:10px;font-size:12px;color:#aebfc6}.guideActions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.guideActions button{border:1px solid #3a5360;background:#122833;color:#eaf1f4;border-radius:9px;padding:8px 12px;font-weight:800}.guideActions .guideNext,.guideActions .guideDone{border-color:#d0a44b;background:#6f5523;color:#fff4d0}.guideSkip{margin-right:auto}.guideNavBtn{border:1px solid #735725;background:#162a33;color:#f2d47e;border-radius:9px;padding:8px 10px;font-weight:900;white-space:nowrap}.guideTargetPulse{position:relative!important;z-index:501!important}
 @media(max-width:560px){.guideOverlay{padding:10px}.guideCard{padding:14px}.guideCard h3{font-size:18px}.guideCard p{font-size:13px}.guideNavBtn{padding:8px 9px}.topbar{gap:7px}.roleBtn{padding:9px 10px}.guideNavBtn{font-size:13px}}
@@ -1435,7 +1453,7 @@ document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks
 
 
 // ==================== 新手導覽 V1｜v0.10.3 三頁共通導覽版 ====================
-const GUIDE_VERSION='v1';
+const GUIDE_VERSION='v2';
 const GUIDE_KEYS={score:'lastz_guide_score_'+GUIDE_VERSION,help:'lastz_guide_help_'+GUIDE_VERSION,radar:'lastz_guide_radar_'+GUIDE_VERSION};
 const GUIDE_DATA={
  score:{
@@ -1453,7 +1471,7 @@ const GUIDE_DATA={
  help:{
    introTitle:'🤝 歡迎使用聯盟幫助計算器',introText:'有傷兵需要治療時，這個工具可以依照你的治療條件，快速計算一次最適合治療多少士兵。',
    steps:[
-    {title:'👤 選擇角色',text:'先選擇目前要計算的角色。不同角色的治療相關設定會分別保存，切換角色後會載入該角色的資料。',target:'.helpSelectedRole .helpRoleHead',scroll:true},
+    {title:'👤 選擇角色',text:'先選擇目前要計算的角色。不同角色的治療相關設定會分別保存，切換角色後會載入該角色的資料。',target:'#helpRoleJump',scroll:true},
     {title:'🪖 選擇士兵等級',text:'在目前角色卡片的「士兵等級」選擇目前要治療的士兵等級。',target:'.helpSelectedRole .helpTierSetting',scroll:true},
     {title:'⏱️ 填入單手幫助時間',text:'在角色卡片中設定單手幫助時間相關資訊，包含聯盟科技、專精與避難招募等資料。',target:'.helpSelectedRole .helpTreatmentTime',scroll:true},
     {title:'⚡ 填入治療速度提高',text:'再填入目前的治療速度提高資訊，系統會把科技、聯盟科技、避難招募與殺敵日效果納入計算。',target:'.helpSelectedRole .helpTreatmentSpeed',scroll:true},
