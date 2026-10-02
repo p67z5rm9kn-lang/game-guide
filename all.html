@@ -1511,6 +1511,47 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   .soldierModal .soldierExplainTitle{font-size:var(--ui-section);}
 }
 </style>
+
+<style id="v136SharedUIAuditFinal">
+/* v1.36：共同 UI 全站檢查後的最終微調
+   只調整 UI，不修改任何計算、資料、事件或功能邏輯。
+   原則：一般內容文字使用 --ui-body；只有真正屬於輔助資訊的文字才使用 --ui-small。
+*/
+
+/* ===== 士兵訓練設定：表格一般內容統一回到共同 UI =====
+   表頭、兵種、時間、數量都屬於表格主要內容，不再因為位於表格而縮成 14px。
+   「%」單位仍屬輔助資訊，因此保留 --ui-small。
+*/
+.soldierModal .soldierTable .stHead{
+  font-size:var(--ui-body);
+  line-height:1.35;
+}
+.soldierModal .soldierTable .stRow{
+  font-size:var(--ui-body);
+  line-height:1.35;
+}
+.soldierModal .soldierTable .unitInput>span{
+  font-size:var(--ui-small);
+}
+.soldierModal .soldierTable .prodTime,
+.soldierModal .soldierTable .twelveQty{
+  font-size:var(--ui-body);
+  line-height:1.35;
+}
+.soldierModal .soldierTable .stTotal{
+  font-size:var(--ui-body);
+  line-height:1.35;
+}
+
+@media(max-width:560px){
+  .soldierModal .soldierTable .stHead{font-size:var(--ui-body);}
+  .soldierModal .soldierTable .stRow{font-size:var(--ui-body);}
+  .soldierModal .soldierTable .unitInput>span{font-size:var(--ui-small);}
+  .soldierModal .soldierTable .prodTime,
+  .soldierModal .soldierTable .twelveQty{font-size:var(--ui-body);}
+  .soldierModal .soldierTable .stTotal{font-size:var(--ui-body);}
+}
+</style>
 </head><body><main><nav class="topbar siteTopbar">
   <div class="siteTopRow">
     <div class="brand">Last Z</div>
