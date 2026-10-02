@@ -3405,4 +3405,52 @@ autoPlanIfReady();
 }
 </style>
 
+
+<style id="v142CommonPanelAlignment">
+/* v1.42：共用設定位置＋設定區外框統一
+   1. 三頁「🔗 共用設定」標題固定相同高度與垂直置中
+   2. 三頁設定區上方內距統一，切換頁面時標題不再上下跳動
+   3. 外框改回低對比藍灰色，與聯盟幫助原本視覺一致
+   僅 UI，不修改任何計算／資料／事件邏輯。
+*/
+:root{
+  --ui-common-border:#294553;
+  --ui-common-panel-top:16px;
+  --ui-common-title-height:40px;
+}
+
+/* 三頁設定容器：上方起點統一 */
+#scorePage .card.hero,
+#helpPage .helpCard:first-child,
+#radarPage .setup-panel{
+  padding-top:var(--ui-common-panel-top);
+}
+
+/* 三頁「共用設定」標題：固定 40px 列高並垂直置中 */
+#scorePage .scoreSettingGroup:first-child > .scoreSettingGroupTitle,
+#helpPage > .helpCard:first-child > .helpSettingGroupTitle,
+#radarPage .radarCommonSettings > .radarSettingGroupTitle{
+  height:var(--ui-common-title-height);
+  min-height:var(--ui-common-title-height);
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  margin:0 0 10px !important;
+  line-height:1.35 !important;
+}
+
+/* 聯盟幫助原本沒有設定卡內側 padding，補回與另外兩頁一致的左右內距 */
+#helpPage > .helpCard:first-child > .helpSettingGroupTitle{
+  padding-left:14px !important;
+  padding-right:14px !important;
+}
+
+/* 外框統一使用低對比藍灰色 */
+#scorePage .card.hero,
+#helpPage .helpCard:first-child,
+#radarPage .setup-panel{
+  border-color:var(--ui-common-border) !important;
+}
+</style>
+
 </body></html>
