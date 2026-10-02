@@ -987,16 +987,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 </style>
 
-<style id="v0124SoldierTimeBlurFix">
-/* v1.25：iOS Safari 按「完成」收起鍵盤時，延後恢復背景模糊效果，避免收鍵盤重繪瞬間造成上方內容短暫模糊。 */
-@media(max-width:560px){
-  body.soldierTimeEditing .topbar,
-  body.soldierTimeEditing .siteTopbar{
-    -webkit-backdrop-filter:none!important;
-    backdrop-filter:none!important;
-  }
-}
-</style>
 <style id="roleSystemV06">
 /* v0.6：角色系統共用視覺／互動提示 */
 .helpRoleHead{cursor:pointer;}
@@ -1125,6 +1115,80 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 #scorePage .scoreRoleSettingRow>span{font-size:16px;color:#dce7eb}
 #scorePage .scoreRoleSettingRow .bonusBtn{width:100%;margin:0}
 @media(max-width:560px){#scorePage .scoreSettingGroupTitle{font-size:18px}#scorePage .scoreRoleSettingRow{grid-template-columns:1fr 150px}#scorePage .scoreRoleSettingRow>span{font-size:15px}}
+</style>
+
+<style id="v124SoldierTableAndManualInputFix">
+/* v1.24：星期五士兵訓練表格＋手動目標輸入欄位共同 UI */
+#scorePage .targetMode .targetInputWrap .settingControl,
+#scorePage .summaryRow input.settingControl{
+  height:40px !important;
+  min-height:40px !important;
+  background:#f3f3f3 !important;
+  border:1px solid #cfd4d7 !important;
+  border-radius:9px !important;
+  color:#111 !important;
+  box-sizing:border-box;
+}
+#scorePage .soldierTable{overflow-x:auto;overflow-y:visible;}
+#scorePage .soldierTable .stHead,
+#scorePage .soldierTable .stRow,
+#scorePage .soldierTable .stTotal{
+  grid-template-columns:minmax(52px,1fr) 82px 88px 78px 88px;
+  gap:5px;
+}
+#scorePage .soldierTable .stHead{
+  font-size:13px !important;
+  line-height:1.25;
+  text-align:center;
+  color:#9fb0b8;
+  padding:7px 0;
+}
+#scorePage .soldierTable .stHead span{white-space:normal;}
+#scorePage .soldierTable .stRow{
+  font-size:15px !important;
+  line-height:1.3;
+  padding:7px 0;
+}
+#scorePage .soldierTable .stRow > span:first-child,
+#scorePage .soldierTable .stTotal > span:first-child{
+  white-space:nowrap;
+}
+#scorePage .soldierTable .stRow input{
+  height:36px;
+  min-height:36px;
+  width:100%;
+  min-width:0;
+  text-align:right;
+}
+#scorePage .soldierTable .stRow .troopCount,
+#scorePage .soldierTable .stRow .troopSpeed{width:100%;}
+#scorePage .soldierTable .unitInput{width:100%;display:flex;align-items:center;gap:2px;}
+#scorePage .soldierTable .unitInput > span{font-size:14px;}
+#scorePage .soldierTable .prodTime,
+#scorePage .soldierTable .twelveQty{font-size:13px;line-height:1.3;text-align:center;}
+#scorePage .soldierTable .stTotal{
+  padding:9px 0 3px;
+  border-top:1px solid #294553;
+  font-size:15px;
+  line-height:1.3;
+  font-weight:900;
+}
+#scorePage .soldierTable .stTotal span:nth-child(2),
+#scorePage .soldierTable .stTotal span:nth-child(5){text-align:right;}
+@media(max-width:560px){
+  #scorePage .soldierTable .stHead,
+  #scorePage .soldierTable .stRow,
+  #scorePage .soldierTable .stTotal{
+    grid-template-columns:minmax(48px,1fr) 76px 82px 72px 82px;
+    gap:4px;
+  }
+  #scorePage .soldierTable .stHead{font-size:12px !important;}
+  #scorePage .soldierTable .stRow{font-size:14px !important;}
+  #scorePage .soldierTable .stTotal{font-size:14px;}
+  #scorePage .soldierTable .unitInput > span{font-size:13px;}
+  #scorePage .soldierTable .prodTime,
+  #scorePage .soldierTable .twelveQty{font-size:12px;}
+}
 </style>
 </head><body><main><nav class="topbar siteTopbar">
   <div class="siteTopRow">
@@ -1266,19 +1330,6 @@ function setTargetMode(mode){const m=mode==='manual'?'manual':'preset';document.
 document.querySelectorAll('#scorePage .targetMode button').forEach(b=>b.addEventListener('click',()=>setTargetMode(b.dataset.targetMode)));
 document.addEventListener('input',e=>{if(e.target.matches('input,select')){calc();scheduleSave();}});
 document.addEventListener('change',e=>{if(e.target.matches('input,select')){calc();scheduleSave();}});
-/* v1.25：iOS Safari 按「完成」收起鍵盤時，延後恢復 backdrop-filter，避免收鍵盤重繪瞬間造成上方畫面短暫模糊。 */
-let soldierTimeRestoreTimer;
-document.querySelectorAll('#twelveH,#twelveM,#twelveS').forEach(el=>{
-  el.addEventListener('focus',()=>{
-    clearTimeout(soldierTimeRestoreTimer);
-    document.body.classList.add('soldierTimeEditing');
-  });
-  el.addEventListener('blur',()=>{
-    clearTimeout(soldierTimeRestoreTimer);
-    soldierTimeRestoreTimer=setTimeout(()=>document.body.classList.remove('soldierTimeEditing'),800);
-  });
-});
-
 document.getElementById('soldierTier')?.addEventListener('change',e=>{const p=db.profiles.find(x=>x.id===db.active);if(p){setProfileTier(p,e.target.value);}if(document.getElementById('helpPage').style.display!=='none')helpRender();});
 document.getElementById('allDone').addEventListener('change',e=>{document.querySelectorAll('.bonus').forEach(x=>x.value=e.target.checked?x.dataset.max:'');calc();saveActive();});
 document.querySelectorAll('#bonusModal #chika,#bonusModal .bonus').forEach(x=>x.addEventListener('input',()=>{calc();saveActive();}));
