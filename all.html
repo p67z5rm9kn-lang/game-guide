@@ -1180,7 +1180,8 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   #scorePage .soldierTable .stHead,
   #scorePage .soldierTable .stRow,
   #scorePage .soldierTable .stTotal{
-    grid-template-columns:40px 72px 76px 70px 77px;
+    /* 五欄依比例完整填滿手機可視寬度，避免右側留下大片空白 */
+    grid-template-columns:12fr 21fr 22fr 23fr 22fr;
     gap:4px;
     width:100%;
   }
@@ -1227,7 +1228,12 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   }
   #scorePage .soldierTable .stTotal span:nth-child(2),
   #scorePage .soldierTable .stTotal span:nth-child(5){
-    text-align:right;
+    text-align:center;
+  }
+  #scorePage .soldierTable .stRow > span:not(:first-child),
+  #scorePage .soldierTable .stHead span:not(:first-child),
+  #scorePage .soldierTable .stTotal > span:not(:first-child){
+    text-align:center;
   }
 }
 </style>
