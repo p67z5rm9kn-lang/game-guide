@@ -1132,9 +1132,10 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <style id="scoreRoleSettingV113">
 #scorePage .scoreSettingGroupTitle{font-size:20px;font-weight:900;line-height:1.35;color:#eef3f5;margin:0 0 10px}
 #scorePage .scoreSettingDivider{border-top:1px solid #294553;margin:12px 0}
-#scorePage .scoreRoleSettingRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,34%);gap:10px;align-items:center;min-height:36px}
+#scorePage .scoreRoleSettingRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,34%);gap:10px;align-items:center;min-height:40px}
+#scorePage .scoreRoleSettingRow + .scoreRoleSettingRow{margin-top:8px}
 #scorePage .scoreRoleSettingRow>span{font-size:16px;color:#dce7eb}
-#scorePage .scoreRoleSettingRow .bonusBtn{width:100%;margin:0}
+#scorePage .scoreRoleSettingRow .bonusBtn{width:100%;height:40px;min-height:40px;margin:0;box-sizing:border-box}
 @media(max-width:560px){#scorePage .scoreSettingGroupTitle{font-size:18px}#scorePage .scoreRoleSettingRow{grid-template-columns:1fr 150px}#scorePage .scoreRoleSettingRow>span{font-size:15px}}
 </style>
 
@@ -1319,6 +1320,12 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   .soldierModal .soldierTable .prodTime,.soldierModal .soldierTable .twelveQty{font-size:12px;}
   .soldierModal .soldierTable .stTotal{font-size:14px;}
   .soldierModal .soldierExplain{font-size:15px;line-height:1.7;}
+}
+</style>
+<style id="v133RoleButtonUI">
+/* v1.33：角色設定兩顆設定按鈕統一共同 UI；右上角角色按鈕略縮小但維持導覽列高度。 */
+@media(max-width:560px){
+  .siteTopRow .roleBtn{font-size:16px!important;padding:8px 9px!important;max-width:104px!important;min-height:38px!important;height:38px!important;box-sizing:border-box!important;}
 }
 </style>
 </head><body><main><nav class="topbar siteTopbar">
