@@ -317,34 +317,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   #helpPage > .helpRoleJump{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
 </style>
-<style id="helpManualInputMatchScore">
-/* 聯盟幫助：手動輸入欄位比照「聯盟對決」的白色輸入框 */
-.helpDetailPanel .helpInputLine .unitInput input[type="number"]{
-  height:36px !important;
-  min-width:0 !important;
-  width:100% !important;
-  box-sizing:border-box;
-  padding:4px 8px !important;
-  background:#f3f3f3 !important;
-  color:#111 !important;
-  border:1px solid #cfd4d7 !important;
-  border-radius:8px !important;
-  text-align:right !important;
-  -webkit-appearance:none;
-  appearance:none;
-}
-.helpDetailPanel .helpInputLine .unitInput input[type="number"]::placeholder{color:#777}
-.helpDetailPanel .helpInputLine .unitInput input[type="number"]:focus{
-  outline:2px solid rgba(208,164,75,.45);
-  outline-offset:1px;
-}
-@media(max-width:560px){
-  .helpDetailPanel .helpInputLine .unitInput input[type="number"]{
-    height:36px !important;
-    font-size:16px !important;
-  }
-}
-</style>
 <style id="sharedControlStyles">
 /* ================================
    🔗 共用設定欄位｜聯盟對決／聯盟幫助
@@ -1319,424 +1291,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 
 
 
-<style id="v144CommonUIBaselineClean">/* v1.44：共同 UI 基準清理版
-   目的：把 v1.33～v1.43 累積的共同 UI 補丁收斂成一套真正的全站基準。
-   本區只處理 CSS/UI；不修改 HTML、JavaScript、計算、資料或事件邏輯。
-
-   已整理：
-   1. 按鈕／主頁籤／角色卡：40px
-   2. 輸入／下拉：40px、白底黑字
-   3. 共同設定／角色設定標題：20px、白色、40px 標題列
-   4. 設定區外框：同一套藍灰色、圓角
-   5. 共同 UI 字體直接沿用 v0.5/v0.9 的 --ui-* 變數
-   6. 移除近期重複的共同 UI 補丁，避免再靠一層一層覆蓋修正。
-*/
-:root{
-  --ui-action-height:40px;
-  --ui-action-radius:9px;
-  --ui-action-font-size:16px;
-  --ui-action-font-weight:900;
-  --ui-action-padding:0 14px;
-
-  --ui-control-height:40px;
-  --ui-control-bg:#f3f3f3;
-  --ui-control-border:#cfd4d7;
-  --ui-control-text:#111;
-  --ui-control-radius:9px;
-  --ui-control-font-size:18px;
-  --ui-control-font-weight:900;
-
-  --ui-common-title-size:20px;
-  --ui-common-title-height:40px;
-  --ui-common-title-weight:900;
-  --ui-common-title-color:#eef3f5;
-  --ui-common-panel-top:16px;
-  --ui-common-border:#294553;
-  --ui-common-border-width:1px;
-  --ui-common-radius:14px;
-  --ui-button-text:#eef3f5;
-}
-
-/* =========================================================
-   A. 全站共同按鈕
-   ========================================================= */
-.mainPageTab,
-#scorePage .scoreRoleSettingRow .bonusBtn,
-#scorePage .dayHeader button,
-#scorePage .targetMode button,
-#scorePage .dayTab,
-#helpPage .stepper button,
-#helpPage .checkPill,
-#helpPage .roleActions button,
-#helpPage .addRole,
-#radarPage .modes label,
-#radarPage button:not(.info):not(.closeBtn),
-#radarPage .smallbtn,
-#radarPage .addSameTime,
-#radarPage .addTime,
-.guideActions button,
-.guideNavBtn,
-.roleActions button,
-.addRole{
-  height:var(--ui-action-height) !important;
-  min-height:var(--ui-action-height) !important;
-  box-sizing:border-box;
-  color:var(--ui-button-text) !important;
-  font-size:var(--ui-action-font-size) !important;
-  font-weight:var(--ui-action-font-weight) !important;
-  line-height:1.25;
-}
-
-.mainPageTab{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:0 9px !important;
-}
-
-#scorePage .scoreRoleSettingRow .bonusBtn{
-  width:100%;
-  margin:0;
-  padding:var(--ui-action-padding);
-  border-radius:var(--ui-action-radius);
-}
-
-#scorePage .dayHeader button,
-#scorePage .targetMode button,
-#scorePage .dayTab,
-#helpPage .stepper button,
-#helpPage .checkPill,
-#radarPage .smallbtn,
-#radarPage .addSameTime,
-#radarPage .addTime,
-.guideActions button,
-.guideNavBtn,
-.roleActions button,
-.addRole{
-  padding:var(--ui-action-padding);
-  border-radius:var(--ui-action-radius);
-}
-
-#radarPage .modes label,
-#radarPage .smallbtn,
-#radarPage .addSameTime,
-#radarPage .addTime{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding-top:0 !important;
-  padding-bottom:0 !important;
-}
-
-/* 角色快速切換卡也屬於可操作按鈕，三頁固定同一高度。 */
-.pageRoleCard,
-.pageRoleCard.compact,
-#radarPage .pageRoleSwitch .pageRoleCard,
-#radarPage .pageRoleSwitch .pageRoleCard.compact{
-  height:var(--ui-action-height) !important;
-  min-height:var(--ui-action-height) !important;
-  box-sizing:border-box;
-  padding:0 10px !important;
-  flex-direction:row !important;
-  align-items:center !important;
-  justify-content:flex-start !important;
-  gap:8px;
-}
-.pageRoleCard .pageRoleName{
-  flex:1 1 auto;
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  text-align:left;
-  font-size:var(--ui-body) !important;
-  line-height:1.25;
-}
-.pageRoleCard .pageRoleValue{
-  flex:0 0 auto;
-  margin-left:auto;
-  min-height:0;
-  line-height:1.25;
-  text-align:right;
-  font-size:var(--ui-body) !important;
-}
-
-/* 右上角目前角色：與一般操作按鈕同一高度。 */
-.siteTopRow .roleBtn{
-  height:var(--ui-action-height) !important;
-  min-height:var(--ui-action-height) !important;
-  box-sizing:border-box;
-  overflow:hidden;
-}
-.siteTopRow .roleBtn #currentRoleName{
-  min-width:0;
-  max-width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  display:inline-block;
-  vertical-align:middle;
-}
-
-/* =========================================================
-   B. 全站共同輸入／下拉
-   ========================================================= */
-#scorePage .settingControl,
-#helpPage #helpClicks,
-#helpPage .helpTierSelect,
-#helpPage .helpDetailPanel select,
-#helpPage .helpDetailPanel .unitInput input[type="number"],
-#helpPage .helpLine .timePair input,
-#radarPage input:not([type="radio"]):not([type="checkbox"]),
-#radarPage select,
-.soldierModal .soldierInputs .settingControl,
-.soldierModal .soldierTable .stRow input.settingControl{
-  height:var(--ui-control-height) !important;
-  min-height:var(--ui-control-height) !important;
-  box-sizing:border-box;
-  background:var(--ui-control-bg) !important;
-  border:1px solid var(--ui-control-border) !important;
-  color:var(--ui-control-text) !important;
-  border-radius:var(--ui-control-radius) !important;
-  font-size:var(--ui-control-font-size) !important;
-  font-weight:var(--ui-control-font-weight) !important;
-}
-
-#scorePage .settingControl,
-#helpPage .helpTierSelect,
-#helpPage .helpDetailPanel select,
-#radarPage select{
-  padding:0 10px !important;
-}
-#helpPage .helpDetailPanel .unitInput input[type="number"]{
-  padding:0 10px !important;
-  text-align:right !important;
-}
-#helpPage .helpLine .timePair input{
-  padding:0 5px !important;
-  text-align:center !important;
-}
-#helpPage #helpClicks{
-  padding:0 8px !important;
-  text-align:center !important;
-}
-#radarPage .time-row input,
-#radarPage .time-row select,
-#radarPage .setting-select{
-  padding:0 10px !important;
-}
-
-/* 設定積分加成與士兵訓練視窗同樣使用 .settingControl 基準。 */
-#bonusModal #chika,
-.modal .brow input[type="number"]{
-  height:var(--ui-control-height) !important;
-  min-height:var(--ui-control-height) !important;
-  background:var(--ui-control-bg) !important;
-  border:1px solid var(--ui-control-border) !important;
-  color:var(--ui-control-text) !important;
-  border-radius:var(--ui-control-radius) !important;
-  font-size:var(--ui-control-font-size) !important;
-  font-weight:var(--ui-control-font-weight) !important;
-  box-sizing:border-box;
-}
-#bonusModal #chika{
-  width:100% !important;
-  min-width:0 !important;
-  padding:0 10px !important;
-  text-align:right !important;
-}
-.modal .brow input[type="number"]{
-  width:100% !important;
-  min-width:0 !important;
-  padding:0 10px !important;
-  text-align:right !important;
-}
-
-/* =========================================================
-   C. 三頁「共用設定／角色設定」共同標題
-   ========================================================= */
-#scorePage .scoreSettingGroupTitle,
-#helpPage .helpSettingGroupTitle,
-#radarPage .radarSettingGroupTitle{
-  height:var(--ui-common-title-height) !important;
-  min-height:var(--ui-common-title-height) !important;
-  box-sizing:border-box;
-  display:flex !important;
-  align-items:center !important;
-  margin:0 0 10px !important;
-  padding:0 !important;
-  font-size:var(--ui-common-title-size) !important;
-  font-weight:var(--ui-common-title-weight) !important;
-  line-height:1.35 !important;
-  color:var(--ui-common-title-color) !important;
-  text-shadow:none;
-}
-
-/* 角色設定標題與共用設定使用同一標題列；分隔距離也一致。 */
-#scorePage .scoreSettingGroup + .scoreSettingGroup .scoreSettingGroupTitle,
-#helpPage .helpRoleGroupTitle,
-#radarPage .radarRoleSettings > .radarSettingGroupTitle{
-  margin-top:16px !important;
-  padding-top:0 !important;
-}
-
-/* =========================================================
-   D. 三頁設定區共同外框與上方位置
-   ========================================================= */
-#scorePage .card.hero,
-#helpPage .helpCard:first-child,
-#radarPage .setup-panel{
-  padding-top:var(--ui-common-panel-top) !important;
-  border:var(--ui-common-border-width) solid var(--ui-common-border) !important;
-  border-radius:var(--ui-common-radius) !important;
-}
-
-/* 聯盟幫助標題的左右位置與另外兩頁一致。 */
-#helpPage > .helpCard:first-child > .helpSettingGroupTitle{
-  padding-left:14px !important;
-  padding-right:14px !important;
-}
-
-/* 共用設定內部分隔線也使用同一套低對比藍灰色。 */
-#scorePage .scoreSettingDivider,
-#helpPage .helpRoleGroupTitle,
-#radarPage .setup-divider{
-  border-color:rgba(220,231,235,.28) !important;
-}
-
-/* =========================================================
-   E. 士兵訓練視窗：沿用共同文字／輸入基準，保留原本版型
-   ========================================================= */
-.soldierModal .soldierInputs label{
-  color:#a9b9c1;
-  font-size:var(--ui-label) !important;
-  line-height:var(--ui-line);
-}
-.soldierModal .soldierTable .stHead,
-.soldierModal .soldierTable .stRow,
-.soldierModal .soldierTable .stTotal{
-  font-size:var(--ui-body) !important;
-  line-height:1.35;
-}
-.soldierModal .soldierTable .unitInput>span{
-  font-size:var(--ui-small) !important;
-}
-.soldierModal .soldierTable .prodTime,
-.soldierModal .soldierTable .twelveQty{
-  font-size:var(--ui-body) !important;
-  line-height:1.35;
-}
-.soldierModal .soldierExplain{
-  font-size:var(--ui-body) !important;
-  line-height:1.65;
-}
-.soldierModal .soldierExplainTitle{
-  font-size:var(--ui-section) !important;
-  line-height:1.35;
-}
-
-/* 手機版共同 UI 不再另外縮小尺寸／字級。 */
-@media(max-width:560px){
-  .mainPageTab,
-  #scorePage .scoreRoleSettingRow .bonusBtn,
-  #scorePage .dayHeader button,
-  #scorePage .targetMode button,
-  #scorePage .dayTab,
-  #helpPage .stepper button,
-  #helpPage .checkPill,
-  #radarPage .modes label,
-  #radarPage button:not(.info):not(.closeBtn),
-  .guideActions button,
-  .guideNavBtn,
-  .roleActions button,
-  .addRole{
-    height:var(--ui-action-height) !important;
-    min-height:var(--ui-action-height) !important;
-    font-size:var(--ui-action-font-size) !important;
-  }
-  .pageRoleCard,
-  .pageRoleCard.compact,
-  #radarPage .pageRoleSwitch .pageRoleCard,
-  #radarPage .pageRoleSwitch .pageRoleCard.compact{
-    height:var(--ui-action-height) !important;
-    min-height:var(--ui-action-height) !important;
-  }
-  .pageRoleCard .pageRoleName,
-  .pageRoleCard .pageRoleValue{
-    font-size:var(--ui-body) !important;
-  }
-  .siteTopRow .roleBtn{
-    height:var(--ui-action-height) !important;
-    min-height:var(--ui-action-height) !important;
-  }
-  #scorePage .settingControl,
-  #helpPage #helpClicks,
-  #helpPage .helpTierSelect,
-  #helpPage .helpDetailPanel select,
-  #helpPage .helpDetailPanel .unitInput input[type="number"],
-  #helpPage .helpLine .timePair input,
-  #radarPage input:not([type="radio"]):not([type="checkbox"]),
-  #radarPage select,
-  .soldierModal .soldierInputs .settingControl,
-  .soldierModal .soldierTable .stRow input.settingControl{
-    height:var(--ui-control-height) !important;
-    min-height:var(--ui-control-height) !important;
-    font-size:var(--ui-control-font-size) !important;
-  }
-  #scorePage .scoreSettingGroupTitle,
-  #helpPage .helpSettingGroupTitle,
-  #radarPage .radarSettingGroupTitle{
-    height:var(--ui-common-title-height) !important;
-    min-height:var(--ui-common-title-height) !important;
-    font-size:var(--ui-common-title-size) !important;
-  }
-  .soldierModal .soldierInputs label{font-size:var(--ui-label) !important;}
-  .soldierModal .soldierTable .stHead,
-  .soldierModal .soldierTable .stRow,
-  .soldierModal .soldierTable .stTotal,
-  .soldierModal .soldierTable .prodTime,
-  .soldierModal .soldierTable .twelveQty{font-size:var(--ui-body) !important;}
-}
-</style>
-<style id="v145CommonSettingTitleStructure">
-/* v1.45：三頁共用設定／角色設定標題採同一個共同結構；僅 UI，不修改功能／計算。 */
-.commonSettingTitle{
-  height:var(--ui-common-title-height) !important;
-  min-height:var(--ui-common-title-height) !important;
-  box-sizing:border-box !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:flex-start !important;
-  gap:0 !important;
-  margin:0 0 10px !important;
-  padding:0 !important;
-  font-size:var(--ui-common-title-size) !important;
-  font-weight:var(--ui-common-title-weight) !important;
-  line-height:1.35 !important;
-  color:var(--ui-common-title-color) !important;
-  text-shadow:none !important;
-}
-/* 三頁的設定區都由外框提供相同的左右起點；標題本身不再另外加 padding。 */
-#scorePage .scoreSettingGroupTitle.commonSettingTitle,
-#helpPage .helpSettingGroupTitle.commonSettingTitle,
-#radarPage .radarSettingGroupTitle.commonSettingTitle{
-  padding-left:0 !important;
-  padding-right:0 !important;
-}
-/* 角色設定標題與共用設定之間保留同一段距離。 */
-#scorePage .scoreSettingGroup + .scoreSettingGroup .commonSettingTitle,
-#helpPage .commonSettingTitle.helpRoleGroupTitle,
-#radarPage .radarRoleSettings > .commonSettingTitle{
-  margin-top:16px !important;
-}
-@media(max-width:560px){
-  .commonSettingTitle{
-    height:var(--ui-common-title-height) !important;
-    min-height:var(--ui-common-title-height) !important;
-    font-size:var(--ui-common-title-size) !important;
-  }
-}
-</style>
 </head><body><main><nav class="topbar siteTopbar">
 <div class="siteTopRow">
 <div class="brand">Last Z</div>
@@ -3315,5 +2869,267 @@ autoPlanIfReady();
 
 
 
+
+
+<style id="v146SharedUICore">
+/* v1.46：共同 UI 核心整理
+   只保留一套全站共同 UI 基準；不修改 HTML、JavaScript、計算、資料或事件。
+   頁面特殊版型仍由原有規則保留。
+*/
+:root{
+  --ui-action-height:40px;
+  --ui-action-radius:9px;
+  --ui-action-font-size:16px;
+  --ui-action-font-weight:900;
+  --ui-action-padding:0 14px;
+  --ui-control-height:40px;
+  --ui-control-bg:#f3f3f3;
+  --ui-control-border:#cfd4d7;
+  --ui-control-text:#111;
+  --ui-control-radius:9px;
+  --ui-control-font-size:18px;
+  --ui-control-font-weight:900;
+  --ui-common-title-size:20px;
+  --ui-common-title-height:40px;
+  --ui-common-title-weight:900;
+  --ui-common-title-color:#eef3f5;
+  --ui-common-border:#294553;
+  --ui-common-border-width:1px;
+  --ui-common-radius:14px;
+  --ui-button-text:#eef3f5;
+}
+
+/* 主頁籤／一般操作按鈕 */
+.mainPageTab,
+#scorePage .scoreRoleSettingRow .bonusBtn,
+#scorePage .dayHeader button,
+#scorePage .targetMode button,
+#scorePage .dayTab,
+#helpPage .stepper button,
+#helpPage .checkPill,
+#helpPage .roleActions button,
+#helpPage .addRole,
+#radarPage .modes label,
+#radarPage button:not(.info):not(.closeBtn),
+#radarPage .smallbtn,
+#radarPage .addSameTime,
+#radarPage .addTime,
+.guideActions button,
+.guideNavBtn,
+.roleActions button,
+.addRole{
+  height:var(--ui-action-height);
+  min-height:var(--ui-action-height);
+  box-sizing:border-box;
+  color:var(--ui-button-text);
+  font-size:var(--ui-action-font-size);
+  font-weight:var(--ui-action-font-weight);
+  line-height:1.25;
+}
+.mainPageTab{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 9px;
+}
+#scorePage .scoreRoleSettingRow .bonusBtn{width:100%;margin:0;padding:var(--ui-action-padding);border-radius:var(--ui-action-radius);}
+#scorePage .dayHeader button,
+#scorePage .targetMode button,
+#scorePage .dayTab,
+#helpPage .stepper button,
+#helpPage .checkPill,
+#radarPage .smallbtn,
+#radarPage .addSameTime,
+#radarPage .addTime,
+.guideActions button,
+.guideNavBtn,
+.roleActions button,
+.addRole{
+  padding:var(--ui-action-padding);
+  border-radius:var(--ui-action-radius);
+}
+#radarPage .modes label,
+#radarPage .smallbtn,
+#radarPage .addSameTime,
+#radarPage .addTime{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding-top:0;
+  padding-bottom:0;
+}
+
+/* 角色快速切換卡 */
+.pageRoleCard,
+.pageRoleCard.compact,
+#radarPage .pageRoleSwitch .pageRoleCard,
+#radarPage .pageRoleSwitch .pageRoleCard.compact{
+  height:var(--ui-action-height);
+  min-height:var(--ui-action-height);
+  box-sizing:border-box;
+  padding:0 10px;
+  flex-direction:row;
+  align-items:center;
+  justify-content:flex-start;
+  gap:8px;
+}
+.pageRoleCard .pageRoleName{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-align:left;
+  font-size:var(--ui-body);
+  line-height:1.25;
+}
+.pageRoleCard .pageRoleValue{
+  flex:0 0 auto;
+  margin-left:auto;
+  min-height:0;
+  line-height:1.25;
+  text-align:right;
+  font-size:var(--ui-body);
+}
+.siteTopRow .roleBtn{
+  height:var(--ui-action-height);
+  min-height:var(--ui-action-height);
+  box-sizing:border-box;
+  overflow:hidden;
+}
+.siteTopRow .roleBtn #currentRoleName{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  display:inline-block;
+  vertical-align:middle;
+}
+
+/* 全站可操作欄位 */
+#scorePage .settingControl,
+#helpPage #helpClicks,
+#helpPage .helpTierSelect,
+#helpPage .helpDetailPanel select,
+#helpPage .helpDetailPanel .unitInput input[type="number"],
+#helpPage .helpLine .timePair input,
+#radarPage input:not([type="radio"]):not([type="checkbox"]),
+#radarPage select,
+.soldierModal .soldierInputs .settingControl,
+.soldierModal .soldierTable .stRow input.settingControl,
+#bonusModal #chika,
+.modal .brow input[type="number"]{
+  height:var(--ui-control-height);
+  min-height:var(--ui-control-height);
+  box-sizing:border-box;
+  background:var(--ui-control-bg);
+  border:1px solid var(--ui-control-border);
+  color:var(--ui-control-text);
+  border-radius:var(--ui-control-radius);
+  font-size:var(--ui-control-font-size);
+  font-weight:var(--ui-control-font-weight);
+}
+#scorePage .settingControl,
+#helpPage .helpTierSelect,
+#helpPage .helpDetailPanel select,
+#radarPage select{padding:0 10px;}
+#helpPage .helpDetailPanel .unitInput input[type="number"]{padding:0 10px;text-align:right;}
+#helpPage .helpLine .timePair input{padding:0 5px;text-align:center;}
+#helpPage #helpClicks{padding:0 8px;text-align:center;}
+#radarPage .time-row input,
+#radarPage .time-row select,
+#radarPage .setting-select{padding:0 10px;}
+#bonusModal #chika,.modal .brow input[type="number"]{width:100%;min-width:0;padding:0 10px;text-align:right;}
+
+/* 三頁共同設定／角色設定標題 */
+.commonSettingTitle,
+#scorePage .scoreSettingGroupTitle,
+#helpPage .helpSettingGroupTitle,
+#radarPage .radarSettingGroupTitle{
+  height:var(--ui-common-title-height);
+  min-height:var(--ui-common-title-height);
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:0;
+  margin:0 0 10px;
+  padding:0;
+  font-size:var(--ui-common-title-size);
+  font-weight:var(--ui-common-title-weight);
+  line-height:1.35;
+  color:var(--ui-common-title-color);
+  text-shadow:none;
+}
+#scorePage .scoreSettingGroup + .scoreSettingGroup .commonSettingTitle,
+#helpPage .commonSettingTitle.helpRoleGroupTitle,
+#radarPage .radarRoleSettings > .commonSettingTitle{
+  margin-top:16px;
+}
+
+/* 三頁主要設定外框 */
+#scorePage .card.hero,
+#helpPage .helpCard:first-child,
+#radarPage .setup-panel{
+  padding-top:16px;
+  border:var(--ui-common-border-width) solid var(--ui-common-border);
+  border-radius:var(--ui-common-radius);
+}
+
+/* 士兵訓練視窗保留原本表格版型，只吃共同文字基準 */
+.soldierModal .soldierInputs label{font-size:var(--ui-label);line-height:var(--ui-line);}
+.soldierModal .soldierTable .stHead,
+.soldierModal .soldierTable .stRow,
+.soldierModal .soldierTable .stTotal{font-size:var(--ui-body);line-height:1.35;}
+.soldierModal .soldierTable .unitInput>span{font-size:var(--ui-small);}
+.soldierModal .soldierTable .prodTime,
+.soldierModal .soldierTable .twelveQty{font-size:var(--ui-body);line-height:1.35;}
+.soldierModal .soldierExplain{font-size:var(--ui-body);line-height:1.65;}
+.soldierModal .soldierExplainTitle{font-size:var(--ui-section);line-height:1.35;}
+
+@media(max-width:560px){
+  .mainPageTab,
+  #scorePage .scoreRoleSettingRow .bonusBtn,
+  #scorePage .dayHeader button,
+  #scorePage .targetMode button,
+  #scorePage .dayTab,
+  #helpPage .stepper button,
+  #helpPage .checkPill,
+  #radarPage .modes label,
+  #radarPage button:not(.info):not(.closeBtn),
+  .guideActions button,
+  .guideNavBtn,
+  .roleActions button,
+  .addRole{
+    height:var(--ui-action-height);
+    min-height:var(--ui-action-height);
+    font-size:var(--ui-action-font-size);
+  }
+  .pageRoleCard,.pageRoleCard.compact,
+  #radarPage .pageRoleSwitch .pageRoleCard,
+  #radarPage .pageRoleSwitch .pageRoleCard.compact,
+  .siteTopRow .roleBtn{
+    height:var(--ui-action-height);
+    min-height:var(--ui-action-height);
+  }
+  #scorePage .settingControl,
+  #helpPage #helpClicks,
+  #helpPage .helpTierSelect,
+  #helpPage .helpDetailPanel select,
+  #helpPage .helpDetailPanel .unitInput input[type="number"],
+  #helpPage .helpLine .timePair input,
+  #radarPage input:not([type="radio"]):not([type="checkbox"]),
+  #radarPage select,
+  .soldierModal .soldierInputs .settingControl,
+  .soldierModal .soldierTable .stRow input.settingControl,
+  #bonusModal #chika,
+  .modal .brow input[type="number"]{
+    height:var(--ui-control-height);
+    min-height:var(--ui-control-height);
+    font-size:var(--ui-control-font-size);
+  }
+}
+</style>
 
 </body></html>
