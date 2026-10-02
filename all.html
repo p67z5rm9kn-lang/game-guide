@@ -3151,3 +3151,33 @@ autoPlanIfReady();
 }
 </style>
 </body></html>
+
+<style id="v138SoldierTableAlignment">
+/* v1.38：合計列依各欄既有對齊方式統一，表頭全部由上方開始排列（僅 UI，不修改任何計算／資料／事件邏輯） */
+.soldierModal .soldierTable .stHead{
+  align-items:start;
+}
+.soldierModal .soldierTable .stHead > span{
+  align-self:start;
+}
+.soldierModal .soldierTable .stTotal > span:nth-child(1){
+  text-align:left;
+}
+.soldierModal .soldierTable .stTotal > span:nth-child(2){
+  text-align:right;
+}
+.soldierModal .soldierTable .stTotal > span:nth-child(3),
+.soldierModal .soldierTable .stTotal > span:nth-child(4),
+.soldierModal .soldierTable .stTotal > span:nth-child(5){
+  text-align:center;
+}
+@media(max-width:560px){
+  .soldierModal .soldierTable .stHead{align-items:start;}
+  .soldierModal .soldierTable .stHead > span{align-self:start;}
+  .soldierModal .soldierTable .stTotal > span:nth-child(1){text-align:left;}
+  .soldierModal .soldierTable .stTotal > span:nth-child(2){text-align:right;}
+  .soldierModal .soldierTable .stTotal > span:nth-child(3),
+  .soldierModal .soldierTable .stTotal > span:nth-child(4),
+  .soldierModal .soldierTable .stTotal > span:nth-child(5){text-align:center;}
+}
+</style>
