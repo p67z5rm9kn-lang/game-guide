@@ -509,27 +509,17 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <style id="sharedRoleSwitchV101">
 /* v0.10.3 第一批收尾：三頁角色卡使用同一套位置、尺寸、間距與兩行結構。對決／雷達第二行保留空白，不硬塞數字；聯盟幫助顯示治療數量。 */
 .pageRoleSwitch{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0 12px;padding:0;}
-.pageRoleCard{width:100%;min-width:0;margin:0!important;padding:8px 10px;border:1px solid #304b59;border-radius:12px;background:#102732;color:#dce7eb;font-weight:900;cursor:pointer;display:flex;text-align:center;line-height:1.2;}
+.pageRoleCard{width:100%;min-width:0;margin:0!important;border:1px solid #304b59;border-radius:12px;background:#102732;color:#dce7eb;font-weight:900;cursor:pointer;display:flex;text-align:center;}
 .pageRoleCard.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);}
-.pageRoleCard.compact{padding:8px 10px;}
-@media(max-width:699px){.pageRoleCard.compact{}}
-@media(max-width:390px){.pageRoleCard.compact{padding:7px 6px;}}
-.pageRoleName{font-size:16px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
-.pageRoleValue{font-size:15px;font-weight:900;color:#f2d47e;white-space:nowrap;min-height:18px;line-height:18px;}
+.pageRoleName{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+.pageRoleValue{font-weight:900;color:#f2d47e;white-space:nowrap;}
 .pageRoleCard.active .pageRoleValue{color:#fff1cf;}
 #scorePage .pageRoleSwitch,#helpPage .pageRoleSwitch,#radarPage .pageRoleSwitch{margin-top:10px;}
 /* 雷達原本的全域 button 規則會把角色卡拉成滿版大按鈕，這裡明確回到共同角色卡規格。 */
-#radarPage .pageRoleSwitch .pageRoleCard{width:100%;margin:0!important;padding:8px 10px;font-size:inherit;}
-@media(max-width:699px){.pageRoleSwitch{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pageRoleName{font-size:16px}.pageRoleValue{font-size:15px}}
-@media(max-width:390px){.pageRoleSwitch{gap:6px}.pageRoleCard{padding:7px 6px}.pageRoleName{font-size:15px}.pageRoleValue{font-size:14px;min-height:17px;line-height:17px}}
+@media(max-width:699px){.pageRoleSwitch{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}
+@media(max-width:390px){.pageRoleSwitch{gap:6px}}
 </style>
-<style id="roleCardLayoutV103">
-/* v0.10.3：角色卡高度依內容決定。對決／雷達只有角色名稱時採單列；聯盟幫助有數值時採雙列。 */
-.pageRoleCard.compact{padding:7px 10px !important;}
-#radarPage .pageRoleSwitch .pageRoleCard.compact{}
 
-@media(max-width:390px){.pageRoleCard.compact{padding:6px 8px !important;}}
-</style>
 <style id="helpFlatRoleLayoutV105">
 /* v0.10.5：聯盟幫助角色區改為雷達式的簡潔層級，避免「大卡片＋角色卡＋內容卡」層層套疊。角色名稱保留作為辨識，不再增加「玩家名稱」等重複標籤。 */
 #helpPage .helpRoles{padding:0 0 10px;background:transparent;}
@@ -1055,12 +1045,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   #scorePage .soldierTitleInfo .infoFlyout{left:0;top:calc(100% + 8px);transform:none;width:min(300px,calc(100vw - 42px));}
 }
 </style>
-<style id="radarRoleCardOverrideV101">
-/* 必須放在雷達原始 scoped button 規則之後，確保三頁角色卡真正共用同一套視覺規格。 */
-#radarPage .pageRoleSwitch .pageRoleCard{font-size:inherit;}
-#radarPage .pageRoleSwitch .pageRoleCard.compact{padding:8px 10px;}
-#radarPage .pageRoleSwitch .pageRoleCard.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);}
-</style>
+
 <style id="v0106HelpRadarPolish">
 /* v0.10.6：聯盟幫助說明精簡＋雷達設定層級整理。只調整 UI，不改計算邏輯。 */
 #helpPage .helpTierSetting .infoAnchor{
@@ -2859,7 +2844,7 @@ autoPlanIfReady();
 
 
 <style id="v146SharedUICore">
-/* v1.51：共同 UI 核心整理＋角色卡高度清理
+/* v1.52：共同 UI 核心整理＋角色卡舊規則清理
    只保留一套全站共同 UI 基準；不修改 HTML、JavaScript、計算、資料或事件。
    頁面特殊版型仍由原有規則保留。
 */
@@ -2960,6 +2945,7 @@ autoPlanIfReady();
   align-items:center;
   justify-content:flex-start;
   gap:8px;
+  font-size:inherit;
 }
 .pageRoleCard .pageRoleName{
   flex:1 1 auto;
