@@ -1396,6 +1396,121 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   }
 }
 </style>
+
+<style id="v135SharedUIAuditFinal">
+/* v1.35：共同 UI 全面整理（僅 UI，不修改任何計算／資料／事件邏輯）
+   原則：共同 UI 為預設；只有真正需要特殊版型的地方才保留尺寸差異。
+*/
+:root{
+  /* 共用操作／設定按鈕 */
+  --ui-action-height:40px;
+  --ui-action-radius:9px;
+  --ui-action-font-size:16px;
+  --ui-action-font-weight:900;
+  --ui-action-padding:0 14px;
+}
+
+/* ===== 共用操作／設定按鈕 =====
+   選擇型按鈕（主頁籤、星期、目標模式）、i、關閉按鈕維持各自 UI。 */
+#scorePage .scoreRoleSettingRow .bonusBtn,
+#scorePage .dayHeader button,
+.guideActions button,
+.guideNavBtn,
+.roleActions button,
+.addRole{
+  height:var(--ui-action-height);
+  min-height:var(--ui-action-height);
+  box-sizing:border-box;
+  padding:var(--ui-action-padding);
+  border-radius:var(--ui-action-radius);
+  font-size:var(--ui-action-font-size);
+  line-height:1.25;
+  font-weight:var(--ui-action-font-weight);
+}
+#scorePage .scoreRoleSettingRow .bonusBtn{width:100%;margin:0;}
+
+/* ===== 共用設定欄位：士兵設定完全回到 .settingControl 預設 ===== */
+.soldierModal .soldierInputs .settingControl,
+.soldierModal .soldierTable .stRow input.settingControl{
+  height:var(--control-height);
+  min-height:var(--control-height);
+  background:var(--control-bg);
+  border:1px solid var(--control-border);
+  color:var(--control-text);
+  border-radius:var(--control-radius);
+  font-size:var(--control-font-size);
+  font-weight:var(--control-font-weight);
+  box-sizing:border-box;
+}
+.soldierModal .soldierInputs select.settingControl{width:100%;text-align:left;}
+.soldierModal .soldierInputs .soldierTime{width:100%;max-width:none;}
+.soldierModal .soldierInputs .soldierTime input.settingControl{width:100%;padding:0 5px;text-align:center;}
+.soldierModal .soldierTable .stRow input.settingControl{width:100%;padding:0 6px;text-align:right;}
+
+/* ===== 士兵設定文字層級：直接使用網站共同文字規格 ===== */
+.soldierModal .soldierInputs label{
+  color:#a9b9c1;
+  font-size:var(--ui-label);
+  line-height:var(--ui-line);
+}
+.soldierModal .soldierTable .stHead{
+  font-size:var(--ui-small);
+  line-height:1.35;
+}
+.soldierModal .soldierTable .stRow{
+  font-size:var(--ui-body);
+  line-height:1.35;
+}
+.soldierModal .soldierTable .unitInput>span{
+  font-size:var(--ui-small);
+}
+.soldierModal .soldierTable .prodTime,
+.soldierModal .soldierTable .twelveQty{
+  font-size:var(--ui-small);
+  line-height:1.35;
+}
+.soldierModal .soldierTable .stTotal{
+  font-size:var(--ui-body);
+  line-height:1.35;
+}
+.soldierModal .soldierExplain{
+  font-size:var(--ui-body);
+  line-height:1.65;
+}
+.soldierModal .soldierExplainTitle{
+  font-size:var(--ui-section);
+  line-height:1.35;
+}
+
+/* 手機版仍沿用共同 UI，不再另外縮小士兵設定文字。 */
+@media(max-width:560px){
+  #scorePage .scoreRoleSettingRow .bonusBtn,
+  #scorePage .dayHeader button,
+  .guideActions button,
+  .guideNavBtn,
+  .roleActions button,
+  .addRole{
+    height:var(--ui-action-height);
+    min-height:var(--ui-action-height);
+    font-size:var(--ui-action-font-size);
+  }
+  .soldierModal .soldierInputs .settingControl,
+  .soldierModal .soldierTable .stRow input.settingControl{
+    height:var(--control-height);
+    min-height:var(--control-height);
+    font-size:var(--control-font-size);
+  }
+  .soldierModal .soldierInputs label{font-size:var(--ui-label);}
+  .soldierModal .soldierTable .stHead{font-size:var(--ui-small);}
+  .soldierModal .soldierTable .stRow{font-size:var(--ui-body);}
+  .soldierModal .soldierTable .unitInput>span{font-size:var(--ui-small);}
+  .soldierModal .soldierTable .prodTime,
+  .soldierModal .soldierTable .twelveQty{font-size:var(--ui-small);}
+  .soldierModal .soldierTable .stTotal{font-size:var(--ui-body);}
+  .soldierModal .soldierExplain{font-size:var(--ui-body);}
+  .soldierModal .soldierExplainTitle{font-size:var(--ui-section);}
+}
+</style>
 </head><body><main><nav class="topbar siteTopbar">
   <div class="siteTopRow">
     <div class="brand">Last Z</div>
