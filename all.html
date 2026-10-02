@@ -599,64 +599,43 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .radarPage .radarSettingGroupTitle{font-size:17px;font-weight:900;color:var(--radar-gold-soft,var(--gold));margin:0 0 12px;line-height:1.35;}
 .radarPage .radarRoleSettings>label[for="max"]{margin-top:12px;}
 </style><style id="targetModeSharedUI">
-/* v1.8：第三欄沿用下方「目前積分」輸入欄的固定寬度與既有輸入格式，讓上下欄寬一致。
-   預設目標／手動輸入沿用雷達頁既有的共同選擇按鈕 UI，第三格放對應的共同輸入欄位。 */
+/* v1.11：目標積分三欄沿用網站既有共同選擇／輸入 UI。
+   預設目標、手動輸入、目前積分共用同一套白色輸入欄位；數字右對齊。 */
 #scorePage .targetSetting{display:block;padding:2px 0 6px;}
 #scorePage .targetMode{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 150px;gap:8px;margin:0;align-items:center;}
-#scorePage .targetMode button{width:100%;min-height:46px;margin:0;padding:8px 10px;border:1px solid #304b59;background:#102732;color:#dce7eb;border-radius:9px;font-weight:900;font-size:16px;line-height:1.3;cursor:pointer;transition:background .15s,border-color .15s,color .15s;box-sizing:border-box;}
+#scorePage .targetMode button{width:100%;min-height:46px;margin:0;padding:8px 10px;border:1px solid #304b59;background:#102732;color:#dce7eb;border-radius:10px;font-weight:900;font-size:16px;line-height:1.3;cursor:pointer;transition:background .15s,border-color .15s,color .15s;box-sizing:border-box;}
 #scorePage .targetMode button.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);}
 #scorePage .targetInputWrap{width:100%;min-width:0;display:flex;align-items:center;}
 #scorePage .targetInputWrap[hidden]{display:none!important;}
-#scorePage .targetInputWrap select,#scorePage .targetInputWrap input{width:100%;height:40px;min-height:40px;text-align:right;margin:0;}
-#scorePage .summaryRow select,#scorePage .summaryRow input{ text-align:right!important; }
-@media(max-width:560px){#scorePage .targetMode{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 150px;gap:6px;}#scorePage .targetMode button{min-height:46px;font-size:16px;padding:8px 6px;}#scorePage .targetInputWrap select,#scorePage .targetInputWrap input{height:40px;min-height:40px;font-size:16px;padding-left:6px;padding-right:6px;text-align:right;}}
-<style id="scoreInputSharedUI_v110">
-/* v1.10：聯盟對決積分欄位統一套用網站共同設定輸入 UI。
-   預設目標下拉、手動輸入、目前積分共用同一套尺寸／圓角／字級／右對齊規則。
-   不改計算邏輯。 */
 #scorePage .targetInputWrap select,
 #scorePage .targetInputWrap input,
 #scorePage .summaryRow input#current{
-  height:var(--control-height)!important;
-  min-height:var(--control-height)!important;
+  height:40px!important;
+  min-height:40px!important;
   width:100%!important;
   box-sizing:border-box!important;
-  background:var(--control-bg)!important;
-  border:1px solid var(--control-border)!important;
-  color:var(--control-text)!important;
-  border-radius:var(--control-radius)!important;
-  font-size:var(--control-font-size)!important;
-  font-weight:var(--control-font-weight)!important;
+  background:#f3f3f3!important;
+  border:1px solid #cfd4d7!important;
+  color:#111!important;
+  border-radius:10px!important;
+  font-size:16px!important;
+  font-weight:900!important;
   line-height:1.1!important;
   padding:0 10px!important;
   text-align:right!important;
   text-align-last:right!important;
   margin:0!important;
-  -webkit-appearance:none;
-  appearance:none;
 }
-#scorePage .targetInputWrap select{
-  -webkit-appearance:auto;
-  appearance:auto;
-}
+#scorePage .targetInputWrap select{ -webkit-appearance:auto; appearance:auto; }
 #scorePage .targetInputWrap input::placeholder{color:#777;}
 #scorePage .targetInputWrap select:focus,
 #scorePage .targetInputWrap input:focus,
-#scorePage .summaryRow input#current:focus{
-  outline:2px solid rgba(208,164,75,.55)!important;
-  outline-offset:1px;
-}
+#scorePage .summaryRow input#current:focus{outline:2px solid rgba(208,164,75,.55)!important;outline-offset:1px;}
 @media(max-width:560px){
-  #scorePage .targetInputWrap select,
-  #scorePage .targetInputWrap input,
-  #scorePage .summaryRow input#current{
-    height:var(--control-height)!important;
-    min-height:var(--control-height)!important;
-    font-size:var(--control-font-size)!important;
-    padding:0 10px!important;
-  }
+  #scorePage .targetMode{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 150px;gap:6px;}
+  #scorePage .targetMode button{min-height:46px;font-size:16px;padding:8px 6px;}
+  #scorePage .targetInputWrap select,#scorePage .targetInputWrap input,#scorePage .summaryRow input#current{height:40px!important;min-height:40px!important;font-size:16px!important;padding:0 10px!important;}
 }
-</style>
 </style>
 <style id="radarScopedV832">.radarPage{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}.radarPage *{box-sizing:border-box}.radarPage h1{font-size:22px;margin:0 0 6px;color:var(--gold)}.radarPage .sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}.radarPage .panel,.radarPage .day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}.radarPage label{display:block;font-size:15px;color:var(--muted);margin-bottom:6px}.radarPage input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;font-size:17px;padding:11px 12px;outline:none}.radarPage button{width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;font-size:16px;padding:11px}.radarPage .meta{font-size:14px;color:var(--muted);line-height:1.6;margin-top:10px}.radarPage .day h2{font-size:18px;margin:0 0 8px}.radarPage .tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:5px}.radarPage .state{font-size:15px;color:#dce8f5;margin:8px 0}.radarPage .action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:13px;line-height:1.65}.radarPage .result{font-size:15px;line-height:1.65}.radarPage .muted{color:var(--muted)}.radarPage .ok{color:var(--good)}.radarPage .warn{color:var(--warn)}.radarPage table{width:100%;border-collapse:collapse;font-size:12px;margin-top:9px}.radarPage td,.radarPage th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}.radarPage th{color:var(--muted);font-weight:500}.radarPage .empty{padding:16px;text-align:center;color:var(--muted)}.radarPage .formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;font-size:12px;line-height:1.7}.radarPage .score{border-color:#806b3e}.radarPage .timeline{margin-top:10px}.radarPage .operation-block,.radarPage .event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:16px;line-height:1.75}.radarPage .operation-block{border-left:3px solid var(--gold);background:#0b2138}.radarPage .operation-range,.radarPage .event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.radarPage .operation-step,.radarPage .event-action{padding:2px 0;font-size:16px}.radarPage .event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.radarPage .event.refresh .event-time{color:#f2d486}.radarPage .schedule-legend,.radarPage .player-mark,.radarPage .system-mark{display:none}
 
