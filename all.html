@@ -3326,4 +3326,83 @@ autoPlanIfReady();
   #helpPage .pageRoleCard .pageRoleValue{font-size:14px;}
 }
 </style>
+
+<style id="v141GlobalVisualUI">
+/* v1.41：全站共同 UI 視覺統一
+   1. 三個主頁籤統一 40px
+   2. 共用設定／角色設定標題統一白色、20px、900
+   3. 設定區外框統一白色系 1px
+   4. 金色只保留作為選取／重要狀態，不作一般設定區外框
+   僅 UI，不修改任何計算／資料／事件邏輯。
+*/
+:root{
+  --ui-common-title-size:20px;
+  --ui-common-title-weight:900;
+  --ui-common-title-color:#eef3f5;
+  --ui-common-border:#dce7eb;
+  --ui-common-border-width:1px;
+  --ui-common-radius:14px;
+  --ui-common-bg:#0d202b;
+}
+
+/* 三個主頁籤：與一般按鈕同樣固定 40px */
+.mainPageTab{
+  height:var(--ui-action-height) !important;
+  min-height:var(--ui-action-height) !important;
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* 三頁「共用設定／角色設定」標題：同一套共同 UI */
+#scorePage .scoreSettingGroupTitle,
+#helpPage .helpSettingGroupTitle,
+#radarPage .radarSettingGroupTitle{
+  font-size:var(--ui-common-title-size) !important;
+  font-weight:var(--ui-common-title-weight) !important;
+  line-height:1.35 !important;
+  color:var(--ui-common-title-color) !important;
+  margin:0 0 10px !important;
+  padding:0 !important;
+}
+
+/* 三頁設定區外框：統一白色系；不再用金色區分頁面 */
+#scorePage .card.hero,
+#helpPage .helpCard:first-child,
+#radarPage .setup-panel{
+  border:var(--ui-common-border-width) solid var(--ui-common-border) !important;
+  border-radius:var(--ui-common-radius) !important;
+}
+
+/* 雷達原本 setup-panel 內的兩個設定區共用同一套文字顏色 */
+#radarPage .radarSettingGroupTitle{color:var(--ui-common-title-color) !important;}
+
+/* 聯盟幫助的角色標題分隔線也使用共同白色系 */
+#helpPage .helpRoleGroupTitle{
+  border-top-color:var(--ui-common-border) !important;
+}
+
+/* 設定區內部的分隔線統一為低對比白色系，避免各頁出現不同藍／金色 */
+#scorePage .scoreSettingDivider,
+#radarPage .setup-divider{
+  border-top-color:rgba(220,231,235,.28) !important;
+}
+
+/* 金色只作選取／重要狀態；一般設定區標題與外框不使用金色 */
+#scorePage .scoreSettingGroupTitle,
+#helpPage .helpSettingGroupTitle,
+#radarPage .radarSettingGroupTitle{
+  text-shadow:none;
+}
+
+@media(max-width:560px){
+  #scorePage .scoreSettingGroupTitle,
+  #helpPage .helpSettingGroupTitle,
+  #radarPage .radarSettingGroupTitle{
+    font-size:var(--ui-common-title-size) !important;
+  }
+}
+</style>
+
 </body></html>
