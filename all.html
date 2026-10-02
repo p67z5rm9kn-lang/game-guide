@@ -987,6 +987,16 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 </style>
 
+<style id="v0124SoldierTimeBlurFix">
+/* v1.24：iOS Safari 手機輸入生產一輪時間時，避免 sticky／backdrop-filter 造成上方內容短暫模糊。只在此欄位取得焦點時暫停背景模糊效果。 */
+@media(max-width:560px){
+  body.soldierTimeEditing .topbar,
+  body.soldierTimeEditing .siteTopbar{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+}
+</style>
 <style id="roleSystemV06">
 /* v0.6：角色系統共用視覺／互動提示 */
 .helpRoleHead{cursor:pointer;}
@@ -1256,6 +1266,12 @@ function setTargetMode(mode){const m=mode==='manual'?'manual':'preset';document.
 document.querySelectorAll('#scorePage .targetMode button').forEach(b=>b.addEventListener('click',()=>setTargetMode(b.dataset.targetMode)));
 document.addEventListener('input',e=>{if(e.target.matches('input,select')){calc();scheduleSave();}});
 document.addEventListener('change',e=>{if(e.target.matches('input,select')){calc();scheduleSave();}});
+/* v1.24：生產一輪時間輸入時，避免手機瀏覽器在焦點狀態下出現短暫模糊。 */
+document.querySelectorAll('#twelveH,#twelveM,#twelveS').forEach(el=>{
+  el.addEventListener('focus',()=>document.body.classList.add('soldierTimeEditing'));
+  el.addEventListener('blur',()=>document.body.classList.remove('soldierTimeEditing'));
+});
+
 document.getElementById('soldierTier')?.addEventListener('change',e=>{const p=db.profiles.find(x=>x.id===db.active);if(p){setProfileTier(p,e.target.value);}if(document.getElementById('helpPage').style.display!=='none')helpRender();});
 document.getElementById('allDone').addEventListener('change',e=>{document.querySelectorAll('.bonus').forEach(x=>x.value=e.target.checked?x.dataset.max:'');calc();saveActive();});
 document.querySelectorAll('#bonusModal #chika,#bonusModal .bonus').forEach(x=>x.addEventListener('input',()=>{calc();saveActive();}));
