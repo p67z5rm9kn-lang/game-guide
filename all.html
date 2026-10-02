@@ -835,19 +835,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
    不修改任何計算／資料／角色／導覽 JS。
    新增頁籤或頁面時，沿用下列共用 class／變數即可。
    ========================================================= */
-:root{
-  --ui-title:22px;
-  --ui-section:20px;
-  --ui-label:16px;
-  --ui-body:16px;
-  --ui-small:14px;
-  --ui-input:18px;
-  --ui-number:18px;
-  --ui-tab:17px;
-  --ui-button:16px;
-  --ui-line:1.4;
-}
-
 /* 共用語意 class：未來新增頁面／元件可直接套用 */
 .ui-page-title{font-size:var(--ui-title)!important;line-height:1.3!important;font-weight:900!important;}
 .ui-section-title{font-size:var(--ui-section)!important;line-height:1.35!important;font-weight:900!important;}
@@ -947,19 +934,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <style id="sharedUIFinalV09">
 /* v0.9：共同 UI 最終統一規格
    這裡集中處理三頁的閱讀層級；不修改任何計算、資料、角色或事件邏輯。 */
-:root{
-  --ui-title:22px;
-  --ui-section:20px;
-  --ui-label:16px;
-  --ui-body:16px;
-  --ui-small:14px;
-  --ui-input:18px;
-  --ui-number:18px;
-  --ui-tab:17px;
-  --ui-button:16px;
-  --ui-line:1.4;
-}
-
 /* ===== 對決積分：主按鈕與星期五特殊區塊 ===== */
 #scorePage .bonusBtn,
 #scorePage .dayHeader button{font-size:var(--ui-button);line-height:1.25;font-weight:900;}
@@ -2844,7 +2818,7 @@ autoPlanIfReady();
 
 
 <style id="v146SharedUICore">
-/* v1.52：共同 UI 核心整理＋角色卡舊規則清理
+/* v1.53：共同 UI 核心整理＋角色卡舊規則清理＋字體變數集中
    只保留一套全站共同 UI 基準；不修改 HTML、JavaScript、計算、資料或事件。
    頁面特殊版型仍由原有規則保留。
 */
@@ -2869,6 +2843,18 @@ autoPlanIfReady();
   --ui-common-border-width:1px;
   --ui-common-radius:14px;
   --ui-button-text:#eef3f5;
+
+  /* 原共同 UI 字體語意變數：集中到唯一核心，避免 v0.5/v0.9 重複定義 */
+  --ui-title:22px;
+  --ui-section:20px;
+  --ui-label:16px;
+  --ui-body:16px;
+  --ui-small:14px;
+  --ui-input:18px;
+  --ui-number:18px;
+  --ui-tab:17px;
+  --ui-button:16px;
+  --ui-line:1.4;
 }
 
 /* 主頁籤／一般操作按鈕 */
