@@ -1002,6 +1002,34 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 #radarPage .pageRoleSwitch .pageRoleCard.compact{min-height:54px;padding:8px 10px;}
 #radarPage .pageRoleSwitch .pageRoleCard.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);}
 </style>
+
+<style id="v0106HelpRadarPolish">
+/* v0.10.6：聯盟幫助說明精簡＋雷達設定層級整理。只調整 UI，不改計算邏輯。 */
+#helpPage .helpTierSetting .infoAnchor{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  position:relative;
+}
+#helpPage .helpTierSetting .info{
+  flex:0 0 18px;
+}
+#helpPage .helpTierSetting .infoFlyout{
+  left:0;
+  top:calc(100% + 8px);
+  transform:none;
+  width:min(280px,calc(100vw - 42px));
+  z-index:240;
+  font-size:14px;
+  line-height:1.6;
+}
+#helpPage .helpRole{
+  overflow:visible;
+}
+#radarPage .setup-panel{
+  padding-top:16px;
+}
+</style>
 </head><body><main><nav class="topbar siteTopbar">
   <div class="siteTopRow">
     <div class="brand">Last Z</div>
@@ -1044,7 +1072,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <div class="stRow"><span>突擊</span><input class="troopCount" type="number" min="0" value="177" inputmode="numeric"><span class="unitInput"><input class="troopSpeed" type="number" min="0" step="0.01" value="529" inputmode="decimal"><span>%</span></span><span class="prodTime">0:0:0</span><span class="twelveQty">0</span></div>
 </div>
 </details></section></div>
-<section id="helpPage" class="helpPage" style="display:none"><div id="helpRoleJump" class="pageRoleSwitch" aria-label="角色快速切換"></div><div class="helpCard"><div class="helpHead"><div class="helpTitleRow"><div class="helpTitle">聯盟幫助｜快速計算每次治療士兵數量</div><div class="helpInfoWrap"><button type="button" class="helpInfo" id="helpInfoBtn" aria-label="聯盟幫助說明">i</button></div></div><div class="helpInfoPanel" id="helpInfoPanel">士兵等級可直接在角色資料中調整，並與「聯盟對決」星期五／士兵訓練／加速計算的士兵等級保持連動。<br>目前提供 T9 / T10 原始治療時間：T9 為 3:58、T10 為 4:38。<br>其他士兵等級目前沒有原始治療時間資料。</div><div class="helpSub">所有角色共用點手數量、玫瑰花、光碟；殺敵日依台灣時間自動判斷，其餘數值依角色分別設定。</div></div><div class="helpSettingGroupTitle">共用設定</div><div class="globalHelp"><div class="globalLabel">點手數量</div><div class="stepper"><button type="button" data-step="-5">−5</button><button type="button" data-step="-1">−1</button><input id="helpClicks" type="number" min="0" max="80" step="1" value="5" inputmode="numeric"><button type="button" data-step="1">＋1</button><button type="button" data-step="5">＋5</button></div><div class="globalChecks"><label class="checkPill"><input id="helpRose" type="checkbox" checked>玫瑰花</label><label class="checkPill"><input id="helpDisc" type="checkbox" checked>光碟</label></div></div><div class="helpSettingGroupTitle helpRoleGroupTitle">角色設定</div><div id="helpRoles" class="helpRoles"></div></section><div class="guideOverlay" id="guideOverlay" aria-hidden="true">
+<section id="helpPage" class="helpPage" style="display:none"><div id="helpRoleJump" class="pageRoleSwitch" aria-label="角色快速切換"></div><div class="helpCard"><div class="helpHead"><div class="helpTitleRow"><div class="helpTitle">聯盟幫助｜快速計算每次治療士兵數量</div></div></div><div class="helpSettingGroupTitle">共用設定</div><div class="globalHelp"><div class="globalLabel">點手數量</div><div class="stepper"><button type="button" data-step="-5">−5</button><button type="button" data-step="-1">−1</button><input id="helpClicks" type="number" min="0" max="80" step="1" value="5" inputmode="numeric"><button type="button" data-step="1">＋1</button><button type="button" data-step="5">＋5</button></div><div class="globalChecks"><label class="checkPill"><input id="helpRose" type="checkbox" checked>玫瑰花</label><label class="checkPill"><input id="helpDisc" type="checkbox" checked>光碟</label></div></div><div class="helpSettingGroupTitle helpRoleGroupTitle">角色設定</div><div id="helpRoles" class="helpRoles"></div></section><div class="guideOverlay" id="guideOverlay" aria-hidden="true">
   <div class="guideShade"></div>
   <div class="guideFocus" id="guideFocus"></div>
   <div class="guideCard" id="guideCard">
@@ -1063,11 +1091,10 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <section id="radarPage" class="radarPage" aria-label="雷達週計劃"><div class="radarInner"><div class="pageRoleSwitch" id="radarRoleSwitch" aria-label="角色快速切換"></div>
 <h1>雷達週計劃</h1>
 <div class="panel setup-panel">
-<h2 class="section-title">⚙️ 規劃設定</h2>
 <div class="radarSettingGroup radarCommonSettings">
   <h3 class="radarSettingGroupTitle">共用設定</h3>
   <label>時間模式</label>
-  <div class="modes"><label><input type="radio" name="timeMode" value="game" checked> 遊戲時間</label><label><input type="radio" name="timeMode" value="local"> 當地時間</label></div>
+  <div class="modes"><label><input type="radio" name="timeMode" value="local" checked> 當地時間</label><label><input type="radio" name="timeMode" value="game"> 遊戲時間</label></div>
   <label>玩家可操作時間</label>
   <div class="modes"><label><input type="radio" name="applyMode" value="same" checked> 每天相同</label><label><input type="radio" name="applyMode" value="custom"> 每天個別設定</label></div>
   <div id="sameTimes"></div>
@@ -1292,12 +1319,9 @@ function helpRender(){
    card.className='helpRole';
    card.dataset.roleId=p.id;
 
-   card.innerHTML=`<div class="helpRoleHead">
-     <div class="helpRoleName"></div>
-   </div>
-   <div class="helpTable">
+   card.innerHTML=`<div class="helpTable">
      <div class="helpTierSetting">
-       <span class="helpMetric">士兵等級</span>
+       <span class="helpMetric infoAnchor">士兵等級 <span class="info" data-info="infoHelpTier" role="button" aria-label="士兵等級說明">i</span><span class="infoFlyout" id="infoHelpTier-${p.id}">士兵治療時間<br>T9：3:58<br>T10：4:38<br><br>其他士兵等級目前沒有原始治療時間資料。</span></span>
        <select class="helpTierSelect" data-key="tier" aria-label="士兵等級">
          <option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option><option value="T7">T7</option><option value="T8">T8</option><option value="T9">T9</option><option value="T10">T10</option>
        </select>
@@ -1338,9 +1362,6 @@ function helpRender(){
 `;
 
    box.appendChild(card);
-   card.querySelector('.helpRoleName').textContent=p.name;
-   const roleHead=card.querySelector('.helpRoleHead');
-   if(roleHead){roleHead.setAttribute('role','button');roleHead.tabIndex=0;roleHead.title='切換目前角色';roleHead.addEventListener('click',()=>RoleManager.select(p.id));roleHead.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();RoleManager.select(p.id);}});}
    card.querySelector('[data-key="tier"]').value=tier;
 
    Object.entries(d).forEach(([k,v])=>{
@@ -1445,7 +1466,7 @@ function scheduleHelpKillDayRefresh(){
 
 function switchPage(id){document.getElementById('scorePage').style.display=id==='scorePage'?'block':'none';document.getElementById('helpPage').style.display=id==='helpPage'?'block':'none';document.getElementById('radarPage').style.display=id==='radarPage'?'block':'none';document.querySelectorAll('.mainPageTab').forEach(b=>{const active=b.dataset.page===id;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false');});renderSharedRoleSwitchers();if(id==='helpPage')helpRender();setTimeout(()=>{if(!document.getElementById('guideOverlay').classList.contains('show'))guideOpen(id==='helpPage'?'help':id==='radarPage'?'radar':'score');},80);}
 
-document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));switchPage('scorePage');document.getElementById('helpInfoBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('helpInfoPanel')?.classList.toggle('show');});
+document.querySelectorAll('.mainPageTab').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));switchPage('scorePage');
 
 document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{helpDB.clicks=clampHelpClicks(helpDB.clicks+(+b.dataset.step));helpRender();helpSave();}));
 document.getElementById('helpClicks').addEventListener('input',e=>{helpDB.clicks=clampHelpClicks(e.target.value);e.target.value=helpDB.clicks;helpSyncAll();});
