@@ -1129,7 +1129,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   color:#111 !important;
   box-sizing:border-box;
 }
-#scorePage .soldierTable{overflow-x:auto;overflow-y:visible;}
+#scorePage .soldierTable{overflow-x:hidden;overflow-y:visible;width:100%;}
 #scorePage .soldierTable .stHead,
 #scorePage .soldierTable .stRow,
 #scorePage .soldierTable .stTotal{
@@ -1176,18 +1176,59 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 #scorePage .soldierTable .stTotal span:nth-child(2),
 #scorePage .soldierTable .stTotal span:nth-child(5){text-align:right;}
 @media(max-width:560px){
+  /* v1.25：手機版五欄完整放入可視寬度，不使用左右滑動 */
   #scorePage .soldierTable .stHead,
   #scorePage .soldierTable .stRow,
   #scorePage .soldierTable .stTotal{
-    grid-template-columns:minmax(48px,1fr) 76px 82px 72px 82px;
+    grid-template-columns:40px 72px 76px 70px 77px;
     gap:4px;
+    width:100%;
   }
-  #scorePage .soldierTable .stHead{font-size:12px !important;}
-  #scorePage .soldierTable .stRow{font-size:14px !important;}
-  #scorePage .soldierTable .stTotal{font-size:14px;}
-  #scorePage .soldierTable .unitInput > span{font-size:13px;}
+  #scorePage .soldierTable .stHead{
+    font-size:12px !important;
+    text-align:center;
+  }
+  #scorePage .soldierTable .stHead span:first-child{
+    text-align:left;
+  }
+  #scorePage .soldierTable .stRow{
+    font-size:14px !important;
+  }
+  #scorePage .soldierTable .stRow > span:first-child,
+  #scorePage .soldierTable .stTotal > span:first-child{
+    text-align:left;
+  }
+  #scorePage .soldierTable .stRow input{
+    width:calc(100% - 4px);
+    justify-self:center;
+  }
+  #scorePage .soldierTable .stRow .troopCount,
+  #scorePage .soldierTable .stRow .troopSpeed{
+    width:calc(100% - 4px);
+  }
+  #scorePage .soldierTable .unitInput{
+    width:100%;
+    justify-self:center;
+    gap:2px;
+  }
+  #scorePage .soldierTable .unitInput input{
+    width:100%;
+    min-width:0;
+  }
+  #scorePage .soldierTable .unitInput > span{font-size:12px;}
   #scorePage .soldierTable .prodTime,
-  #scorePage .soldierTable .twelveQty{font-size:12px;}
+  #scorePage .soldierTable .twelveQty{
+    font-size:12px;
+    text-align:center;
+    white-space:nowrap;
+  }
+  #scorePage .soldierTable .stTotal{
+    font-size:14px;
+  }
+  #scorePage .soldierTable .stTotal span:nth-child(2),
+  #scorePage .soldierTable .stTotal span:nth-child(5){
+    text-align:right;
+  }
 }
 </style>
 </head><body><main><nav class="topbar siteTopbar">
