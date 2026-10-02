@@ -3453,4 +3453,100 @@ autoPlanIfReady();
 }
 </style>
 
+
+<style id="v143CommonControlAudit">
+/* v1.43：共同 UI 第一批｜按鈕＋輸入／下拉控制項
+   只整理視覺，不修改任何計算、資料、事件或 HTML 結構。
+   已確認：一般操作高度 40px；輸入／下拉也以 40px 為共同基準。
+*/
+:root{
+  --ui-control-height:40px;
+  --ui-control-bg:#f3f3f3;
+  --ui-control-border:#cfd4d7;
+  --ui-control-text:#111;
+  --ui-control-radius:9px;
+  --ui-control-font-size:18px;
+  --ui-control-font-weight:900;
+  --ui-button-text:#eef3f5;
+}
+
+/* 共同按鈕：40px＋白色文字；選取狀態仍由各頁保留金色背景 */
+.mainPageTab,
+#scorePage .scoreRoleSettingRow .bonusBtn,
+#scorePage .dayHeader button,
+#scorePage .targetMode button,
+.dayTab,
+#helpPage .stepper button,
+#helpPage .checkPill,
+#radarPage .modes label,
+#radarPage button:not(.info):not(.closeBtn),
+.guideActions button,
+.guideNavBtn,
+.roleActions button,
+.addRole{
+  color:var(--ui-button-text) !important;
+}
+
+/* 共同輸入／下拉：白底、黑字、40px、同圓角 */
+#scorePage .settingControl,
+#helpPage #helpClicks,
+#helpPage .helpTierSelect,
+#helpPage .helpDetailPanel select,
+#helpPage .helpDetailPanel .unitInput input[type="number"],
+#helpPage .helpLine .timePair input,
+#radarPage input:not([type="radio"]):not([type="checkbox"]),
+#radarPage select{
+  height:var(--ui-control-height) !important;
+  min-height:var(--ui-control-height) !important;
+  box-sizing:border-box;
+  background:var(--ui-control-bg) !important;
+  border:1px solid var(--ui-control-border) !important;
+  color:var(--ui-control-text) !important;
+  border-radius:var(--ui-control-radius) !important;
+  font-size:var(--ui-control-font-size) !important;
+  font-weight:var(--ui-control-font-weight) !important;
+}
+
+/* 聯盟幫助：原本仍使用深色輸入框，這裡正式接入全站共同輸入 UI */
+#helpPage .helpTierSelect,
+#helpPage .helpDetailPanel select{
+  padding:0 10px !important;
+}
+#helpPage .helpDetailPanel .unitInput input[type="number"]{
+  padding:0 10px !important;
+  text-align:right !important;
+}
+#helpPage .helpLine .timePair input{
+  padding:0 5px !important;
+  text-align:center !important;
+}
+#helpPage #helpClicks{
+  padding:0 8px !important;
+  text-align:center !important;
+}
+
+/* 雷達時間欄位保留既有版型，只統一控制項本身的外觀 */
+#radarPage .time-row input,
+#radarPage .time-row select,
+#radarPage .setting-select{
+  padding:0 10px !important;
+}
+
+/* 手機版仍維持共同 40px，不再因頁面不同而縮成 34／38px */
+@media(max-width:560px){
+  #scorePage .settingControl,
+  #helpPage #helpClicks,
+  #helpPage .helpTierSelect,
+  #helpPage .helpDetailPanel select,
+  #helpPage .helpDetailPanel .unitInput input[type="number"],
+  #helpPage .helpLine .timePair input,
+  #radarPage input:not([type="radio"]):not([type="checkbox"]),
+  #radarPage select{
+    height:var(--ui-control-height) !important;
+    min-height:var(--ui-control-height) !important;
+    font-size:var(--ui-control-font-size) !important;
+  }
+}
+</style>
+
 </body></html>
