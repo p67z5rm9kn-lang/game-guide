@@ -3225,34 +3225,105 @@ autoPlanIfReady();
   .siteTopRow .roleBtn #currentRoleName{max-width:78px;}
 }
 </style>
-</body></html>
 
-<style id="v138SoldierTableAlignment">
-/* v1.38：合計列依各欄既有對齊方式統一，表頭全部由上方開始排列（僅 UI，不修改任何計算／資料／事件邏輯） */
-.soldierModal .soldierTable .stHead{
-  align-items:start;
+<style id="v140GlobalButtonUI">
+/* v1.40：全站一般按鈕共同 UI 統一。一般文字按鈕統一 40px；主頁籤與圓形圖示按鈕保留各自類型尺寸。僅 UI，不修改任何計算／資料／事件邏輯。 */
+:root{
+  --ui-action-height:40px;
+  --ui-action-min-height:40px;
 }
-.soldierModal .soldierTable .stHead > span{
-  align-self:start;
+
+/* 一般文字／操作按鈕：統一 40px */
+#scorePage .scoreRoleSettingRow .bonusBtn,
+#scorePage .dayHeader button,
+#scorePage .targetMode button,
+.guideActions button,
+.guideNavBtn,
+.roleActions button,
+.addRole,
+#helpPage button:not(.info):not(.closeBtn),
+#radarPage button:not(.info):not(.closeBtn),
+#radarPage .smallbtn,
+#radarPage .addSameTime,
+#radarPage .addTime{
+  height:var(--ui-action-height) !important;
+  min-height:var(--ui-action-min-height) !important;
+  box-sizing:border-box;
 }
-.soldierModal .soldierTable .stTotal > span:nth-child(1){
+
+/* 三頁角色快速切換卡：不再有 54px 特例，統一為 40px */
+.pageRoleCard,
+.pageRoleCard.compact,
+#radarPage .pageRoleSwitch .pageRoleCard,
+#radarPage .pageRoleSwitch .pageRoleCard.compact{
+  height:var(--ui-action-height) !important;
+  min-height:var(--ui-action-min-height) !important;
+  padding:0 10px !important;
+  box-sizing:border-box;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+}
+
+/* 右上角目前角色：一般按鈕同樣 40px；長名稱在框內省略 */
+.siteTopRow .roleBtn{
+  height:var(--ui-action-height) !important;
+  min-height:var(--ui-action-min-height) !important;
+  box-sizing:border-box;
+  overflow:hidden;
+}
+.siteTopRow .roleBtn #currentRoleName{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  display:inline-block;
+  vertical-align:middle;
+}
+
+/* 聯盟幫助：角色與士兵數量維持同一列，並在 40px 高度內垂直置中 */
+#helpPage .pageRoleCard .pageRoleName{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
   text-align:left;
+  font-size:16px;
 }
-.soldierModal .soldierTable .stTotal > span:nth-child(2){
+#helpPage .pageRoleCard .pageRoleValue{
+  flex:0 0 auto;
+  margin-left:auto;
+  min-height:0;
+  line-height:1.2;
   text-align:right;
+  font-size:15px;
 }
-.soldierModal .soldierTable .stTotal > span:nth-child(3),
-.soldierModal .soldierTable .stTotal > span:nth-child(4),
-.soldierModal .soldierTable .stTotal > span:nth-child(5){
-  text-align:center;
+
+/* 雷達一般按鈕：移除原本 42/44px 等高度差異 */
+#radarPage .modes label{
+  min-height:var(--ui-action-min-height) !important;
+  height:var(--ui-action-height) !important;
+  box-sizing:border-box;
 }
+#radarPage .smallbtn,
+#radarPage .addSameTime,
+#radarPage .addTime{
+  padding-top:0 !important;
+  padding-bottom:0 !important;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
 @media(max-width:560px){
-  .soldierModal .soldierTable .stHead{align-items:start;}
-  .soldierModal .soldierTable .stHead > span{align-self:start;}
-  .soldierModal .soldierTable .stTotal > span:nth-child(1){text-align:left;}
-  .soldierModal .soldierTable .stTotal > span:nth-child(2){text-align:right;}
-  .soldierModal .soldierTable .stTotal > span:nth-child(3),
-  .soldierModal .soldierTable .stTotal > span:nth-child(4),
-  .soldierModal .soldierTable .stTotal > span:nth-child(5){text-align:center;}
+  .siteTopRow .roleBtn{
+    height:var(--ui-action-height) !important;
+    min-height:var(--ui-action-min-height) !important;
+  }
+  #helpPage .pageRoleCard .pageRoleName{font-size:15px;}
+  #helpPage .pageRoleCard .pageRoleValue{font-size:14px;}
 }
 </style>
+</body></html>
