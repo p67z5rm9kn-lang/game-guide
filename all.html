@@ -3150,6 +3150,81 @@ autoPlanIfReady();
   .soldierModal .soldierTable .stTotal{font-size:16px;}
 }
 </style>
+
+<style id="v139RoleButtonUnifiedUI">
+/* v1.39：角色快速切換按鈕統一高度；聯盟幫助改為角色＋士兵數量同列。僅 UI，不修改任何計算、資料或事件邏輯。 */
+.pageRoleCard,
+.pageRoleCard.compact,
+#radarPage .pageRoleSwitch .pageRoleCard,
+#radarPage .pageRoleSwitch .pageRoleCard.compact{
+  height:54px !important;
+  min-height:54px !important;
+  box-sizing:border-box;
+  padding:8px 10px !important;
+  flex-direction:row !important;
+  align-items:center;
+  justify-content:flex-start;
+  gap:8px;
+  line-height:1.2;
+}
+.pageRoleCard .pageRoleName{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-align:left;
+}
+.pageRoleCard .pageRoleValue{
+  flex:0 0 auto;
+  margin-left:auto;
+  min-height:0;
+  line-height:1.2;
+  text-align:right;
+}
+#helpPage .pageRoleCard .pageRoleName{font-size:16px;}
+#helpPage .pageRoleCard .pageRoleValue{font-size:15px;}
+.siteTopRow .roleBtn{
+  min-width:0;
+  max-width:180px;
+  overflow:hidden;
+}
+.siteTopRow .roleBtn #currentRoleName{
+  min-width:0;
+  max-width:120px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  display:inline-block;
+  vertical-align:middle;
+}
+@media(max-width:560px){
+  .pageRoleCard,
+  .pageRoleCard.compact,
+  #radarPage .pageRoleSwitch .pageRoleCard,
+  #radarPage .pageRoleSwitch .pageRoleCard.compact{
+    height:54px !important;
+    min-height:54px !important;
+    padding:8px 8px !important;
+  }
+  #helpPage .pageRoleCard .pageRoleName{font-size:15px;}
+  #helpPage .pageRoleCard .pageRoleValue{font-size:14px;}
+  .siteTopRow .roleBtn{max-width:140px;}
+  .siteTopRow .roleBtn #currentRoleName{max-width:86px;}
+}
+@media(max-width:390px){
+  .pageRoleCard,
+  .pageRoleCard.compact,
+  #radarPage .pageRoleSwitch .pageRoleCard,
+  #radarPage .pageRoleSwitch .pageRoleCard.compact{
+    height:54px !important;
+    min-height:54px !important;
+    padding:8px 7px !important;
+  }
+  .siteTopRow .roleBtn{max-width:132px;}
+  .siteTopRow .roleBtn #currentRoleName{max-width:78px;}
+}
+</style>
 </body></html>
 
 <style id="v138SoldierTableAlignment">
