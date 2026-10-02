@@ -988,7 +988,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 </style>
 
 <style id="v0124SoldierTimeBlurFix">
-/* v1.24：iOS Safari 手機輸入生產一輪時間時，避免 sticky／backdrop-filter 造成上方內容短暫模糊。只在此欄位取得焦點時暫停背景模糊效果。 */
+/* v1.25：iOS Safari 按「完成」收起鍵盤時，延後恢復背景模糊效果，避免收鍵盤重繪瞬間造成上方內容短暫模糊。 */
 @media(max-width:560px){
   body.soldierTimeEditing .topbar,
   body.soldierTimeEditing .siteTopbar{
@@ -1266,10 +1266,17 @@ function setTargetMode(mode){const m=mode==='manual'?'manual':'preset';document.
 document.querySelectorAll('#scorePage .targetMode button').forEach(b=>b.addEventListener('click',()=>setTargetMode(b.dataset.targetMode)));
 document.addEventListener('input',e=>{if(e.target.matches('input,select')){calc();scheduleSave();}});
 document.addEventListener('change',e=>{if(e.target.matches('input,select')){calc();scheduleSave();}});
-/* v1.24：生產一輪時間輸入時，避免手機瀏覽器在焦點狀態下出現短暫模糊。 */
+/* v1.25：iOS Safari 按「完成」收起鍵盤時，延後恢復 backdrop-filter，避免收鍵盤重繪瞬間造成上方畫面短暫模糊。 */
+let soldierTimeRestoreTimer;
 document.querySelectorAll('#twelveH,#twelveM,#twelveS').forEach(el=>{
-  el.addEventListener('focus',()=>document.body.classList.add('soldierTimeEditing'));
-  el.addEventListener('blur',()=>document.body.classList.remove('soldierTimeEditing'));
+  el.addEventListener('focus',()=>{
+    clearTimeout(soldierTimeRestoreTimer);
+    document.body.classList.add('soldierTimeEditing');
+  });
+  el.addEventListener('blur',()=>{
+    clearTimeout(soldierTimeRestoreTimer);
+    soldierTimeRestoreTimer=setTimeout(()=>document.body.classList.remove('soldierTimeEditing'),800);
+  });
 });
 
 document.getElementById('soldierTier')?.addEventListener('change',e=>{const p=db.profiles.find(x=>x.id===db.active);if(p){setProfileTier(p,e.target.value);}if(document.getElementById('helpPage').style.display!=='none')helpRender();});
