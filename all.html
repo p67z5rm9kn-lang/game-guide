@@ -525,17 +525,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 @media(max-width:699px){.pageRoleSwitch{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pageRoleCard{min-height:66px}.pageRoleName{font-size:16px}.pageRoleValue{font-size:15px}}
 @media(max-width:390px){.pageRoleSwitch{gap:6px}.pageRoleCard{padding:7px 6px;min-height:64px}.pageRoleName{font-size:15px}.pageRoleValue{font-size:14px;min-height:17px;line-height:17px}}
 </style>
-<style id="roleCardLayoutV103">
-/* v0.10.3：角色卡高度依內容決定。對決／雷達只有角色名稱時採單列；聯盟幫助有數值時採雙列。 */
-.pageRoleCard.compact{min-height:54px !important;height:54px !important;padding:7px 10px !important;flex-direction:row !important;gap:0 !important;}
-#radarPage .pageRoleSwitch .pageRoleCard.compact{min-height:54px !important;height:54px !important;}
-@media(max-width:699px){.pageRoleCard.compact{min-height:54px !important;height:54px !important;}}
-@media(max-width:390px){.pageRoleCard.compact{min-height:52px !important;height:52px !important;padding:6px 8px !important;}}
-/* 聯盟幫助：設定標題與雷達採同一種內距節奏，避免手機版文字貼邊。 */
-#helpPage .helpSettingGroupTitle{display:block;box-sizing:border-box;width:100%;padding-left:14px;padding-right:14px;margin-left:0;margin-right:0;overflow-wrap:anywhere;}
-#helpPage .helpRoleGroupTitle{padding-top:14px;padding-left:14px;padding-right:14px;}
-@media(max-width:560px){#helpPage .helpSettingGroupTitle{font-size:17px !important;line-height:1.35 !important;}}
-</style>
+
 <style id="helpFlatRoleLayoutV105">
 /* v0.10.5：聯盟幫助角色區改為雷達式的簡潔層級，避免「大卡片＋角色卡＋內容卡」層層套疊。角色名稱保留作為辨識，不再增加「玩家名稱」等重複標籤。 */
 #helpPage .helpRoles{padding:0 14px 10px;background:transparent;}
@@ -1494,7 +1484,7 @@ function renderSharedRoleSwitchers(){
   const profiles=RoleManager.list();
   const configs=[
     {id:'scoreRoleSwitch',showValue:false,compact:true},
-    {id:'helpRoleJump',showValue:true,compact:true},
+    {id:'helpRoleJump',showValue:true,compact:false},
     {id:'radarRoleSwitch',showValue:false,compact:true}
   ];
   configs.forEach(cfg=>{
@@ -2871,8 +2861,8 @@ autoPlanIfReady();
 
 
 
-<style id="v146SharedUICore">
-/* v1.46：共同 UI 核心整理
+<style id="v148SharedUICore">
+/* v1.48：共同 UI 結構清理
    只保留一套全站共同 UI 基準；不修改 HTML、JavaScript、計算、資料或事件。
    頁面特殊版型仍由原有規則保留。
 */
@@ -3132,34 +3122,14 @@ autoPlanIfReady();
 }
 </style>
 
-<style id="v147SharedStructureCleanup">
-/* v1.47：共同結構清理
-   只處理三頁共同 UI 的外層結構與角色快速切換卡高度。
-   不修改計算、資料、事件或既有功能。
+</body></html>
+<style id="v148CommonStructureCleanup">
+/* v1.48：只修正歷史結構差異，不新增零散尺寸補丁。
+   聯盟幫助的共用／角色設定標題直接位於 helpCard，
+   其他兩頁則位於已有 14px 內距的設定容器；因此在同一層補上相同的水平內距。
 */
-
-/* 三頁角色快速切換卡統一使用既有 compact 規格；聯盟幫助同樣採單列高度，
-   但保留角色名稱＋治療數量兩個資訊。 */
-#helpPage .pageRoleSwitch .pageRoleCard,
-#helpPage .pageRoleSwitch .pageRoleCard.compact{
-  height:54px;
-  min-height:54px;
-}
-
-/* 聯盟幫助主設定外框補回與另外兩頁一致的水平內距。
-   內部原本各自帶的 14px 水平內距移除，避免變成雙重內距。 */
-#helpPage .helpCard:first-child{
+#helpPage .helpCard:first-child > .commonSettingTitle{
   padding-left:14px;
   padding-right:14px;
 }
-#helpPage .helpCard:first-child .globalHelp{
-  padding-left:0;
-  padding-right:0;
-}
-#helpPage .helpCard:first-child .helpRoles{
-  padding-left:0;
-  padding-right:0;
-}
 </style>
-
-</body></html>
