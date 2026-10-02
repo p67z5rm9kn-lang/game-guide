@@ -1328,6 +1328,74 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   .siteTopRow .roleBtn{font-size:16px!important;padding:8px 9px!important;max-width:104px!important;min-height:38px!important;height:38px!important;box-sizing:border-box!important;}
 }
 </style>
+
+<style id="v134CommonButtonAndSoldierAlign">
+/* v1.34：只整理 UI，不修改任何計算／資料／事件邏輯。
+   1. 操作／設定類按鈕統一使用網站共同按鈕尺寸。
+   2. 士兵等級下拉選單與「生產一輪時間」三格輸入的總寬度對齊。
+*/
+:root{
+  --ui-action-height:40px;
+  --ui-action-radius:9px;
+  --ui-action-font-size:16px;
+  --ui-action-font-weight:900;
+  --ui-action-padding:0 14px;
+}
+
+/* 同屬「操作／設定」用途的按鈕，統一尺寸與字體。
+   選擇型按鈕（星期、目標模式、主頁籤）及圓形 i／關閉按鈕維持各自 UI。 */
+#scorePage .scoreRoleSettingRow .bonusBtn,
+#scorePage .dayHeader button,
+.guideActions button,
+.guideNavBtn,
+.roleActions button,
+.addRole{
+  height:var(--ui-action-height);
+  min-height:var(--ui-action-height);
+  box-sizing:border-box;
+  padding:var(--ui-action-padding);
+  border-radius:var(--ui-action-radius);
+  font-size:var(--ui-action-font-size);
+  line-height:1.25;
+  font-weight:var(--ui-action-font-weight);
+}
+
+/* 角色設定中的兩顆「設定」按鈕：與共同操作按鈕完全同一尺寸。 */
+#scorePage .scoreRoleSettingRow .bonusBtn{
+  width:100%;
+  margin:0;
+}
+
+/* 士兵設定：下拉選單寬度 = 三個時間輸入框＋兩個冒號的總寬度。 */
+.soldierModal .soldierInputRow{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+}
+.soldierModal .soldierInputs select.settingControl,
+.soldierModal .soldierInputs .soldierTime{
+  width:100%;
+  max-width:none;
+}
+
+@media(max-width:560px){
+  #scorePage .scoreRoleSettingRow .bonusBtn,
+  #scorePage .dayHeader button,
+  .guideActions button,
+  .guideNavBtn,
+  .roleActions button,
+  .addRole{
+    height:40px;
+    min-height:40px;
+    font-size:16px;
+  }
+  .soldierModal .soldierInputRow{
+    grid-template-columns:minmax(0,1fr) minmax(0,150px);
+  }
+  .soldierModal .soldierInputs select.settingControl,
+  .soldierModal .soldierInputs .soldierTime{
+    width:100%;
+  }
+}
+</style>
 </head><body><main><nav class="topbar siteTopbar">
   <div class="siteTopRow">
     <div class="brand">Last Z</div>
