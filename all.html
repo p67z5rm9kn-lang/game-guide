@@ -525,7 +525,17 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 @media(max-width:699px){.pageRoleSwitch{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pageRoleCard{min-height:66px}.pageRoleName{font-size:16px}.pageRoleValue{font-size:15px}}
 @media(max-width:390px){.pageRoleSwitch{gap:6px}.pageRoleCard{padding:7px 6px;min-height:64px}.pageRoleName{font-size:15px}.pageRoleValue{font-size:14px;min-height:17px;line-height:17px}}
 </style>
-
+<style id="roleCardLayoutV103">
+/* v0.10.3：角色卡高度依內容決定。對決／雷達只有角色名稱時採單列；聯盟幫助有數值時採雙列。 */
+.pageRoleCard.compact{min-height:54px !important;height:54px !important;padding:7px 10px !important;flex-direction:row !important;gap:0 !important;}
+#radarPage .pageRoleSwitch .pageRoleCard.compact{min-height:54px !important;height:54px !important;}
+@media(max-width:699px){.pageRoleCard.compact{min-height:54px !important;height:54px !important;}}
+@media(max-width:390px){.pageRoleCard.compact{min-height:52px !important;height:52px !important;padding:6px 8px !important;}}
+/* 聯盟幫助：設定標題與雷達採同一種內距節奏，避免手機版文字貼邊。 */
+#helpPage .helpSettingGroupTitle{display:block;box-sizing:border-box;width:100%;padding-left:14px;padding-right:14px;margin-left:0;margin-right:0;overflow-wrap:anywhere;}
+#helpPage .helpRoleGroupTitle{padding-top:14px;padding-left:14px;padding-right:14px;}
+@media(max-width:560px){#helpPage .helpSettingGroupTitle{font-size:17px !important;line-height:1.35 !important;}}
+</style>
 <style id="helpFlatRoleLayoutV105">
 /* v0.10.5：聯盟幫助角色區改為雷達式的簡潔層級，避免「大卡片＋角色卡＋內容卡」層層套疊。角色名稱保留作為辨識，不再增加「玩家名稱」等重複標籤。 */
 #helpPage .helpRoles{padding:0 14px 10px;background:transparent;}
@@ -1312,7 +1322,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <div class="row resource" data-cat="none" data-score="30"><div class="name">鑽石禮包</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">30</div><div class="need">0</div></div>
 </div>
 </section></div>
-<section class="helpPage" id="helpPage" style="display:none"><div aria-label="角色快速切換" class="pageRoleSwitch" id="helpRoleJump"></div><div class="helpCard"><div class="commonSettingTitle helpSettingGroupTitle">🔗 共用設定</div><div class="globalHelp"><div class="globalLabel">點手數量</div><div class="stepper"><button data-step="-5" type="button">−5</button><button data-step="-1" type="button">−1</button><input id="helpClicks" inputmode="numeric" max="80" min="0" step="1" type="number" value="5"/><button data-step="1" type="button">＋1</button><button data-step="5" type="button">＋5</button></div><div class="globalChecks"><label class="checkPill"><input checked="" id="helpRose" type="checkbox"/>玫瑰花</label><label class="checkPill"><input checked="" id="helpDisc" type="checkbox"/>光碟</label></div></div><div class="commonSettingTitle helpSettingGroupTitle helpRoleGroupTitle">👤 角色設定</div><div class="helpRoles" id="helpRoles"></div></div></section><div aria-hidden="true" class="guideOverlay" id="guideOverlay">
+<section class="helpPage" id="helpPage" style="display:none"><div aria-label="角色快速切換" class="pageRoleSwitch" id="helpRoleJump"></div><div class="helpCard"><div class="commonSettingGroup helpSettingGroup"><div class="commonSettingTitle helpSettingGroupTitle">🔗 共用設定</div><div class="globalHelp"><div class="globalLabel">點手數量</div><div class="stepper"><button data-step="-5" type="button">−5</button><button data-step="-1" type="button">−1</button><input id="helpClicks" inputmode="numeric" max="80" min="0" step="1" type="number" value="5"/><button data-step="1" type="button">＋1</button><button data-step="5" type="button">＋5</button></div><div class="globalChecks"><label class="checkPill"><input checked="" id="helpRose" type="checkbox"/>玫瑰花</label><label class="checkPill"><input checked="" id="helpDisc" type="checkbox"/>光碟</label></div></div></div><div class="commonSettingGroup helpSettingGroup helpRoleSettingGroup"><div class="commonSettingTitle helpSettingGroupTitle helpRoleGroupTitle">👤 角色設定</div><div class="helpRoles" id="helpRoles"></div></div></div></section><div aria-hidden="true" class="guideOverlay" id="guideOverlay">
 <div class="guideShade"></div>
 <div class="guideFocus" id="guideFocus"></div>
 <div class="guideCard" id="guideCard">
@@ -2861,8 +2871,8 @@ autoPlanIfReady();
 
 
 
-<style id="v148SharedUICore">
-/* v1.48：共同 UI 結構清理
+<style id="v146SharedUICore">
+/* v1.46：共同 UI 核心整理
    只保留一套全站共同 UI 基準；不修改 HTML、JavaScript、計算、資料或事件。
    頁面特殊版型仍由原有規則保留。
 */
@@ -3123,13 +3133,33 @@ autoPlanIfReady();
 </style>
 
 </body></html>
-<style id="v148CommonStructureCleanup">
-/* v1.48：只修正歷史結構差異，不新增零散尺寸補丁。
-   聯盟幫助的共用／角色設定標題直接位於 helpCard，
-   其他兩頁則位於已有 14px 內距的設定容器；因此在同一層補上相同的水平內距。
+<style id="v149CommonSettingStructure">
+/* v1.49：三頁「共用設定／角色設定」統一為相同的外層結構與內距。
+   只整理 UI 結構，不修改任何計算、資料或事件邏輯。
 */
-#helpPage .helpCard:first-child > .commonSettingTitle{
+#scorePage .card.hero,
+#helpPage .helpCard:first-child,
+#radarPage .setup-panel{
+  padding-top:16px;
+}
+#scorePage .scoreSettingGroup,
+#helpPage .commonSettingGroup,
+#radarPage .radarSettingGroup{
   padding-left:14px;
   padding-right:14px;
+}
+#helpPage .commonSettingGroup{
+  margin:0;
+}
+#helpPage .helpSettingGroup + .helpSettingGroup{
+  margin-top:16px;
+  padding-top:0;
+  border-top:1px solid #294553;
+}
+#scorePage .scoreSettingGroup + .scoreSettingGroup{
+  margin-top:16px;
+}
+#radarPage .radarSettingGroup + .radarSettingGroup{
+  margin-top:0;
 }
 </style>
