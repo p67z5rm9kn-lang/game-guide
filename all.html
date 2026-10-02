@@ -1,4 +1,5 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Last Z</title><style>
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/><title>Last Z</title><style>
 *{box-sizing:border-box}html{background:#07131b}body{margin:0;overflow-x:hidden;background:#07131b;color:#eef3f5;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC",sans-serif}button,input,select{font:inherit}main{max-width:820px;margin:auto;padding:0 14px 44px}.topbar{position:sticky;top:0;z-index:80;margin:0 -14px 12px;padding:10px 14px;background:#091621ee;border-bottom:1px solid #294553;backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px}.brand{font-size:17px;font-weight:900;letter-spacing:.3px;flex:0 0 auto}.navBtn,.roleBtn{border:1px solid #3a5360;background:#122833;color:#eaf1f4;border-radius:10px;padding:9px 12px;font-weight:800;white-space:nowrap}.roleBtn{display:flex;align-items:center;gap:7px}.card{background:#0d202b;border:1px solid #294553;border-radius:16px;margin:10px 0;overflow:hidden}.hero{padding:13px 14px;border-color:#735725;background:linear-gradient(145deg,#11232d,#09151d)}.titleLine{display:flex;align-items:center;justify-content:space-between;gap:10px}.titleLine h1{font-size:21px;margin:0;font-weight:900}.bonusBtn{border:1px solid #d0a44b;background:#6f5523;color:#fff4d0;border-radius:9px;padding:8px 10px;font-weight:900;white-space:nowrap}.summaryRows{display:flex;flex-direction:column;gap:2px;margin-top:8px}.summaryRow{display:grid;grid-template-columns:1fr minmax(145px,34%);gap:10px;align-items:center;padding:2px 0;min-height:34px}.summaryRow>span{font-size:13px;color:#b7c5ca}.summaryRow select,.summaryRow input{height:32px;text-align:right}.finalValue{text-align:right;font-size:19px;font-weight:900;color:#f2d47e;min-height:24px}.dayTabs{display:flex;gap:6px;overflow-x:auto;margin:10px 0}.dayTab{flex:1;min-width:70px;padding:9px 7px;border:1px solid #304b59;border-radius:9px;background:#102732;color:#dce7eb;font-weight:900}.dayTab.active{background:#6f5523;border-color:#d0a44b}.dayHeader{padding:10px 12px;background:#102732;display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:17px}.dayHeader button{border:1px solid #3a5360;background:#172f3a;color:#fff;border-radius:8px;padding:7px 9px;font-weight:800}.body{padding:8px 12px 10px}.tablehead,.row{display:grid;grid-template-columns:minmax(0,1fr) 138px 78px 84px;gap:6px;align-items:center}.tablehead{color:#9fb0b8;font-size:11px;padding:0 0 4px}.row{padding:7px 0;border-bottom:1px solid #203640}.name{line-height:1.25;font-size:14px}.qty{width:82px;justify-self:end;text-align:right}.single,.need{text-align:right;color:#d7e4e8;font-weight:800;font-size:12px}.need{color:#ffbc63}.timeGroup,.timeInput{display:grid;grid-template-columns:minmax(0,1fr) 8px minmax(0,1fr) 8px minmax(0,1fr);gap:2px;align-items:center;justify-self:end}.timeGroup input,.timeInput input{width:100%;height:36px;min-width:0;padding:4px 5px;text-align:center}.dailyTime,.timeInput{grid-template-columns:38px 8px 38px 8px 38px;width:130px}.soldierTime{grid-template-columns:78px 8px 78px 8px 78px;width:250px}.timeGroup span{text-align:center;color:#a9b9c1;font-weight:800}.unitInput{display:flex;align-items:center;gap:4px}.unitInput input{flex:1}.unitInput>span{font-weight:900;color:#c5d1d5}.resource input,.specialResource input,.soldierTable input{text-align:right}select{text-align:right}details{border-top:1px solid #203640}summary{padding:10px 0;font-weight:900;cursor:pointer;list-style:none}summary::-webkit-details-marker{display:none}.bonusSettings{border-top:0;margin-top:8px}.bonusSettings>summary{padding:0;display:none}.modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:200;display:none;align-items:center;justify-content:center;padding:12px 10px;overflow:hidden}.modalOverlay.show{display:flex}.modal{width:min(650px,calc(100vw - 20px));max-width:650px;max-height:calc(100dvh - 24px);overflow-y:auto;overflow-x:hidden;background:#0d202b;border:1px solid #5a6570;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.55)}.modalHead{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#102732;border-bottom:1px solid #294553}.modalHead h2{font-size:18px;margin:0}.modalOverlay#roleModal{}.modalOverlay#bonusModal{}.closeBtn{width:34px;height:34px;border-radius:50%;padding:0}.modalBody{padding:12px 16px}.settingBlock{border-top:1px solid #294553;padding-top:10px;margin-top:10px}.settingTitle{font-weight:900;font-size:16px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center}.chikaTitle{display:inline-flex;align-items:center;gap:6px;position:relative}.info{display:inline-flex;width:18px;height:18px;border:1px solid #9fb0b8;border-radius:50%;align-items:center;justify-content:center;font-size:12px;color:#dce7eb;cursor:pointer;font-style:normal}.chikaFlyout{position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);width:260px;z-index:220;padding:11px 12px;border:1px solid #735725;border-radius:10px;background:#0b1c25;color:#e8eef1;box-shadow:0 10px 24px rgba(0,0,0,.4);font-size:14px;font-weight:500;line-height:1.55;display:none}.chikaFlyout.show{display:block}.infoFlyout{position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);width:280px;z-index:220;padding:11px 12px;border:1px solid #735725;border-radius:10px;background:#0b1c25;color:#e8eef1;box-shadow:0 10px 24px rgba(0,0,0,.4);font-size:14px;font-weight:500;line-height:1.55;display:none;white-space:normal}.infoFlyout.show{display:block}.infoAnchor{display:inline-flex;align-items:center;gap:6px;position:relative}.check{display:flex;gap:7px;align-items:center;color:#fff;font-size:14px;margin:0}.check input{width:19px;height:19px;accent-color:#d6aa4c}.brow{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #203640;font-size:13px}.brow input{text-align:right}.brow>div:first-child{min-width:0;line-height:1.35}.brow .unitInput{min-width:0;width:112px}.brow .unitInput input{min-width:0;width:100%;}.soldierBox{margin:8px 0 0;border:1px solid #294553;border-radius:10px;padding:0 10px}.soldierInputs{display:flex;flex-direction:column;gap:8px;padding:0 0 8px}.soldierInputRow{display:flex;align-items:center;gap:10px}.soldierInputs label{display:block;color:#a9b9c1;font-size:12px;margin:0;min-width:112px}.soldierInputs select{width:150px;height:38px;text-align:left}.soldierInputs .soldierTime{width:auto}.soldierTable{overflow-x:auto}.stHead,.stRow{display:grid;grid-template-columns:minmax(55px,1fr) 82px 100px 82px 88px;gap:6px;align-items:center}.stHead{font-size:10px;color:#9fb0b8;padding:6px 0}.stRow{padding:7px 0;border-top:1px solid #203640;font-size:12px}.stRow input{height:36px;padding:5px;width:100%;min-width:0}.stRow .troopCount{width:82px}.stRow .troopSpeed{width:82px}.stRow .unitInput{width:100%}.stTotal{display:grid;grid-template-columns:minmax(55px,1fr) 82px 100px 82px 88px;gap:6px;align-items:center;padding:8px 0 2px;border-top:1px solid #294553;font-size:12px;font-weight:900}.stTotal span:nth-child(2),.stTotal span:nth-child(5){text-align:center}.prodTime,.twelveQty{text-align:center;font-size:11px}.roleList{padding:4px 0}.roleRow{display:flex;align-items:center;gap:10px;padding:13px 4px;border-bottom:1px solid #203640}.roleRow.active{background:#123b4a}.roleName{flex:1;font-size:17px;font-weight:800}.roleActions{display:flex;gap:6px}.roleActions button{padding:7px 9px}.addRole{width:100%;margin-top:10px;padding:11px}.roleHint{font-size:12px;color:#9fb0b8;margin:0 0 8px}.hidden{display:none!important}
 #infoTraining,#infoDiamond{left:0;top:auto;bottom:calc(100% + 8px);transform:none;}
 @media(max-width:560px){main{padding:0 10px 36px}.topbar{margin:0 -10px 10px;padding:9px 10px}.brand{font-size:15px;flex:0 0 auto}.mainPageNav{flex:1;justify-content:center}.mainPageTab{padding:7px 8px;font-size:11px}.roleBtn{font-size:14px;max-width:112px}.titleLine h1{font-size:18px}.bonusBtn{font-size:12px;padding:7px 8px}.summaryRow{grid-template-columns:1fr 150px;min-height:31px}.summaryRow select,.summaryRow input{height:30px}.tablehead,.row{grid-template-columns:minmax(0,1fr) 116px 68px 76px;gap:5px}.dailyTime{grid-template-columns:34px 8px 34px 8px 34px;width:118px}.qty{width:76px}.name{font-size:13px}.single,.need{font-size:11px}.soldierInputs{grid-template-columns:1fr}.soldierTime{grid-template-columns:72px 8px 72px 8px 72px;width:232px;max-width:none}.stHead,.stRow{grid-template-columns:minmax(45px,1fr) 74px 88px 72px 78px;gap:4px}.stRow .troopCount{width:74px}.stRow .troopSpeed{width:74px}.chikaFlyout,.infoFlyout{left:0;top:calc(100% + 8px);transform:none;width:min(280px,calc(100vw - 42px))}.modalOverlay{padding:12px 10px}.modalOverlay#roleModal{}.modalOverlay#bonusModal{}.modal{max-height:calc(100dvh - 24px)}.modalBody{padding:10px 12px}.brow{grid-template-columns:minmax(0,1fr) 104px;gap:6px}.brow .unitInput{width:104px}.brow .unitInput input{min-width:0}.soldierInputs{grid-template-columns:1fr}.soldierInputs select{max-width:140px}.timeInput{grid-template-columns:38px 8px 38px 8px 38px;width:130px}.modalOverlay#bonusModal .modal{overflow:hidden}.modalOverlay#bonusModal .modalBody{overflow:visible}.modalOverlay#bonusModal details .brow{grid-template-columns:minmax(0,1fr) 104px}}
@@ -812,7 +813,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .radarPage .smallbtn{font-size:15px !important;}
 @media(max-width:560px){.radarPage .radarInner > h1,.radarPage .setup-panel > h1{font-size:22px !important}.radarPage .section-title{font-size:20px !important}.radarPage .setup-panel > label,.radarPage .day-title{font-size:16px !important}.radarPage .modes label{font-size:16px !important}.radarPage .time-row input[type="text"]{font-size:18px !important;line-height:44px !important}}
 </style>
-
 <style id="readabilityV6Unified">
 /* 三頁 v6：整站可讀性統一；不改計算邏輯 */
 /* 聯盟對決 */
@@ -874,7 +874,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   #radarPage .time-row input[type="text"],#radarPage .setting-select,#radarPage #max{font-size:18px !important;height:44px !important;line-height:44px !important;}
 }
 </style>
-
 <style id="uiSystemV05">
 /* =========================================================
    v0.5：三頁共用 UI 系統
@@ -986,13 +985,11 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   #radarPage .time-row input[type="text"],#radarPage .setting-select,#radarPage #max{font-size:var(--ui-input)!important;}
 }
 </style>
-
 <style id="roleSystemV06">
 /* v0.6：角色系統共用視覺／互動提示 */
 .helpRoleHead{cursor:pointer;}
 .helpRoleHead:focus-visible{outline:2px solid #d0a44b;outline-offset:2px;border-radius:8px;}
 </style>
-
 <style id="sharedUIFinalV09">
 /* v0.9：共同 UI 最終統一規格
    這裡集中處理三頁的閱讀層級；不修改任何計算、資料、角色或事件邏輯。 */
@@ -1100,7 +1097,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 #radarPage .pageRoleSwitch .pageRoleCard.compact{min-height:54px;padding:8px 10px;}
 #radarPage .pageRoleSwitch .pageRoleCard.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);}
 </style>
-
 <style id="v0106HelpRadarPolish">
 /* v0.10.6：聯盟幫助說明精簡＋雷達設定層級整理。只調整 UI，不改計算邏輯。 */
 #helpPage .helpTierSetting .infoAnchor{
@@ -1128,7 +1124,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   padding-top:16px;
 }
 </style>
-
 <style id="scoreRoleSettingV113">
 #scorePage .scoreSettingGroupTitle{font-size:20px;font-weight:900;line-height:1.35;color:#eef3f5;margin:0 0 10px}
 #scorePage .scoreSettingDivider{border-top:1px solid #294553;margin:12px 0}
@@ -1138,7 +1133,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 #scorePage .scoreRoleSettingRow .bonusBtn{width:100%;height:40px;min-height:40px;margin:0;box-sizing:border-box}
 @media(max-width:560px){#scorePage .scoreSettingGroupTitle{font-size:18px}#scorePage .scoreRoleSettingRow{grid-template-columns:1fr 150px}#scorePage .scoreRoleSettingRow>span{font-size:15px}}
 </style>
-
 <style id="v124SoldierTableAndManualInputFix">
 /* v1.24：星期五士兵訓練表格＋手動目標輸入欄位共同 UI */
 #scorePage .targetMode .targetInputWrap .settingControl,
@@ -1272,7 +1266,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   #scorePage .soldierInputs .soldierTime{width:100%;}
 }
 </style>
-
 <style id="v131SoldierSharedUI">
 /* v1.31：保留 v1.29 已確認的「可愛」士兵區配置，所有士兵可輸入欄位改用網站共同 UI。 */
 #scorePage .soldierBox .settingControl{height:var(--control-height)!important;min-height:var(--control-height)!important;background:var(--control-bg)!important;border:1px solid var(--control-border)!important;color:var(--control-text)!important;border-radius:var(--control-radius)!important;font-size:var(--control-font-size)!important;font-weight:var(--control-font-weight)!important;box-sizing:border-box!important;line-height:1.1!important;}
@@ -1322,17 +1315,21 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   .soldierModal .soldierExplain{font-size:15px;line-height:1.7;}
 }
 </style>
-<style id="v133RoleButtonUI">
-/* v1.33：角色設定兩顆設定按鈕統一共同 UI；右上角角色按鈕略縮小但維持導覽列高度。 */
-@media(max-width:560px){
-  .siteTopRow .roleBtn{font-size:16px!important;padding:8px 9px!important;max-width:104px!important;min-height:38px!important;height:38px!important;box-sizing:border-box!important;}
-}
-</style>
 
-<style id="v134CommonButtonAndSoldierAlign">
-/* v1.34：只整理 UI，不修改任何計算／資料／事件邏輯。
-   1. 操作／設定類按鈕統一使用網站共同按鈕尺寸。
-   2. 士兵等級下拉選單與「生產一輪時間」三格輸入的總寬度對齊。
+
+
+
+<style id="v144CommonUIBaselineClean">/* v1.44：共同 UI 基準清理版
+   目的：把 v1.33～v1.43 累積的共同 UI 補丁收斂成一套真正的全站基準。
+   本區只處理 CSS/UI；不修改 HTML、JavaScript、計算、資料或事件邏輯。
+
+   已整理：
+   1. 按鈕／主頁籤／角色卡：40px
+   2. 輸入／下拉：40px、白底黑字
+   3. 共同設定／角色設定標題：20px、白色、40px 標題列
+   4. 設定區外框：同一套藍灰色、圓角
+   5. 共同 UI 字體直接沿用 v0.5/v0.9 的 --ui-* 變數
+   6. 移除近期重複的共同 UI 補丁，避免再靠一層一層覆蓋修正。
 */
 :root{
   --ui-action-height:40px;
@@ -1340,284 +1337,431 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   --ui-action-font-size:16px;
   --ui-action-font-weight:900;
   --ui-action-padding:0 14px;
+
+  --ui-control-height:40px;
+  --ui-control-bg:#f3f3f3;
+  --ui-control-border:#cfd4d7;
+  --ui-control-text:#111;
+  --ui-control-radius:9px;
+  --ui-control-font-size:18px;
+  --ui-control-font-weight:900;
+
+  --ui-common-title-size:20px;
+  --ui-common-title-height:40px;
+  --ui-common-title-weight:900;
+  --ui-common-title-color:#eef3f5;
+  --ui-common-panel-top:16px;
+  --ui-common-border:#294553;
+  --ui-common-border-width:1px;
+  --ui-common-radius:14px;
+  --ui-button-text:#eef3f5;
 }
 
-/* 同屬「操作／設定」用途的按鈕，統一尺寸與字體。
-   選擇型按鈕（星期、目標模式、主頁籤）及圓形 i／關閉按鈕維持各自 UI。 */
+/* =========================================================
+   A. 全站共同按鈕
+   ========================================================= */
+.mainPageTab,
 #scorePage .scoreRoleSettingRow .bonusBtn,
 #scorePage .dayHeader button,
+#scorePage .targetMode button,
+#scorePage .dayTab,
+#helpPage .stepper button,
+#helpPage .checkPill,
+#helpPage .roleActions button,
+#helpPage .addRole,
+#radarPage .modes label,
+#radarPage button:not(.info):not(.closeBtn),
+#radarPage .smallbtn,
+#radarPage .addSameTime,
+#radarPage .addTime,
 .guideActions button,
 .guideNavBtn,
 .roleActions button,
 .addRole{
-  height:var(--ui-action-height);
-  min-height:var(--ui-action-height);
+  height:var(--ui-action-height) !important;
+  min-height:var(--ui-action-height) !important;
   box-sizing:border-box;
-  padding:var(--ui-action-padding);
-  border-radius:var(--ui-action-radius);
-  font-size:var(--ui-action-font-size);
+  color:var(--ui-button-text) !important;
+  font-size:var(--ui-action-font-size) !important;
+  font-weight:var(--ui-action-font-weight) !important;
   line-height:1.25;
-  font-weight:var(--ui-action-font-weight);
 }
 
-/* 角色設定中的兩顆「設定」按鈕：與共同操作按鈕完全同一尺寸。 */
+.mainPageTab{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 9px !important;
+}
+
 #scorePage .scoreRoleSettingRow .bonusBtn{
   width:100%;
   margin:0;
+  padding:var(--ui-action-padding);
+  border-radius:var(--ui-action-radius);
 }
 
-/* 士兵設定：下拉選單寬度 = 三個時間輸入框＋兩個冒號的總寬度。 */
-.soldierModal .soldierInputRow{
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-}
-.soldierModal .soldierInputs select.settingControl,
-.soldierModal .soldierInputs .soldierTime{
-  width:100%;
-  max-width:none;
-}
-
-@media(max-width:560px){
-  #scorePage .scoreRoleSettingRow .bonusBtn,
-  #scorePage .dayHeader button,
-  .guideActions button,
-  .guideNavBtn,
-  .roleActions button,
-  .addRole{
-    height:40px;
-    min-height:40px;
-    font-size:16px;
-  }
-  .soldierModal .soldierInputRow{
-    grid-template-columns:minmax(0,1fr) minmax(0,150px);
-  }
-  .soldierModal .soldierInputs select.settingControl,
-  .soldierModal .soldierInputs .soldierTime{
-    width:100%;
-  }
-}
-</style>
-
-<style id="v135SharedUIAuditFinal">
-/* v1.35：共同 UI 全面整理（僅 UI，不修改任何計算／資料／事件邏輯）
-   原則：共同 UI 為預設；只有真正需要特殊版型的地方才保留尺寸差異。
-*/
-:root{
-  /* 共用操作／設定按鈕 */
-  --ui-action-height:40px;
-  --ui-action-radius:9px;
-  --ui-action-font-size:16px;
-  --ui-action-font-weight:900;
-  --ui-action-padding:0 14px;
-}
-
-/* ===== 共用操作／設定按鈕 =====
-   選擇型按鈕（主頁籤、星期、目標模式）、i、關閉按鈕維持各自 UI。 */
-#scorePage .scoreRoleSettingRow .bonusBtn,
 #scorePage .dayHeader button,
+#scorePage .targetMode button,
+#scorePage .dayTab,
+#helpPage .stepper button,
+#helpPage .checkPill,
+#radarPage .smallbtn,
+#radarPage .addSameTime,
+#radarPage .addTime,
 .guideActions button,
 .guideNavBtn,
 .roleActions button,
 .addRole{
-  height:var(--ui-action-height);
-  min-height:var(--ui-action-height);
-  box-sizing:border-box;
   padding:var(--ui-action-padding);
   border-radius:var(--ui-action-radius);
-  font-size:var(--ui-action-font-size);
-  line-height:1.25;
-  font-weight:var(--ui-action-font-weight);
 }
-#scorePage .scoreRoleSettingRow .bonusBtn{width:100%;margin:0;}
 
-/* ===== 共用設定欄位：士兵設定完全回到 .settingControl 預設 ===== */
+#radarPage .modes label,
+#radarPage .smallbtn,
+#radarPage .addSameTime,
+#radarPage .addTime{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding-top:0 !important;
+  padding-bottom:0 !important;
+}
+
+/* 角色快速切換卡也屬於可操作按鈕，三頁固定同一高度。 */
+.pageRoleCard,
+.pageRoleCard.compact,
+#radarPage .pageRoleSwitch .pageRoleCard,
+#radarPage .pageRoleSwitch .pageRoleCard.compact{
+  height:var(--ui-action-height) !important;
+  min-height:var(--ui-action-height) !important;
+  box-sizing:border-box;
+  padding:0 10px !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:8px;
+}
+.pageRoleCard .pageRoleName{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-align:left;
+  font-size:var(--ui-body) !important;
+  line-height:1.25;
+}
+.pageRoleCard .pageRoleValue{
+  flex:0 0 auto;
+  margin-left:auto;
+  min-height:0;
+  line-height:1.25;
+  text-align:right;
+  font-size:var(--ui-body) !important;
+}
+
+/* 右上角目前角色：與一般操作按鈕同一高度。 */
+.siteTopRow .roleBtn{
+  height:var(--ui-action-height) !important;
+  min-height:var(--ui-action-height) !important;
+  box-sizing:border-box;
+  overflow:hidden;
+}
+.siteTopRow .roleBtn #currentRoleName{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  display:inline-block;
+  vertical-align:middle;
+}
+
+/* =========================================================
+   B. 全站共同輸入／下拉
+   ========================================================= */
+#scorePage .settingControl,
+#helpPage #helpClicks,
+#helpPage .helpTierSelect,
+#helpPage .helpDetailPanel select,
+#helpPage .helpDetailPanel .unitInput input[type="number"],
+#helpPage .helpLine .timePair input,
+#radarPage input:not([type="radio"]):not([type="checkbox"]),
+#radarPage select,
 .soldierModal .soldierInputs .settingControl,
 .soldierModal .soldierTable .stRow input.settingControl{
-  height:var(--control-height);
-  min-height:var(--control-height);
-  background:var(--control-bg);
-  border:1px solid var(--control-border);
-  color:var(--control-text);
-  border-radius:var(--control-radius);
-  font-size:var(--control-font-size);
-  font-weight:var(--control-font-weight);
+  height:var(--ui-control-height) !important;
+  min-height:var(--ui-control-height) !important;
+  box-sizing:border-box;
+  background:var(--ui-control-bg) !important;
+  border:1px solid var(--ui-control-border) !important;
+  color:var(--ui-control-text) !important;
+  border-radius:var(--ui-control-radius) !important;
+  font-size:var(--ui-control-font-size) !important;
+  font-weight:var(--ui-control-font-weight) !important;
+}
+
+#scorePage .settingControl,
+#helpPage .helpTierSelect,
+#helpPage .helpDetailPanel select,
+#radarPage select{
+  padding:0 10px !important;
+}
+#helpPage .helpDetailPanel .unitInput input[type="number"]{
+  padding:0 10px !important;
+  text-align:right !important;
+}
+#helpPage .helpLine .timePair input{
+  padding:0 5px !important;
+  text-align:center !important;
+}
+#helpPage #helpClicks{
+  padding:0 8px !important;
+  text-align:center !important;
+}
+#radarPage .time-row input,
+#radarPage .time-row select,
+#radarPage .setting-select{
+  padding:0 10px !important;
+}
+
+/* 設定積分加成與士兵訓練視窗同樣使用 .settingControl 基準。 */
+#bonusModal #chika,
+.modal .brow input[type="number"]{
+  height:var(--ui-control-height) !important;
+  min-height:var(--ui-control-height) !important;
+  background:var(--ui-control-bg) !important;
+  border:1px solid var(--ui-control-border) !important;
+  color:var(--ui-control-text) !important;
+  border-radius:var(--ui-control-radius) !important;
+  font-size:var(--ui-control-font-size) !important;
+  font-weight:var(--ui-control-font-weight) !important;
   box-sizing:border-box;
 }
-.soldierModal .soldierInputs select.settingControl{width:100%;text-align:left;}
-.soldierModal .soldierInputs .soldierTime{width:100%;max-width:none;}
-.soldierModal .soldierInputs .soldierTime input.settingControl{width:100%;padding:0 5px;text-align:center;}
-.soldierModal .soldierTable .stRow input.settingControl{width:100%;padding:0 6px;text-align:right;}
+#bonusModal #chika{
+  width:100% !important;
+  min-width:0 !important;
+  padding:0 10px !important;
+  text-align:right !important;
+}
+.modal .brow input[type="number"]{
+  width:100% !important;
+  min-width:0 !important;
+  padding:0 10px !important;
+  text-align:right !important;
+}
 
-/* ===== 士兵設定文字層級：直接使用網站共同文字規格 ===== */
+/* =========================================================
+   C. 三頁「共用設定／角色設定」共同標題
+   ========================================================= */
+#scorePage .scoreSettingGroupTitle,
+#helpPage .helpSettingGroupTitle,
+#radarPage .radarSettingGroupTitle{
+  height:var(--ui-common-title-height) !important;
+  min-height:var(--ui-common-title-height) !important;
+  box-sizing:border-box;
+  display:flex !important;
+  align-items:center !important;
+  margin:0 0 10px !important;
+  padding:0 !important;
+  font-size:var(--ui-common-title-size) !important;
+  font-weight:var(--ui-common-title-weight) !important;
+  line-height:1.35 !important;
+  color:var(--ui-common-title-color) !important;
+  text-shadow:none;
+}
+
+/* 角色設定標題與共用設定使用同一標題列；分隔距離也一致。 */
+#scorePage .scoreSettingGroup + .scoreSettingGroup .scoreSettingGroupTitle,
+#helpPage .helpRoleGroupTitle,
+#radarPage .radarRoleSettings > .radarSettingGroupTitle{
+  margin-top:16px !important;
+  padding-top:0 !important;
+}
+
+/* =========================================================
+   D. 三頁設定區共同外框與上方位置
+   ========================================================= */
+#scorePage .card.hero,
+#helpPage .helpCard:first-child,
+#radarPage .setup-panel{
+  padding-top:var(--ui-common-panel-top) !important;
+  border:var(--ui-common-border-width) solid var(--ui-common-border) !important;
+  border-radius:var(--ui-common-radius) !important;
+}
+
+/* 聯盟幫助標題的左右位置與另外兩頁一致。 */
+#helpPage > .helpCard:first-child > .helpSettingGroupTitle{
+  padding-left:14px !important;
+  padding-right:14px !important;
+}
+
+/* 共用設定內部分隔線也使用同一套低對比藍灰色。 */
+#scorePage .scoreSettingDivider,
+#helpPage .helpRoleGroupTitle,
+#radarPage .setup-divider{
+  border-color:rgba(220,231,235,.28) !important;
+}
+
+/* =========================================================
+   E. 士兵訓練視窗：沿用共同文字／輸入基準，保留原本版型
+   ========================================================= */
 .soldierModal .soldierInputs label{
   color:#a9b9c1;
-  font-size:var(--ui-label);
+  font-size:var(--ui-label) !important;
   line-height:var(--ui-line);
 }
-.soldierModal .soldierTable .stHead{
-  font-size:var(--ui-small);
-  line-height:1.35;
-}
-.soldierModal .soldierTable .stRow{
-  font-size:var(--ui-body);
+.soldierModal .soldierTable .stHead,
+.soldierModal .soldierTable .stRow,
+.soldierModal .soldierTable .stTotal{
+  font-size:var(--ui-body) !important;
   line-height:1.35;
 }
 .soldierModal .soldierTable .unitInput>span{
-  font-size:var(--ui-small);
+  font-size:var(--ui-small) !important;
 }
 .soldierModal .soldierTable .prodTime,
 .soldierModal .soldierTable .twelveQty{
-  font-size:var(--ui-small);
-  line-height:1.35;
-}
-.soldierModal .soldierTable .stTotal{
-  font-size:var(--ui-body);
+  font-size:var(--ui-body) !important;
   line-height:1.35;
 }
 .soldierModal .soldierExplain{
-  font-size:var(--ui-body);
+  font-size:var(--ui-body) !important;
   line-height:1.65;
 }
 .soldierModal .soldierExplainTitle{
-  font-size:var(--ui-section);
+  font-size:var(--ui-section) !important;
   line-height:1.35;
 }
 
-/* 手機版仍沿用共同 UI，不再另外縮小士兵設定文字。 */
+/* 手機版共同 UI 不再另外縮小尺寸／字級。 */
 @media(max-width:560px){
+  .mainPageTab,
   #scorePage .scoreRoleSettingRow .bonusBtn,
   #scorePage .dayHeader button,
+  #scorePage .targetMode button,
+  #scorePage .dayTab,
+  #helpPage .stepper button,
+  #helpPage .checkPill,
+  #radarPage .modes label,
+  #radarPage button:not(.info):not(.closeBtn),
   .guideActions button,
   .guideNavBtn,
   .roleActions button,
   .addRole{
-    height:var(--ui-action-height);
-    min-height:var(--ui-action-height);
-    font-size:var(--ui-action-font-size);
+    height:var(--ui-action-height) !important;
+    min-height:var(--ui-action-height) !important;
+    font-size:var(--ui-action-font-size) !important;
   }
+  .pageRoleCard,
+  .pageRoleCard.compact,
+  #radarPage .pageRoleSwitch .pageRoleCard,
+  #radarPage .pageRoleSwitch .pageRoleCard.compact{
+    height:var(--ui-action-height) !important;
+    min-height:var(--ui-action-height) !important;
+  }
+  .pageRoleCard .pageRoleName,
+  .pageRoleCard .pageRoleValue{
+    font-size:var(--ui-body) !important;
+  }
+  .siteTopRow .roleBtn{
+    height:var(--ui-action-height) !important;
+    min-height:var(--ui-action-height) !important;
+  }
+  #scorePage .settingControl,
+  #helpPage #helpClicks,
+  #helpPage .helpTierSelect,
+  #helpPage .helpDetailPanel select,
+  #helpPage .helpDetailPanel .unitInput input[type="number"],
+  #helpPage .helpLine .timePair input,
+  #radarPage input:not([type="radio"]):not([type="checkbox"]),
+  #radarPage select,
   .soldierModal .soldierInputs .settingControl,
   .soldierModal .soldierTable .stRow input.settingControl{
-    height:var(--control-height);
-    min-height:var(--control-height);
-    font-size:var(--control-font-size);
+    height:var(--ui-control-height) !important;
+    min-height:var(--ui-control-height) !important;
+    font-size:var(--ui-control-font-size) !important;
   }
-  .soldierModal .soldierInputs label{font-size:var(--ui-label);}
-  .soldierModal .soldierTable .stHead{font-size:var(--ui-small);}
-  .soldierModal .soldierTable .stRow{font-size:var(--ui-body);}
-  .soldierModal .soldierTable .unitInput>span{font-size:var(--ui-small);}
+  #scorePage .scoreSettingGroupTitle,
+  #helpPage .helpSettingGroupTitle,
+  #radarPage .radarSettingGroupTitle{
+    height:var(--ui-common-title-height) !important;
+    min-height:var(--ui-common-title-height) !important;
+    font-size:var(--ui-common-title-size) !important;
+  }
+  .soldierModal .soldierInputs label{font-size:var(--ui-label) !important;}
+  .soldierModal .soldierTable .stHead,
+  .soldierModal .soldierTable .stRow,
+  .soldierModal .soldierTable .stTotal,
   .soldierModal .soldierTable .prodTime,
-  .soldierModal .soldierTable .twelveQty{font-size:var(--ui-small);}
-  .soldierModal .soldierTable .stTotal{font-size:var(--ui-body);}
-  .soldierModal .soldierExplain{font-size:var(--ui-body);}
-  .soldierModal .soldierExplainTitle{font-size:var(--ui-section);}
+  .soldierModal .soldierTable .twelveQty{font-size:var(--ui-body) !important;}
 }
-</style>
-
-<style id="v136SharedUIAuditFinal">
-/* v1.36：共同 UI 全站檢查後的最終微調
-   只調整 UI，不修改任何計算、資料、事件或功能邏輯。
-   原則：一般內容文字使用 --ui-body；只有真正屬於輔助資訊的文字才使用 --ui-small。
-*/
-
-/* ===== 士兵訓練設定：表格一般內容統一回到共同 UI =====
-   表頭、兵種、時間、數量都屬於表格主要內容，不再因為位於表格而縮成 14px。
-   「%」單位仍屬輔助資訊，因此保留 --ui-small。
-*/
-.soldierModal .soldierTable .stHead{
-  font-size:var(--ui-body);
-  line-height:1.35;
-}
-.soldierModal .soldierTable .stRow{
-  font-size:var(--ui-body);
-  line-height:1.35;
-}
-.soldierModal .soldierTable .unitInput>span{
-  font-size:var(--ui-small);
-}
-.soldierModal .soldierTable .prodTime,
-.soldierModal .soldierTable .twelveQty{
-  font-size:var(--ui-body);
-  line-height:1.35;
-}
-.soldierModal .soldierTable .stTotal{
-  font-size:var(--ui-body);
-  line-height:1.35;
-}
-
-@media(max-width:560px){
-  .soldierModal .soldierTable .stHead{font-size:var(--ui-body);}
-  .soldierModal .soldierTable .stRow{font-size:var(--ui-body);}
-  .soldierModal .soldierTable .unitInput>span{font-size:var(--ui-small);}
-  .soldierModal .soldierTable .prodTime,
-  .soldierModal .soldierTable .twelveQty{font-size:var(--ui-body);}
-  .soldierModal .soldierTable .stTotal{font-size:var(--ui-body);}
-}
-</style>
-</head><body><main><nav class="topbar siteTopbar">
-  <div class="siteTopRow">
-    <div class="brand">Last Z</div>
-    <button class="guideNavBtn" id="guideNavBtn" type="button" aria-label="新手導覽">🧭 導覽</button>
-    <button class="roleBtn" id="roleBtn">👤 <span id="currentRoleName">玩家A</span>⌄</button>
-  </div>
-  <div class="mainPageNav sitePageNav" role="tablist" aria-label="主要頁面">
-    <button class="mainPageTab active" data-page="scorePage" role="tab" aria-selected="true">對決積分</button>
-    <button class="mainPageTab" data-page="helpPage" role="tab" aria-selected="false">聯盟幫助</button>
-    <button class="mainPageTab" data-page="radarPage" role="tab" aria-selected="false">雷達週計劃</button>
-  </div>
-</nav><div id="scorePage"><div class="pageRoleSwitch" id="scoreRoleSwitch" aria-label="角色快速切換"></div><section class="card hero"><div class="scoreSettingGroup"><div class="scoreSettingGroupTitle">🔗 共用設定</div><div class="summaryRows"><div class="targetSetting"><input id="targetMode" type="hidden" value="preset"><div class="targetMode modes" role="group" aria-label="目標積分方式"><button type="button" data-target-mode="preset" class="active">預設目標</button><button type="button" data-target-mode="manual">手動輸入</button><div id="targetPresetWrap" class="targetInputWrap"><select id="target" class="settingControl"><option value="20000">20,000</option><option value="80000">80,000</option><option value="300000">300,000</option><option value="550000">550,000</option><option value="840000">840,000</option><option value="1500000">1,500,000</option><option value="2200000">2,200,000</option><option value="3000000">3,000,000</option><option value="6000000" selected>6,000,000</option></select></div><div id="targetManualWrap" class="targetInputWrap" hidden><input id="targetManual" class="settingControl" type="text" inputmode="numeric" autocomplete="off" placeholder="請輸入目標積分"></div></div></div><div class="summaryRow"><span>目前積分</span><input id="current" class="settingControl" type="text" inputmode="numeric" autocomplete="off"></div><div class="summaryRow"><span>預計最終積分</span><b id="final" class="finalValue">0</b></div></div></div><div class="scoreSettingDivider"></div><div class="scoreSettingGroup"><div class="scoreSettingGroupTitle">👤 角色設定</div><div class="scoreRoleSettingRow"><span>設定積分加成</span><button class="bonusBtn" id="bonusBtn">設定</button></div><div class="scoreRoleSettingRow"><span>士兵訓練設定</span><button class="bonusBtn" id="soldierSettingBtn">設定</button></div></div></section>
+</style></head><body><main><nav class="topbar siteTopbar">
+<div class="siteTopRow">
+<div class="brand">Last Z</div>
+<button aria-label="新手導覽" class="guideNavBtn" id="guideNavBtn" type="button">🧭 導覽</button>
+<button class="roleBtn" id="roleBtn">👤 <span id="currentRoleName">玩家A</span>⌄</button>
+</div>
+<div aria-label="主要頁面" class="mainPageNav sitePageNav" role="tablist">
+<button aria-selected="true" class="mainPageTab active" data-page="scorePage" role="tab">對決積分</button>
+<button aria-selected="false" class="mainPageTab" data-page="helpPage" role="tab">聯盟幫助</button>
+<button aria-selected="false" class="mainPageTab" data-page="radarPage" role="tab">雷達週計劃</button>
+</div>
+</nav><div id="scorePage"><div aria-label="角色快速切換" class="pageRoleSwitch" id="scoreRoleSwitch"></div><section class="card hero"><div class="scoreSettingGroup"><div class="scoreSettingGroupTitle">🔗 共用設定</div><div class="summaryRows"><div class="targetSetting"><input id="targetMode" type="hidden" value="preset"/><div aria-label="目標積分方式" class="targetMode modes" role="group"><button class="active" data-target-mode="preset" type="button">預設目標</button><button data-target-mode="manual" type="button">手動輸入</button><div class="targetInputWrap" id="targetPresetWrap"><select class="settingControl" id="target"><option value="20000">20,000</option><option value="80000">80,000</option><option value="300000">300,000</option><option value="550000">550,000</option><option value="840000">840,000</option><option value="1500000">1,500,000</option><option value="2200000">2,200,000</option><option value="3000000">3,000,000</option><option selected="" value="6000000">6,000,000</option></select></div><div class="targetInputWrap" hidden="" id="targetManualWrap"><input autocomplete="off" class="settingControl" id="targetManual" inputmode="numeric" placeholder="請輸入目標積分" type="text"/></div></div></div><div class="summaryRow"><span>目前積分</span><input autocomplete="off" class="settingControl" id="current" inputmode="numeric" type="text"/></div><div class="summaryRow"><span>預計最終積分</span><b class="finalValue" id="final">0</b></div></div></div><div class="scoreSettingDivider"></div><div class="scoreSettingGroup"><div class="scoreSettingGroupTitle">👤 角色設定</div><div class="scoreRoleSettingRow"><span>設定積分加成</span><button class="bonusBtn" id="bonusBtn">設定</button></div><div class="scoreRoleSettingRow"><span>士兵訓練設定</span><button class="bonusBtn" id="soldierSettingBtn">設定</button></div></div></section>
 <div class="dayTabs"><button class="dayTab active" data-index="0">星期一</button><button class="dayTab" data-index="1">星期二</button><button class="dayTab" data-index="2">星期三</button><button class="dayTab" data-index="3">星期四</button><button class="dayTab" data-index="4">星期五</button></div>
-<section class="dayPanel card" data-day="星期一" style="display:block"><div class="dayHeader"><span>星期一</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource" data-score="20" data-cat="blueprint"><div class="name">改裝圖紙</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="5000" data-cat="wrench"><div class="name">扳手</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="5000" data-cat="none"><div class="name">雷達</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><details><summary>外裝模組（組件）　⌄</summary><div class="row resource" data-score="500" data-cat="none"><div class="name">1級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1500" data-cat="none"><div class="name">2級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="4500" data-cat="none"><div class="name">3級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="13500" data-cat="none"><div class="name">4級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="40500" data-cat="none"><div class="name">5級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="121500" data-cat="none"><div class="name">6級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="364500" data-cat="none"><div class="name">7級外裝模組（組件）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></details><details><summary>戰術插片（晶片）　⌄</summary><div class="row resource" data-score="3000" data-cat="none"><div class="name">綠色戰術插片（晶片）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="12500" data-cat="none"><div class="name">藍色戰術插片（晶片）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="50000" data-cat="none"><div class="name">紫色戰術插片（晶片）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="240000" data-cat="none"><div class="name">橙色戰術插片（晶片）</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></details><details><summary>瘦瘦　⌄</summary><div class="row resource" data-score="500" data-cat="wild"><div class="name">瘦瘦1-10</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="600" data-cat="wild"><div class="name">瘦瘦11-20</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="700" data-cat="wild"><div class="name">瘦瘦21-30</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="800" data-cat="wild"><div class="name">瘦瘦31-40</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1000" data-cat="wild"><div class="name">瘦瘦41-50</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1200" data-cat="wild"><div class="name">瘦瘦51-60</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></details><details><summary>胖胖　⌄</summary><div class="row resource" data-score="1000" data-cat="wild"><div class="name">胖胖1-10</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1200" data-cat="wild"><div class="name">胖胖11-20</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1400" data-cat="wild"><div class="name">胖胖21-30</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1600" data-cat="wild"><div class="name">胖胖31-40</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="2000" data-cat="wild"><div class="name">胖胖41-50</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="2400" data-cat="wild"><div class="name">胖胖51-60</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></details><div class="row resource" data-score="30" data-cat="none"><div class="name infoAnchor">鑽石禮包 <span class="info" data-info="infoDiamond" role="button" aria-label="鑽石禮包說明">i</span><span class="infoFlyout" id="infoDiamond">購買含鑽石的禮包，每獲得 1 顆鑽石可獲得 30 積分。<br><br>此積分不受千夏及聯盟表彰的積分加成影響。</span></div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="3" data-cat="gather"><div class="name">採集1000Z幣</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1" data-cat="gather"><div class="name">採集1000木頭/電/食物</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期二" style="display:none"><div class="dayHeader"><span>星期二</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource accelResource" data-score="40" data-cat="accel"><div class="name infoAnchor">建造加速 <span class="info" data-info="infoBuildAccel" role="button" aria-label="建造加速說明">i</span><span class="infoFlyout" id="infoBuildAccel">加速時間請輸入「天 : 時 : 分」。<br><br>例如：0 : 2 : 0 = 使用 2 小時加速。<br><br>系統會依使用的加速時間及目前設定的積分加成計算加速積分。</span></div><span class="timeInput"><input class="d" type="number" min="0" inputmode="numeric"><span>:</span><input class="h" type="number" min="0" max="23" inputmode="numeric"><span>:</span><input class="m" type="number" min="0" max="59" inputmode="numeric"></span><div class="single">40</div><div class="need">0:0:0</div></div><div class="row resource" data-score="0.1" data-cat="building"><div class="name infoAnchor">建築戰力 <span class="info" data-info="infoBuilding" role="button" aria-label="建築戰力說明">i</span><span class="infoFlyout" id="infoBuilding">填入升級前後增加的建築戰力。<br><br>例如：建築等級 1 戰力為 100，升級至等級 2 戰力為 300，則增加建築戰力為：300 − 100 = 200。</span></div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="60000" data-cat="none"><div class="name">橙色懸賞任務</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="4000" data-cat="none"><div class="name">鍛造石</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="100000" data-cat="none"><div class="name">脈衝模組</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="40000" data-cat="none"><div class="name">橙色避難</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="10000" data-cat="none"><div class="name">紫色避難</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="2000" data-cat="none"><div class="name">藍色避難</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="30" data-cat="none"><div class="name">鑽石禮包</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期三" style="display:none"><div class="dayHeader"><span>星期三</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource accelResource" data-score="30" data-cat="accel"><div class="name infoAnchor">科技加速 <span class="info" data-info="infoTechAccel" role="button" aria-label="科技加速說明">i</span><span class="infoFlyout" id="infoTechAccel">加速時間請輸入「天 : 時 : 分」。<br><br>例如：0 : 2 : 0 = 使用 2 小時加速。<br><br>系統會依使用的加速時間及目前設定的積分加成計算加速積分。</span></div><span class="timeInput"><input class="d" type="number" min="0" inputmode="numeric"><span>:</span><input class="h" type="number" min="0" max="23" inputmode="numeric"><span>:</span><input class="m" type="number" min="0" max="59" inputmode="numeric"></span><div class="single">30</div><div class="need">0:0:0</div></div><div class="row resource" data-score="0.1" data-cat="tech"><div class="name infoAnchor">科技戰力 <span class="info" data-info="infoTech" role="button" aria-label="科技戰力說明">i</span><span class="infoFlyout" id="infoTech">填入升級前後增加的科技戰力。<br><br>例如：科技等級 1 戰力為 100，升級至等級 2 戰力為 300，則增加科技戰力為：300 − 100 = 200。</span></div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="40" data-cat="none"><div class="name">警徽</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="75000" data-cat="none"><div class="name">貨車</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="30" data-cat="none"><div class="name">鑽石禮包</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期四" style="display:none"><div class="dayHeader"><span>星期四</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource" data-score="5000" data-cat="none"><div class="name">橙碎</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="1750" data-cat="none"><div class="name">紫碎</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="500" data-cat="none"><div class="name">藍碎</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="5000" data-cat="none"><div class="name">專屬裝備碎片</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="500" data-cat="hero"><div class="name">高級招募</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="400" data-cat="energy"><div class="name">能源核心</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="300000" data-cat="none"><div class="name">消耗橙裝晉升</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="0.3" data-cat="none"><div class="name infoAnchor">強化合金 <span class="info" data-info="infoAlloy" role="button" aria-label="強化合金說明">i</span><span class="infoFlyout" id="infoAlloy">每次計算以 10 個的倍數強化合金計分。<br><br>例如使用 10、20、30 個都有積分；若使用 15 個，則 10 個計分、剩餘 5 個不計分。</span></div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="10" data-cat="none"><div class="name">橙書</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="10000" data-cat="none"><div class="name">覺醒徽章</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="10000" data-cat="none"><div class="name">突破水晶</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-score="30" data-cat="none"><div class="name">鑽石禮包</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期五" style="display:none">
+<section class="dayPanel card" data-day="星期一" style="display:block"><div class="dayHeader"><span>星期一</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource" data-cat="blueprint" data-score="20"><div class="name">改裝圖紙</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="wrench" data-score="5000"><div class="name">扳手</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="5000"><div class="name">雷達</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><details><summary>外裝模組（組件）　⌄</summary><div class="row resource" data-cat="none" data-score="500"><div class="name">1級外裝模組（組件）</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="1500"><div class="name">2級外裝模組（組件）</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="4500"><div class="name">3級外裝模組（組件）</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="13500"><div class="name">4級外裝模組（組件）</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="40500"><div class="name">5級外裝模組（組件）</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="121500"><div class="name">6級外裝模組（組件）</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="364500"><div class="name">7級外裝模組（組件）</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div></details><details><summary>戰術插片（晶片）　⌄</summary><div class="row resource" data-cat="none" data-score="3000"><div class="name">綠色戰術插片（晶片）</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="12500"><div class="name">藍色戰術插片（晶片）</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="50000"><div class="name">紫色戰術插片（晶片）</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="240000"><div class="name">橙色戰術插片（晶片）</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div></details><details><summary>瘦瘦　⌄</summary><div class="row resource" data-cat="wild" data-score="500"><div class="name">瘦瘦1-10</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="wild" data-score="600"><div class="name">瘦瘦11-20</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="wild" data-score="700"><div class="name">瘦瘦21-30</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="wild" data-score="800"><div class="name">瘦瘦31-40</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="wild" data-score="1000"><div class="name">瘦瘦41-50</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="wild" data-score="1200"><div class="name">瘦瘦51-60</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div></details><details><summary>胖胖　⌄</summary><div class="row resource" data-cat="wild" data-score="1000"><div class="name">胖胖1-10</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="wild" data-score="1200"><div class="name">胖胖11-20</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="wild" data-score="1400"><div class="name">胖胖21-30</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="wild" data-score="1600"><div class="name">胖胖31-40</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="wild" data-score="2000"><div class="name">胖胖41-50</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="wild" data-score="2400"><div class="name">胖胖51-60</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div></details><div class="row resource" data-cat="none" data-score="30"><div class="name infoAnchor">鑽石禮包 <span aria-label="鑽石禮包說明" class="info" data-info="infoDiamond" role="button">i</span><span class="infoFlyout" id="infoDiamond">購買含鑽石的禮包，每獲得 1 顆鑽石可獲得 30 積分。<br/><br/>此積分不受千夏及聯盟表彰的積分加成影響。</span></div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="gather" data-score="3"><div class="name">採集1000Z幣</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="gather" data-score="1"><div class="name">採集1000木頭/電/食物</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期二" style="display:none"><div class="dayHeader"><span>星期二</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource accelResource" data-cat="accel" data-score="40"><div class="name infoAnchor">建造加速 <span aria-label="建造加速說明" class="info" data-info="infoBuildAccel" role="button">i</span><span class="infoFlyout" id="infoBuildAccel">加速時間請輸入「天 : 時 : 分」。<br/><br/>例如：0 : 2 : 0 = 使用 2 小時加速。<br/><br/>系統會依使用的加速時間及目前設定的積分加成計算加速積分。</span></div><span class="timeInput"><input class="d" inputmode="numeric" min="0" type="number"/><span>:</span><input class="h" inputmode="numeric" max="23" min="0" type="number"/><span>:</span><input class="m" inputmode="numeric" max="59" min="0" type="number"/></span><div class="single">40</div><div class="need">0:0:0</div></div><div class="row resource" data-cat="building" data-score="0.1"><div class="name infoAnchor">建築戰力 <span aria-label="建築戰力說明" class="info" data-info="infoBuilding" role="button">i</span><span class="infoFlyout" id="infoBuilding">填入升級前後增加的建築戰力。<br/><br/>例如：建築等級 1 戰力為 100，升級至等級 2 戰力為 300，則增加建築戰力為：300 − 100 = 200。</span></div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="60000"><div class="name">橙色懸賞任務</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="4000"><div class="name">鍛造石</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="100000"><div class="name">脈衝模組</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="40000"><div class="name">橙色避難</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="10000"><div class="name">紫色避難</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="2000"><div class="name">藍色避難</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="30"><div class="name">鑽石禮包</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期三" style="display:none"><div class="dayHeader"><span>星期三</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource accelResource" data-cat="accel" data-score="30"><div class="name infoAnchor">科技加速 <span aria-label="科技加速說明" class="info" data-info="infoTechAccel" role="button">i</span><span class="infoFlyout" id="infoTechAccel">加速時間請輸入「天 : 時 : 分」。<br/><br/>例如：0 : 2 : 0 = 使用 2 小時加速。<br/><br/>系統會依使用的加速時間及目前設定的積分加成計算加速積分。</span></div><span class="timeInput"><input class="d" inputmode="numeric" min="0" type="number"/><span>:</span><input class="h" inputmode="numeric" max="23" min="0" type="number"/><span>:</span><input class="m" inputmode="numeric" max="59" min="0" type="number"/></span><div class="single">30</div><div class="need">0:0:0</div></div><div class="row resource" data-cat="tech" data-score="0.1"><div class="name infoAnchor">科技戰力 <span aria-label="科技戰力說明" class="info" data-info="infoTech" role="button">i</span><span class="infoFlyout" id="infoTech">填入升級前後增加的科技戰力。<br/><br/>例如：科技等級 1 戰力為 100，升級至等級 2 戰力為 300，則增加科技戰力為：300 − 100 = 200。</span></div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="40"><div class="name">警徽</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="75000"><div class="name">貨車</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="30"><div class="name">鑽石禮包</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期四" style="display:none"><div class="dayHeader"><span>星期四</span><button class="clearDay">清除次數</button></div><div class="body"><div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div><div class="row resource" data-cat="none" data-score="5000"><div class="name">橙碎</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="1750"><div class="name">紫碎</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="500"><div class="name">藍碎</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="5000"><div class="name">專屬裝備碎片</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="hero" data-score="500"><div class="name">高級招募</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="energy" data-score="400"><div class="name">能源核心</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="300000"><div class="name">消耗橙裝晉升</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="0.3"><div class="name infoAnchor">強化合金 <span aria-label="強化合金說明" class="info" data-info="infoAlloy" role="button">i</span><span class="infoFlyout" id="infoAlloy">每次計算以 10 個的倍數強化合金計分。<br/><br/>例如使用 10、20、30 個都有積分；若使用 15 個，則 10 個計分、剩餘 5 個不計分。</span></div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="10"><div class="name">橙書</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="10000"><div class="name">覺醒徽章</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="10000"><div class="name">突破水晶</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div><div class="row resource" data-cat="none" data-score="30"><div class="name">鑽石禮包</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div></div></section><section class="dayPanel card" data-day="星期五" style="display:none">
 <div class="dayHeader"><span>星期五</span><button class="clearDay">清除次數</button></div>
 <div class="body">
 <div class="tablehead"><div>項目</div><div>次數/時間</div><div>單次積分</div><div>尚須投入</div></div>
-<div class="row resource accelResource" data-score="40" data-cat="accel"><div class="name infoAnchor">任意加速 <span class="info" data-info="infoAnyAccel" role="button" aria-label="任意加速說明">i</span><span class="infoFlyout" id="infoAnyAccel">加速時間請輸入「天 : 時 : 分」。<br><br>例如：0 : 2 : 0 = 使用 2 小時加速。<br><br>系統會依使用的加速時間及目前設定的積分加成計算加速積分。</span></div><div class="timeGroup dailyTime"><input class="d" type="number" min="0" inputmode="numeric" aria-label="天"><span>:</span><input class="h" type="number" min="0" max="23" inputmode="numeric" aria-label="小時"><span>:</span><input class="m" type="number" min="0" max="59" inputmode="numeric" aria-label="分鐘"></div><div class="single">40</div><div class="need">0:0:0</div></div>
-<div class="row resource" data-score="1" data-cat="building"><div class="name infoAnchor">建築戰力 <span class="info" data-info="infoBuildingPowerFri" role="button" aria-label="建築戰力說明">i</span><span class="infoFlyout" id="infoBuildingPowerFri">填入升級前後增加的建築戰力。<br><br>例如：建築等級 1 戰力為 100，升級至等級 2 戰力為 300，則增加建築戰力為：300 − 100 = 200。</span></div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div>
-<div class="row resource" data-score="1" data-cat="tech"><div class="name infoAnchor">科技戰力 <span class="info" data-info="infoTechPowerFri" role="button" aria-label="科技戰力說明">i</span><span class="infoFlyout" id="infoTechPowerFri">填入升級前後增加的科技戰力。<br><br>例如：科技等級 1 戰力為 100，升級至等級 2 戰力為 300，則增加科技戰力為：300 − 100 = 200。</span></div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div>
-<div class="row resource" data-score="5000" data-cat="none"><div class="name">雷達</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div>
-<div class="row specialResource" data-special="one"><div class="name">生產一隻士兵</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div>
-<div class="row specialResource" data-special="full"><div class="name">生產一批上限</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div>
-<div class="row specialResource" data-special="12"><div class="name">生產一輪</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div>
-<div class="row specialResource" data-special="instant"><div class="name">立即生產一批上限</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div>
-<div class="row specialResource" data-special="assault"><div class="name">立即生產一隻突擊</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div>
-<div class="row specialResource" data-special="archer"><div class="name">立即生產一隻射手</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div>
-<div class="row specialResource" data-special="knight"><div class="name">立即生產一隻騎士</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">0</div><div class="need">0</div></div>
-
-<div class="row resource" data-score="30" data-cat="none"><div class="name">鑽石禮包</div><input class="qty" type="number" min="0" step="1" inputmode="numeric"><div class="single">30</div><div class="need">0</div></div>
+<div class="row resource accelResource" data-cat="accel" data-score="40"><div class="name infoAnchor">任意加速 <span aria-label="任意加速說明" class="info" data-info="infoAnyAccel" role="button">i</span><span class="infoFlyout" id="infoAnyAccel">加速時間請輸入「天 : 時 : 分」。<br/><br/>例如：0 : 2 : 0 = 使用 2 小時加速。<br/><br/>系統會依使用的加速時間及目前設定的積分加成計算加速積分。</span></div><div class="timeGroup dailyTime"><input aria-label="天" class="d" inputmode="numeric" min="0" type="number"/><span>:</span><input aria-label="小時" class="h" inputmode="numeric" max="23" min="0" type="number"/><span>:</span><input aria-label="分鐘" class="m" inputmode="numeric" max="59" min="0" type="number"/></div><div class="single">40</div><div class="need">0:0:0</div></div>
+<div class="row resource" data-cat="building" data-score="1"><div class="name infoAnchor">建築戰力 <span aria-label="建築戰力說明" class="info" data-info="infoBuildingPowerFri" role="button">i</span><span class="infoFlyout" id="infoBuildingPowerFri">填入升級前後增加的建築戰力。<br/><br/>例如：建築等級 1 戰力為 100，升級至等級 2 戰力為 300，則增加建築戰力為：300 − 100 = 200。</span></div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div>
+<div class="row resource" data-cat="tech" data-score="1"><div class="name infoAnchor">科技戰力 <span aria-label="科技戰力說明" class="info" data-info="infoTechPowerFri" role="button">i</span><span class="infoFlyout" id="infoTechPowerFri">填入升級前後增加的科技戰力。<br/><br/>例如：科技等級 1 戰力為 100，升級至等級 2 戰力為 300，則增加科技戰力為：300 − 100 = 200。</span></div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div>
+<div class="row resource" data-cat="none" data-score="5000"><div class="name">雷達</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div>
+<div class="row specialResource" data-special="one"><div class="name">生產一隻士兵</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div>
+<div class="row specialResource" data-special="full"><div class="name">生產一批上限</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div>
+<div class="row specialResource" data-special="12"><div class="name">生產一輪</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div>
+<div class="row specialResource" data-special="instant"><div class="name">立即生產一批上限</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div>
+<div class="row specialResource" data-special="assault"><div class="name">立即生產一隻突擊</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div>
+<div class="row specialResource" data-special="archer"><div class="name">立即生產一隻射手</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div>
+<div class="row specialResource" data-special="knight"><div class="name">立即生產一隻騎士</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">0</div><div class="need">0</div></div>
+<div class="row resource" data-cat="none" data-score="30"><div class="name">鑽石禮包</div><input class="qty" inputmode="numeric" min="0" step="1" type="number"/><div class="single">30</div><div class="need">0</div></div>
 </div>
 </section></div>
-<section id="helpPage" class="helpPage" style="display:none"><div id="helpRoleJump" class="pageRoleSwitch" aria-label="角色快速切換"></div><div class="helpCard"><div class="helpSettingGroupTitle">🔗 共用設定</div><div class="globalHelp"><div class="globalLabel">點手數量</div><div class="stepper"><button type="button" data-step="-5">−5</button><button type="button" data-step="-1">−1</button><input id="helpClicks" type="number" min="0" max="80" step="1" value="5" inputmode="numeric"><button type="button" data-step="1">＋1</button><button type="button" data-step="5">＋5</button></div><div class="globalChecks"><label class="checkPill"><input id="helpRose" type="checkbox" checked>玫瑰花</label><label class="checkPill"><input id="helpDisc" type="checkbox" checked>光碟</label></div></div><div class="helpSettingGroupTitle helpRoleGroupTitle">👤 角色設定</div><div id="helpRoles" class="helpRoles"></div></section><div class="guideOverlay" id="guideOverlay" aria-hidden="true">
-  <div class="guideShade"></div>
-  <div class="guideFocus" id="guideFocus"></div>
-  <div class="guideCard" id="guideCard">
-    <div class="guideStep" id="guideStep"></div>
-    <h3 id="guideTitle"></h3>
-    <p id="guideText"></p>
-    <div class="guideActions">
-      <button type="button" class="guideSkip" id="guideLater">稍後再看</button>
-      <button type="button" id="guidePrev">上一步</button>
-      <button type="button" class="guideNext" id="guideNext">下一步</button>
-    </div>
-  </div>
+<section class="helpPage" id="helpPage" style="display:none"><div aria-label="角色快速切換" class="pageRoleSwitch" id="helpRoleJump"></div><div class="helpCard"><div class="helpSettingGroupTitle">🔗 共用設定</div><div class="globalHelp"><div class="globalLabel">點手數量</div><div class="stepper"><button data-step="-5" type="button">−5</button><button data-step="-1" type="button">−1</button><input id="helpClicks" inputmode="numeric" max="80" min="0" step="1" type="number" value="5"/><button data-step="1" type="button">＋1</button><button data-step="5" type="button">＋5</button></div><div class="globalChecks"><label class="checkPill"><input checked="" id="helpRose" type="checkbox"/>玫瑰花</label><label class="checkPill"><input checked="" id="helpDisc" type="checkbox"/>光碟</label></div></div><div class="helpSettingGroupTitle helpRoleGroupTitle">👤 角色設定</div><div class="helpRoles" id="helpRoles"></div></div></section><div aria-hidden="true" class="guideOverlay" id="guideOverlay">
+<div class="guideShade"></div>
+<div class="guideFocus" id="guideFocus"></div>
+<div class="guideCard" id="guideCard">
+<div class="guideStep" id="guideStep"></div>
+<h3 id="guideTitle"></h3>
+<p id="guideText"></p>
+<div class="guideActions">
+<button class="guideSkip" id="guideLater" type="button">稍後再看</button>
+<button id="guidePrev" type="button">上一步</button>
+<button class="guideNext" id="guideNext" type="button">下一步</button>
 </div>
-<div class="modalOverlay" id="bonusModal"><div class="modal"><div class="modalHead"><h2>設定積分加成</h2><button class="closeBtn" data-close="bonusModal">×</button></div><div class="modalBody"><div class="settingBlock" style="border-top:0;padding-top:0;margin-top:0"><div class="settingTitle"><span class="chikaTitle">🌸 千夏 <span class="info" id="chikaInfo" role="button" aria-label="千夏說明">i</span><span class="chikaFlyout" id="chikaFlyout">查看千夏第三技能，填入聯盟對決積分加成。</span></span><div class="unitInput chikaSettingWrap"><input id="chika" class="settingControl" type="number" min="0" step="0.01" inputmode="decimal"><span>%</span></div></div></div><div class="settingBlock"><div class="settingTitle"><span class="infoAnchor">⭐ 聯盟表彰 <span class="info" data-info="infoAlliance" role="button" aria-label="聯盟表彰說明">i</span><span class="infoFlyout" id="infoAlliance">聯盟表彰各項加成會依對應的積分項目計算。<br>「所有積分」及各分類加成可以同時套用。<br><br>遊戲內查看方式：<br>打開「科技升級」面板，點擊時間旁的「ⓘ」，查看「聯盟對決屬性」，再將相關數值填入這裡。</span></span><label class="check"><input id="allDone" type="checkbox">全部完成</label></div><details open><summary>聯盟表彰加成項目</summary><div class="brow"><div>所有積分</div><div class="unitInput"><input class="bonus" data-key="all" data-max="300" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>採集資源積分</div><div class="unitInput"><input class="bonus" data-key="gather" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>擊敗野外生物積分</div><div class="unitInput"><input class="bonus" data-key="wild" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗改裝圖紙積分</div><div class="unitInput"><input class="bonus" data-key="blueprint" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗黃金扳手積分</div><div class="unitInput"><input class="bonus" data-key="wrench" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>建築戰力積分</div><div class="unitInput"><input class="bonus" data-key="building" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>科技戰力積分</div><div class="unitInput"><input class="bonus" data-key="tech" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>招募英雄積分</div><div class="unitInput"><input class="bonus" data-key="hero" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div>消耗能源核心積分</div><div class="unitInput"><input class="bonus" data-key="energy" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div><div class="brow"><div class="infoAnchor">訓練積分 <span class="info" data-info="infoTraining" role="button" aria-label="訓練積分說明">i</span><span class="infoFlyout" id="infoTraining">訓練積分會提升每生產 1 隻士兵所獲得的士兵積分。<br><br>例如 T10 基礎士兵積分為 250，訓練積分為 100%：<br>250 × (1 + 100%) = 500 分／隻</span></div><div class="unitInput"><input class="bonus" data-key="training" data-max="100" type="number" min="0" step="1" inputmode="numeric"><span>%</span></div></div></details></div></div></div></div>
-<div class="modalOverlay" id="soldierModal"><div class="modal soldierModal"><div class="modalHead"><h2>士兵訓練設定</h2><button class="closeBtn" data-close="soldierModal">×</button></div><div class="modalBody"><div class="soldierInputs soldierModalInputs"><div class="soldierInputRow"><label>士兵等級</label><select id="soldierTier" class="settingControl"><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option><option value="T7">T7</option><option value="T8">T8</option><option value="T9">T9</option><option value="T10" selected>T10</option></select></div><div class="soldierInputRow"><label>生產一輪時間</label><div class="timeGroup soldierTime"><input id="twelveH" class="settingControl" type="number" min="0" max="99" value="11" inputmode="numeric" aria-label="小時"><span>:</span><input id="twelveM" class="settingControl" type="number" min="0" max="59" value="45" inputmode="numeric" aria-label="分鐘"><span>:</span><input id="twelveS" class="settingControl" type="number" min="0" max="59" value="0" inputmode="numeric" aria-label="秒"></div></div></div><div class="soldierTable"><div class="stHead"><span>兵種</span><span>單次生產<br>上限</span><span>訓練加速</span><span>生產上限<br>時間</span><span>一輪生產量</span></div><div class="stRow"><span>突擊</span><input class="settingControl troopCount" type="number" min="0" value="177" inputmode="numeric"><span class="unitInput"><input class="settingControl troopSpeed" type="number" min="0" step="0.01" value="529" inputmode="decimal"><span>%</span></span><span class="prodTime">0:0:0</span><span class="twelveQty">0</span></div><div class="stRow"><span>射手</span><input class="settingControl troopCount" type="number" min="0" value="182" inputmode="numeric"><span class="unitInput"><input class="settingControl troopSpeed" type="number" min="0" step="0.01" value="525" inputmode="decimal"><span>%</span></span><span class="prodTime">0:0:0</span><span class="twelveQty">0</span></div><div class="stRow"><span>騎士</span><input class="settingControl troopCount" type="number" min="0" value="171" inputmode="numeric"><span class="unitInput"><input class="settingControl troopSpeed" type="number" min="0" step="0.01" value="526" inputmode="decimal"><span>%</span></span><span class="prodTime">0:0:0</span><span class="twelveQty">0</span></div><div class="stTotal"><span>合計</span><span id="soldierTotalCount">0</span><span>—</span><span>—</span><span id="soldierTotalRound">0</span></div></div><div class="soldierExplain"><div class="soldierExplainTitle">計算說明</div><p><b>生產：</b>只獲得士兵積分，不使用加速。</p><p><b>立即生產：</b>使用加速立即完成士兵生產，同時獲得加速積分及士兵積分。</p><p><b>單次生產上限：</b>每個軍營單次最多可以生產的士兵數量。</p><p><b>一輪生產量：</b>依你設定的生產一輪時間，計算這一輪可以生產的士兵數量；生產量不會超過該軍營的單次生產上限。</p><p><b>預設生產一輪時間為 11 小時 45 分鐘：</b>方便在下一次任務前預留收割時間；也可以依自己的操作時間調整。</p></div></div></div></div>
+</div>
+</div>
+<div class="modalOverlay" id="bonusModal"><div class="modal"><div class="modalHead"><h2>設定積分加成</h2><button class="closeBtn" data-close="bonusModal">×</button></div><div class="modalBody"><div class="settingBlock" style="border-top:0;padding-top:0;margin-top:0"><div class="settingTitle"><span class="chikaTitle">🌸 千夏 <span aria-label="千夏說明" class="info" id="chikaInfo" role="button">i</span><span class="chikaFlyout" id="chikaFlyout">查看千夏第三技能，填入聯盟對決積分加成。</span></span><div class="unitInput chikaSettingWrap"><input class="settingControl" id="chika" inputmode="decimal" min="0" step="0.01" type="number"/><span>%</span></div></div></div><div class="settingBlock"><div class="settingTitle"><span class="infoAnchor">⭐ 聯盟表彰 <span aria-label="聯盟表彰說明" class="info" data-info="infoAlliance" role="button">i</span><span class="infoFlyout" id="infoAlliance">聯盟表彰各項加成會依對應的積分項目計算。<br/>「所有積分」及各分類加成可以同時套用。<br/><br/>遊戲內查看方式：<br/>打開「科技升級」面板，點擊時間旁的「ⓘ」，查看「聯盟對決屬性」，再將相關數值填入這裡。</span></span><label class="check"><input id="allDone" type="checkbox"/>全部完成</label></div><details open=""><summary>聯盟表彰加成項目</summary><div class="brow"><div>所有積分</div><div class="unitInput"><input class="bonus" data-key="all" data-max="300" inputmode="numeric" min="0" step="1" type="number"/><span>%</span></div></div><div class="brow"><div>採集資源積分</div><div class="unitInput"><input class="bonus" data-key="gather" data-max="100" inputmode="numeric" min="0" step="1" type="number"/><span>%</span></div></div><div class="brow"><div>擊敗野外生物積分</div><div class="unitInput"><input class="bonus" data-key="wild" data-max="100" inputmode="numeric" min="0" step="1" type="number"/><span>%</span></div></div><div class="brow"><div>消耗改裝圖紙積分</div><div class="unitInput"><input class="bonus" data-key="blueprint" data-max="100" inputmode="numeric" min="0" step="1" type="number"/><span>%</span></div></div><div class="brow"><div>消耗黃金扳手積分</div><div class="unitInput"><input class="bonus" data-key="wrench" data-max="100" inputmode="numeric" min="0" step="1" type="number"/><span>%</span></div></div><div class="brow"><div>建築戰力積分</div><div class="unitInput"><input class="bonus" data-key="building" data-max="100" inputmode="numeric" min="0" step="1" type="number"/><span>%</span></div></div><div class="brow"><div>科技戰力積分</div><div class="unitInput"><input class="bonus" data-key="tech" data-max="100" inputmode="numeric" min="0" step="1" type="number"/><span>%</span></div></div><div class="brow"><div>招募英雄積分</div><div class="unitInput"><input class="bonus" data-key="hero" data-max="100" inputmode="numeric" min="0" step="1" type="number"/><span>%</span></div></div><div class="brow"><div>消耗能源核心積分</div><div class="unitInput"><input class="bonus" data-key="energy" data-max="100" inputmode="numeric" min="0" step="1" type="number"/><span>%</span></div></div><div class="brow"><div class="infoAnchor">訓練積分 <span aria-label="訓練積分說明" class="info" data-info="infoTraining" role="button">i</span><span class="infoFlyout" id="infoTraining">訓練積分會提升每生產 1 隻士兵所獲得的士兵積分。<br/><br/>例如 T10 基礎士兵積分為 250，訓練積分為 100%：<br/>250 × (1 + 100%) = 500 分／隻</span></div><div class="unitInput"><input class="bonus" data-key="training" data-max="100" inputmode="numeric" min="0" step="1" type="number"/><span>%</span></div></div></details></div></div></div></div>
+<div class="modalOverlay" id="soldierModal"><div class="modal soldierModal"><div class="modalHead"><h2>士兵訓練設定</h2><button class="closeBtn" data-close="soldierModal">×</button></div><div class="modalBody"><div class="soldierInputs soldierModalInputs"><div class="soldierInputRow"><label>士兵等級</label><select class="settingControl" id="soldierTier"><option value="T1">T1</option><option value="T2">T2</option><option value="T3">T3</option><option value="T4">T4</option><option value="T5">T5</option><option value="T6">T6</option><option value="T7">T7</option><option value="T8">T8</option><option value="T9">T9</option><option selected="" value="T10">T10</option></select></div><div class="soldierInputRow"><label>生產一輪時間</label><div class="timeGroup soldierTime"><input aria-label="小時" class="settingControl" id="twelveH" inputmode="numeric" max="99" min="0" type="number" value="11"/><span>:</span><input aria-label="分鐘" class="settingControl" id="twelveM" inputmode="numeric" max="59" min="0" type="number" value="45"/><span>:</span><input aria-label="秒" class="settingControl" id="twelveS" inputmode="numeric" max="59" min="0" type="number" value="0"/></div></div></div><div class="soldierTable"><div class="stHead"><span>兵種</span><span>單次生產<br/>上限</span><span>訓練加速</span><span>生產上限<br/>時間</span><span>一輪生產量</span></div><div class="stRow"><span>突擊</span><input class="settingControl troopCount" inputmode="numeric" min="0" type="number" value="177"/><span class="unitInput"><input class="settingControl troopSpeed" inputmode="decimal" min="0" step="0.01" type="number" value="529"/><span>%</span></span><span class="prodTime">0:0:0</span><span class="twelveQty">0</span></div><div class="stRow"><span>射手</span><input class="settingControl troopCount" inputmode="numeric" min="0" type="number" value="182"/><span class="unitInput"><input class="settingControl troopSpeed" inputmode="decimal" min="0" step="0.01" type="number" value="525"/><span>%</span></span><span class="prodTime">0:0:0</span><span class="twelveQty">0</span></div><div class="stRow"><span>騎士</span><input class="settingControl troopCount" inputmode="numeric" min="0" type="number" value="171"/><span class="unitInput"><input class="settingControl troopSpeed" inputmode="decimal" min="0" step="0.01" type="number" value="526"/><span>%</span></span><span class="prodTime">0:0:0</span><span class="twelveQty">0</span></div><div class="stTotal"><span>合計</span><span id="soldierTotalCount">0</span><span>—</span><span>—</span><span id="soldierTotalRound">0</span></div></div><div class="soldierExplain"><div class="soldierExplainTitle">計算說明</div><p><b>生產：</b>只獲得士兵積分，不使用加速。</p><p><b>立即生產：</b>使用加速立即完成士兵生產，同時獲得加速積分及士兵積分。</p><p><b>單次生產上限：</b>每個軍營單次最多可以生產的士兵數量。</p><p><b>一輪生產量：</b>依你設定的生產一輪時間，計算這一輪可以生產的士兵數量；生產量不會超過該軍營的單次生產上限。</p><p><b>預設生產一輪時間為 11 小時 45 分鐘：</b>方便在下一次任務前預留收割時間；也可以依自己的操作時間調整。</p></div></div></div></div>
 <div class="modalOverlay" id="roleModal"><div class="modal"><div class="modalHead"><h2>角色</h2><button class="closeBtn" data-close="roleModal">×</button></div><div class="modalBody"><p class="roleHint">切換角色會帶出該角色上次保存的輸入資料。</p><div class="roleList" id="roleList"></div><button class="addRole" id="addRole">＋ 新增角色</button></div></div></div>
-<section id="radarPage" class="radarPage" aria-label="雷達週計劃"><div class="radarInner"><div class="pageRoleSwitch" id="radarRoleSwitch" aria-label="角色快速切換"></div>
+<section aria-label="雷達週計劃" class="radarPage" id="radarPage"><div class="radarInner"><div aria-label="角色快速切換" class="pageRoleSwitch" id="radarRoleSwitch"></div>
 <div class="panel setup-panel">
 <div class="radarSettingGroup radarCommonSettings">
-  <h3 class="radarSettingGroupTitle">🔗 共用設定</h3>
-  <label>時間模式</label>
-  <div class="modes"><label><input type="radio" name="timeMode" value="local" checked> 當地時間</label><label><input type="radio" name="timeMode" value="game"> 遊戲時間</label></div>
-  <label>玩家可操作時間</label>
-  <div class="modes"><label><input type="radio" name="applyMode" value="same" checked> 每天相同</label><label><input type="radio" name="applyMode" value="custom"> 每天個別設定</label></div>
-  <div id="sameTimes"></div>
-  <div id="customTimes" hidden></div>
+<h3 class="radarSettingGroupTitle">🔗 共用設定</h3>
+<label>時間模式</label>
+<div class="modes"><label><input checked="" name="timeMode" type="radio" value="local"/> 當地時間</label><label><input name="timeMode" type="radio" value="game"/> 遊戲時間</label></div>
+<label>玩家可操作時間</label>
+<div class="modes"><label><input checked="" name="applyMode" type="radio" value="same"/> 每天相同</label><label><input name="applyMode" type="radio" value="custom"/> 每天個別設定</label></div>
+<div id="sameTimes"></div>
+<div hidden="" id="customTimes"></div>
 </div>
 <div class="setup-divider"></div>
 <div class="radarSettingGroup radarRoleSettings">
-  <h3 class="radarSettingGroupTitle">👤 角色設定</h3>
-  <label>勞拉星等</label>
-  <div class="laura-toggle-row"><label class="switch-label"><input type="checkbox" id="lauraToggle" checked><span class="switch"></span><span id="lauraStatus">有勞拉</span></label><div id="lauraDetail"><select id="lauraStar" class="setting-select" aria-label="勞拉星等"><option value="0">0★（+5）</option><option value="1">1★（+10）</option><option value="2">2★（+10）</option><option value="3">3★（+10）</option><option value="4" selected>4★（+20）</option><option value="5">5★（+20）</option></select></div></div>
-  <label for="max">儲存上限</label><input id="max" type="number" min="1" step="1" placeholder="例如 30">
+<h3 class="radarSettingGroupTitle">👤 角色設定</h3>
+<label>勞拉星等</label>
+<div class="laura-toggle-row"><label class="switch-label"><input checked="" id="lauraToggle" type="checkbox"/><span class="switch"></span><span id="lauraStatus">有勞拉</span></label><div id="lauraDetail"><select aria-label="勞拉星等" class="setting-select" id="lauraStar"><option value="0">0★（+5）</option><option value="1">1★（+10）</option><option value="2">2★（+10）</option><option value="3">3★（+10）</option><option selected="" value="4">4★（+20）</option><option value="5">5★（+20）</option></select></div></div>
+<label for="max">儲存上限</label><input id="max" min="1" placeholder="例如 30" step="1" type="number"/>
 </div>
 </div>
 <div class="panel result-panel">
@@ -3126,427 +3270,10 @@ autoPlanIfReady();
 
 })();
 </script>
-<style id="v137SoldierTableLayout">
-/* v1.37：士兵表格欄位與標題換行（僅 UI，不修改任何計算／資料／事件邏輯） */
-.soldierModal .soldierTable .stHead{
-  font-size:16px;
-  line-height:1.25;
-  text-align:center;
-}
-.soldierModal .soldierTable .stHead span{
-  white-space:normal;
-}
-.soldierModal .soldierTable .stHead span:nth-child(1),
-.soldierModal .soldierTable .stHead span:nth-child(3),
-.soldierModal .soldierTable .stHead span:nth-child(5){
-  white-space:nowrap;
-}
-.soldierModal .soldierTable .stTotal{
-  font-size:16px;
-  line-height:1.3;
-}
-@media(max-width:560px){
-  .soldierModal .soldierTable .stHead{font-size:16px;}
-  .soldierModal .soldierTable .stTotal{font-size:16px;}
-}
-</style>
-
-<style id="v139RoleButtonUnifiedUI">
-/* v1.39：角色快速切換按鈕統一高度；聯盟幫助改為角色＋士兵數量同列。僅 UI，不修改任何計算、資料或事件邏輯。 */
-.pageRoleCard,
-.pageRoleCard.compact,
-#radarPage .pageRoleSwitch .pageRoleCard,
-#radarPage .pageRoleSwitch .pageRoleCard.compact{
-  height:54px !important;
-  min-height:54px !important;
-  box-sizing:border-box;
-  padding:8px 10px !important;
-  flex-direction:row !important;
-  align-items:center;
-  justify-content:flex-start;
-  gap:8px;
-  line-height:1.2;
-}
-.pageRoleCard .pageRoleName{
-  flex:1 1 auto;
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  text-align:left;
-}
-.pageRoleCard .pageRoleValue{
-  flex:0 0 auto;
-  margin-left:auto;
-  min-height:0;
-  line-height:1.2;
-  text-align:right;
-}
-#helpPage .pageRoleCard .pageRoleName{font-size:16px;}
-#helpPage .pageRoleCard .pageRoleValue{font-size:15px;}
-.siteTopRow .roleBtn{
-  min-width:0;
-  max-width:180px;
-  overflow:hidden;
-}
-.siteTopRow .roleBtn #currentRoleName{
-  min-width:0;
-  max-width:120px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  display:inline-block;
-  vertical-align:middle;
-}
-@media(max-width:560px){
-  .pageRoleCard,
-  .pageRoleCard.compact,
-  #radarPage .pageRoleSwitch .pageRoleCard,
-  #radarPage .pageRoleSwitch .pageRoleCard.compact{
-    height:54px !important;
-    min-height:54px !important;
-    padding:8px 8px !important;
-  }
-  #helpPage .pageRoleCard .pageRoleName{font-size:15px;}
-  #helpPage .pageRoleCard .pageRoleValue{font-size:14px;}
-  .siteTopRow .roleBtn{max-width:140px;}
-  .siteTopRow .roleBtn #currentRoleName{max-width:86px;}
-}
-@media(max-width:390px){
-  .pageRoleCard,
-  .pageRoleCard.compact,
-  #radarPage .pageRoleSwitch .pageRoleCard,
-  #radarPage .pageRoleSwitch .pageRoleCard.compact{
-    height:54px !important;
-    min-height:54px !important;
-    padding:8px 7px !important;
-  }
-  .siteTopRow .roleBtn{max-width:132px;}
-  .siteTopRow .roleBtn #currentRoleName{max-width:78px;}
-}
-</style>
-
-<style id="v140GlobalButtonUI">
-/* v1.40：全站一般按鈕共同 UI 統一。一般文字按鈕統一 40px；主頁籤與圓形圖示按鈕保留各自類型尺寸。僅 UI，不修改任何計算／資料／事件邏輯。 */
-:root{
-  --ui-action-height:40px;
-  --ui-action-min-height:40px;
-}
-
-/* 一般文字／操作按鈕：統一 40px */
-#scorePage .scoreRoleSettingRow .bonusBtn,
-#scorePage .dayHeader button,
-#scorePage .targetMode button,
-.guideActions button,
-.guideNavBtn,
-.roleActions button,
-.addRole,
-#helpPage button:not(.info):not(.closeBtn),
-#radarPage button:not(.info):not(.closeBtn),
-#radarPage .smallbtn,
-#radarPage .addSameTime,
-#radarPage .addTime{
-  height:var(--ui-action-height) !important;
-  min-height:var(--ui-action-min-height) !important;
-  box-sizing:border-box;
-}
-
-/* 三頁角色快速切換卡：不再有 54px 特例，統一為 40px */
-.pageRoleCard,
-.pageRoleCard.compact,
-#radarPage .pageRoleSwitch .pageRoleCard,
-#radarPage .pageRoleSwitch .pageRoleCard.compact{
-  height:var(--ui-action-height) !important;
-  min-height:var(--ui-action-min-height) !important;
-  padding:0 10px !important;
-  box-sizing:border-box;
-  flex-direction:row !important;
-  align-items:center !important;
-  justify-content:flex-start !important;
-}
-
-/* 右上角目前角色：一般按鈕同樣 40px；長名稱在框內省略 */
-.siteTopRow .roleBtn{
-  height:var(--ui-action-height) !important;
-  min-height:var(--ui-action-min-height) !important;
-  box-sizing:border-box;
-  overflow:hidden;
-}
-.siteTopRow .roleBtn #currentRoleName{
-  min-width:0;
-  max-width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  display:inline-block;
-  vertical-align:middle;
-}
-
-/* 聯盟幫助：角色與士兵數量維持同一列，並在 40px 高度內垂直置中 */
-#helpPage .pageRoleCard .pageRoleName{
-  flex:1 1 auto;
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  text-align:left;
-  font-size:16px;
-}
-#helpPage .pageRoleCard .pageRoleValue{
-  flex:0 0 auto;
-  margin-left:auto;
-  min-height:0;
-  line-height:1.2;
-  text-align:right;
-  font-size:15px;
-}
-
-/* 雷達一般按鈕：移除原本 42/44px 等高度差異 */
-#radarPage .modes label{
-  min-height:var(--ui-action-min-height) !important;
-  height:var(--ui-action-height) !important;
-  box-sizing:border-box;
-}
-#radarPage .smallbtn,
-#radarPage .addSameTime,
-#radarPage .addTime{
-  padding-top:0 !important;
-  padding-bottom:0 !important;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-}
-
-@media(max-width:560px){
-  .siteTopRow .roleBtn{
-    height:var(--ui-action-height) !important;
-    min-height:var(--ui-action-min-height) !important;
-  }
-  #helpPage .pageRoleCard .pageRoleName{font-size:15px;}
-  #helpPage .pageRoleCard .pageRoleValue{font-size:14px;}
-}
-</style>
-
-<style id="v141GlobalVisualUI">
-/* v1.41：全站共同 UI 視覺統一
-   1. 三個主頁籤統一 40px
-   2. 共用設定／角色設定標題統一白色、20px、900
-   3. 設定區外框統一白色系 1px
-   4. 金色只保留作為選取／重要狀態，不作一般設定區外框
-   僅 UI，不修改任何計算／資料／事件邏輯。
-*/
-:root{
-  --ui-common-title-size:20px;
-  --ui-common-title-weight:900;
-  --ui-common-title-color:#eef3f5;
-  --ui-common-border:#dce7eb;
-  --ui-common-border-width:1px;
-  --ui-common-radius:14px;
-  --ui-common-bg:#0d202b;
-}
-
-/* 三個主頁籤：與一般按鈕同樣固定 40px */
-.mainPageTab{
-  height:var(--ui-action-height) !important;
-  min-height:var(--ui-action-height) !important;
-  box-sizing:border-box;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-}
-
-/* 三頁「共用設定／角色設定」標題：同一套共同 UI */
-#scorePage .scoreSettingGroupTitle,
-#helpPage .helpSettingGroupTitle,
-#radarPage .radarSettingGroupTitle{
-  font-size:var(--ui-common-title-size) !important;
-  font-weight:var(--ui-common-title-weight) !important;
-  line-height:1.35 !important;
-  color:var(--ui-common-title-color) !important;
-  margin:0 0 10px !important;
-  padding:0 !important;
-}
-
-/* 三頁設定區外框：統一白色系；不再用金色區分頁面 */
-#scorePage .card.hero,
-#helpPage .helpCard:first-child,
-#radarPage .setup-panel{
-  border:var(--ui-common-border-width) solid var(--ui-common-border) !important;
-  border-radius:var(--ui-common-radius) !important;
-}
-
-/* 雷達原本 setup-panel 內的兩個設定區共用同一套文字顏色 */
-#radarPage .radarSettingGroupTitle{color:var(--ui-common-title-color) !important;}
-
-/* 聯盟幫助的角色標題分隔線也使用共同白色系 */
-#helpPage .helpRoleGroupTitle{
-  border-top-color:var(--ui-common-border) !important;
-}
-
-/* 設定區內部的分隔線統一為低對比白色系，避免各頁出現不同藍／金色 */
-#scorePage .scoreSettingDivider,
-#radarPage .setup-divider{
-  border-top-color:rgba(220,231,235,.28) !important;
-}
-
-/* 金色只作選取／重要狀態；一般設定區標題與外框不使用金色 */
-#scorePage .scoreSettingGroupTitle,
-#helpPage .helpSettingGroupTitle,
-#radarPage .radarSettingGroupTitle{
-  text-shadow:none;
-}
-
-@media(max-width:560px){
-  #scorePage .scoreSettingGroupTitle,
-  #helpPage .helpSettingGroupTitle,
-  #radarPage .radarSettingGroupTitle{
-    font-size:var(--ui-common-title-size) !important;
-  }
-}
-</style>
 
 
-<style id="v142CommonPanelAlignment">
-/* v1.42：共用設定位置＋設定區外框統一
-   1. 三頁「🔗 共用設定」標題固定相同高度與垂直置中
-   2. 三頁設定區上方內距統一，切換頁面時標題不再上下跳動
-   3. 外框改回低對比藍灰色，與聯盟幫助原本視覺一致
-   僅 UI，不修改任何計算／資料／事件邏輯。
-*/
-:root{
-  --ui-common-border:#294553;
-  --ui-common-panel-top:16px;
-  --ui-common-title-height:40px;
-}
-
-/* 三頁設定容器：上方起點統一 */
-#scorePage .card.hero,
-#helpPage .helpCard:first-child,
-#radarPage .setup-panel{
-  padding-top:var(--ui-common-panel-top);
-}
-
-/* 三頁「共用設定」標題：固定 40px 列高並垂直置中 */
-#scorePage .scoreSettingGroup:first-child > .scoreSettingGroupTitle,
-#helpPage > .helpCard:first-child > .helpSettingGroupTitle,
-#radarPage .radarCommonSettings > .radarSettingGroupTitle{
-  height:var(--ui-common-title-height);
-  min-height:var(--ui-common-title-height);
-  box-sizing:border-box;
-  display:flex;
-  align-items:center;
-  margin:0 0 10px !important;
-  line-height:1.35 !important;
-}
-
-/* 聯盟幫助原本沒有設定卡內側 padding，補回與另外兩頁一致的左右內距 */
-#helpPage > .helpCard:first-child > .helpSettingGroupTitle{
-  padding-left:14px !important;
-  padding-right:14px !important;
-}
-
-/* 外框統一使用低對比藍灰色 */
-#scorePage .card.hero,
-#helpPage .helpCard:first-child,
-#radarPage .setup-panel{
-  border-color:var(--ui-common-border) !important;
-}
-</style>
 
 
-<style id="v143CommonControlAudit">
-/* v1.43：共同 UI 第一批｜按鈕＋輸入／下拉控制項
-   只整理視覺，不修改任何計算、資料、事件或 HTML 結構。
-   已確認：一般操作高度 40px；輸入／下拉也以 40px 為共同基準。
-*/
-:root{
-  --ui-control-height:40px;
-  --ui-control-bg:#f3f3f3;
-  --ui-control-border:#cfd4d7;
-  --ui-control-text:#111;
-  --ui-control-radius:9px;
-  --ui-control-font-size:18px;
-  --ui-control-font-weight:900;
-  --ui-button-text:#eef3f5;
-}
 
-/* 共同按鈕：40px＋白色文字；選取狀態仍由各頁保留金色背景 */
-.mainPageTab,
-#scorePage .scoreRoleSettingRow .bonusBtn,
-#scorePage .dayHeader button,
-#scorePage .targetMode button,
-.dayTab,
-#helpPage .stepper button,
-#helpPage .checkPill,
-#radarPage .modes label,
-#radarPage button:not(.info):not(.closeBtn),
-.guideActions button,
-.guideNavBtn,
-.roleActions button,
-.addRole{
-  color:var(--ui-button-text) !important;
-}
-
-/* 共同輸入／下拉：白底、黑字、40px、同圓角 */
-#scorePage .settingControl,
-#helpPage #helpClicks,
-#helpPage .helpTierSelect,
-#helpPage .helpDetailPanel select,
-#helpPage .helpDetailPanel .unitInput input[type="number"],
-#helpPage .helpLine .timePair input,
-#radarPage input:not([type="radio"]):not([type="checkbox"]),
-#radarPage select{
-  height:var(--ui-control-height) !important;
-  min-height:var(--ui-control-height) !important;
-  box-sizing:border-box;
-  background:var(--ui-control-bg) !important;
-  border:1px solid var(--ui-control-border) !important;
-  color:var(--ui-control-text) !important;
-  border-radius:var(--ui-control-radius) !important;
-  font-size:var(--ui-control-font-size) !important;
-  font-weight:var(--ui-control-font-weight) !important;
-}
-
-/* 聯盟幫助：原本仍使用深色輸入框，這裡正式接入全站共同輸入 UI */
-#helpPage .helpTierSelect,
-#helpPage .helpDetailPanel select{
-  padding:0 10px !important;
-}
-#helpPage .helpDetailPanel .unitInput input[type="number"]{
-  padding:0 10px !important;
-  text-align:right !important;
-}
-#helpPage .helpLine .timePair input{
-  padding:0 5px !important;
-  text-align:center !important;
-}
-#helpPage #helpClicks{
-  padding:0 8px !important;
-  text-align:center !important;
-}
-
-/* 雷達時間欄位保留既有版型，只統一控制項本身的外觀 */
-#radarPage .time-row input,
-#radarPage .time-row select,
-#radarPage .setting-select{
-  padding:0 10px !important;
-}
-
-/* 手機版仍維持共同 40px，不再因頁面不同而縮成 34／38px */
-@media(max-width:560px){
-  #scorePage .settingControl,
-  #helpPage #helpClicks,
-  #helpPage .helpTierSelect,
-  #helpPage .helpDetailPanel select,
-  #helpPage .helpDetailPanel .unitInput input[type="number"],
-  #helpPage .helpLine .timePair input,
-  #radarPage input:not([type="radio"]):not([type="checkbox"]),
-  #radarPage select{
-    height:var(--ui-control-height) !important;
-    min-height:var(--ui-control-height) !important;
-    font-size:var(--ui-control-font-size) !important;
-  }
-}
-</style>
 
 </body></html>
