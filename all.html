@@ -1494,7 +1494,7 @@ function renderSharedRoleSwitchers(){
   const profiles=RoleManager.list();
   const configs=[
     {id:'scoreRoleSwitch',showValue:false,compact:true},
-    {id:'helpRoleJump',showValue:true,compact:false},
+    {id:'helpRoleJump',showValue:true,compact:true},
     {id:'radarRoleSwitch',showValue:false,compact:true}
   ];
   configs.forEach(cfg=>{
@@ -3129,6 +3129,36 @@ autoPlanIfReady();
     min-height:var(--ui-control-height);
     font-size:var(--ui-control-font-size);
   }
+}
+</style>
+
+<style id="v147SharedStructureCleanup">
+/* v1.47：共同結構清理
+   只處理三頁共同 UI 的外層結構與角色快速切換卡高度。
+   不修改計算、資料、事件或既有功能。
+*/
+
+/* 三頁角色快速切換卡統一使用既有 compact 規格；聯盟幫助同樣採單列高度，
+   但保留角色名稱＋治療數量兩個資訊。 */
+#helpPage .pageRoleSwitch .pageRoleCard,
+#helpPage .pageRoleSwitch .pageRoleCard.compact{
+  height:54px;
+  min-height:54px;
+}
+
+/* 聯盟幫助主設定外框補回與另外兩頁一致的水平內距。
+   內部原本各自帶的 14px 水平內距移除，避免變成雙重內距。 */
+#helpPage .helpCard:first-child{
+  padding-left:14px;
+  padding-right:14px;
+}
+#helpPage .helpCard:first-child .globalHelp{
+  padding-left:0;
+  padding-right:0;
+}
+#helpPage .helpCard:first-child .helpRoles{
+  padding-left:0;
+  padding-right:0;
 }
 </style>
 
