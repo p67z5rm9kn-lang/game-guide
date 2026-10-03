@@ -1237,7 +1237,7 @@ function helpRender(){
      if(el)el.value=(el.type==='number' && Number(v)===0)?'':v;
    });
 
-   card.querySelectorAll('[data-key]').forEach(el=>{
+   card.querySelectorAll('[data-key]:not([data-key="tier"])').forEach(el=>{
      const save=()=>helpUpdateCard(card,p.id);
      el.addEventListener('input',save);
      el.addEventListener('change',save);
@@ -2492,8 +2492,6 @@ if(planBtn)planBtn.addEventListener('click',runPlan);
 const maxInput=document.getElementById('max');
 if(maxInput){
   maxInput.addEventListener('input',()=>{saveRadarMax();autoPlanIfReady();});
-  maxInput.addEventListener('change',()=>{saveRadarMax();autoPlanIfReady();});
-  maxInput.addEventListener('blur',()=>{saveRadarMax();autoPlanIfReady();});
 }
 autoPlanIfReady();
 
