@@ -625,12 +625,58 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   }
 }
 </style>
-<style id="radarScopedV832">.radarPage{--bg:#071426;--card:#0d2038;--line:#27415f;--gold:#d7b56d;--text:#edf3fb;--muted:#9fb1c7;--good:#8fd3a7;--warn:#f0c674}.radarPage *{box-sizing:border-box}.radarPage h1{margin:0 0 6px;color:var(--gold)}.radarPage .sub{color:var(--muted);line-height:1.6;margin-bottom:16px}.radarPage .panel,.radarPage .day{background:rgba(13,32,56,.94);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}.radarPage label{display:block;color:var(--muted);margin-bottom:6px}.radarPage input{width:100%;border:1px solid #365574;border-radius:10px;background:#102842;color:#fff;padding:11px 12px;outline:none}.radarPage button:not(.pageRoleCard):not(.delTime):not(.addTime):not(.addSameTime){width:100%;margin-top:10px;border:1px solid #a68748;border-radius:10px;background:#172c46;color:#f5d98e;font-weight:700;padding:11px}.radarPage .meta{color:var(--muted);line-height:1.6;margin-top:10px}.radarPage .day h2{margin:0 0 8px}.radarPage .tag{display:inline-block;border:1px solid #806b3e;color:#f2d486;border-radius:999px;padding:2px 8px;margin-left:5px}.radarPage .state{color:#dce8f5;margin:8px 0}.radarPage .action{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;line-height:1.65}.radarPage .result{line-height:1.65}.radarPage .muted{color:var(--muted)}.radarPage .ok{color:var(--good)}.radarPage .warn{color:var(--warn)}.radarPage table{width:100%;border-collapse:collapse;margin-top:9px}.radarPage td,.radarPage th{border-bottom:1px solid #203852;padding:7px 4px;text-align:left}.radarPage th{color:var(--muted);font-weight:500}.radarPage .empty{padding:16px;text-align:center;color:var(--muted)}.radarPage .formula{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:9px;line-height:1.7}.radarPage .score{border-color:#806b3e}.radarPage .timeline{margin-top:10px}.radarPage .operation-block,.radarPage .event{background:#09192c;border-radius:10px;padding:9px 10px;margin-top:7px;line-height:1.75}.radarPage .operation-block{border-left:3px solid var(--gold);background:#0b2138}.radarPage .operation-range,.radarPage .event-time{color:#f2d486;font-weight:700;margin-bottom:3px}.radarPage .operation-step,.radarPage .event-action{padding:2px 0}.radarPage .event.refresh{border-left:3px solid #557a9e;color:#dce8f5}.radarPage .event.refresh .event-time{color:#f2d486}.radarPage .schedule-legend,.radarPage .player-mark,.radarPage .system-mark{display:none}
-
-.radarPage .modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 14px}.radarPage .modes label{display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #365574;background:#102842;color:#dce8f5;border-radius:10px;padding:9px 10px;margin:0;min-height:42px}.radarPage .modes input{width:auto;margin:0}.radarPage .time-row{--time-row-gap:14px;display:flex;align-items:center;gap:var(--time-row-gap);width:100%;margin:8px 0;min-width:0}.radarPage .setting-select{margin-bottom:4px}.radarPage .time-control{flex:1 1 0;min-width:0;height:var(--ui-control-height);box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:0;background:var(--ui-control-bg);border:1px solid var(--ui-control-border);border-radius:var(--ui-control-radius);color:var(--ui-control-text);font-size:var(--ui-control-font-size);font-weight:var(--ui-control-font-weight);overflow:hidden}.radarPage .time-slot{position:relative;flex:1 1 0;width:0;min-width:0;height:100%;display:flex;align-items:center;justify-content:center}.radarPage .time-value{position:relative;z-index:0;pointer-events:none;text-align:center;font-size:inherit;font-weight:inherit;line-height:1}.radarPage .time-slot .time-part{position:absolute;inset:0;width:100%;height:100%;margin:0;border:0!important;outline:0;background:transparent!important;color:transparent!important;box-shadow:none!important;opacity:0;appearance:none;-webkit-appearance:none;padding:0;z-index:1;cursor:pointer}.radarPage .time-control .time-colon{flex:0 0 auto;color:inherit;font-size:inherit;font-weight:inherit;line-height:1;text-align:center;pointer-events:none}.radarPage .time-range-sep{flex:0 0 18px;width:18px;color:var(--radar-gold-soft);font-weight:900;text-align:center;font-size:18px;line-height:1}
+<style id="radarLayoutCore">
+/* 雷達設定版面核心：只保留時間欄、設定列與結果區所需的結構規則。
+   舊版雷達外觀（背景、輸入框、按鈕、模式按鈕等）已由新版雷達主題與共用 UI 接手，避免重複覆蓋。 */
+.radarPage .time-row{--time-row-gap:14px;display:flex;align-items:center;gap:var(--time-row-gap);width:100%;margin:8px 0;min-width:0}
+.radarPage .setting-select{margin-bottom:4px}
+.radarPage .time-control{flex:1 1 0;min-width:0;height:var(--ui-control-height);box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:0;background:var(--ui-control-bg);border:1px solid var(--ui-control-border);border-radius:var(--ui-control-radius);color:var(--ui-control-text);font-size:var(--ui-control-font-size);font-weight:var(--ui-control-font-weight);overflow:hidden}
+.radarPage .time-slot{position:relative;flex:1 1 0;width:0;min-width:0;height:100%;display:flex;align-items:center;justify-content:center}
+.radarPage .time-value{position:relative;z-index:0;pointer-events:none;text-align:center;font-size:inherit;font-weight:inherit;line-height:1}
+.radarPage .time-slot .time-part{position:absolute;inset:0;width:100%;height:100%;margin:0;border:0!important;outline:0;background:transparent!important;color:transparent!important;box-shadow:none!important;opacity:0;appearance:none;-webkit-appearance:none;padding:0;z-index:1;cursor:pointer}
+.radarPage .time-control .time-colon{flex:0 0 auto;color:inherit;font-size:inherit;font-weight:inherit;line-height:1;text-align:center;pointer-events:none}
+.radarPage .time-range-sep{flex:0 0 18px;width:18px;color:var(--radar-gold-soft);font-weight:900;text-align:center;font-size:18px;line-height:1}
 .radarPage .time-colon{flex:0 0 14px;width:14px;color:var(--radar-gold-soft);font-weight:900;text-align:center;font-size:18px;line-height:1}
-.radarPage .time-range-sep{flex:0 0 18px;width:18px;color:var(--radar-gold-soft);font-weight:900;text-align:center;font-size:18px;line-height:1}.radarPage .smallbtn{box-sizing:border-box;min-width:0;margin:0;padding:10px 6px;white-space:nowrap}.radarPage .time-row .delTime{flex:0 0 82px;width:82px;min-width:82px}.radarPage .time-add-row{width:calc((100% - 82px - 18px - (var(--time-row-gap) * 3)) / 2);min-width:0}.radarPage .time-add-row .addSameTime,.radarPage .time-add-row .addTime{width:100%;min-width:0;display:inline-flex}.radarPage .day-title{font-weight:600;color:#dce8f5;margin:12px 0 7px}.radarPage .setup-panel>label{margin-top:10px}.radarPage .setup-panel>label:first-of-type{margin-top:0}.radarPage .laura-toggle-row{display:grid;grid-template-columns:minmax(0,1fr) 50%;gap:8px;align-items:center;margin:0 0 10px}.radarPage .laura-left{display:flex;align-items:center;gap:24px;min-width:0}.radarPage .laura-left .setting-label{margin:0;white-space:nowrap;color:#dce8f5;font-weight:900;font-size:16px}.radarPage .switch-label{display:flex!important;align-items:center;justify-content:flex-start;gap:8px!important;border:0!important;background:transparent!important;padding:0!important;color:#dce8f5!important;border-radius:0!important;min-height:42px;margin:0!important;white-space:nowrap}.radarPage .switch-label input{position:absolute;opacity:0;pointer-events:none}.radarPage .switch{position:relative;width:48px;height:26px;border-radius:999px;background:#365574;display:inline-block;transition:.2s;flex:0 0 auto}.radarPage .switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.radarPage .switch-label input:checked + .switch{background:#b28c3f}.radarPage .switch-label input:checked + .switch:after{transform:translateX(22px)}.radarPage .laura-toggle-row #lauraDetail{min-width:0;width:100%}.radarPage .laura-toggle-row #lauraDetail .setting-select{margin:0;min-height:42px;width:100%;max-width:none}.radarPage .storage-setting-row{display:grid;grid-template-columns:minmax(0,1fr) 50%;align-items:center;gap:8px;margin:0}.radarPage .storage-setting-row label{margin:0!important}.radarPage .storage-setting-row #max{width:100%;max-width:none;min-width:0;margin:0}.radarPage .setup-panel{padding-bottom:16px}.radarPage .section-title{margin:0 0 14px;color:var(--gold)}.radarPage .setup-divider{height:1px;background:#27415f;margin:16px 0}.radarPage .result-heading{font-weight:700;color:var(--gold);margin:18px 2px 10px}.radarPage .setup-panel .day-title{font-weight:600}.radarPage .setup-panel .meta{margin-top:12px}.radarPage .cycle-bridge{margin-top:10px;padding:12px 14px;border:1px solid #365574;border-radius:12px;background:#102842}.radarPage .cycle-bridge-title{font-weight:700;color:var(--gold);margin-bottom:6px}.radarPage .cycle-bridge-text{line-height:1.6;color:#dce8f5}.radarPage .cycle-bridge-warn{margin-top:6px;color:#ffd36a;line-height:1.5}.radarPage .score-plan{margin-top:9px;padding:10px 12px;border:1px solid #806b3e;border-radius:10px;background:#102842;color:#f2d486}.radarPage .schedule-loss{margin-top:4px;color:#ffd36a;line-height:1.5}
-@media(max-width:560px){.radarPage .modes{grid-template-columns:repeat(2,minmax(0,1fr))}.radarPage .time-row{--time-row-gap:10px;display:flex;min-width:0}.radarPage .time-control{flex:1 1 0;min-width:0}.radarPage .time-row .delTime{flex:0 0 82px;width:82px;min-width:82px}.radarPage .time-add-row{width:calc((100% - 82px - 18px - (var(--time-row-gap) * 3)) / 2)}.radarPage .laura-toggle-row{align-items:center}.radarPage .laura-toggle-row #lauraDetail,.radarPage .laura-toggle-row #lauraDetail .setting-select{width:100%;max-width:none}.radarPage .storage-setting-row #max{width:100%;max-width:none}}
+.radarPage .time-row .delTime{flex:0 0 82px;width:82px;min-width:82px}
+.radarPage .time-add-row{width:calc((100% - 82px - 18px - (var(--time-row-gap) * 3)) / 2);min-width:0}
+.radarPage .time-add-row .addSameTime,.radarPage .time-add-row .addTime{width:100%;min-width:0;display:inline-flex}
+.radarPage .day-title{font-weight:600;color:#dce8f5;margin:12px 0 7px}
+.radarPage .setup-panel>label{margin-top:10px}
+.radarPage .setup-panel>label:first-of-type{margin-top:0}
+.radarPage .laura-toggle-row{display:grid;grid-template-columns:minmax(0,1fr) 50%;gap:8px;align-items:center;margin:0 0 10px}
+.radarPage .laura-left{display:flex;align-items:center;gap:24px;min-width:0}
+.radarPage .laura-left .setting-label{margin:0;white-space:nowrap;color:#dce8f5;font-weight:900}
+.radarPage .switch-label{display:flex!important;align-items:center;justify-content:flex-start;gap:8px!important;border:0!important;background:transparent!important;padding:0!important;color:#dce8f5!important;border-radius:0!important;min-height:42px;margin:0!important;white-space:nowrap}
+.radarPage .switch-label input{position:absolute;opacity:0;pointer-events:none}
+.radarPage .switch{position:relative;width:48px;height:26px;border-radius:999px;background:#365574;display:inline-block;transition:.2s;flex:0 0 auto}
+.radarPage .switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.radarPage .switch-label input:checked + .switch{background:#b28c3f}
+.radarPage .switch-label input:checked + .switch:after{transform:translateX(22px)}
+.radarPage .laura-toggle-row #lauraDetail{min-width:0;width:100%}
+.radarPage .laura-toggle-row #lauraDetail .setting-select{margin:0;min-height:42px;width:100%;max-width:none}
+.radarPage .storage-setting-row{display:grid;grid-template-columns:minmax(0,1fr) 50%;align-items:center;gap:8px;margin:0}
+.radarPage .storage-setting-row label{margin:0!important}
+.radarPage .storage-setting-row #max{width:100%;max-width:none;min-width:0;margin:0}
+.radarPage .setup-panel{padding-bottom:16px}
+.radarPage .section-title{margin:0 0 14px;color:var(--gold)}
+.radarPage .setup-divider{height:1px;background:#27415f;margin:16px 0}
+.radarPage .result-heading{font-weight:700;color:var(--gold);margin:18px 2px 10px}
+.radarPage .setup-panel .day-title{font-weight:600}
+.radarPage .setup-panel .meta{margin-top:12px}
+.radarPage .cycle-bridge{margin-top:10px;padding:12px 14px;border:1px solid #365574;border-radius:12px;background:#102842}
+.radarPage .cycle-bridge-title{font-weight:700;color:var(--gold);margin-bottom:6px}
+.radarPage .cycle-bridge-text{line-height:1.6;color:#dce8f5}
+.radarPage .cycle-bridge-warn{margin-top:6px;color:#ffd36a;line-height:1.5}
+.radarPage .score-plan{margin-top:9px;padding:10px 12px;border:1px solid #806b3e;border-radius:10px;background:#102842;color:#f2d486}
+.radarPage .schedule-loss{margin-top:4px;color:#ffd36a;line-height:1.5}
+@media(max-width:560px){
+  .radarPage .time-row{--time-row-gap:10px}
+  .radarPage .time-row .delTime{flex:0 0 82px;width:82px;min-width:82px}
+  .radarPage .time-add-row{width:calc((100% - 82px - 18px - (var(--time-row-gap) * 3)) / 2)}
+  .radarPage .laura-toggle-row{align-items:center}
+  .radarPage .laura-toggle-row #lauraDetail,.radarPage .laura-toggle-row #lauraDetail .setting-select{width:100%;max-width:none}
+  .radarPage .storage-setting-row #max{width:100%;max-width:none}
+}
 </style><style id="radarUnifiedThemeClean">
 .radarPage{display:none;}
 
@@ -729,16 +775,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 
 @media(min-width:561px){.radarPage .laura-toggle-row{grid-template-columns:minmax(0,1fr) 50%;}.radarPage .laura-toggle-row #lauraDetail,.radarPage .laura-toggle-row #lauraDetail .setting-select,.radarPage .storage-setting-row #max{width:100%;max-width:100%;}}
-</style><style id="radarUiBaselineV03">
-/* v0.3：依 UI 完整基準調整雷達規劃設定外觀；不修改計算邏輯。 */
-.radarPage .radarInner > h1,.radarPage .setup-panel > h1{line-height:1.25;}
-.radarPage .section-title{line-height:1.25;}
-.radarPage .setup-panel > label,.radarPage .day-title{line-height:1.35;}
-.radarPage .modes label{min-height:44px;}
-
-
-
-.radarPage .time-sep{font-size:18px;}
 </style>
 
 <style id="uiSystemV05">
