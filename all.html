@@ -35,10 +35,6 @@
 .helpMetric{font-size:13px;color:#b7c5ca;font-weight:800}
 .helpValue{font-size:17px;color:#f2d47e}
 .helpInputs{gap:8px;margin-top:8px}
-.helpField{background:#102732;border:1px solid #294553;border-radius:9px;padding:8px}
-.helpField label{font-size:10px;color:#9fb0b8}
-.helpField input,.helpField select{height:34px;background:#f3f3f3;border:1px solid #cfd4d7;color:#111;border-radius:7px}
-.helpField .helpMuted{display:inline-block;margin-left:4px}
 .helpBreakdown{gap:5px}
 .helpLine{font-size:12px;min-height:24px;align-items:center}
 .helpResult{padding:11px 12px;background:#102732;border-top:1px solid #294553}
@@ -61,9 +57,6 @@
   .helpSection{padding:8px 11px}
   .helpSummary{padding:8px 0}
   .helpInputs{grid-template-columns:1fr 1fr}
-  .helpField{padding:7px}
-  .helpField label{font-size:10px;line-height:1.35}
-  .helpField input{font-size:15px}
   .helpResult{padding:10px 11px}
 }
 
@@ -242,7 +235,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   .guideNavBtn{order:2;flex:0 0 auto}
   .roleBtn{order:3;margin-left:0;flex:0 0 auto;max-width:112px}
   .mainPageNav{order:4;flex:1 0 100%!important;width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;justify-content:stretch!important}
-  .mainPageTab{width:100%;min-width:0;padding:8px 4px;font-size:16px;line-height:1.2;border-radius:10px}
+  .mainPageTab{width:100%;min-width:0}
   .helpRoleTitle{gap:7px}
   .helpRoleName{font-size:15px}
   .helpDetailPanel .helpLine{grid-template-columns:minmax(0,1fr) 132px!important}
@@ -252,7 +245,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 @media(max-width:390px){
   .topbar{row-gap:7px;column-gap:6px}
-  .mainPageTab{padding-left:3px;padding-right:3px;font-size:15px}
   .roleBtn{max-width:108px}
 }
 
@@ -558,7 +550,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 #scorePage .targetMode button{
   width:100%;
-  min-height:42px;
   margin:0;
   padding:8px 10px;
   border:1px solid #304b59;
@@ -607,14 +598,8 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
     gap:6px;
   }
   #scorePage .targetMode button{
-    min-height:42px;
     font-size:16px;
     padding:8px 6px;
-  }
-  #scorePage .targetInputWrap .settingControl{
-    height:40px;
-    min-height:40px;
-    font-size:18px;
   }
 }
 </style>
@@ -780,7 +765,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   font-size:var(--ui-tab)!important;
   line-height:1.25!important;
   font-weight:900!important;
-  min-height:46px!important;
   padding:9px 8px!important;
 }
 
@@ -846,7 +830,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 
 @media(max-width:560px){
   /* 手機版仍使用同一套規格，不再讓三頁各自縮小字體 */
-  .sitePageNav .mainPageTab{font-size:var(--ui-tab)!important;padding:9px 5px!important;}
   .siteTopRow .brand{font-size:20px!important;}
   .siteTopRow .guideNavBtn,.siteTopRow .roleBtn{font-size:16px!important;}
   #scorePage .dayTab{font-size:var(--ui-tab)!important;}
@@ -2856,6 +2839,8 @@ autoPlanIfReady();
 #helpPage #helpClicks{padding:0 8px;text-align:center;}
 #bonusModal #chika,.modal .brow input[type="number"]{width:100%;min-width:0;padding:0 10px;text-align:right;}
 
+/* v1.95：最後共同 UI 結構清理：移除已被共同 40px 規則取代的舊尺寸，以及未使用的舊 helpField 外觀。
+   保留頁面專用寬度／排列／資訊按鈕等真正差異。 */
 /* v1.89：共用控制項的手機版不再重複覆寫；士兵區只保留欄位寬度／對齊等必要差異。
    三頁共同設定／角色設定：唯一共同結構基準
    外框 → 設定群組 → 40px 標題 → 內容
