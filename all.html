@@ -1093,7 +1093,7 @@ const raw={T1:[46,45],T2:[70,90],T3:[92,135],T4:[116,225],T5:[140,360],T6:[160,5
 function bonusMap(){const b={};document.querySelectorAll('.bonus').forEach(x=>b[x.dataset.key]=Math.max(0,Number(x.value)||0));b.chika=Math.max(0,Number(document.getElementById('chika').value)||0);return b;}
 function mult(cat,b){let extra=b.all||0;if(cat==='gather')extra+=b.gather||0;if(cat==='wild')extra+=b.wild||0;if(cat==='blueprint')extra+=b.blueprint||0;if(cat==='wrench')extra+=b.wrench||0;if(cat==='building')extra+=b.building||0;if(cat==='tech')extra+=b.tech||0;if(cat==='hero')extra+=b.hero||0;if(cat==='energy')extra+=b.energy||0;if(cat==='training')extra+=b.training||0;return 1+extra/100+b.chika/100;}
 function accelMinutes(r){const d=Number(r.querySelector('.d')?.value)||0,h=Number(r.querySelector('.h')?.value)||0,m=Number(r.querySelector('.m')?.value)||0;return d*1440+h*60+m;}
-function syncScoreDurationControl(root){(root||document).querySelectorAll?.('#scorePage .ui-duration-control').forEach(control=>{const parts=[...control.querySelectorAll('.time-part')];if(parts.length!==3)return;const values=parts.map(x=>String(x.value??''));const hasAny=values.some(v=>v.trim()!==''&&v!=='00');parts.forEach((x,i)=>{const v=x.closest('.time-slot')?.querySelector('.time-value');if(!v)return;v.textContent=hasAny?(values[i]||'00'):'';});});}
+function syncScoreDurationControl(root){const controls=root?.matches?.('#scorePage .ui-duration-control')?[root]:[...(root||document).querySelectorAll?.('#scorePage .ui-duration-control')||[]];controls.forEach(control=>{const parts=[...control.querySelectorAll('.time-part')];if(parts.length!==3)return;const values=parts.map(x=>String(x.value??''));const hasAny=values.some(v=>v.trim()!==''&&v!=='00');parts.forEach((x,i)=>{const v=x.closest('.time-slot')?.querySelector('.time-value');if(!v)return;v.textContent=hasAny?(values[i]||'00'):'';});});}
 function bindScoreDurationControls(){document.querySelectorAll('#scorePage .ui-duration-control .time-part').forEach(x=>{if(x.dataset.scoreDurationBound)return;x.dataset.scoreDurationBound='1';const refresh=()=>requestAnimationFrame(()=>syncScoreDurationControl(x.closest('.ui-duration-control')));x.addEventListener('input',refresh);x.addEventListener('change',refresh);});syncScoreDurationControl(document);} 
 bindScoreDurationControls();
 function fmtDHM(minutes){minutes=Math.max(0,Math.floor(minutes));const d=Math.floor(minutes/1440),h=Math.floor((minutes%1440)/60),m=minutes%60;return `${d}:${h}:${m}`;}
@@ -2830,7 +2830,7 @@ autoPlanIfReady();
 #helpPage #helpClicks{padding:0 8px;text-align:center;}
 #bonusModal #chika,.modal .brow input[type="number"]{width:100%;min-width:0;padding:0 10px;text-align:right;}
 
-/* v2.11：聯盟對決表格／加速時間共同 UI 間距修正。
+/* v2.13：聯盟對決加速時間顯示更新修正。
    表格：項目 24%／次數・時間 30%／單次積分 20%／尚須投入 20%，
    三個欄間各 2%，合計 100%。內容不可反向撐開欄位。
    加速時間：沿用雷達式三段選擇器，日／時／分等寬、冒號間距一致，
