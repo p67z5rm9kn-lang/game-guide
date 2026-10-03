@@ -162,8 +162,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .helpResultRow .helpMetric{color:#e7edf0}
 .helpResultRow .helpMetric small{font-size:10px;color:#8ea3ab;font-weight:700}
 .helpResultRow .helpResultValue{grid-column:2;text-align:right;font-size:24px;line-height:1;color:#f2c66e;font-weight:1000}
-.helpFormulaBox{padding:7px 12px 10px;background:#10252e;border-top:1px solid #29424d}
-.helpFormulaBox .resultFormula{display:block;text-align:right;line-height:1.35}
 .helpInputs{display:none}
 .helpSection{padding:0}
 @media(max-width:480px){.helpRoles{padding:8px}.helpTable{padding:0 10px 2px}.helpTableHead,.helpTableRow{grid-template-columns:minmax(0,1fr) 92px;gap:8px}.helpTableRow{min-height:47px}.helpTableRow:after{display:none}.helpRoleName{font-size:15px}.helpDetailPanel .helpLine{grid-template-columns:minmax(0,1fr) 96px}.helpDetailPanel select{min-width:90px;max-width:96px}.helpDetailPanel .unitInput{width:96px}.helpTierSetting{grid-template-columns:minmax(0,1fr) 96px}.helpTierSelect{width:96px;max-width:96px}.helpDetailPanel .timeMini{width:90px}.helpResultRow .helpResultValue{font-size:23px}.helpFormulaBox{padding:6px 10px 9px}.helpFormulaBox .resultFormula{font-size:10px}}
@@ -217,13 +215,11 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <style id="finalHelpOverrides">
 /* 最終版：聯盟幫助／Last Z 手機版排版 */
 .mainPageNav{flex:0 0 auto;justify-content:flex-start}
-.roleBtn{margin-left:auto}
 .helpInfoWrap{display:flex;align-items:center}
 .helpInfo{touch-action:manipulation}
 .helpDetails .helpTableRow:after{display:none;content:none}
 .helpDetails[open]>.helpTableRow:after{display:none;content:none}
 .helpResultRow .helpResultValue{font-size:16px;line-height:1.2}
-.helpFormulaBox{display:none!important}
 @media(max-width:560px){
   /* 手機版：主要頁面與工具功能分成兩層，避免三個頁籤被擠小 */
   .topbar{flex-wrap:wrap;row-gap:8px;column-gap:7px;align-items:center}
@@ -240,65 +236,19 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   .roleBtn{max-width:108px}
 }
 
-/* 聯盟幫助：角色快速導覽與展開箭頭修正 */
-.helpRoleJumpCard{margin:10px 0;border:1px solid #294553;border-radius:14px;background:#0d202b;overflow:hidden;padding:10px}
-.helpRoleJumpTitle{font-size:13px;font-weight:900;color:#b7c5ca;margin:0 2px 8px}
-.helpRoleJump{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.helpJumpBtn{min-width:0;min-height:48px;padding:8px 10px;border:1px solid #304b59;border-radius:9px;background:#102732;color:#dce7eb;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left}
-.helpJumpBtn:active{transform:scale(.98)}
-.helpJumpName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.helpJumpValue{color:#f2d47e;white-space:nowrap}
-.helpRole{scroll-margin-top:90px}
-/* 每個展開列只保留一個箭頭 */
-.helpDetails .helpTableRow .helpMetric:after{display:none;content:none}
-@media(max-width:480px){.helpJumpBtn{min-height:46px;padding:7px 9px;font-size:12px}}
-</style>
-<style id="helpDesktopFinalFix">
-/* 聯盟幫助：桌面版角色導覽一排四個；所有資料列移除多餘箭頭 */
-.helpRoleJumpCard .helpRoleJump{grid-template-columns:repeat(4,minmax(0,1fr))}
-.helpTableRow .helpMetric:after,
-.helpDetails .helpTableRow:after,
-.helpDetails[open]>.helpTableRow .helpMetric:after,
-.helpDetails[open]>.helpTableRow:after{display:none;content:none}
-@media(max-width:699px){
-  .helpRoleJumpCard .helpRoleJump{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-</style>
-<style id="helpFinalTypography">
-.helpDetailPanel select{
-  text-align:right;
-  text-align-last:right;
-  padding-right:8px;
-}
-.helpRoleJumpTitle{
-  font-size:16px;
-  line-height:1.25;
-  font-weight:900;
-  color:#e7edf0;
-  margin:0 2px 8px;
-}
 </style>
 <style id="helpSingleRoleView">
-.helpJumpBtn{justify-content:center;flex-direction:column;gap:2px;text-align:center;transition:background .15s,border-color .15s,color .15s,transform .08s}
-.helpJumpBtn.active{background:#6f5a2d!important;border-color:#d7a83f!important;color:#fff!important;box-shadow:0 0 0 1px rgba(215,168,63,.25) inset}
-.helpJumpBtn.active .helpJumpValue{color:#fff3c4}
-
 .helpStaticSection .helpDetailPanel{display:block!important}
 .helpStaticSection .helpTableRow{cursor:default}
-@media(max-width:560px){.helpJumpBtn{min-height:54px;font-size:13px}.helpJumpValue{font-size:12px}}
 </style>
 <style id="helpSimplifiedStructure">
 /* 聯盟幫助：移除「治療數量／資料設定」兩層，角色頁籤與選定角色直接呈現 */
 #helpPage > .helpCard:first-child{margin-bottom:10px}
-#helpPage > .helpRoleJump{margin:0 0 10px;padding:0 10px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 #helpPage > .helpRoles{padding:0 10px 10px}
 #helpPage > .helpRoles .helpRole{width:100%}
 #helpPage .helpTitleRow{align-items:center}
 #helpPage .helpTitleRow .helpInfoWrap{flex:0 0 auto}
 #helpPage .helpTitleRow .helpInfo{width:34px;height:34px}
-@media(max-width:699px){
-  #helpPage > .helpRoleJump{grid-template-columns:repeat(2,minmax(0,1fr));}
-}
 </style>
 <style id="sharedControlStyles">
 /* ================================
