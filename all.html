@@ -320,27 +320,26 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 <style id="sharedControlStyles">
 /* ================================
    🔗 共用設定欄位｜聯盟對決／聯盟幫助
-   所有可操作的數值 input / select 使用同一套視覺規格。
-   未來新增頁籤可直接套用 .settingControl。
+   所有可操作的數值 input / select 沿用全站 --ui-control-* 規格。
    ================================ */
 :root{
-  --control-bg:#f3f3f3;
-  --control-border:#cfd4d7;
-  --control-text:#111;
-  --control-radius:9px;
-  --control-height:40px;
-  --control-font-size:16px;
-  --control-font-weight:900;
+  --ui-control-bg:#f3f3f3;
+  --ui-control-border:#cfd4d7;
+  --ui-control-text:#111;
+  --ui-control-radius:9px;
+  --ui-control-height:40px;
+  --ui-control-font-size:16px;
+  --ui-control-font-weight:900;
 }
 .settingControl{
-  height:var(--control-height);
-  min-height:var(--control-height);
-  background:var(--control-bg);
-  border:1px solid var(--control-border);
-  color:var(--control-text);
-  border-radius:var(--control-radius);
-  font-size:var(--control-font-size);
-  font-weight:var(--control-font-weight);
+  height:var(--ui-control-height);
+  min-height:var(--ui-control-height);
+  background:var(--ui-control-bg);
+  border:1px solid var(--ui-control-border);
+  color:var(--ui-control-text);
+  border-radius:var(--ui-control-radius);
+  font-size:var(--ui-control-font-size);
+  font-weight:var(--ui-control-font-weight);
   line-height:1.1;
   box-sizing:border-box;
 }
@@ -351,14 +350,14 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 /* 聯盟對決：一般數值輸入、時間欄位、下拉選單 */
 #scorePage input[type="number"],
 #scorePage select{
-  height:var(--control-height);
-  min-height:var(--control-height);
-  background:var(--control-bg);
-  border:1px solid var(--control-border);
-  color:var(--control-text);
-  border-radius:var(--control-radius);
-  font-size:var(--control-font-size);
-  font-weight:var(--control-font-weight);
+  height:var(--ui-control-height);
+  min-height:var(--ui-control-height);
+  background:var(--ui-control-bg);
+  border:1px solid var(--ui-control-border);
+  color:var(--ui-control-text);
+  border-radius:var(--ui-control-radius);
+  font-size:var(--ui-control-font-size);
+  font-weight:var(--ui-control-font-weight);
   line-height:1.1;
   box-sizing:border-box;
 }
@@ -370,24 +369,24 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 /* 保留時間輸入框原本的尺寸／排列，只統一外觀與字級 */
 #scorePage .timeGroup input[type="number"],
 #scorePage .timeInput input[type="number"]{
-  background:var(--control-bg);
-  color:var(--control-text);
-  border:1px solid var(--control-border);
-  border-radius:var(--control-radius);
-  font-size:var(--control-font-size);
-  font-weight:var(--control-font-weight);
+  background:var(--ui-control-bg);
+  color:var(--ui-control-text);
+  border:1px solid var(--ui-control-border);
+  border-radius:var(--ui-control-radius);
+  font-size:var(--ui-control-font-size);
+  font-weight:var(--ui-control-font-weight);
 }
 /* 聯盟幫助：玩家資料設定欄位與聯盟對決共用同一套設定元件 */
 #helpPage .helpRole input[type="number"],
 #helpPage .helpRole select,
 #helpPage #helpClicks,
 .modal .brow input[type="number"]{
-  background:var(--control-bg) !important;
-  border:1px solid var(--control-border) !important;
-  color:var(--control-text) !important;
-  border-radius:var(--control-radius) !important;
-  font-size:var(--control-font-size) !important;
-  font-weight:var(--control-font-weight) !important;
+  background:var(--ui-control-bg) !important;
+  border:1px solid var(--ui-control-border) !important;
+  color:var(--ui-control-text) !important;
+  border-radius:var(--ui-control-radius) !important;
+  font-size:var(--ui-control-font-size) !important;
+  font-weight:var(--ui-control-font-weight) !important;
   line-height:1.1;
   box-sizing:border-box;
 }
@@ -408,17 +407,17 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   flex:0 0 112px;
 }
 #bonusModal #chika{
-  height:var(--control-height) !important;
-  min-height:var(--control-height) !important;
+  height:var(--ui-control-height) !important;
+  min-height:var(--ui-control-height) !important;
   width:100% !important;
   min-width:0 !important;
   padding:0 10px !important;
-  background:var(--control-bg) !important;
-  border:1px solid var(--control-border) !important;
-  color:var(--control-text) !important;
-  border-radius:var(--control-radius) !important;
-  font-size:var(--control-font-size) !important;
-  font-weight:var(--control-font-weight) !important;
+  background:var(--ui-control-bg) !important;
+  border:1px solid var(--ui-control-border) !important;
+  color:var(--ui-control-text) !important;
+  border-radius:var(--ui-control-radius) !important;
+  font-size:var(--ui-control-font-size) !important;
+  font-weight:var(--ui-control-font-weight) !important;
   line-height:1.1;
   box-sizing:border-box;
   text-align:right !important;
@@ -433,22 +432,22 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   font-weight:900;
 }
 .modal .brow input[type="number"]{
-  height:var(--control-height) !important;
-  min-height:var(--control-height) !important;
+  height:var(--ui-control-height) !important;
+  min-height:var(--ui-control-height) !important;
   width:100% !important;
   min-width:0 !important;
   padding:0 10px !important;
   text-align:right !important;
-  font-size:var(--control-font-size) !important;
-  font-weight:var(--control-font-weight) !important;
+  font-size:var(--ui-control-font-size) !important;
+  font-weight:var(--ui-control-font-weight) !important;
   line-height:1.1;
   box-sizing:border-box;
 }
 
 /* 下拉選單與手動輸入框維持相同高度、圓角與字級 */
 #helpPage .helpTierSelect{
-  height:var(--control-height) !important;
-  min-height:var(--control-height) !important;
+  height:var(--ui-control-height) !important;
+  min-height:var(--ui-control-height) !important;
   width:100% !important;
   max-width:150px !important;
   padding:0 10px !important;
@@ -456,8 +455,8 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   text-align-last:right !important;
 }
 #helpPage .helpDetailPanel select{
-  height:var(--control-height) !important;
-  min-height:var(--control-height) !important;
+  height:var(--ui-control-height) !important;
+  min-height:var(--ui-control-height) !important;
   width:112px !important;
   min-width:112px !important;
   max-width:112px !important;
@@ -476,8 +475,8 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 #helpPage .helpDetailPanel .unitInput input[type="number"]{
   width:100% !important;
   min-width:0 !important;
-  height:var(--control-height) !important;
-  min-height:var(--control-height) !important;
+  height:var(--ui-control-height) !important;
+  min-height:var(--ui-control-height) !important;
   padding:0 10px !important;
   text-align:right !important;
 }
@@ -489,14 +488,14 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 /* 全體共用點手數量也採同一設定框架 */
 #helpPage #helpClicks{
-  height:var(--control-height) !important;
-  min-height:var(--control-height) !important;
+  height:var(--ui-control-height) !important;
+  min-height:var(--ui-control-height) !important;
   text-align:center;
 }
 @media(max-width:560px){
   :root{
-    --control-height:40px;
-    --control-font-size:18px;
+    --ui-control-height:40px;
+    --ui-control-font-size:18px;
   }
   #scorePage .summaryRow select,
   #scorePage .summaryRow input[type="number"]{height:40px;}
@@ -623,7 +622,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 </style>
 <style id="radarLayoutCore">
-/* v1.81：雷達設定版面核心只保留時間欄、設定列與結果區所需的結構規則。
+/* v1.85：雷達設定版面核心只保留時間欄、設定列與結果區所需的結構規則。
    舊版雷達外觀（背景、輸入框、按鈕、模式按鈕等）已由新版雷達主題與共用 UI 接手，避免重複覆蓋。 */
 .radarPage .time-row{--time-row-gap:14px;display:flex;align-items:center;gap:var(--time-row-gap);width:100%;margin:8px 0;min-width:0}
 .radarPage .time-range-sep{flex:0 0 18px;width:18px;color:var(--radar-gold-soft);font-weight:900;text-align:center;font-size:18px;line-height:1}
@@ -658,7 +657,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .radarPage .storage-setting-row #max{width:100%;max-width:none;min-width:0;margin:0;}
 .radarPage .setup-panel{padding-bottom:16px}
 .radarPage .section-title{margin:0 0 14px;color:var(--gold)}
-.radarPage .setup-divider{height:1px;background:#27415f;margin:16px 0}
 .radarPage .result-heading{font-weight:700;color:var(--gold);margin:18px 2px 10px}
 .radarPage .setup-panel .day-title{font-weight:600}
 .radarPage .setup-panel .meta{margin-top:12px}
@@ -1118,7 +1116,7 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 </style>
 <style id="v131SoldierSharedUI">
 /* v1.31：保留 v1.29 已確認的「可愛」士兵區配置，所有士兵可輸入欄位改用網站共同 UI。 */
-#scorePage .soldierBox .settingControl{height:var(--control-height)!important;min-height:var(--control-height)!important;background:var(--control-bg)!important;border:1px solid var(--control-border)!important;color:var(--control-text)!important;border-radius:var(--control-radius)!important;font-size:var(--control-font-size)!important;font-weight:var(--control-font-weight)!important;box-sizing:border-box!important;line-height:1.1!important;}
+#scorePage .soldierBox .settingControl{height:var(--ui-control-height)!important;min-height:var(--ui-control-height)!important;background:var(--ui-control-bg)!important;border:1px solid var(--ui-control-border)!important;color:var(--ui-control-text)!important;border-radius:var(--ui-control-radius)!important;font-size:var(--ui-control-font-size)!important;font-weight:var(--ui-control-font-weight)!important;box-sizing:border-box!important;line-height:1.1!important;}
 #scorePage .soldierInputs .settingControl{width:100%;}
 #scorePage .soldierInputs .soldierTime{width:100%;max-width:none;}
 #scorePage .soldierInputs .soldierTime input.settingControl{width:100%;padding:0 5px;text-align:center;}
@@ -2985,7 +2983,8 @@ autoPlanIfReady();
 #helpPage #helpClicks{padding:0 8px;text-align:center;}
 #bonusModal #chika,.modal .brow input[type="number"]{width:100%;min-width:0;padding:0 10px;text-align:right;}
 
-/* 三頁共同設定／角色設定：唯一共同結構基準
+/* v1.86：共用控制項統一回收至 --ui-control-*，不再保留舊 --control-* 變數。
+   三頁共同設定／角色設定：唯一共同結構基準
    外框 → 設定群組 → 40px 標題 → 內容
    三頁只保留各自功能 class，不再由標題本身承擔頁面專用內距。 */
 .commonSettingsShell{
@@ -3025,14 +3024,6 @@ autoPlanIfReady();
 .commonSettingsShell .helpRoleGroupTitle{
   margin-top:16px;
 }
-#scorePage .card.hero.commonSettingsShell,
-#helpPage .helpCard.commonSettingsShell,
-#radarPage .setup-panel.commonSettingsShell{
-  padding:16px 14px;
-  border:var(--ui-common-border-width) solid var(--ui-common-border);
-  border-radius:var(--ui-common-radius);
-}
-
 /* 士兵訓練視窗保留原本表格版型，只吃共同文字基準 */
 .soldierModal .soldierInputs label{font-size:var(--ui-label);line-height:var(--ui-line);}
 .soldierModal .soldierTable .stHead,
