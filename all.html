@@ -220,14 +220,10 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .roleBtn{margin-left:auto}
 .helpInfoWrap{display:flex;align-items:center}
 .helpInfo{touch-action:manipulation}
-.helpDetails .helpTableRow:after{display:none!important;content:none!important}
-.helpDetails[open]>.helpTableRow:after{display:none!important;content:none!important}
+.helpDetails .helpTableRow:after{display:none;content:none}
+.helpDetails[open]>.helpTableRow:after{display:none;content:none}
 .helpResultRow .helpResultValue{font-size:16px!important;line-height:1.2!important}
 .helpFormulaBox{display:none!important}
-.helpDetailPanel .helpLine{grid-template-columns:minmax(0,1fr) 132px!important}
-.helpDetailPanel select{width:112px!important;min-width:112px!important;max-width:112px!important}
-.helpDetailPanel .unitInput{width:112px!important;justify-self:end!important}
-.helpDetailPanel .timePair{width:112px!important;justify-self:end!important}
 @media(max-width:560px){
   /* 手機版：主要頁面與工具功能分成兩層，避免三個頁籤被擠小 */
   .topbar{flex-wrap:wrap;row-gap:8px;column-gap:7px;align-items:center}
@@ -238,10 +234,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   .mainPageTab{width:100%;min-width:0}
   .helpRoleTitle{gap:7px}
   .helpRoleName{font-size:15px}
-  .helpDetailPanel .helpLine{grid-template-columns:minmax(0,1fr) 132px!important}
-  .helpDetailPanel select{width:112px!important;min-width:112px!important;max-width:112px!important}
-  .helpDetailPanel .unitInput{width:112px!important}
-  .helpDetailPanel .timePair{width:112px!important}
 }
 @media(max-width:390px){
   .topbar{row-gap:7px;column-gap:6px}
@@ -258,32 +250,32 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .helpJumpValue{color:#f2d47e;white-space:nowrap}
 .helpRole{scroll-margin-top:90px}
 /* 每個展開列只保留一個箭頭 */
-.helpDetails .helpTableRow .helpMetric:after{display:none!important;content:none!important}
+.helpDetails .helpTableRow .helpMetric:after{display:none;content:none}
 @media(max-width:480px){.helpJumpBtn{min-height:46px;padding:7px 9px;font-size:12px}}
 </style>
 <style id="helpDesktopFinalFix">
 /* 聯盟幫助：桌面版角色導覽一排四個；所有資料列移除多餘箭頭 */
-.helpRoleJumpCard .helpRoleJump{grid-template-columns:repeat(4,minmax(0,1fr)) !important}
+.helpRoleJumpCard .helpRoleJump{grid-template-columns:repeat(4,minmax(0,1fr))}
 .helpTableRow .helpMetric:after,
 .helpDetails .helpTableRow:after,
 .helpDetails[open]>.helpTableRow .helpMetric:after,
-.helpDetails[open]>.helpTableRow:after{display:none !important;content:none !important}
+.helpDetails[open]>.helpTableRow:after{display:none;content:none}
 @media(max-width:699px){
-  .helpRoleJumpCard .helpRoleJump{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+  .helpRoleJumpCard .helpRoleJump{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 </style>
 <style id="helpFinalTypography">
 .helpDetailPanel select{
-  text-align:right !important;
-  text-align-last:right !important;
-  padding-right:8px !important;
+  text-align:right;
+  text-align-last:right;
+  padding-right:8px;
 }
 .helpRoleJumpTitle{
-  font-size:16px !important;
-  line-height:1.25 !important;
-  font-weight:900 !important;
-  color:#e7edf0 !important;
-  margin:0 2px 8px !important;
+  font-size:16px;
+  line-height:1.25;
+  font-weight:900;
+  color:#e7edf0;
+  margin:0 2px 8px;
 }
 </style>
 <style id="helpSingleRoleView">
@@ -362,12 +354,12 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 #helpPage .helpRole select,
 #helpPage #helpClicks,
 .modal .brow input[type="number"]{
-  background:var(--ui-control-bg) !important;
-  border:1px solid var(--ui-control-border) !important;
-  color:var(--ui-control-text) !important;
-  border-radius:var(--ui-control-radius) !important;
-  font-size:var(--ui-control-font-size) !important;
-  font-weight:var(--ui-control-font-weight) !important;
+  background:var(--ui-control-bg);
+  border:1px solid var(--ui-control-border);
+  color:var(--ui-control-text);
+  border-radius:var(--ui-control-radius);
+  font-size:var(--ui-control-font-size);
+  font-weight:var(--ui-control-font-weight);
   line-height:1.1;
   box-sizing:border-box;
 }
@@ -388,20 +380,20 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   flex:0 0 112px;
 }
 #bonusModal #chika{
-  height:var(--ui-control-height) !important;
-  min-height:var(--ui-control-height) !important;
-  width:100% !important;
-  min-width:0 !important;
-  padding:0 10px !important;
-  background:var(--ui-control-bg) !important;
-  border:1px solid var(--ui-control-border) !important;
-  color:var(--ui-control-text) !important;
-  border-radius:var(--ui-control-radius) !important;
-  font-size:var(--ui-control-font-size) !important;
-  font-weight:var(--ui-control-font-weight) !important;
+  height:var(--ui-control-height);
+  min-height:var(--ui-control-height);
+  width:100%;
+  min-width:0;
+  padding:0 10px;
+  background:var(--ui-control-bg);
+  border:1px solid var(--ui-control-border);
+  color:var(--ui-control-text);
+  border-radius:var(--ui-control-radius);
+  font-size:var(--ui-control-font-size);
+  font-weight:var(--ui-control-font-weight);
   line-height:1.1;
   box-sizing:border-box;
-  text-align:right !important;
+  text-align:right;
 }
 #bonusModal #chika:focus{
   outline:2px solid rgba(208,164,75,.55);
@@ -413,37 +405,37 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   font-weight:900;
 }
 .modal .brow input[type="number"]{
-  height:var(--ui-control-height) !important;
-  min-height:var(--ui-control-height) !important;
-  width:100% !important;
-  min-width:0 !important;
-  padding:0 10px !important;
-  text-align:right !important;
-  font-size:var(--ui-control-font-size) !important;
-  font-weight:var(--ui-control-font-weight) !important;
+  height:var(--ui-control-height);
+  min-height:var(--ui-control-height);
+  width:100%;
+  min-width:0;
+  padding:0 10px;
+  text-align:right;
+  font-size:var(--ui-control-font-size);
+  font-weight:var(--ui-control-font-weight);
   line-height:1.1;
   box-sizing:border-box;
 }
 
 /* 下拉選單與手動輸入框維持相同高度、圓角與字級 */
 #helpPage .helpTierSelect{
-  height:var(--ui-control-height) !important;
-  min-height:var(--ui-control-height) !important;
-  width:100% !important;
-  max-width:150px !important;
-  padding:0 10px !important;
-  text-align:right !important;
-  text-align-last:right !important;
+  height:var(--ui-control-height);
+  min-height:var(--ui-control-height);
+  width:100%;
+  max-width:150px;
+  padding:0 10px;
+  text-align:right;
+  text-align-last:right;
 }
 #helpPage .helpDetailPanel select{
-  height:var(--ui-control-height) !important;
-  min-height:var(--ui-control-height) !important;
-  width:112px !important;
-  min-width:112px !important;
-  max-width:112px !important;
-  padding:0 10px !important;
-  text-align:right !important;
-  text-align-last:right !important;
+  height:var(--ui-control-height);
+  min-height:var(--ui-control-height);
+  width:112px;
+  min-width:112px;
+  max-width:112px;
+  padding:0 10px;
+  text-align:right;
+  text-align-last:right;
 }
 #helpPage .helpDetailPanel .unitInput{
   width:132px;
@@ -454,12 +446,12 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
   gap:5px;
 }
 #helpPage .helpDetailPanel .unitInput input[type="number"]{
-  width:100% !important;
-  min-width:0 !important;
-  height:var(--ui-control-height) !important;
-  min-height:var(--ui-control-height) !important;
-  padding:0 10px !important;
-  text-align:right !important;
+  width:100%;
+  min-width:0;
+  height:var(--ui-control-height);
+  min-height:var(--ui-control-height);
+  padding:0 10px;
+  text-align:right;
 }
 #helpPage .helpDetailPanel .unitInput em{
   flex:0 0 auto;
@@ -469,8 +461,8 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 /* 全體共用點手數量也採同一設定框架 */
 #helpPage #helpClicks{
-  height:var(--ui-control-height) !important;
-  min-height:var(--ui-control-height) !important;
+  height:var(--ui-control-height);
+  min-height:var(--ui-control-height);
   text-align:center;
 }
 @media(max-width:560px){
@@ -478,14 +470,13 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
     --ui-control-height:40px;
     --ui-control-font-size:18px;
   }
-  #helpPage .helpTierSelect{max-width:140px !important;}
-  #helpPage .helpDetailPanel select{width:112px !important;min-width:112px !important;max-width:112px !important;}
+  #helpPage .helpTierSelect{max-width:140px;}
 }
 </style>
 <style id="sharedRoleSwitchV101">
 /* v0.10.3 第一批收尾：三頁角色卡使用同一套位置、尺寸、間距與兩行結構。對決／雷達第二行保留空白，不硬塞數字；聯盟幫助顯示治療數量。 */
 .pageRoleSwitch{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0 12px;padding:0;}
-.pageRoleCard{width:100%;min-width:0;margin:0!important;border:1px solid #304b59;border-radius:12px;background:#102732;color:#dce7eb;font-weight:900;cursor:pointer;display:flex;text-align:center;}
+.pageRoleCard{width:100%;min-width:0;margin:0;border:1px solid #304b59;border-radius:12px;background:#102732;color:#dce7eb;font-weight:900;cursor:pointer;display:flex;text-align:center;}
 .pageRoleCard.active{background:#6f5523;border-color:#d0a44b;color:#fff1cf;box-shadow:inset 0 0 0 1px rgba(255,190,90,.12);}
 .pageRoleName{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
 .pageRoleValue{font-weight:900;color:#f2d47e;white-space:nowrap;}
