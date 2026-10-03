@@ -2833,6 +2833,18 @@ autoPlanIfReady();
   --ui-line:1.4;
 }
 
+/* 雙按鈕並排共同 UI：兩個同級選項平均分配可用寬度。
+   .targetMode 為聯盟對決的特殊三欄版型，因此刻意排除。 */
+.modes:not(.targetMode){
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  width:100%;
+}
+.modes:not(.targetMode)>label{
+  width:100%;
+}
+
 /* 主頁籤／一般操作按鈕 */
 .mainPageTab,
 #scorePage .scoreRoleSettingRow .bonusBtn,
