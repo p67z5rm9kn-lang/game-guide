@@ -548,9 +548,9 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .radarPage .radarInner>h1{margin:0 0 6px;color:#d7b56d;}
 .radarPage .radarInner input,.radarPage .radarInner select,.radarPage .radarInner button{font-family:inherit;}
 @media(max-width:560px){main{padding:0 10px 36px}.siteTopbar{margin:0 -10px 10px;padding:8px 10px}.siteTopRow{min-height:36px}.sitePageNav{margin-top:5px}.sitePageNav .mainPageTab{font-size:11px;padding:7px 5px;min-height:36px}.radarPage .radarInner{max-width:none;}}
-</style><style id="radarSettingGroupV101">
+</style><style id="radarSettingGroupV102">
+/* v1.80：雷達角色設定改為只保留「版型」規則；欄位外觀、40px 高度與字體全部交由全站共同 UI。 */
 .radarPage .radarSettingGroup{margin:0;}
-.radarPage .radarRoleSettings>label[for="max"]{margin-top:12px;}
 </style><style id="targetModeSharedUI">
 /* v1.12：聯盟對決「目標積分」直接使用網站既有共同 UI。
    選擇按鈕沿用雷達共同選擇按鈕；預設目標、手動輸入、目前積分
@@ -629,7 +629,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 /* 雷達設定版面核心：只保留時間欄、設定列與結果區所需的結構規則。
    舊版雷達外觀（背景、輸入框、按鈕、模式按鈕等）已由新版雷達主題與共用 UI 接手，避免重複覆蓋。 */
 .radarPage .time-row{--time-row-gap:14px;display:flex;align-items:center;gap:var(--time-row-gap);width:100%;margin:8px 0;min-width:0}
-.radarPage .setting-select{margin-bottom:4px}
 .radarPage .time-range-sep{flex:0 0 18px;width:18px;color:var(--radar-gold-soft);font-weight:900;text-align:center;font-size:18px;line-height:1}
 .radarPage .time-colon{flex:0 0 14px;width:14px;color:var(--radar-gold-soft);font-weight:900;text-align:center;font-size:18px;line-height:1}
 .radarPage .time-row .delTime{flex:0 0 82px;width:82px;min-width:82px}
@@ -637,20 +636,30 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .radarPage .day-title{font-weight:600;color:#dce8f5;margin:12px 0 7px}
 .radarPage .setup-panel>label{margin-top:10px}
 .radarPage .setup-panel>label:first-of-type{margin-top:0}
-.radarPage .laura-toggle-row{display:grid;grid-template-columns:minmax(0,1fr) 50%;gap:8px;align-items:center;margin:0 0 10px}
-.radarPage .laura-left{display:flex;align-items:center;gap:24px;min-width:0}
-.radarPage .laura-left .setting-label{margin:0;white-space:nowrap;color:#dce8f5;font-weight:900}
-.radarPage .switch-label{display:flex!important;align-items:center;justify-content:flex-start;gap:8px!important;border:0!important;background:transparent!important;padding:0!important;color:#dce8f5!important;border-radius:0!important;min-height:42px;margin:0!important;white-space:nowrap}
-.radarPage .switch-label input{position:absolute;opacity:0;pointer-events:none}
-.radarPage .switch{position:relative;width:48px;height:26px;border-radius:999px;background:#365574;display:inline-block;transition:.2s;flex:0 0 auto}
-.radarPage .switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
-.radarPage .switch-label input:checked + .switch{background:#b28c3f}
-.radarPage .switch-label input:checked + .switch:after{transform:translateX(22px)}
-.radarPage .laura-toggle-row #lauraDetail{min-width:0;width:100%}
-.radarPage .laura-toggle-row #lauraDetail .setting-select{margin:0;min-height:42px;width:100%;max-width:none}
-.radarPage .storage-setting-row{display:grid;grid-template-columns:minmax(0,1fr) 50%;align-items:center;gap:8px;margin:0}
-.radarPage .storage-setting-row label{margin:0!important}
-.radarPage .storage-setting-row #max{width:100%;max-width:none;min-width:0;margin:0}
+/* 角色設定兩列：左側文字／開關，右側控制欄固定占內容區 50%。
+   右側欄位的高度、背景、邊框、圓角、字體由全站共同 UI 接手。 */
+.radarPage .laura-toggle-row,
+.radarPage .storage-setting-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 50%;
+  gap:8px;
+  align-items:center;
+  width:100%;
+}
+.radarPage .laura-toggle-row{margin:0 0 10px;}
+.radarPage .laura-left{display:flex;align-items:center;gap:24px;min-width:0;}
+.radarPage .laura-left .setting-label{margin:0;white-space:nowrap;color:#dce8f5;font-weight:900;}
+.radarPage .switch-label{display:flex!important;align-items:center;justify-content:flex-start;gap:8px!important;border:0!important;background:transparent!important;padding:0!important;color:#dce8f5!important;border-radius:0!important;margin:0!important;white-space:nowrap;}
+.radarPage .switch-label input{position:absolute;opacity:0;pointer-events:none;}
+.radarPage .switch{position:relative;width:48px;height:26px;border-radius:999px;background:#365574;display:inline-block;transition:.2s;flex:0 0 auto;}
+.radarPage .switch:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;}
+.radarPage .switch-label input:checked + .switch{background:#b28c3f;}
+.radarPage .switch-label input:checked + .switch:after{transform:translateX(22px);}
+.radarPage .laura-toggle-row #lauraDetail{min-width:0;width:100%;}
+.radarPage .laura-toggle-row #lauraDetail .setting-select{width:100%;max-width:none;}
+.radarPage .storage-setting-row{margin:0;}
+.radarPage .storage-setting-row label{margin:0!important;}
+.radarPage .storage-setting-row #max{width:100%;max-width:none;min-width:0;margin:0;}
 .radarPage .setup-panel{padding-bottom:16px}
 .radarPage .section-title{margin:0 0 14px;color:var(--gold)}
 .radarPage .setup-divider{height:1px;background:#27415f;margin:16px 0}
@@ -666,7 +675,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 @media(max-width:560px){
   .radarPage .time-row{--time-row-gap:10px}
   .radarPage .time-row .delTime{flex:0 0 82px;width:82px;min-width:82px}
-  .radarPage .laura-toggle-row{align-items:center}
 }
 </style><style id="radarUnifiedThemeClean">
 .radarPage{display:none;}
@@ -753,11 +761,10 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 }
 
 
-.radarPage .setting-select{text-align:right;text-align-last:right;}
-.radarPage #max{text-align:center;}
-.radarPage #max::placeholder{color:#777;opacity:1;font-weight:900;}
+.radarPage .radarRoleSettings .setting-select{text-align:right;text-align-last:right;}
+.radarPage .radarRoleSettings #max{text-align:center;}
+.radarPage .radarRoleSettings #max::placeholder{color:#777;opacity:1;font-weight:900;}
 
-@media(min-width:561px){.radarPage .laura-toggle-row #lauraDetail,.radarPage .laura-toggle-row #lauraDetail .setting-select,.radarPage .storage-setting-row #max{width:100%;max-width:100%;}}
 </style>
 
 <style id="uiSystemV05">
