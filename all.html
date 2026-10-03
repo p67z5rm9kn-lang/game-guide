@@ -2834,11 +2834,11 @@ autoPlanIfReady();
    表格：項目 24%／次數・時間 30%／單次積分 20%／尚須投入 20%，
    三個欄間各 2%，合計 100%。內容不可反向撐開欄位。
    加速時間：沿用雷達式三段選擇器，日／時／分等寬、冒號間距一致，
-   三段數字等寬；冒號保留一致的固定間距，避免數字與冒號黏在一起。 */
+   三段數字等寬；冒號採較緊湊的固定間距，讓三段數字的視覺重心更平均。 */
 #scorePage .tablehead>div,#scorePage .row>div,#scorePage .row>input{min-width:0;}
 #scorePage .ui-duration-control{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 10px minmax(0,1fr) 10px minmax(0,1fr);
+  grid-template-columns:minmax(0,1fr) 8px minmax(0,1fr) 8px minmax(0,1fr);
   align-items:center;
   width:100%;
   max-width:none;
@@ -2871,6 +2871,7 @@ autoPlanIfReady();
   font-weight:inherit;
   line-height:1;
   white-space:nowrap;
+  font-variant-numeric:tabular-nums;
 }
 #scorePage .ui-duration-control .time-part{
   position:absolute;
@@ -2891,7 +2892,7 @@ autoPlanIfReady();
   cursor:pointer;
 }
 #scorePage .ui-duration-control .time-colon{
-  width:10px;
+  width:8px;
   color:inherit;
   font-size:inherit;
   font-weight:inherit;
