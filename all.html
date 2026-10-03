@@ -630,11 +630,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
    舊版雷達外觀（背景、輸入框、按鈕、模式按鈕等）已由新版雷達主題與共用 UI 接手，避免重複覆蓋。 */
 .radarPage .time-row{--time-row-gap:14px;display:flex;align-items:center;gap:var(--time-row-gap);width:100%;margin:8px 0;min-width:0}
 .radarPage .setting-select{margin-bottom:4px}
-.radarPage .time-control{flex:1 1 0;min-width:0;height:var(--ui-control-height);box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:0;background:var(--ui-control-bg);border:1px solid var(--ui-control-border);border-radius:var(--ui-control-radius);color:var(--ui-control-text);font-size:var(--ui-control-font-size);font-weight:var(--ui-control-font-weight);overflow:hidden}
-.radarPage .time-slot{position:relative;flex:1 1 0;width:0;min-width:0;height:100%;display:flex;align-items:center;justify-content:center}
-.radarPage .time-value{position:relative;z-index:0;pointer-events:none;text-align:center;font-size:inherit;font-weight:inherit;line-height:1}
-.radarPage .time-slot .time-part{position:absolute;inset:0;width:100%;height:100%;margin:0;border:0!important;outline:0;background:transparent!important;color:transparent!important;box-shadow:none!important;opacity:0;appearance:none;-webkit-appearance:none;padding:0;z-index:1;cursor:pointer}
-.radarPage .time-control .time-colon{flex:0 0 auto;color:inherit;font-size:inherit;font-weight:inherit;line-height:1;text-align:center;pointer-events:none}
 .radarPage .time-range-sep{flex:0 0 18px;width:18px;color:var(--radar-gold-soft);font-weight:900;text-align:center;font-size:18px;line-height:1}
 .radarPage .time-colon{flex:0 0 14px;width:14px;color:var(--radar-gold-soft);font-weight:900;text-align:center;font-size:18px;line-height:1}
 .radarPage .time-row .delTime{flex:0 0 82px;width:82px;min-width:82px}
@@ -2706,7 +2701,7 @@ function timeSlot(unit,value,aria){
 }
 function timeControl(prefix,value){
  const t=normalizeStoredTime(value);
- return `<div class="time-control" aria-label="${prefix}時間">${timeSlot('hour',t.h,`${prefix}時間（時）`)}<span class="time-colon">：</span>${timeSlot('minute',t.m,`${prefix}時間（分）`)}</div>`;
+ return `<div class="time-control ui-time-control" aria-label="${prefix}時間">${timeSlot('hour',t.h,`${prefix}時間（時）`)}<span class="time-colon">：</span>${timeSlot('minute',t.m,`${prefix}時間（分）`)}</div>`;
 }
 function timeRow(h='',end=''){
  return `<div class="time-row">${timeControl('開始',h)}<span class="time-range-sep">－</span>${timeControl('結束',end)}<button type="button" class="smallbtn delTime">刪除</button></div>`;
@@ -2800,6 +2795,7 @@ autoPlanIfReady();
   --ui-control-radius:9px;
   --ui-control-font-size:18px;
   --ui-control-font-weight:900;
+
   --ui-common-title-size:20px;
   --ui-common-title-height:40px;
   --ui-common-title-weight:900;
@@ -2821,6 +2817,13 @@ autoPlanIfReady();
   --ui-button:16px;
   --ui-line:1.4;
 }
+
+/* 共用 UI：時間顯示／選取框。雷達與後續對決時間欄共用同一外觀。 */
+.ui-time-control{flex:1 1 0;min-width:0;height:var(--ui-control-height);box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:0;background:var(--ui-control-bg);border:1px solid var(--ui-control-border);border-radius:var(--ui-control-radius);color:var(--ui-control-text);font-size:var(--ui-control-font-size);font-weight:var(--ui-control-font-weight);overflow:hidden}
+.ui-time-control .time-slot{position:relative;flex:1 1 0;width:0;min-width:0;height:100%;display:flex;align-items:center;justify-content:center}
+.ui-time-control .time-value{position:relative;z-index:0;pointer-events:none;text-align:center;font-size:inherit;font-weight:inherit;line-height:1}
+.ui-time-control .time-part{position:absolute;inset:0;width:100%;height:100%;margin:0;border:0!important;outline:0;background:transparent!important;color:transparent!important;box-shadow:none!important;opacity:0;appearance:none;-webkit-appearance:none;padding:0;z-index:1;cursor:pointer}
+.ui-time-control .time-colon{flex:0 0 auto;color:inherit;font-size:inherit;font-weight:inherit;line-height:1;text-align:center;pointer-events:none}
 
 /* 雙按鈕並排共同 UI：兩個同級選項平均分配可用寬度。
    .targetMode 為聯盟對決的特殊三欄版型，因此刻意排除。 */
