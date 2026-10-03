@@ -639,7 +639,6 @@ details.helpDetails[open]>.helpTableRow .helpMetric:after{content:'⌃'}
 .radarPage .time-colon{flex:0 0 14px;width:14px;color:var(--radar-gold-soft);font-weight:900;text-align:center;font-size:18px;line-height:1}
 .radarPage .time-row .delTime{flex:0 0 82px;width:82px;min-width:82px}
 .radarPage .time-add-row{min-width:0}
-.radarPage .time-add-row .addSameTime,.radarPage .time-add-row .addTime{width:100%;min-width:0;display:inline-flex}
 .radarPage .day-title{font-weight:600;color:#dce8f5;margin:12px 0 7px}
 .radarPage .setup-panel>label{margin-top:10px}
 .radarPage .setup-panel>label:first-of-type{margin-top:0}
@@ -2726,8 +2725,8 @@ function bindTimeInputs(){document.querySelectorAll('.time-row select').forEach(
 function addTimeRow(container,h='',end=''){container.insertAdjacentHTML('beforeend',timeRow(h,end));bindDelete();bindTimeInputs();autoSaveAvailability();}
 function renderTimes(){
  const same=document.querySelector('#sameTimes'), custom=document.querySelector('#customTimes');
- same.innerHTML='<div id="sameDayTimes">'+timeRow()+'</div><div class="time-add-row ui-half-left"><button type="button" class="smallbtn addSameTime">＋新增時段</button></div>';
- custom.innerHTML=weekNames.map((d,i)=>`<div class="day-title">${d}</div><div class="dayTimes" data-day="${i}">${timeRow()}</div><div class="time-add-row ui-half-left"><button type="button" class="smallbtn addTime" data-day="${i}">＋新增時段</button></div>`).join('');
+ same.innerHTML='<div id="sameDayTimes">'+timeRow()+'</div><div class="time-add-row"><button type="button" class="smallbtn addSameTime ui-main-action">＋新增時段</button></div>';
+ custom.innerHTML=weekNames.map((d,i)=>`<div class="day-title">${d}</div><div class="dayTimes" data-day="${i}">${timeRow()}</div><div class="time-add-row"><button type="button" class="smallbtn addTime ui-main-action" data-day="${i}">＋新增時段</button></div>`).join('');
  document.querySelector('.addSameTime').onclick=()=>addTimeRow(document.querySelector('#sameDayTimes'));
  document.querySelectorAll('.addTime').forEach(b=>b.onclick=()=>addTimeRow(document.querySelector(`.dayTimes[data-day="${b.dataset.day}"]`)));
  bindDelete();bindTimeInputs();
@@ -2849,6 +2848,9 @@ autoPlanIfReady();
 .ui-half-left,.ui-half-right{width:calc((100% - var(--ui-two-col-gap)) / 2);min-width:0;box-sizing:border-box;}
 .ui-half-left{margin-right:auto;}
 .ui-half-right{margin-left:auto;}
+
+/* 共用 UI：整列主要操作按鈕 */
+.ui-main-action{width:100%;min-width:0;box-sizing:border-box;}
 
 /* 主頁籤／一般操作按鈕 */
 .mainPageTab,
